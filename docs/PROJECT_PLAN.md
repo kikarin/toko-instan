@@ -12,13 +12,13 @@
 
 | Phase                     | Task    | Selesai   |
 | ------------------------- | ------- | --------- |
-| Phase 0 — Foundation      | 17      | 0/17      |
+| Phase 0 — Foundation      | 17      | 4/17      |
 | Phase 1 — MVP             | 42      | 0/42      |
 | Phase 1.5 — Beta & Launch | 10      | 0/10      |
 | Phase 2 — Growth          | 28      | 0/28      |
 | Phase 3 — Scale           | 18      | 0/18      |
 | Phase 4 — Enterprise      | 12      | 0/12      |
-| **Total**                 | **127** | **0/127** |
+| **Total**                 | **127** | **4/127** |
 
 
 > Update kolom "Selesai" manual saat milestone tercapai.
@@ -48,16 +48,16 @@
 
 ## 0.1 Dokumen Arsitektur
 
-- [ ] **P0-001** — Multi-tenant strategy
+- [x] **P0-001** — Multi-tenant strategy
   - **Deliverable:** `docs/architecture/multi-tenant.md` — strategi tenancy (single DB + tenant_id), subdomain routing, isolasi data, middleware
 
-- [ ] **P0-002** — Database schema
+- [x] **P0-002** — Database schema
   - **Deliverable:** `docs/database/schema.md` — ERD + tabel inti (users, tenants, stores, products, orders, payments, wallets)
 
-- [ ] **P0-003** — Money flow
+- [x] **P0-003** — Money flow
   - **Deliverable:** `docs/architecture/money-flow.md` — escrow, wallet ledger, withdraw fee Rp5.000, premium direct settlement
 
-- [ ] **P0-004** — CDN & media
+- [x] **P0-004** — CDN & media
   - **Deliverable:** `docs/architecture/cdn-media.md` — struktur bucket R2, naming convention, image variants (thumbnail/medium/large)
 
 ---
