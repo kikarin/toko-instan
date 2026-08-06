@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme inline {
+    --font-sans:
+        'Outfit', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'DM Mono', monospace;
+}
+
+:root {
+    --bg-main: #f5f4f0;
+    --surface: #faf9f6;
+    --panel: #ffffff;
+    --sidebar-bg: #1e1c2a;
+    --sidebar-border: rgba(255, 255, 255, 0.06);
+    --border-color: rgba(0, 0, 0, 0.07);
+    --border-hi: rgba(0, 0, 0, 0.13);
+
+    --brand-amber: #e07c28;
+    --brand-amber-soft: rgba(224, 124, 40, 0.1);
+    --brand-violet: #6d4fc2;
+    --brand-violet-soft: rgba(109, 79, 194, 0.1);
+    --brand-teal: #0e9f8a;
+    --brand-teal-soft: rgba(14, 159, 138, 0.1);
+    --brand-rose: #e0405a;
+    --brand-rose-soft: rgba(224, 64, 90, 0.1);
+    --brand-sky: #3b82f6;
+    --brand-sky-soft: rgba(59, 130, 246, 0.1);
+    --brand-green: #22a15a;
+    --brand-green-soft: rgba(34, 161, 90, 0.1);
+}
+
+body {
+    background-color: var(--bg-main);
+    font-family: var(--font-sans);
+    color: #1c1c22;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}

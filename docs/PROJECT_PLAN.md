@@ -10,15 +10,15 @@
 ## Progress Overview
 
 
-| Phase                     | Task    | Selesai   |
-| ------------------------- | ------- | --------- |
-| Phase 0 — Foundation      | 17      | 4/17      |
-| Phase 1 — MVP             | 42      | 0/42      |
-| Phase 1.5 — Beta & Launch | 10      | 0/10      |
-| Phase 2 — Growth          | 28      | 0/28      |
-| Phase 3 — Scale           | 18      | 0/18      |
-| Phase 4 — Enterprise      | 12      | 0/12      |
-| **Total**                 | **127** | **4/127** |
+| Phase                     | Task    | Selesai    |
+| ------------------------- | ------- | ---------- |
+| Phase 0 — Foundation      | 17      | 11/17      |
+| Phase 1 — MVP             | 42      | 9/42       |
+| Phase 1.5 — Beta & Launch | 10      | 0/10       |
+| Phase 2 — Growth          | 28      | 0/28       |
+| Phase 3 — Scale           | 18      | 0/18       |
+| Phase 4 — Enterprise      | 12      | 0/12       |
+| **Total**                 | **127** | **20/127** |
 
 
 > Update kolom "Selesai" manual saat milestone tercapai.
@@ -66,16 +66,16 @@
 
 ## 0.2 Project Scaffold
 
-- [ ] **P0-010** — Init Laravel + Inertia + Vue 3 + TypeScript
+- [x] **P0-010** — Init Laravel + Inertia + Vue 3 + TypeScript
   - **Deliverable:** Project jalan, halaman welcome Inertia tampil, `npm run dev` + `php artisan serve` OK
 
-- [ ] **P0-011** — Setup Tailwind + shadcn-vue
-  - **Deliverable:** Tailwind configured, minimal 1 komponen shadcn-vue (Button) bisa dipakai
+- [x] **P0-011** — Setup Tailwind + shadcn-vue
+  - **Deliverable:** Tailwind configured, komponen shadcn-vue (Button, Card, Input, Badge) bisa dipakai
 
-- [ ] **P0-012** — Folder structure backend
+- [x] **P0-012** — Folder structure backend
   - **Deliverable:** Folder sesuai blueprint: `Actions`, `DTO`, `Enums`, `Services`, `Repositories`, dll.
 
-- [ ] **P0-013** — Folder structure frontend
+- [x] **P0-013** — Folder structure frontend
   - **Deliverable:** `resources/js/Pages`, `Components`, `Layouts`, `Composables`, `Stores`, `Types`
 
 ---
@@ -84,7 +84,7 @@
 
 ## 0.3 Dev Environment
 
-- [ ] **P0-021** — PostgreSQL schema setup
+- [x] **P0-021** — PostgreSQL schema setup
   - **Deliverable:** Migration schema `public`, `audit`, `logs`; koneksi DB OK
 
 - [ ] **P0-022** — Redis + Horizon
@@ -99,10 +99,10 @@
 
 ## 0.4 Fondasi Aplikasi
 
-- [ ] **P0-030** — Migration tabel inti (users, tenants, stores) ⚠️ butuh P0-002
+- [x] **P0-030** — Migration tabel inti (users, tenants, stores) ⚠️ butuh P0-002
   - **Deliverable:** Migration + Model + relasi dasar; seeder 1 tenant dev
 
-- [ ] **P0-031** — Tenant middleware & subdomain routing ⚠️ butuh P0-001, P0-030
+- [x] **P0-031** — Tenant middleware & subdomain routing ⚠️ butuh P0-001, P0-030
   - **Deliverable:** Request ke `{tenant}.toko-instan.test` resolve tenant context; data terisolasi
 
 - [ ] **P0-032** — Layout dasar (auth + dashboard)
@@ -129,8 +129,8 @@
 
 ## 1.1 Authentication
 
-- [ ] **P1-001** — Register & login
-  - **Deliverable:** Halaman register/login, session auth, redirect ke dashboard
+- [x] **P1-001** — Register & login
+  - **Deliverable:** Halaman register/login (Vue + Firebase & Database Auth), session auth, redirect ke dashboard
 
 - [ ] **P1-002** — Email verification
   - **Deliverable:** Email verifikasi saat register, halaman "verify email", middleware `verified`
@@ -141,8 +141,8 @@
 - [ ] **P1-004** — OTP login (opsional MVP)
   - **Deliverable:** Login via OTP ke email/phone; bisa di-skip jika belum ada provider SMS
 
-- [ ] **P1-005** — Google login (opsional MVP)
-  - **Deliverable:** OAuth Google via Laravel Socialite
+- [x] **P1-005** — Google login (opsional MVP)
+  - **Deliverable:** OAuth Google via Firebase Authentication JS SDK
 
 ---
 
@@ -150,7 +150,7 @@
 
 ## 1.2 Tenant & Store
 
-- [ ] **P1-010** — Create store (onboarding) ⚠️ butuh P0-031
+- [x] **P1-010** — Create store (onboarding) ⚠️ butuh P0-031
   - **Deliverable:** Form buat toko (nama, slug/subdomain), auto-create tenant + store
 
 - [ ] **P1-011** — Update store profile
@@ -168,13 +168,13 @@
 
 ## 1.3 Product & CDN
 
-- [ ] **P1-020** — Migration products, categories, brands ⚠️ butuh P0-030
+- [x] **P1-020** — Migration products, categories, brands ⚠️ butuh P0-030
   - **Deliverable:** Migration + Model + relasi; seeder sample
 
 - [ ] **P1-021** — CRUD category & brand
   - **Deliverable:** Dashboard CRUD kategori & brand
 
-- [ ] **P1-022** — CRUD product
+- [x] **P1-022** — CRUD product
   - **Deliverable:** Dashboard CRUD produk (nama, deskripsi, harga, status publish)
 
 - [ ] **P1-023** — Product variant & SKU
@@ -183,7 +183,7 @@
 - [ ] **P1-024** — Image upload → CDN ⚠️ butuh P0-023
   - **Deliverable:** Upload gambar → queue job → resize (thumbnail/medium/large) → push R2 → simpan CDN URL di DB
 
-- [ ] **P1-025** — Storefront product catalog
+- [x] **P1-025** — Storefront product catalog
   - **Deliverable:** Halaman list produk + detail produk di storefront publik
 
 - [ ] **P1-026** — Digital product (basic)
@@ -201,7 +201,7 @@
 - [ ] **P1-031** — Customer address
   - **Deliverable:** CRUD alamat pengiriman buyer
 
-- [ ] **P1-032** — Cart
+- [x] **P1-032** — Cart
   - **Deliverable:** Add to cart, update qty, remove; cart persist (session/DB)
 
 ---
@@ -210,10 +210,10 @@
 
 ## 1.5 Checkout & Order
 
-- [ ] **P1-040** — Checkout page
+- [x] **P1-040** — Checkout page
   - **Deliverable:** Halaman checkout: pilih alamat, ringkasan order, notes
 
-- [ ] **P1-041** — Create order
+- [x] **P1-041** — Create order
   - **Deliverable:** Order creation dengan status `Pending`, order items, snapshot harga
 
 - [ ] **P1-042** — Order status flow
@@ -630,5 +630,5 @@
 | ---------- | --------------------------------------------------- |
 | 2026-08-06 | Initial project plan dibuat                         |
 | 2026-08-06 | Hapus branch naming & Docker; simplify git workflow |
-
+| 2026-08-06 | Update progress: Foundation & Auth MVP tasks        |
 
