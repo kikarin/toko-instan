@@ -15,6 +15,7 @@ interface Product {
     price: number;
     stock: number;
     sold: number;
+    is_active: boolean;
     tag: string | null;
     img: string | null;
 }
@@ -33,6 +34,7 @@ const category = ref(
 );
 const price = ref(props.product ? String(props.product.price) : '');
 const stock = ref(props.product ? String(props.product.stock) : '0');
+const isActive = ref(props.product?.is_active ?? true);
 const tag = ref(props.product?.tag ?? '');
 const img = ref(props.product?.img ?? '');
 const isLoading = ref(false);
@@ -50,6 +52,7 @@ function submit() {
         category: category.value,
         price: price.value,
         stock: stock.value,
+        is_active: isActive.value,
         tag: tag.value,
         img: img.value,
     };
@@ -222,6 +225,42 @@ function submit() {
                             >
                                 {{ errors.img }}
                             </p>
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between rounded-2xl border border-black/8 bg-[#faf9f6] px-4 py-3"
+                        >
+                            <div>
+                                <p class="text-xs font-bold text-[#1c1c22]">
+                                    Status Produk
+                                </p>
+                                <p class="mt-0.5 text-[10px] text-[#9090a0]">
+                                    {{
+                                        isActive
+                                            ? 'Produk tampil di marketplace.'
+                                            : 'Produk disembunyikan dari marketplace.'
+                                    }}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                role="switch"
+                                :aria-checked="isActive"
+                                @click="isActive = !isActive"
+                                class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors"
+                                :class="
+                                    isActive ? 'bg-[#22a15a]' : 'bg-[#c8c8d5]'
+                                "
+                            >
+                                <span
+                                    class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                                    :class="
+                                        isActive
+                                            ? 'translate-x-5'
+                                            : 'translate-x-0'
+                                    "
+                                />
+                            </button>
                         </div>
                     </CardContent>
                 </Card>

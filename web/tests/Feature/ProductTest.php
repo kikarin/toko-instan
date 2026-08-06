@@ -78,7 +78,7 @@ test('seller can update a product', function () {
     ]);
 });
 
-test('seller can delete a product', function () {
+test('seller can delete a product (soft delete)', function () {
     [$seller, $store] = sellerContext();
     $product = Product::factory()->create(['store_id' => $store->id]);
 
@@ -86,5 +86,40 @@ test('seller can delete a product', function () {
         ->delete("/products/{$product->id}")
         ->assertRedirect(route('products.index'));
 
-    $this->assertDatabaseMissing('products', ['id' => $product->id]);
+    $this->assertSoftDeleted('products', ['id' => $product->id]);
+});
+
+test('seller can update product stock', function () {
+    [$seller, $store] = sellerContext();
+    $product = Product::factory()->create(['store_id' => $store->id, 'stock' => 10]);
+
+    $this->actingAs($seller)
+        ->patch("/products/{$product->id}/stock", ['stock' => 25])
+        ->assertRedirect(route('products.index'));
+
+    $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => 25]);
+});
+
+test('seller can toggle product active status', function () {
+    [$seller, $store] = sellerContext();
+    $product = Product::factory()->create(['store_id' => $store->id, 'is_active' => true]);
+
+    $this->actingAs($seller)
+        ->post("/products/{$product->id}/toggle-active")
+        ->assertRedirect(route('products.index'));
+
+    $this->assertDatabaseHas('products', ['id' => $product->id, 'is_active' => false]);
+});
+
+test('inactive products are hidden from the marketplace catalog', function () {
+    [$seller, $store] = sellerContext();
+    Product::factory()->create(['store_id' => $store->id, 'is_active' => true]);
+    Product::factory()->create(['store_id' => $store->id, 'is_active' => false]);
+
+    $buyer = User::factory()->state(['role' => 'buyer'])->create();
+
+    $this->actingAs($buyer)
+        ->get('/marketplace')
+        ->assertInertia(fn ($page) => $page->component('Marketplace'))
+        ->assertInertia(fn ($page) => $page->has('products', 1));
 });

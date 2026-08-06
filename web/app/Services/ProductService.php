@@ -59,6 +59,19 @@ class ProductService
         $this->productRepository->deleteProduct($product);
     }
 
+    public function updateStock(Product $product, int $stock): void
+    {
+        $this->requireStore();
+        $this->productRepository->updateStock($product, $stock);
+    }
+
+    public function toggleActive(Product $product): bool
+    {
+        $this->requireStore();
+
+        return $this->productRepository->toggleActive($product);
+    }
+
     /**
      * @return array<int, string>
      */
@@ -79,6 +92,7 @@ class ProductService
             'price' => $product->price,
             'formatted_price' => 'Rp '.number_format($product->price, 0, ',', '.'),
             'stock' => $product->stock,
+            'is_active' => (bool) $product->is_active,
             'sold' => $product->sold,
             'rating' => (float) $product->rating,
             'tag' => $product->tag,

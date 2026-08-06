@@ -31,6 +31,11 @@
     --brand-sky-soft: rgba(59, 130, 246, 0.1);
     --brand-green: #22a15a;
     --brand-green-soft: rgba(34, 161, 90, 0.1);
+
+    --popover: #ffffff;
+    --popover-foreground: #1c1c22;
+    --border: rgba(0, 0, 0, 0.07);
+    --radius: 1rem;
 }
 
 body {

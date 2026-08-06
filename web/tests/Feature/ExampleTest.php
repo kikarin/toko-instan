@@ -1,7 +1,9 @@
 <?php
 
-test('marketplace page has a successful response', function () {
-    $response = $this->get('/marketplace');
+test('landing page has a successful response', function () {
+    $this->get('/')->assertOk();
+});
 
-    $response->assertOk();
+test('guest browsing is redirected away from the buyer marketplace', function () {
+    $this->get('/marketplace')->assertRedirect('/login');
 });

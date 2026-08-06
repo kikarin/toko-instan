@@ -87,6 +87,40 @@ class ProductController extends Controller
             ->with('success', 'Produk berhasil dihapus.');
     }
 
+    public function updateStock(Request $request, int $id): RedirectResponse
+    {
+        $product = $this->productService->findForSeller($id);
+
+        if (! $product) {
+            abort(404, 'Produk tidak ditemukan');
+        }
+
+        $validated = $request->validate([
+            'stock' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $this->productService->updateStock($product, (int) $validated['stock']);
+
+        return redirect()->route('products.index')
+            ->with('success', "Stok produk diperbarui menjadi {$validated['stock']}.");
+    }
+
+    public function toggleActive(Request $request, int $id): RedirectResponse
+    {
+        $product = $this->productService->findForSeller($id);
+
+        if (! $product) {
+            abort(404, 'Produk tidak ditemukan');
+        }
+
+        $active = $this->productService->toggleActive($product);
+
+        return redirect()->route('products.index')
+            ->with('success', $active
+                ? 'Produk diaktifkan kembali.'
+                : 'Produk dinonaktifkan.');
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -97,6 +131,7 @@ class ProductController extends Controller
             'category' => ['required', 'string', 'max:100'],
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
+            'is_active' => ['nullable', 'boolean'],
             'tag' => ['nullable', 'string', 'max:50'],
             'img' => ['nullable', 'string', 'url', 'max:2048'],
         ]);

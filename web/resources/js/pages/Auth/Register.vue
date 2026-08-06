@@ -19,7 +19,7 @@ import { toast } from '@/components/ui/sonner';
 import { signInWithGooglePopup } from '@/lib/firebase';
 
 type AccountRole = 'buyer' | 'seller';
-const selectedRole = ref<AccountRole>('seller');
+const selectedRole = ref<AccountRole>('buyer');
 
 const name = ref('');
 const storeName = ref('');

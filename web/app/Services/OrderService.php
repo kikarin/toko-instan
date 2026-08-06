@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\DTO\CreateOrderDTO;
 use App\Models\Order;
+use App\Models\User;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\StoreRepository;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
 class OrderService
@@ -40,6 +42,14 @@ class OrderService
         $this->storeRepository->addPendingEscrow($dto->storeId, $totalAmount);
 
         return $order;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function buyerOrders(User $user)
+    {
+        return $this->orderRepository->getByBuyerEmail($user->email);
     }
 
     /**

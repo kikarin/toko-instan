@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\DTO\CreateOrderDTO;
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Collection;
 
 class OrderRepository
 {
@@ -44,8 +45,27 @@ class OrderRepository
         ]);
     }
 
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getRecent(int $limit = 5)
+    {
+        return Order::with('store')->orderByDesc('created_at')->take($limit)->get();
+    }
+
     public function findByOrderNumber(string $orderNumber): ?Order
     {
         return Order::with('store')->where('order_number', $orderNumber)->first();
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getByBuyerEmail(string $email)
+    {
+        return Order::with('store')
+            ->where('customer_email', $email)
+            ->orderByDesc('created_at')
+            ->get();
     }
 }

@@ -27,6 +27,14 @@ class StoreRepository
     }
 
     /**
+     * @return Collection<int, Store>
+     */
+    public function getLatest(int $limit = 5): Collection
+    {
+        return Store::orderByDesc('created_at')->take($limit)->get();
+    }
+
+    /**
      * @return array{tenant: Tenant, store: Store}
      */
     public function createTenantAndStore(int $userId, string $storeName, string $slug): array

@@ -2,7 +2,6 @@
 import { router } from '@inertiajs/vue3';
 import {
     LayoutDashboard,
-    ShoppingBag,
     Package,
     ShoppingCart,
     Users,
@@ -23,7 +22,7 @@ import { useActiveUser } from '@/lib/useActiveUser';
 
 interface Props {
     title?: string;
-    activePage?: 'Dashboard' | 'Marketplace' | 'Auth' | 'Produk';
+    activePage?: 'Dashboard' | 'Produk';
     period?: 'Hari' | 'Minggu' | 'Bulan';
 }
 
@@ -50,7 +49,6 @@ const userInitial = computed(() => {
 
 const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', route: '/' },
-    { icon: ShoppingBag, label: 'Marketplace', route: '/marketplace' },
     { icon: Package, label: 'Produk', route: '/products' },
     { icon: ShoppingCart, label: 'Pesanan', route: '#' },
     { icon: Users, label: 'Pelanggan', route: '#' },
@@ -72,7 +70,7 @@ async function handleLogout() {
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-[#f5f4f0] font-sans">
+    <div class="flex h-screen overflow-hidden bg-[#f5f4f0] font-sans">
         <!-- ── Sidebar ── -->
         <aside
             class="z-20 flex w-16 shrink-0 flex-col items-center gap-2 border-r border-white/5 bg-[#1e1c2a] py-4 select-none"
@@ -149,16 +147,6 @@ async function handleLogout() {
                         @click="navigate('/')"
                     >
                         Dashboard
-                    </Button>
-                    <Button
-                        :variant="
-                            activePage === 'Marketplace' ? 'amber' : 'ghost'
-                        "
-                        size="sm"
-                        class="rounded-lg text-xs"
-                        @click="navigate('/marketplace')"
-                    >
-                        Marketplace
                     </Button>
                 </div>
 

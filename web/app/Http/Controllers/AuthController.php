@@ -29,11 +29,8 @@ class AuthController extends Controller
         $this->authService->login($credentials);
 
         $user = $request->user();
-        if ($user && $user->role === 'buyer') {
-            return redirect()->intended('/marketplace');
-        }
 
-        return redirect()->intended('/');
+        return redirect()->intended($user?->homePath() ?? '/');
     }
 
     public function showRegister(): Response
@@ -53,12 +50,9 @@ class AuthController extends Controller
 
         $this->authService->register($validated);
 
-        $role = $validated['role'] ?? 'seller';
-        if ($role === 'buyer') {
-            return redirect()->intended('/marketplace');
-        }
+        $user = $request->user();
 
-        return redirect()->intended('/');
+        return redirect()->intended($user?->homePath() ?? '/');
     }
 
     public function logout(Request $request): RedirectResponse

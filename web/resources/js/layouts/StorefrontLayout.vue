@@ -5,7 +5,7 @@ import {
     Heart,
     Search,
     LogIn,
-    LayoutDashboard,
+    ReceiptText,
     X,
 } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
@@ -132,15 +132,15 @@ function navigate(url: string) {
 
                 <!-- Right Actions: Wishlist, Cart & Auth -->
                 <div class="flex shrink-0 items-center gap-3">
-                    <!-- Switch to Seller Dashboard Button -->
+                    <!-- My Orders Button -->
                     <Button
                         variant="ghost"
                         size="sm"
                         class="hidden items-center gap-1.5 text-xs font-semibold text-[#4a4a57] hover:text-[#1c1c22] lg:flex"
-                        @click="navigate('/')"
+                        @click="navigate('/orders')"
                     >
-                        <LayoutDashboard class="h-4 w-4 text-[#e07c28]" />
-                        <span>Dashboard Seller</span>
+                        <ReceiptText class="h-4 w-4 text-[#e07c28]" />
+                        <span>Pesanan Saya</span>
                     </Button>
 
                     <!-- Wishlist Button -->

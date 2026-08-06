@@ -29,6 +29,18 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // 1b. Seed Admin Master User
+        User::firstOrCreate(
+            ['email' => 'admin@toko-instan.com'],
+            [
+                'name' => 'Admin Master',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'auth_provider' => 'email',
+                'email_verified_at' => now(),
+            ]
+        );
+
         // 2. Seed Tenant
         $tenant = Tenant::firstOrCreate(
             ['slug' => 'tokobagus'],

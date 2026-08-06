@@ -13,7 +13,7 @@ class ProductRepository
      */
     public function getMarketplaceCatalog(?string $search = null, ?string $category = null): Collection
     {
-        $query = Product::with('store');
+        $query = Product::with('store')->where('is_active', true);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -69,6 +69,7 @@ class ProductRepository
             'tag' => $data->tag,
             'img' => $data->img,
             'stock' => $data->stock,
+            'is_active' => $data->isActive,
         ]);
     }
 
@@ -81,7 +82,20 @@ class ProductRepository
             'stock' => $data->stock,
             'tag' => $data->tag,
             'img' => $data->img,
+            'is_active' => $data->isActive,
         ]);
+    }
+
+    public function updateStock(Product $product, int $stock): void
+    {
+        $product->update(['stock' => max(0, $stock)]);
+    }
+
+    public function toggleActive(Product $product): bool
+    {
+        $product->update(['is_active' => ! $product->is_active]);
+
+        return (bool) $product->is_active;
     }
 
     public function deleteProduct(Product $product): void
