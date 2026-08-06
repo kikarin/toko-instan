@@ -9,14 +9,24 @@ import {
     PackageX,
     PackagePlus,
     Check,
+    Star,
+    BoxIcon,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import {
+    Card,
+    // CardAction,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/sonner';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 interface Product {
@@ -136,38 +146,34 @@ const lowStock = (stock: number) => stock <= 5;
     <Head title="Manajemen Produk - Toko Instan" />
 
     <AppLayout activePage="Produk">
-        <main class="mx-auto flex w-full max-w-6xl flex-col gap-5 p-4 sm:p-6">
+        <main class="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 sm:p-6">
+
+            <!-- Page Header -->
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <p
-                        class="mb-1 text-xs font-extrabold tracking-widest text-[#e07c28] uppercase"
-                    >
+                    <p class="mb-1 text-xs font-extrabold tracking-widest text-[#e07c28] uppercase">
                         Seller · Katalog
                     </p>
                     <h1 class="text-2xl font-extrabold text-[#1c1c22]">
                         Manajemen Produk
                     </h1>
                 </div>
-                <Button
-                    variant="amber"
-                    class="text-sm font-bold"
-                    @click="goToCreate"
-                >
+                <Button variant="amber" class="text-sm font-bold" @click="goToCreate">
                     <Plus class="mr-2 h-4 w-4" /> Tambah Produk
                 </Button>
             </div>
 
+            <!-- Search -->
             <div class="relative max-w-sm">
-                <Search
-                    class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#9090a0]"
-                />
-                <input
+                <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#9090a0]" />
+                <Input
                     v-model="searchQ"
-                    placeholder="Cari produk..."
-                    class="w-full rounded-2xl border border-black/12 bg-white py-2.5 pr-3.5 pl-9 text-xs transition-all outline-none focus:border-[#e07c28] focus:ring-2 focus:ring-[#e07c28]/20"
+                    placeholder="Cari produk atau kategori..."
+                    class="pl-9"
                 />
             </div>
 
+            <!-- Product Grid -->
             <div
                 v-if="filtered.length > 0"
                 class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
@@ -175,83 +181,82 @@ const lowStock = (stock: number) => stock <= 5;
                 <Card
                     v-for="p in filtered"
                     :key="p.id"
-                    class="flex flex-col gap-3 p-4"
+                    class="overflow-hidden py-0 shadow-sm transition-shadow hover:shadow-md"
+                    :class="{ 'opacity-60': !p.is_active }"
                 >
-                    <div class="flex items-start gap-3">
+                    <!-- Product Image -->
+                    <div class="relative h-40 w-full bg-[#f5f4f0]">
+                        <img
+                            v-if="p.img"
+                            :src="p.img"
+                            :alt="p.name"
+                            class="h-full w-full object-cover"
+                        />
                         <div
-                            class="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-black/5 bg-black/5"
+                            v-else
+                            class="flex h-full w-full items-center justify-center text-[#c8c8d5]"
                         >
-                            <img
-                                v-if="p.img"
-                                :src="p.img"
-                                :alt="p.name"
-                                class="h-full w-full object-cover"
-                            />
-                            <div
-                                v-else
-                                class="flex h-full w-full items-center justify-center bg-[#f5f4f0] text-[#c8c8d5]"
-                            >
-                                <Package class="h-6 w-6" />
-                            </div>
+                            <Package class="h-10 w-10" />
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <p
-                                class="line-clamp-2 text-xs leading-snug font-bold text-[#1c1c22]"
-                            >
-                                {{ p.name }}
-                            </p>
-                            <div class="mt-1.5 flex items-center gap-1.5">
-                                <Badge
-                                    variant="outline"
-                                    class="px-2 py-0 text-[9px]"
-                                    >{{ p.category }}</Badge
-                                >
-                                <Badge
-                                    v-if="p.tag"
-                                    variant="amber"
-                                    class="px-2 py-0 text-[9px] font-bold"
-                                >
-                                    {{ p.tag }}
-                                </Badge>
-                                <Badge
-                                    v-if="!p.is_active"
-                                    variant="rose"
-                                    class="px-2 py-0 text-[9px] font-bold"
-                                >
-                                    Nonaktif
-                                </Badge>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="flex items-end justify-between">
-                        <div>
-                            <p
-                                class="font-mono text-sm font-extrabold text-[#e07c28]"
-                            >
-                                {{ p.formatted_price }}
-                            </p>
-                            <p class="text-[10px] text-[#9090a0]">
-                                Terkirim: {{ p.sold }}
-                            </p>
+                        <!-- Badges overlaying the image -->
+                        <div class="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5">
+                            <Badge v-if="p.tag" variant="amber" class="text-[9px] font-bold shadow-sm">
+                                {{ p.tag }}
+                            </Badge>
+                            <Badge v-if="!p.is_active" variant="rose" class="text-[9px] font-bold shadow-sm">
+                                Nonaktif
+                            </Badge>
                         </div>
+
+                        <!-- Stock badge top-right -->
                         <button
                             @click="openStockDialog(p)"
-                            class="cursor-pointer rounded-full px-2.5 py-1 text-[10px] font-bold transition-all hover:opacity-80"
+                            class="absolute top-2.5 right-2.5 cursor-pointer rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm transition-all hover:opacity-90"
                             :class="
                                 !p.is_active
-                                    ? 'bg-[#c8c8d51a] text-[#9090a0]'
+                                    ? 'bg-white/80 text-[#9090a0]'
                                     : lowStock(p.stock)
-                                      ? 'bg-red-100 text-red-600'
-                                      : 'bg-[#22a15a1a] text-[#22a15a]'
+                                      ? 'bg-red-100/90 text-red-600'
+                                      : 'bg-green-100/90 text-green-700'
                             "
                             :title="'Klik untuk atur stok ' + p.name"
                         >
+                            <BoxIcon class="mr-1 inline h-3 w-3" />
                             Stok {{ p.stock }}
                         </button>
                     </div>
 
-                    <div class="mt-1 flex gap-2">
+                    <!-- Card Header: Name + Category -->
+                    <CardHeader class="pb-2 pt-4">
+                        <CardTitle class="line-clamp-2 text-sm leading-snug">
+                            {{ p.name }}
+                        </CardTitle>
+                        <CardDescription class="flex items-center gap-1.5">
+                            <Badge variant="outline" class="px-2 py-0 text-[9px]">
+                                {{ p.category }}
+                            </Badge>
+                        </CardDescription>
+                        <CardAction>
+                            <div class="flex items-center gap-0.5 text-[11px] text-[#e07c28]">
+                                <Star class="h-3 w-3 fill-[#e07c28]" />
+                                {{ p.rating.toFixed(1) }}
+                            </div>
+                        </CardAction>
+                    </CardHeader>
+
+                    <!-- Card Content: Price & Sold -->
+                    <CardContent class="pb-3">
+                        <p class="font-mono text-base font-extrabold text-[#e07c28]">
+                            {{ p.formatted_price }}
+                        </p>
+                        <p class="mt-0.5 text-[10px] text-[#9090a0]">
+                            {{ p.sold }} terjual
+                        </p>
+                    </CardContent>
+
+                    <!-- Card Footer: Actions -->
+                    <CardFooter class="flex gap-2 pt-3 pb-4">
                         <Button
                             variant="outline"
                             size="sm"
@@ -265,45 +270,44 @@ const lowStock = (stock: number) => stock <= 5;
                             size="sm"
                             class="text-xs"
                             @click="toggleActive(p)"
-                            :title="
-                                p.is_active
-                                    ? 'Nonaktifkan produk'
-                                    : 'Aktifkan kembali'
-                            "
+                            :title="p.is_active ? 'Nonaktifkan produk' : 'Aktifkan kembali'"
                         >
-                            <PackageX
-                                v-if="p.is_active"
-                                class="mr-1.5 h-3.5 w-3.5"
-                            />
+                            <PackageX v-if="p.is_active" class="mr-1.5 h-3.5 w-3.5" />
                             <PackagePlus v-else class="mr-1.5 h-3.5 w-3.5" />
                             {{ p.is_active ? 'Nonaktif' : 'Aktif' }}
                         </Button>
                         <Button
                             variant="ghost"
                             size="sm"
-                            class="text-xs text-red-500 hover:bg-red-50 hover:text-red-600"
+                            class="px-2 text-xs text-red-500 hover:bg-red-50 hover:text-red-600"
                             @click="deleteTarget = p"
                         >
-                            <Trash2 class="mr-1.5 h-3.5 w-3.5" /> Hapus
+                            <Trash2 class="h-3.5 w-3.5" />
                         </Button>
-                    </div>
+                    </CardFooter>
                 </Card>
             </div>
 
-            <div
-                v-else
-                class="rounded-3xl border border-black/5 bg-white py-20 text-center"
-            >
-                <Package class="mx-auto mb-2 h-10 w-10 text-[#c8c8d5]" />
-                <p class="text-base font-semibold text-[#4a4a57]">
-                    Belum ada produk
-                </p>
-                <p class="mt-1 text-xs text-[#9090a0]">
-                    Tambahkan produk pertama untuk mulai berjualan
-                </p>
-            </div>
+            <!-- Empty State — also wrapped in a Card -->
+            <Card v-else class="py-16 text-center shadow-sm">
+                <CardContent class="flex flex-col items-center gap-3">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f5f4f0]">
+                        <Package class="h-7 w-7 text-[#c8c8d5]" />
+                    </div>
+                    <div>
+                        <p class="text-base font-semibold text-[#4a4a57]">Belum ada produk</p>
+                        <p class="mt-1 text-xs text-[#9090a0]">
+                            Tambahkan produk pertama untuk mulai berjualan
+                        </p>
+                    </div>
+                    <Button variant="amber" size="sm" class="mt-2 text-xs font-bold" @click="goToCreate">
+                        <Plus class="mr-1.5 h-3.5 w-3.5" /> Tambah Produk Pertama
+                    </Button>
+                </CardContent>
+            </Card>
         </main>
 
+        <!-- Delete Confirm Dialog -->
         <ConfirmDialog
             :open="deleteTarget !== null"
             :title="`Hapus produk ${deleteTarget?.name ?? ''}?`"
@@ -313,6 +317,7 @@ const lowStock = (stock: number) => stock <= 5;
             @cancel="deleteTarget = null"
         />
 
+        <!-- Stock Edit Modal -->
         <Teleport to="body">
             <Transition name="fade">
                 <div
@@ -323,31 +328,19 @@ const lowStock = (stock: number) => stock <= 5;
                         class="absolute inset-0 bg-black/40 backdrop-blur-sm"
                         @click="stockTarget = null"
                     />
-                    <div
-                        class="relative z-10 w-full max-w-sm rounded-2xl border border-black/8 bg-white p-5 shadow-2xl"
-                    >
-                        <div class="flex items-start gap-3.5">
-                            <div
-                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e07c2818] text-[#e07c28]"
-                            >
+                    <Card class="relative z-10 w-full max-w-sm py-0 shadow-2xl">
+                        <CardHeader class="pt-5">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e07c2818] text-[#e07c28]">
                                 <Package class="h-5 w-5" />
                             </div>
-                            <div class="min-w-0">
-                                <h2
-                                    class="text-sm font-extrabold text-[#1c1c22]"
-                                >
-                                    Atur Stok Produk
-                                </h2>
-                                <p class="mt-1 truncate text-xs text-[#9090a0]">
-                                    {{ stockTarget?.name }}
-                                </p>
-                            </div>
-                        </div>
+                            <CardTitle class="text-sm">Atur Stok Produk</CardTitle>
+                            <CardDescription class="truncate text-xs">
+                                {{ stockTarget?.name }}
+                            </CardDescription>
+                        </CardHeader>
 
-                        <div class="mt-5">
-                            <label
-                                class="mb-1.5 block text-xs font-bold text-[#1c1c22]"
-                            >
+                        <CardContent class="pb-2">
+                            <label class="mb-1.5 block text-xs font-bold text-[#1c1c22]">
                                 Jumlah Stok
                             </label>
                             <Input
@@ -357,12 +350,11 @@ const lowStock = (stock: number) => stock <= 5;
                                 placeholder="100"
                             />
                             <p class="mt-1.5 text-[10px] text-[#9090a0]">
-                                Saat ini tersedia:
-                                {{ stockTarget?.stock }} pcs
+                                Saat ini tersedia: {{ stockTarget?.stock }} pcs
                             </p>
-                        </div>
+                        </CardContent>
 
-                        <div class="mt-5 flex justify-end gap-2">
+                        <CardFooter class="flex justify-end gap-2 pt-4 pb-5">
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -379,14 +371,11 @@ const lowStock = (stock: number) => stock <= 5;
                                 :disabled="stockLoading"
                                 @click="saveStock"
                             >
-                                <Check
-                                    v-if="!stockLoading"
-                                    class="mr-1.5 h-3.5 w-3.5"
-                                />
+                                <Check v-if="!stockLoading" class="mr-1.5 h-3.5 w-3.5" />
                                 {{ stockLoading ? 'Menyimpan...' : 'Simpan' }}
                             </Button>
-                        </div>
-                    </div>
+                        </CardFooter>
+                    </Card>
                 </div>
             </Transition>
         </Teleport>

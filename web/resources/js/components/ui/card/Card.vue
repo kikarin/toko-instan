@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "@/lib/utils"
 
-defineProps<{
-    class?: string;
-}>();
+const props = defineProps<{
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
-    <div
-        :class="
-            cn(
-                'rounded-2xl border border-[#00000012] bg-white text-[#1c1c22] shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-all duration-200',
-                $props.class
-            )
-        "
-    >
-        <slot />
-    </div>
+  <div
+    data-slot="card"
+    :class="
+      cn(
+        'bg-card text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-sm',
+        props.class,
+      )
+    "
+  >
+    <slot />
+  </div>
 </template>

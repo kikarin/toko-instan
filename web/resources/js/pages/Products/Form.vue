@@ -5,7 +5,16 @@ import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/sonner';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'vue-sonner';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 interface Product {
@@ -29,9 +38,7 @@ const props = defineProps<Props>();
 
 const isEdit = ref(!!props.product);
 const name = ref(props.product?.name ?? '');
-const category = ref(
-    props.product?.category ?? props.categories?.[0] ?? 'Fashion',
-);
+const category = ref(props.product?.category ?? props.categories?.[0] ?? 'Fashion');
 const price = ref(props.product ? String(props.product.price) : '');
 const stock = ref(props.product ? String(props.product.stock) : '0');
 const isActive = ref(props.product?.is_active ?? true);
@@ -63,9 +70,7 @@ function submit() {
             errors.value = {};
         },
         onSuccess: () => {
-            toast.success(
-                isEdit.value ? 'Produk diperbarui!' : 'Produk ditambahkan!',
-            );
+            toast.success(isEdit.value ? 'Produk diperbarui!' : 'Produk ditambahkan!');
         },
         onError: (errs: Record<string, string>) => {
             errors.value = errs;
@@ -85,11 +90,7 @@ function submit() {
 </script>
 
 <template>
-    <Head
-        :title="
-            isEdit ? 'Edit Produk - Toko Instan' : 'Tambah Produk - Toko Instan'
-        "
-    />
+    <Head :title="isEdit ? 'Edit Produk - Toko Instan' : 'Tambah Produk - Toko Instan'" />
 
     <AppLayout activePage="Produk">
         <main class="mx-auto flex w-full max-w-3xl flex-col gap-5 p-4 sm:p-6">
@@ -98,9 +99,7 @@ function submit() {
                     <ArrowLeft class="mr-1.5 h-4 w-4" /> Kembali
                 </Button>
                 <div>
-                    <p
-                        class="mb-1 text-xs font-extrabold tracking-widest text-[#e07c28] uppercase"
-                    >
+                    <p class="mb-1 text-xs font-extrabold tracking-widest text-[#e07c28] uppercase">
                         Seller · Katalog
                     </p>
                     <h1 class="text-2xl font-extrabold text-[#1c1c22]">
@@ -117,123 +116,120 @@ function submit() {
                             Informasi Produk
                         </CardTitle>
                     </CardHeader>
-                    <CardContent class="flex flex-col gap-4 p-0">
-                        <div class="flex flex-col gap-1">
-                            <label class="text-xs font-bold text-[#1c1c22]"
-                                >Nama Produk *</label
-                            >
+
+                    <CardContent class="flex flex-col gap-5 p-0">
+                        <!-- Nama Produk -->
+                        <div class="flex flex-col gap-1.5">
+                            <Label for="product-name" class="text-xs font-bold text-[#1c1c22]">
+                                Nama Produk *
+                            </Label>
                             <Input
+                                id="product-name"
                                 v-model="name"
                                 placeholder="Contoh: Kemeja Batik Premium"
                                 required
                             />
-                            <p
-                                v-if="errors.name"
-                                class="text-[11px] text-red-500"
-                            >
+                            <p v-if="errors.name" class="text-[11px] text-red-500">
                                 {{ errors.name }}
                             </p>
                         </div>
 
+                        <!-- Kategori + Tag -->
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div class="flex flex-col gap-1">
-                                <label class="text-xs font-bold text-[#1c1c22]"
-                                    >Kategori *</label
-                                >
-                                <select
-                                    v-model="category"
-                                    class="w-full rounded-2xl border border-black/12 bg-white px-3.5 py-2.5 text-xs text-[#1c1c22] transition-all outline-none focus:border-[#e07c28] focus:ring-2 focus:ring-[#e07c28]/20"
-                                >
-                                    <option
-                                        v-for="c in categories"
-                                        :key="c"
-                                        :value="c"
-                                    >
-                                        {{ c }}
-                                    </option>
-                                </select>
+                            <div class="flex flex-col gap-1.5">
+                                <Label for="product-category" class="text-xs font-bold text-[#1c1c22]">
+                                    Kategori *
+                                </Label>
+                                <Select v-model="category">
+                                    <SelectTrigger id="product-category" class="w-full">
+                                        <SelectValue placeholder="Pilih kategori" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem
+                                            v-for="c in categories"
+                                            :key="c"
+                                            :value="c"
+                                        >
+                                            {{ c }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            <div class="flex flex-col gap-1">
-                                <label class="text-xs font-bold text-[#1c1c22]"
-                                    >Label / Tag</label
-                                >
-                                <select
-                                    v-model="tag"
-                                    class="w-full rounded-2xl border border-black/12 bg-white px-3.5 py-2.5 text-xs text-[#1c1c22] transition-all outline-none focus:border-[#e07c28] focus:ring-2 focus:ring-[#e07c28]/20"
-                                >
-                                    <option
-                                        v-for="t in tags"
-                                        :key="t"
-                                        :value="t"
-                                    >
-                                        {{ t || 'Tanpa Label' }}
-                                    </option>
-                                </select>
+
+                            <div class="flex flex-col gap-1.5">
+                                <Label for="product-tag" class="text-xs font-bold text-[#1c1c22]">
+                                    Label / Tag
+                                </Label>
+                                <Select v-model="tag">
+                                    <SelectTrigger id="product-tag" class="w-full">
+                                        <SelectValue placeholder="Tanpa Label" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem v-for="t in tags" :key="t" :value="t">
+                                            {{ t || 'Tanpa Label' }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 
+                        <!-- Harga + Stok -->
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div class="flex flex-col gap-1">
-                                <label class="text-xs font-bold text-[#1c1c22]"
-                                    >Harga (Rp) *</label
-                                >
+                            <div class="flex flex-col gap-1.5">
+                                <Label for="product-price" class="text-xs font-bold text-[#1c1c22]">
+                                    Harga (Rp) *
+                                </Label>
                                 <Input
+                                    id="product-price"
                                     v-model="price"
                                     type="number"
                                     min="0"
                                     placeholder="285000"
                                     required
                                 />
-                                <p
-                                    v-if="errors.price"
-                                    class="text-[11px] text-red-500"
-                                >
+                                <p v-if="errors.price" class="text-[11px] text-red-500">
                                     {{ errors.price }}
                                 </p>
                             </div>
-                            <div class="flex flex-col gap-1">
-                                <label class="text-xs font-bold text-[#1c1c22]"
-                                    >Stok *</label
-                                >
+                            <div class="flex flex-col gap-1.5">
+                                <Label for="product-stock" class="text-xs font-bold text-[#1c1c22]">
+                                    Stok *
+                                </Label>
                                 <Input
+                                    id="product-stock"
                                     v-model="stock"
                                     type="number"
                                     min="0"
                                     placeholder="100"
                                     required
                                 />
-                                <p
-                                    v-if="errors.stock"
-                                    class="text-[11px] text-red-500"
-                                >
+                                <p v-if="errors.stock" class="text-[11px] text-red-500">
                                     {{ errors.stock }}
                                 </p>
                             </div>
                         </div>
 
-                        <div class="flex flex-col gap-1">
-                            <label class="text-xs font-bold text-[#1c1c22]"
-                                >URL Gambar (opsional)</label
-                            >
+                        <!-- URL Gambar -->
+                        <div class="flex flex-col gap-1.5">
+                            <Label for="product-img" class="text-xs font-bold text-[#1c1c22]">
+                                URL Gambar (opsional)
+                            </Label>
                             <Input
+                                id="product-img"
                                 v-model="img"
                                 placeholder="https://images.unsplash.com/..."
                             />
-                            <p
-                                v-if="errors.img"
-                                class="text-[11px] text-red-500"
-                            >
+                            <p v-if="errors.img" class="text-[11px] text-red-500">
                                 {{ errors.img }}
                             </p>
                         </div>
 
-                        <div
-                            class="flex items-center justify-between rounded-2xl border border-black/8 bg-[#faf9f6] px-4 py-3"
-                        >
+                        <!-- Status Aktif -->
+                        <div class="flex items-center justify-between rounded-xl bg-[#faf9f6] px-4 py-3">
                             <div>
-                                <p class="text-xs font-bold text-[#1c1c22]">
+                                <Label class="text-xs font-bold text-[#1c1c22]">
                                     Status Produk
-                                </p>
+                                </Label>
                                 <p class="mt-0.5 text-[10px] text-[#9090a0]">
                                     {{
                                         isActive
@@ -242,36 +238,16 @@ function submit() {
                                     }}
                                 </p>
                             </div>
-                            <button
-                                type="button"
-                                role="switch"
-                                :aria-checked="isActive"
-                                @click="isActive = !isActive"
-                                class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors"
-                                :class="
-                                    isActive ? 'bg-[#22a15a]' : 'bg-[#c8c8d5]'
-                                "
-                            >
-                                <span
-                                    class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
-                                    :class="
-                                        isActive
-                                            ? 'translate-x-5'
-                                            : 'translate-x-0'
-                                    "
-                                />
-                            </button>
+                            <Switch
+                                :checked="isActive"
+                                @update:checked="isActive = $event"
+                            />
                         </div>
                     </CardContent>
                 </Card>
 
                 <div class="flex gap-3">
-                    <Button
-                        variant="outline"
-                        size="lg"
-                        class="font-bold"
-                        @click="back"
-                    >
+                    <Button variant="outline" size="lg" class="font-bold" @click="back">
                         Batal
                     </Button>
                     <Button
@@ -281,10 +257,7 @@ function submit() {
                         class="flex-1 text-sm font-bold shadow-md"
                         :disabled="isLoading"
                     >
-                        <Loader2
-                            v-if="isLoading"
-                            class="mr-2 h-4 w-4 animate-spin"
-                        />
+                        <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
                         <Save v-else class="mr-2 h-4 w-4" />
                         {{ isEdit ? 'Simpan Perubahan' : 'Simpan Produk' }}
                     </Button>

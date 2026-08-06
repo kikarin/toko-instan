@@ -12,13 +12,13 @@
 
 | Phase                     | Task    | Selesai    |
 | ------------------------- | ------- | ---------- |
-| Phase 0 — Foundation      | 17      | 11/17      |
-| Phase 1 — MVP             | 42      | 9/42       |
+| Phase 0 — Foundation      | 17      | 12/17      |
+| Phase 1 — MVP             | 42      | 15/42      |
 | Phase 1.5 — Beta & Launch | 10      | 0/10       |
 | Phase 2 — Growth          | 28      | 0/28       |
 | Phase 3 — Scale           | 18      | 0/18       |
 | Phase 4 — Enterprise      | 12      | 0/12       |
-| **Total**                 | **127** | **20/127** |
+| **Total**                 | **127** | **27/127** |
 
 
 > Update kolom "Selesai" manual saat milestone tercapai.
@@ -102,16 +102,16 @@
 - [x] **P0-030** — Migration tabel inti (users, tenants, stores) ⚠️ butuh P0-002
   - **Deliverable:** Migration + Model + relasi dasar; seeder 1 tenant dev
 
-- [x] **P0-031** — Tenant middleware & subdomain routing ⚠️ butuh P0-001, P0-030
+- [ ] **P0-031** — Tenant middleware & subdomain routing ⚠️ butuh P0-001, P0-030
   - **Deliverable:** Request ke `{tenant}.toko-instan.test` resolve tenant context; data terisolasi
 
-- [ ] **P0-032** — Layout dasar (auth + dashboard)
+- [x] **P0-032** — Layout dasar (auth + dashboard)
   - **Deliverable:** `AuthLayout`, `DashboardLayout`, `StorefrontLayout` — responsive skeleton
 
 - [ ] **P0-033** — CI pipeline dasar
   - **Deliverable:** GitHub Actions — lint (Pint/ESLint) + `php artisan test` + `npm run build`
 
-- [ ] **P0-034** — Environment & config template
+- [x] **P0-034** — Environment & config template
   - **Deliverable:** `.env.example` lengkap; tidak ada secret di repo
 
 ---
@@ -195,7 +195,7 @@
 
 ## 1.4 Customer & Cart
 
-- [ ] **P1-030** — Customer registration (buyer)
+- [x] **P1-030** — Customer registration (buyer)
   - **Deliverable:** Buyer bisa register/login terpisah atau unified account
 
 - [ ] **P1-031** — Customer address
@@ -219,10 +219,10 @@
 - [ ] **P1-042** — Order status flow
   - **Deliverable:** Status: Pending → Paid → Processing → Completed (+ Cancelled)
 
-- [ ] **P1-043** — Order history (seller)
+- [x] **P1-043** — Order history (seller)
   - **Deliverable:** Dashboard seller — list & detail order
 
-- [ ] **P1-044** — Order history (buyer)
+- [x] **P1-044** — Order history (buyer)
   - **Deliverable:** Halaman buyer — riwayat pesanan
 
 - [ ] **P1-045** — Invoice generation
@@ -306,13 +306,13 @@
 
 ## 1.10 Dashboard
 
-- [ ] **P1-090** — Seller dashboard
+- [x] **P1-090** — Seller dashboard
   - **Deliverable:** Widget: revenue, orders hari ini, total produk, saldo wallet
 
-- [ ] **P1-091** — Platform admin dashboard
+- [x] **P1-091** — Platform admin dashboard
   - **Deliverable:** Admin: total tenants, orders platform, pending withdraw
 
-- [ ] **P1-092** — Admin modules dasar
+- [x] **P1-092** — Admin modules dasar
   - **Deliverable:** CRUD users, tenants, lihat orders, approve withdraw
 
 ---
@@ -631,4 +631,5 @@
 | 2026-08-06 | Initial project plan dibuat                         |
 | 2026-08-06 | Hapus branch naming & Docker; simplify git workflow |
 | 2026-08-06 | Update progress: Foundation & Auth MVP tasks        |
+| 2026-08-07 | Rampung: P0-032/034, P1-030/043/044/090/091/092; P0-031 dikembalikan ke pending |
 

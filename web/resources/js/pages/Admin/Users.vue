@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { toast } from '@/components/ui/sonner';
+import { Input } from '@/components/ui/input';
+import { toast } from 'vue-sonner';
 import AdminLayout from '@/layouts/AdminLayout.vue';
+import { Search } from 'lucide-vue-next';
 
 interface AdminUser {
     id: number;
@@ -141,10 +143,11 @@ function runAction() {
             </div>
 
             <div class="relative max-w-sm">
-                <input
+                <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#9090a0]" />
+                <Input
                     v-model="searchQ"
                     placeholder="Cari nama atau email..."
-                    class="w-full rounded-2xl border border-black/12 bg-white py-2.5 pr-3.5 pl-3.5 text-xs transition-all outline-none focus:border-[#6d4fc2] focus:ring-2 focus:ring-[#6d4fc2]/20"
+                    class="pl-9"
                 />
             </div>
 
