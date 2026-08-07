@@ -21,6 +21,11 @@ return new class extends Migration
                 $table->string('tag')->nullable();
                 $table->string('img')->nullable();
                 $table->integer('stock')->default(100);
+                $table->boolean('is_active')->default(true);
+                $table->text('description')->nullable();
+                $table->string('sku')->nullable();
+                $table->string('brand')->default('Nike');
+                $table->integer('weight_gram')->default(500);
                 $table->timestamps();
             });
         }

@@ -16,7 +16,8 @@ class OrderService
     public function __construct(
         protected OrderRepository $orderRepository,
         protected ProductRepository $productRepository,
-        protected StoreRepository $storeRepository
+        protected StoreRepository $storeRepository,
+        protected WalletService $walletService
     ) {}
 
     public function processCheckout(CreateOrderDTO $dto): Order
@@ -39,9 +40,55 @@ class OrderService
 
         $order = $this->orderRepository->createOrder($dto, $orderNumber, $totalAmount);
 
-        $this->storeRepository->addPendingEscrow($dto->storeId, $totalAmount);
+        $this->storeRepository->incrementTotalOrders($dto->storeId);
 
         return $order;
+    }
+
+    public function markOrderPaid(Order $order): void
+    {
+        if ($order->status === 'paid' || $order->status === 'completed') {
+            return;
+        }
+
+        $tenantId = $order->store?->tenant_id;
+        if ($tenantId === null) {
+            throw new \RuntimeException('Order tanpa store tidak bisa diproses escrow.');
+        }
+
+        $wallet = $this->walletService->ensureForTenant($tenantId);
+
+        $this->walletService->creditOrderEscrow(
+            $wallet->id,
+            (float) $order->total_amount,
+            $order->id,
+            'Escrow penjualan (order '.$order->order_number.')'
+        );
+
+        $order->update(['status' => 'paid']);
+    }
+
+    public function markOrderCompleted(Order $order): void
+    {
+        if ($order->status === 'completed') {
+            return;
+        }
+
+        $tenantId = $order->store?->tenant_id;
+
+        if ($tenantId === null) {
+            return;
+        }
+
+        $wallet = $this->walletService->ensureForTenant($tenantId);
+
+        $this->walletService->releaseEscrowToAvailable(
+            $wallet->id,
+            (float) $order->total_amount,
+            $order->id
+        );
+
+        $order->update(['status' => 'completed']);
     }
 
     /**

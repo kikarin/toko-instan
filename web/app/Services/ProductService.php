@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\DTO\ProductData;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Label;
 use App\Models\Product;
 use App\Models\Store;
 use App\Repositories\ProductRepository;
@@ -77,7 +80,68 @@ class ProductService
      */
     public function categories(): array
     {
-        return ['Fashion', 'Elektronik', 'Sepatu', 'Aksesoris', 'Kuliner'];
+        $store = $this->storeRepository->getPrimaryStore();
+
+        $query = Category::query();
+        if ($store) {
+            $query->where(function ($q) use ($store) {
+                $q->where('tenant_id', $store->tenant_id)->orWhereNull('tenant_id');
+            });
+        }
+
+        $list = $query->orderBy('name')->pluck('name')->filter()->values()->all();
+
+        if (empty($list)) {
+            return ['Sneakers', 'Apparel', 'Accessories', 'Sportswear', 'Running'];
+        }
+
+        return array_values(array_unique($list));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function labels(): array
+    {
+        $store = $this->storeRepository->getPrimaryStore();
+
+        $query = Label::query();
+        if ($store) {
+            $query->where(function ($q) use ($store) {
+                $q->where('tenant_id', $store->tenant_id)->orWhereNull('tenant_id');
+            });
+        }
+
+        $list = $query->orderBy('name')->pluck('name')->filter()->values()->all();
+
+        if (empty($list)) {
+            return ['BESTSELLER', 'NEW ARRIVAL', 'PROMO 8.8', 'GARANSI RESMI', 'LIMITED EDITION'];
+        }
+
+        return array_values(array_unique($list));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function brands(): array
+    {
+        $store = $this->storeRepository->getPrimaryStore();
+
+        $query = Brand::query();
+        if ($store) {
+            $query->where(function ($q) use ($store) {
+                $q->where('tenant_id', $store->tenant_id)->orWhereNull('tenant_id');
+            });
+        }
+
+        $list = $query->orderBy('name')->pluck('name')->filter()->values()->all();
+
+        if (empty($list)) {
+            return ['Nike', 'Jordan', 'Adidas', 'Puma', 'Converse'];
+        }
+
+        return array_values(array_unique($list));
     }
 
     /**
@@ -97,6 +161,10 @@ class ProductService
             'rating' => (float) $product->rating,
             'tag' => $product->tag,
             'img' => $product->img,
+            'description' => $product->description ?: 'Produk Nike original dengan material premium, daya tahan tinggi, dan kenyamanan maksimal untuk aktivitas sehari-hari.',
+            'sku' => $product->sku ?: ('NK-'.strtoupper(substr(md5((string) $product->id), 0, 6))),
+            'brand' => $product->brand ?: 'Nike',
+            'weight_gram' => $product->weight_gram ?: 500,
         ];
     }
 

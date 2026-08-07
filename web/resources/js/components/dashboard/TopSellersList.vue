@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Star } from 'lucide-vue-next';
+import { Star, Trophy, Sparkles } from 'lucide-vue-next';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
@@ -21,50 +21,52 @@ defineProps<Props>();
 </script>
 
 <template>
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2.5">
         <div
             v-for="(seller, i) in sellers"
             :key="i"
-            class="flex cursor-default items-center gap-2.5 rounded-xl border p-2.5 transition-all duration-200"
+            class="group flex cursor-pointer items-center gap-3 rounded-2xl border p-3 transition-all duration-200"
             :class="[
                 i === 0
-                    ? 'border-[#e07c2825] bg-[#e07c2810]'
-                    : 'border-[#0000000d] bg-[#f5f4f0] hover:bg-white hover:shadow-xs',
+                    ? 'border-amber-500/30 bg-amber-50/40 shadow-xs hover:shadow-md'
+                    : 'border-black/8 bg-white hover:bg-zinc-50 hover:border-black/15 hover:shadow-xs',
             ]"
         >
-            <span
-                class="w-3.5 text-center font-mono text-[10px] font-bold text-[#c8c8d5]"
+            <!-- Rank Badge -->
+            <div
+                class="h-7 w-7 rounded-xl flex items-center justify-center font-mono text-xs font-black shrink-0 shadow-2xs"
+                :class="[
+                    i === 0 ? 'bg-amber-500 text-white' : i === 1 ? 'bg-zinc-800 text-white' : i === 2 ? 'bg-zinc-600 text-white' : 'bg-zinc-100 text-zinc-500'
+                ]"
             >
-                {{ i + 1 }}
-            </span>
+                <Trophy v-if="i === 0" class="h-3.5 w-3.5 text-white" />
+                <span v-else>#{{ i + 1 }}</span>
+            </div>
 
-            <Avatar :fallback="seller.avatar" :hue="seller.hue" size="sm" />
+            <Avatar :fallback="seller.avatar" :hue="seller.hue" size="sm" class="shrink-0 rounded-xl" />
 
             <div class="min-w-0 flex-1">
-                <p class="truncate text-xs font-semibold text-[#1c1c22]">
+                <p class="truncate text-xs font-extrabold text-[#1c1c22] group-hover:text-amber-600 transition-colors">
                     {{ seller.name }}
                 </p>
-                <p class="flex items-center gap-1 text-[10px] text-[#9090a0]">
-                    {{ seller.orders }} pesanan ·
-                    <span
-                        class="flex items-center gap-0.5 font-medium text-amber-500"
-                    >
-                        <Star
-                            class="h-2.5 w-2.5 fill-amber-400 stroke-amber-400"
-                        />
+                <div class="flex items-center gap-2 text-[10px] text-zinc-400 font-medium">
+                    <span>{{ seller.orders }} Terjual</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-0.5 font-bold text-amber-500">
+                        <Star class="h-3 w-3 fill-amber-400 text-amber-400" />
                         {{ seller.rating }}
                     </span>
-                </p>
+                </div>
             </div>
 
             <div class="flex shrink-0 flex-col items-end gap-0.5 text-right">
-                <p class="font-mono text-xs font-bold text-[#e07c28]">
+                <p class="font-mono text-xs font-black text-amber-600">
                     {{ seller.gmv }}
                 </p>
                 <Badge
                     v-if="seller.badge"
-                    :variant="seller.badge === 'top' ? 'amber' : 'violet'"
-                    class="px-1.5 py-0 text-[9px] tracking-wider uppercase"
+                    :variant="seller.badge === 'top' ? 'amber' : 'violetSolid'"
+                    class="px-2 py-0.2 text-[9px] font-black tracking-wider uppercase"
                 >
                     {{ seller.badge }}
                 </Badge>

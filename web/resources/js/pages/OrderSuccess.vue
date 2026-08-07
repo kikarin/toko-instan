@@ -37,32 +37,31 @@ function navigate(url: string) {
 </script>
 
 <template>
-    <Head title="Pesanan Berhasil - Toko Instan" />
+    <Head title="Pesanan Berhasil — Nike Official Store" />
 
     <StorefrontLayout>
         <main
-            class="mx-auto flex w-full max-w-2xl flex-col items-center p-6 py-12 font-sans"
+            class="mx-auto flex w-full max-w-2xl flex-col items-center px-4 pt-6 pb-28 sm:p-6 sm:py-12 font-sans"
         >
             <!-- Success Icon Animation -->
             <div
-                class="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-[#22a15a30] bg-[#22a15a1a] text-[#22a15a] shadow-lg shadow-[#22a15a]/20"
+                class="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-emerald-500/30 bg-emerald-50 text-emerald-600 shadow-md shadow-emerald-500/10"
             >
                 <CheckCircle2 class="h-8 w-8" />
             </div>
 
             <h1
-                class="text-center text-2xl font-extrabold tracking-tight text-[#1c1c22]"
+                class="text-center text-2xl font-black tracking-tight text-[#1c1c22]"
             >
-                Pesanan Berhasil Dibuat!
+                Pesanan Nike Berhasil Dibuat!
             </h1>
             <p class="mt-1 mb-8 max-w-md text-center text-xs text-[#9090a0]">
-                Terima kasih telah berbelanja. Invoice pesanan Anda telah dibuat
-                dan dana Anda disimpan dengan aman di Escrow Rekening Bersama.
+                Terima kasih telah berbelanja di Nike Official Store. Pesanan Anda sedang diproses dengan garansi 100% keaslian.
             </p>
 
             <!-- Invoice Card -->
             <Card
-                class="flex w-full flex-col gap-5 border-black/10 p-6 shadow-md"
+                class="flex w-full flex-col gap-5 border-black/10 p-6 shadow-md bg-white rounded-2xl"
             >
                 <div
                     class="flex items-center justify-between border-b border-black/8 pb-4"
@@ -81,7 +80,7 @@ function navigate(url: string) {
                     </div>
                     <Badge
                         variant="amber"
-                        class="px-2.5 py-1 text-xs font-bold uppercase"
+                        class="px-2.5 py-1 text-xs font-bold uppercase bg-black text-amber-400 border-none"
                     >
                         {{ invoice.status }}
                     </Badge>
@@ -91,7 +90,7 @@ function navigate(url: string) {
                 <div class="grid grid-cols-2 gap-4 text-xs">
                     <div class="flex flex-col gap-1">
                         <span class="flex items-center gap-1.5 text-[#9090a0]">
-                            <Store class="h-3.5 w-3.5 text-[#e07c28]" /> Toko
+                            <Store class="h-3.5 w-3.5 text-black" /> Toko
                             Penjual
                         </span>
                         <span class="font-bold text-[#1c1c22]">{{
@@ -101,7 +100,7 @@ function navigate(url: string) {
 
                     <div class="flex flex-col gap-1">
                         <span class="flex items-center gap-1.5 text-[#9090a0]">
-                            <Calendar class="h-3.5 w-3.5 text-[#e07c28]" />
+                            <Calendar class="h-3.5 w-3.5 text-black" />
                             Waktu Transaksi
                         </span>
                         <span class="font-mono font-bold text-[#1c1c22]">{{
@@ -111,7 +110,7 @@ function navigate(url: string) {
 
                     <div class="flex flex-col gap-1">
                         <span class="flex items-center gap-1.5 text-[#9090a0]">
-                            <User class="h-3.5 w-3.5 text-[#e07c28]" /> Nama
+                            <User class="h-3.5 w-3.5 text-black" /> Nama
                             Pembeli
                         </span>
                         <span class="font-bold text-[#1c1c22]">{{
@@ -121,7 +120,7 @@ function navigate(url: string) {
 
                     <div class="flex flex-col gap-1">
                         <span class="flex items-center gap-1.5 text-[#9090a0]">
-                            <Mail class="h-3.5 w-3.5 text-[#e07c28]" /> Email
+                            <Mail class="h-3.5 w-3.5 text-black" /> Email
                             Pembeli
                         </span>
                         <span class="truncate font-bold text-[#1c1c22]">{{
@@ -132,13 +131,13 @@ function navigate(url: string) {
 
                 <!-- Total Amount Banner -->
                 <div
-                    class="mt-2 flex items-center justify-between rounded-2xl border border-[#e07c2820] bg-[#e07c280a] p-4"
+                    class="mt-2 flex items-center justify-between rounded-2xl border border-black/10 bg-zinc-900 p-4 text-white"
                 >
-                    <span class="text-xs font-bold text-[#4a4a57]"
+                    <span class="text-xs font-bold text-zinc-300"
                         >Total Pembayaran</span
                     >
                     <span
-                        class="font-mono text-xl font-extrabold text-[#e07c28]"
+                        class="font-mono text-xl font-black text-amber-400"
                     >
                         {{ invoice.total_amount }}
                     </span>
@@ -148,18 +147,18 @@ function navigate(url: string) {
                 <div class="mt-2 flex flex-col items-center gap-3 sm:flex-row">
                     <Button
                         variant="amber"
-                        class="flex h-11 w-full items-center justify-center gap-2 text-xs font-bold shadow-sm"
-                        @click="navigate('/marketplace')"
+                        class="flex h-11 w-full items-center justify-center gap-2 text-xs font-bold bg-black text-amber-400 hover:bg-zinc-800 shadow-md"
+                        @click="navigate('/orders')"
                     >
                         <ShoppingBag class="h-4 w-4" />
-                        <span>Kembali Belanja di Marketplace</span>
+                        <span>Lihat Riwayat Pesanan Saya</span>
                     </Button>
                     <Button
                         variant="outline"
                         class="flex h-11 w-full items-center justify-center gap-2 border-black/12 text-xs font-bold"
                         @click="navigate('/')"
                     >
-                        <span>Lihat Dashboard Seller</span>
+                        <span>Kembali Belanja</span>
                     </Button>
                 </div>
             </Card>

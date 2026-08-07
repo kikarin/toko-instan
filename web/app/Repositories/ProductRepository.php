@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\DTO\ProductData;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class ProductRepository
 {
@@ -75,7 +76,7 @@ class ProductRepository
 
     public function createForStore(int $storeId, ProductData $data): Product
     {
-        return Product::create([
+        $attributes = [
             'store_id' => $storeId,
             'name' => $data->name,
             'slug' => \Str::slug($data->name).'-'.random_int(1000, 9999),
@@ -87,12 +88,22 @@ class ProductRepository
             'img' => $data->img,
             'stock' => $data->stock,
             'is_active' => $data->isActive,
-        ]);
+            'description' => $data->description,
+            'sku' => $data->sku ?: ('NK-'.strtoupper(\Str::random(6))),
+            'brand' => $data->brand ?: 'Nike',
+            'weight_gram' => $data->weightGram ?: 500,
+        ];
+
+        $filtered = array_filter($attributes, function ($val, $key) {
+            return Schema::hasColumn('products', $key);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        return Product::create($filtered);
     }
 
     public function updateProduct(Product $product, ProductData $data): void
     {
-        $product->update([
+        $attributes = [
             'name' => $data->name,
             'category' => $data->category,
             'price' => $data->price,
@@ -100,7 +111,17 @@ class ProductRepository
             'tag' => $data->tag,
             'img' => $data->img,
             'is_active' => $data->isActive,
-        ]);
+            'description' => $data->description,
+            'sku' => $data->sku,
+            'brand' => $data->brand,
+            'weight_gram' => $data->weightGram,
+        ];
+
+        $filtered = array_filter($attributes, function ($val, $key) {
+            return Schema::hasColumn('products', $key);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        $product->update($filtered);
     }
 
     public function updateStock(Product $product, int $stock): void

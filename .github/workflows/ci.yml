@@ -1,0 +1,99 @@
+name: CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+concurrency:
+    group: ci-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    backend:
+        name: Backend (Pint + Tests)
+        runs-on: ubuntu-latest
+        services:
+            postgres:
+                image: postgres:17
+                env:
+                    POSTGRES_DB: toko_instan_test
+                    POSTGRES_USER: dev
+                    POSTGRES_PASSWORD: secret
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd "pg_isready -U dev"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                    --health-start-period 10s
+        defaults:
+            run:
+                working-directory: web
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  extensions: mbstring, intl, pdo, pdo_pgsql, sqlite3, redis
+                  tools: composer:v2
+
+            - name: Get Composer cache directory
+              id: composer-cache
+              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+            - uses: actions/cache@v4
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('web/composer.lock') }}
+                  restore-keys: ${{ runner.os }}-composer-
+
+            - name: Install dependencies
+              run: composer install --no-interaction --no-progress --prefer-dist
+
+            - name: Code style (Pint)
+              run: vendor/bin/pint --test --dirty
+
+            - name: Run tests (PostgreSQL)
+              run: php artisan test --compact
+              env:
+                  APP_ENV: testing
+                  DB_CONNECTION: pgsql
+                  DB_HOST: 127.0.0.1
+                  DB_PORT: 5432
+                  DB_DATABASE: toko_instan_test
+                  DB_USERNAME: dev
+                  DB_PASSWORD: secret
+                  QUEUE_CONNECTION: sync
+
+    frontend:
+        name: Frontend (Lint + Build)
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: web
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: npm
+                  cache-dependency-path: web/package-lock.json
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: ESLint
+              run: npm run lint:check
+
+            - name: Prettier check
+              run: npm run format:check
+
+            - name: Type check (vue-tsc)
+              run: npm run types:check
+
+            - name: Build
+              run: npm run build

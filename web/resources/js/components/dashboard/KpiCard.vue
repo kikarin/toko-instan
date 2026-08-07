@@ -17,8 +17,8 @@ interface Props {
 defineProps<Props>();
 
 // Generate SVG paths for sparkline
-const w = 72;
-const h = 26;
+const w = 84;
+const h = 28;
 
 function getSparkPaths(data: number[]) {
     if (!data || data.length === 0) {
@@ -29,7 +29,7 @@ function getSparkPaths(data: number[]) {
     const max = Math.max(...data);
     const getX = (i: number) => (i / (data.length - 1)) * w;
     const getY = (v: number) =>
-        h - ((v - min) / (max - min || 1)) * (h - 4) - 2;
+        h - ((v - min) / (max - min || 1)) * (h - 6) - 3;
 
     const pts = data.map((v, i) => `${getX(i)},${getY(v)}`).join(' ');
     const area =
@@ -46,37 +46,37 @@ function getSparkPaths(data: number[]) {
 
 <template>
     <Card
-        class="flex flex-col gap-2.5 p-4 transition-all duration-200 hover:border-[#00000020] hover:shadow-md"
+        class="group relative overflow-hidden rounded-2xl border border-black/8 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-amber-500/20 flex flex-col justify-between gap-2.5"
     >
         <div class="flex items-center justify-between">
-            <p class="text-xs font-medium text-[#9090a0]">{{ label }}</p>
+            <span class="text-xs font-bold text-zinc-500 group-hover:text-black transition-colors">{{ label }}</span>
             <div
-                class="flex h-7 w-7 items-center justify-center rounded-lg text-sm shadow-2xs"
+                class="flex h-9 w-9 items-center justify-center rounded-xl text-base shadow-xs transition-transform duration-300 group-hover:scale-110"
                 :style="{ backgroundColor: softColor }"
             >
                 <component
                     :is="icon"
-                    class="h-4 w-4"
+                    class="h-4.5 w-4.5"
                     :style="{ color: color }"
                 />
             </div>
         </div>
 
         <p
-            class="font-mono text-xl leading-none font-extrabold tracking-tight text-[#1c1c22]"
+            class="font-mono text-2xl leading-none font-black tracking-tight text-[#1c1c22]"
         >
             {{ value }}
         </p>
 
-        <div class="flex items-center justify-between pt-0.5">
+        <div class="flex items-center justify-between pt-1">
             <span
-                class="flex items-center gap-0.5 font-mono text-[11px] font-bold"
+                class="inline-flex items-center gap-0.5 font-mono text-[11px] font-extrabold px-2 py-0.5 rounded-full"
                 :class="[
                     up === null
-                        ? 'text-[#0e9f8a]'
+                        ? 'bg-emerald-50 text-emerald-600'
                         : up
-                          ? 'text-[#22a15a]'
-                          : 'text-[#e0405a]',
+                          ? 'bg-emerald-50 text-emerald-600'
+                          : 'bg-rose-50 text-rose-600',
                 ]"
             >
                 <ArrowUpRight v-if="up === true" class="h-3.5 w-3.5" />
@@ -86,7 +86,7 @@ function getSparkPaths(data: number[]) {
             </span>
 
             <!-- Sparkline SVG -->
-            <svg :viewBox="`0 0 ${w} ${h}`" class="block h-[26px] w-[72px]">
+            <svg :viewBox="`0 0 ${w} ${h}`" class="block h-[28px] w-[84px]">
                 <defs>
                     <linearGradient
                         :id="`sg-${label.toLowerCase().replace(/[^a-z0-9]/g, '')}`"
@@ -98,7 +98,7 @@ function getSparkPaths(data: number[]) {
                         <stop
                             offset="0%"
                             :stop-color="color"
-                            stop-opacity="0.3"
+                            stop-opacity="0.35"
                         />
                         <stop
                             offset="100%"
@@ -115,13 +115,13 @@ function getSparkPaths(data: number[]) {
                     :points="getSparkPaths(sparkData).pts"
                     fill="none"
                     :stroke="color"
-                    stroke-width="1.8"
+                    stroke-width="2"
                     stroke-linejoin="round"
                     stroke-linecap="round"
                 />
             </svg>
         </div>
 
-        <p class="text-[10px] text-[#c8c8d5]">{{ sub }}</p>
+        <p class="text-[10px] font-medium text-zinc-400 border-t border-black/5 pt-1.5">{{ sub }}</p>
     </Card>
 </template>

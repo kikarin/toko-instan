@@ -12,6 +12,10 @@ class ProductData
         public bool $isActive = true,
         public ?string $tag = null,
         public ?string $img = null,
+        public ?string $description = null,
+        public ?string $sku = null,
+        public ?string $brand = 'Nike',
+        public int $weightGram = 500,
     ) {}
 
     /**
@@ -27,6 +31,10 @@ class ProductData
             isActive: (bool) ($validated['is_active'] ?? true),
             tag: $validated['tag'] ?? null,
             img: $validated['img'] ?? null,
+            description: $validated['description'] ?? null,
+            sku: $validated['sku'] ?? null,
+            brand: $validated['brand'] ?? 'Nike',
+            weightGram: (int) ($validated['weight_gram'] ?? 500),
         );
     }
 }

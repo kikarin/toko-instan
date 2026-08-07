@@ -122,14 +122,14 @@ import { computed } from 'vue';
 </script>
 
 <template>
-    <Head title="Akun Saya — Toko Instan" />
+    <Head title="Akun Saya — Nike Official Store" />
 
     <StorefrontLayout
         :cartCount="totalCartCount"
         @open-cart="isCartOpen = true"
         @search="(q: string) => router.visit('/marketplace', { data: { search: q } })"
     >
-        <main class="mx-auto w-full max-w-[1200px] p-3 sm:p-6 lg:p-8">
+        <main class="mx-auto w-full max-w-[1200px] px-3 pt-3 pb-28 sm:p-6 lg:p-8">
             <div class="flex flex-col gap-6">
 
                 <!-- ── 1. Top User Profile Header ── -->
@@ -145,18 +145,18 @@ import { computed } from 'vue';
                             class="h-16 w-16 text-xl font-extrabold ring-4 ring-white shadow-md sm:h-20 sm:w-20 sm:text-2xl group-hover:scale-105 transition-transform"
                         />
                         <div class="flex flex-col gap-1">
-                            <h1 class="text-lg font-extrabold text-[#1c1c22] sm:text-2xl group-hover:text-[#e07c28] transition-colors">
+                            <h1 class="text-lg font-extrabold text-[#1c1c22] sm:text-2xl group-hover:text-black transition-colors">
                                 {{ userName }}
                             </h1>
                             <div class="flex items-center gap-2">
                                 <Button
                                     variant="amber"
                                     size="sm"
-                                    class="h-6 rounded-full px-2.5 text-[10px] font-black uppercase shadow-2xs gap-1"
-                                    @click="toast.info('Akun Anda sudah terverifikasi.')"
+                                    class="h-6 rounded-full px-2.5 text-[10px] font-black uppercase shadow-2xs gap-1 bg-black text-amber-400 hover:bg-zinc-800"
+                                    @click="toast.info('Akun Anda terverifikasi sebagai Nike Official Member.')"
                                 >
-                                    <ShoppingBag class="h-3 w-3" />
-                                    Toko Instan VIP Member
+                                    <ShoppingBag class="h-3 w-3 text-amber-400" />
+                                    Nike Member VIP
                                 </Button>
                             </div>
                         </div>
@@ -166,7 +166,7 @@ import { computed } from 'vue';
                     <div class="flex items-center gap-2">
                         <button
                             title="Bantuan & Dukungan"
-                            @click="toast.info('Layanan Bantuan Toko Instan Siap 24/7!')"
+                            @click="toast.info('Layanan Pelanggan Nike Official Siap 24/7!')"
                             class="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xs border border-black/6 text-[#4a4a57] hover:bg-[#f5f4f0] transition-colors"
                         >
                             <HelpCircle class="h-4 w-4" />
@@ -187,24 +187,24 @@ import { computed } from 'vue';
                         <!-- Top Banner Split -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <!-- Banner 1 -->
-                            <div class="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/60 p-3.5 border border-teal-200/50">
+                            <div class="flex items-center justify-between rounded-xl bg-gradient-to-r from-zinc-900 via-black to-zinc-800 p-3.5 border border-black/10 text-white">
                                 <div>
-                                    <p class="text-xs font-bold text-teal-900 leading-tight">Yuk, mulai belanja pertamamu!</p>
-                                    <p class="text-[10px] text-teal-700 mt-0.5">Dapatkan cashback s.d Rp 50rb</p>
+                                    <p class="text-xs font-bold leading-tight text-amber-400">Nike Member Rewards</p>
+                                    <p class="text-[10px] text-zinc-300 mt-0.5">Dapatkan diskon khusus & rilis sepatu perdana</p>
                                 </div>
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500 text-white shadow-xs">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-black shadow-xs">
                                     <ShoppingBag class="h-5 w-5" />
                                 </div>
                             </div>
 
                             <!-- Banner 2 -->
-                            <div class="flex items-center justify-between rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 p-3.5 text-white shadow-xs">
+                            <div class="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 p-3.5 text-white shadow-xs">
                                 <div>
                                     <div class="flex items-center gap-1">
                                         <Sparkles class="h-3.5 w-3.5 fill-amber-200 text-amber-200" />
-                                        <span class="text-xs font-black uppercase tracking-wider text-amber-100">PLUS Member</span>
+                                        <span class="text-xs font-black uppercase tracking-wider text-amber-100">Official Guarantee</span>
                                     </div>
-                                    <p class="text-xs font-bold mt-0.5">Selalu diskon setiap belanja</p>
+                                    <p class="text-xs font-bold mt-0.5">100% Produk Original & Bebas Ongkir</p>
                                 </div>
                                 <Button size="sm" variant="outline" class="h-7 rounded-lg bg-white/20 border-white/40 text-[10px] font-bold text-white hover:bg-white/30">
                                     Cek Status
@@ -214,40 +214,40 @@ import { computed } from 'vue';
 
                         <!-- 4 Loyalty Stats Bar -->
                         <div class="grid grid-cols-4 divide-x divide-black/6 pt-1 text-center">
-                            <!-- 1. Voucher Belanja -->
-                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Anda memiliki 5 Voucher Belanja!')">
+                            <!-- 1. Voucher Diskon -->
+                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Anda memiliki 5 Voucher Diskon Nike!')">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-600 font-black text-xs">
                                     %
                                 </div>
                                 <span class="font-mono text-xs font-black text-[#1c1c22]">{{ vouchers.shopping }}</span>
-                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Voucher Belanja</span>
+                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Voucher Diskon</span>
                             </div>
 
                             <!-- 2. Voucher Ongkir -->
-                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Anda memiliki 6 Gratis Ongkir!')">
+                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Anda memiliki 6 Voucher Bebas Ongkir!')">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 font-black text-xs">
                                     <Truck class="h-4 w-4" />
                                 </div>
                                 <span class="font-mono text-xs font-black text-[#1c1c22]">{{ vouchers.shipping }}</span>
-                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Voucher Ongkir</span>
+                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Bebas Ongkir</span>
                             </div>
 
-                            <!-- 3. Belanja Bonus -->
-                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Kumpulkan bonus Toko Instan!')">
+                            <!-- 3. Nike Points -->
+                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Kumpulkan poin belanja Nike Member!')">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600 font-black text-xs">
                                     <Gift class="h-4 w-4" />
                                 </div>
-                                <span class="text-xs font-extrabold text-[#e07c28]">Bonus</span>
-                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Belanja Bonus</span>
+                                <span class="text-xs font-extrabold text-amber-600">1.250 pts</span>
+                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Nike Points</span>
                             </div>
 
-                            <!-- 4. Tokopedia Card / Pass -->
-                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Kartu Loyalti Toko Instan')">
-                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 font-black text-xs">
+                            <!-- 4. Nike Pass -->
+                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Nike Member Pass')">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-black text-white font-black text-xs">
                                     <QrCode class="h-4 w-4" />
                                 </div>
-                                <span class="text-xs font-extrabold text-indigo-600">Daftar</span>
-                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Instan Card</span>
+                                <span class="text-xs font-extrabold text-black">Aktif</span>
+                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Nike Pass</span>
                             </div>
                         </div>
                     </CardContent>
@@ -329,20 +329,20 @@ import { computed } from 'vue';
 
                     <Card class="rounded-2xl border-black/6 shadow-xs bg-white p-4">
                         <div class="grid grid-cols-4 text-center">
-                            <!-- Buka Toko -->
+                            <!-- Dashboard Seller / Nike Manager -->
                             <button @click="router.visit('/dashboard')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100/70 text-[#e07c28] group-hover:scale-105 transition-all">
-                                    <Store class="h-6 w-6" />
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white group-hover:scale-105 transition-all">
+                                    <Store class="h-6 w-6 text-amber-400" />
                                 </div>
-                                <span class="text-[11px] font-semibold text-[#4a4a57]">Buka Toko</span>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Dashboard</span>
                             </button>
 
-                            <!-- Affiliate -->
-                            <button @click="toast.info('Program Affiliate Toko Instan!')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                            <!-- Nike Club Affiliate -->
+                            <button @click="toast.info('Program Nike Club Affiliate!')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100/70 text-teal-600 group-hover:scale-105 transition-all">
                                     <Share2 class="h-6 w-6" />
                                 </div>
-                                <span class="text-[11px] font-semibold text-[#4a4a57]">Affiliate</span>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Nike Club</span>
                             </button>
 
                             <!-- Wishlist -->
@@ -353,12 +353,12 @@ import { computed } from 'vue';
                                 <span class="text-[11px] font-semibold text-[#4a4a57]">Wishlist</span>
                             </button>
 
-                            <!-- Toko Favorit -->
-                            <button @click="toast.info('Daftar Toko Favorit')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                            <!-- Panduan Ukuran -->
+                            <button @click="toast.info('Panduan Ukuran Sepatu & Clothing Nike')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/70 text-indigo-600 group-hover:scale-105 transition-all">
-                                    <Building2 class="h-6 w-6" />
+                                    <Footprints class="h-6 w-6" />
                                 </div>
-                                <span class="text-[11px] font-semibold text-[#4a4a57]">Toko Favorit</span>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Size Guide</span>
                             </button>
                         </div>
                     </Card>

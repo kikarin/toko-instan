@@ -37,6 +37,19 @@ return new class extends Migration
                 $table->decimal('rating', 3, 1)->default(4.5);
                 $table->string('badge')->nullable();
                 $table->integer('avatar_hue')->default(220);
+                $table->text('banner_url')->nullable();
+                $table->string('phone')->nullable();
+                $table->string('email')->nullable();
+                $table->text('address')->nullable();
+                $table->string('instagram')->nullable();
+                $table->string('tiktok')->nullable();
+                $table->string('headline')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->string('npwp')->nullable();
+                $table->string('nik')->nullable();
+                $table->boolean('is_pkp')->default(false);
+                $table->string('tax_name')->nullable();
+                $table->text('tax_address')->nullable();
                 $table->timestamps();
             });
         } else {

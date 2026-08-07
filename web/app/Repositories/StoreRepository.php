@@ -61,11 +61,10 @@ class StoreRepository
         return ['tenant' => $tenant, 'store' => $store];
     }
 
-    public function addPendingEscrow(int $storeId, float $amount): void
+    public function incrementTotalOrders(int $storeId): void
     {
-        $store = Store::find($storeId) ?: Store::first();
+        $store = Store::find($storeId);
         if ($store) {
-            $store->increment('pending_escrow', $amount);
             $store->increment('total_orders', 1);
         }
     }

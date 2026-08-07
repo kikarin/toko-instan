@@ -9,23 +9,19 @@
 
 ## Progress Overview
 
-
 | Phase                     | Task    | Selesai    |
 | ------------------------- | ------- | ---------- |
-| Phase 0 — Foundation      | 17      | 12/17      |
-| Phase 1 — MVP             | 42      | 15/42      |
+| Phase 0 — Foundation      | 17      | 17/17      |
+| Phase 1 — MVP             | 42      | 22/42      |
 | Phase 1.5 — Beta & Launch | 10      | 0/10       |
 | Phase 2 — Growth          | 28      | 0/28       |
 | Phase 3 — Scale           | 18      | 0/18       |
 | Phase 4 — Enterprise      | 12      | 0/12       |
-| **Total**                 | **127** | **27/127** |
-
+| **Total**                 | **127** | **39/127** |
 
 > Update kolom "Selesai" manual saat milestone tercapai.
 
 ---
-
-
 
 ## Cara Pakai
 
@@ -35,16 +31,12 @@
 
 ---
 
-
-
 # Phase 0 — Foundation
 
 **Tujuan:** Dokumen teknis, scaffold project, dev environment siap coding.
 **Milestone:** Login + buat tenant + subdomain resolve + upload test ke R2/CDN.
 
 ---
-
-
 
 ## 0.1 Dokumen Arsitektur
 
@@ -62,8 +54,6 @@
 
 ---
 
-
-
 ## 0.2 Project Scaffold
 
 - [x] **P0-010** — Init Laravel + Inertia + Vue 3 + TypeScript
@@ -80,35 +70,31 @@
 
 ---
 
-
-
 ## 0.3 Dev Environment
 
 - [x] **P0-021** — PostgreSQL schema setup
   - **Deliverable:** Migration schema `public`, `audit`, `logs`; koneksi DB OK
 
-- [ ] **P0-022** — Redis + Horizon
+- [x] **P0-022** — Redis + Horizon
   - **Deliverable:** Horizon jalan, dashboard `/horizon` accessible (dev)
 
-- [ ] **P0-023** — S3 / R2 storage config
+- [x] **P0-023** — S3 / R2 storage config
   - **Deliverable:** Laravel filesystem disk `s3`/`r2` configured, upload test file ke Cloudflare R2 berhasil
 
 ---
-
-
 
 ## 0.4 Fondasi Aplikasi
 
 - [x] **P0-030** — Migration tabel inti (users, tenants, stores) ⚠️ butuh P0-002
   - **Deliverable:** Migration + Model + relasi dasar; seeder 1 tenant dev
 
-- [ ] **P0-031** — Tenant middleware & subdomain routing ⚠️ butuh P0-001, P0-030
+- [x] **P0-031** — Tenant middleware & subdomain routing ⚠️ butuh P0-001, P0-030
   - **Deliverable:** Request ke `{tenant}.toko-instan.test` resolve tenant context; data terisolasi
 
 - [x] **P0-032** — Layout dasar (auth + dashboard)
   - **Deliverable:** `AuthLayout`, `DashboardLayout`, `StorefrontLayout` — responsive skeleton
 
-- [ ] **P0-033** — CI pipeline dasar
+- [x] **P0-033** — CI pipeline dasar
   - **Deliverable:** GitHub Actions — lint (Pint/ESLint) + `php artisan test` + `npm run build`
 
 - [x] **P0-034** — Environment & config template
@@ -116,16 +102,12 @@
 
 ---
 
-
-
 # Phase 1 — MVP
 
 **Tujuan:** Seller bisa buat toko, jual produk, terima order, uang masuk wallet, withdraw.
 **Milestone:** Vertical slice lengkap — register → toko → produk → checkout → bayar → saldo → withdraw.
 
 ---
-
-
 
 ## 1.1 Authentication
 
@@ -146,8 +128,6 @@
 
 ---
 
-
-
 ## 1.2 Tenant & Store
 
 - [x] **P1-010** — Create store (onboarding) ⚠️ butuh P0-031
@@ -163,8 +143,6 @@
   - **Deliverable:** Halaman publik `{slug}.domain.com` menampilkan toko
 
 ---
-
-
 
 ## 1.3 Product & CDN
 
@@ -191,8 +169,6 @@
 
 ---
 
-
-
 ## 1.4 Customer & Cart
 
 - [x] **P1-030** — Customer registration (buyer)
@@ -206,8 +182,6 @@
 
 ---
 
-
-
 ## 1.5 Checkout & Order
 
 - [x] **P1-040** — Checkout page
@@ -216,7 +190,7 @@
 - [x] **P1-041** — Create order
   - **Deliverable:** Order creation dengan status `Pending`, order items, snapshot harga
 
-- [ ] **P1-042** — Order status flow
+- [x] **P1-042** — Order status flow
   - **Deliverable:** Status: Pending → Paid → Processing → Completed (+ Cancelled)
 
 - [x] **P1-043** — Order history (seller)
@@ -229,8 +203,6 @@
   - **Deliverable:** Generate invoice PDF per order
 
 ---
-
-
 
 ## 1.6 Payment
 
@@ -251,37 +223,31 @@
 
 ---
 
-
-
 ## 1.7 Wallet & Escrow
 
-- [ ] **P1-060** — Wallet migration & model ⚠️ butuh P0-003
+- [x] **P1-060** — Wallet migration & model ⚠️ butuh P0-003
   - **Deliverable:** Tabel `wallets`, `wallet_transactions` — ledger immutable
 
-- [ ] **P1-061** — Escrow flow (Free Plan)
+- [x] **P1-061** — Escrow flow (Free Plan)
   - **Deliverable:** Dana order masuk `pending_balance` → `balance` setelah order completed
 
-- [ ] **P1-062** — Wallet dashboard (seller)
+- [x] **P1-062** — Wallet dashboard (seller)
   - **Deliverable:** Tampilkan balance, pending balance, history transaksi
 
 ---
 
-
-
 ## 1.8 Withdraw
 
-- [ ] **P1-070** — Withdraw request
+- [x] **P1-070** — Withdraw request
   - **Deliverable:** Form withdraw, validasi saldo, status: Pending → Approved → Transferred
 
-- [ ] **P1-071** — Withdraw fee Rp5.000 (Free Plan)
+- [x] **P1-071** — Withdraw fee Rp5.000 (Free Plan)
   - **Deliverable:** Potong fee Rp5.000 saat withdraw untuk Free Plan
 
-- [ ] **P1-072** — Admin withdraw approval
+- [x] **P1-072** — Admin withdraw approval
   - **Deliverable:** Platform admin approve/reject withdraw
 
 ---
-
-
 
 ## 1.9 Subscription
 
@@ -302,8 +268,6 @@
 
 ---
 
-
-
 ## 1.10 Dashboard
 
 - [x] **P1-090** — Seller dashboard
@@ -316,8 +280,6 @@
   - **Deliverable:** CRUD users, tenants, lihat orders, approve withdraw
 
 ---
-
-
 
 # Phase 1.5 — Beta & Launch
 
@@ -358,16 +320,12 @@
 
 ---
 
-
-
 # Phase 2 — Growth
 
 **Tujuan:** Fitur lengkap untuk seller serius — shipping, promo, tax, theme, analytics.
 **Milestone:** Toko terasa "matang", bukan sekadar MVP.
 
 ---
-
-
 
 ## 2.1 Shipping
 
@@ -382,22 +340,18 @@
 
 ---
 
-
-
 ## 2.2 Promo & Customer
 
 - [ ] **P2-010** — Voucher & discount
   - **Deliverable:** CRUD voucher (% / nominal), apply di checkout
 
-- [ ] **P2-011** — Wishlist
+- [x] **P2-011** — Wishlist
   - **Deliverable:** Buyer simpan produk ke wishlist
 
 - [ ] **P2-012** — Review & rating
   - **Deliverable:** Buyer review produk, rating 1–5, foto review (CDN)
 
 ---
-
-
 
 ## 2.3 Tax Engine
 
@@ -411,8 +365,6 @@
   - **Deliverable:** Laporan pajak bulanan/tahunan, export CSV/Excel
 
 ---
-
-
 
 ## 2.4 Theme & Store CMS
 
@@ -430,8 +382,6 @@
 
 ---
 
-
-
 ## 2.5 Analytics & Notification
 
 - [ ] **P2-040** — Analytics dashboard
@@ -445,22 +395,18 @@
 
 ---
 
-
-
 ## 2.6 Inventory
 
-- [ ] **P2-050** — Stock in/out
+- [x] **P2-050** — Stock in/out
   - **Deliverable:** Catat stock masuk/keluar, history per produk
 
-- [ ] **P2-051** — Stock adjustment
+- [x] **P2-051** — Stock adjustment
   - **Deliverable:** Adjustment manual + alasan
 
-- [ ] **P2-052** — Low stock alert
+- [x] **P2-052** — Low stock alert
   - **Deliverable:** Notifikasi jika stock di bawah threshold
 
 ---
-
-
 
 ## 2.7 Blog CMS
 
@@ -471,8 +417,6 @@
   - **Deliverable:** Halaman blog di storefront, SEO meta
 
 ---
-
-
 
 ## 2.8 SEO
 
@@ -487,16 +431,12 @@
 
 ---
 
-
-
 # Phase 3 — Scale
 
 **Tujuan:** Differentiation — AI, API, affiliate, automation.
 **Milestone:** Platform siap scale, monetisasi premium kuat.
 
 ---
-
-
 
 ## 3.1 AI Module
 
@@ -514,8 +454,6 @@
 
 ---
 
-
-
 ## 3.2 WhatsApp & Communication
 
 - [ ] **P3-010** — WhatsApp notification (Premium)
@@ -525,8 +463,6 @@
   - **Deliverable:** Auto-reply chat customer (basic)
 
 ---
-
-
 
 ## 3.3 Public API
 
@@ -541,8 +477,6 @@
 
 ---
 
-
-
 ## 3.4 Affiliate & Automation
 
 - [ ] **P3-030** — Referral system
@@ -552,8 +486,6 @@
   - **Deliverable:** Generate FAQ otomatis dari data produk
 
 ---
-
-
 
 ## 3.5 Platform Maturity
 
@@ -573,8 +505,6 @@
   - **Deliverable:** Premium seller pasang domain sendiri via Cloudflare API
 
 ---
-
-
 
 # Phase 4 — Enterprise (Opsional)
 
@@ -621,15 +551,13 @@
 
 ---
 
-
-
 ## Changelog
 
-
-| Tanggal    | Update                                              |
-| ---------- | --------------------------------------------------- |
-| 2026-08-06 | Initial project plan dibuat                         |
-| 2026-08-06 | Hapus branch naming & Docker; simplify git workflow |
-| 2026-08-06 | Update progress: Foundation & Auth MVP tasks        |
+| Tanggal    | Update                                                                          |
+| ---------- | ------------------------------------------------------------------------------- |
+| 2026-08-06 | Initial project plan dibuat                                                     |
+| 2026-08-06 | Hapus branch naming & Docker; simplify git workflow                             |
+| 2026-08-06 | Update progress: Foundation & Auth MVP tasks                                    |
 | 2026-08-07 | Rampung: P0-032/034, P1-030/043/044/090/091/092; P0-031 dikembalikan ke pending |
-
+| 2026-08-07 | Phase 0 tuntas (17/17): P0-022 Redis+Horizon, P0-023 R2/S3 storage, P0-031 tenant middleware & subdomain routing, P0-033 CI pipeline |
+| 2026-08-07 | Backbone uang: P1-042/060/061/062/070/071/072 — wallet ledger immutable (schema.md), escrow, withdraw fee & approval; payment ditunda (provider-agnostic) |

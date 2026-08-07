@@ -60,19 +60,19 @@
     --ring: #e07c28;
     --radius: 1rem;
 
-    --sidebar: #1e1c2a;
-    --sidebar-foreground: #ffffff80;
-    --sidebar-primary: #e07c28;
+    --sidebar: #18181c;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #f59e0b;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #e07c2833;
-    --sidebar-accent-foreground: #e07c28;
-    --sidebar-border: rgba(255, 255, 255, 0.06);
-    --sidebar-ring: #e07c28;
+    --sidebar-accent: rgba(245, 158, 11, 0.15);
+    --sidebar-accent-foreground: #f59e0b;
+    --sidebar-border: rgba(255, 255, 255, 0.1);
+    --sidebar-ring: #f59e0b;
 
     --bg-main: #f5f4f0;
     --surface: #faf9f6;
     --panel: #ffffff;
-    --sidebar-bg: #1e1c2a;
+    --sidebar-bg: #ffffff;
     --border-color: rgba(0, 0, 0, 0.07);
     --border-hi: rgba(0, 0, 0, 0.13);
 

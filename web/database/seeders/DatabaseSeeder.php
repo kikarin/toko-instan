@@ -2,14 +2,19 @@
 
 namespace Database\Seeders;
 
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Label;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Models\Withdrawal;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,7 +29,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Niko Agustio',
                 'username' => 'nikoagustio',
-                'bio' => 'Pecinta produk lokal & teknologi',
+                'bio' => 'Pecinta produk Nike & sneakers original',
                 'phone' => '+6285264415051',
                 'phone_verified_at' => now(),
                 'gender' => 'Pria',
@@ -37,37 +42,26 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Seed 5 Dedicated Seller Users
-        $sellersData = [
-            ['email' => 'seller1@tokobagus.com', 'name' => 'Nova Batik Seller', 'username' => 'seller_novabatik'],
-            ['email' => 'seller2@tokobagus.com', 'name' => 'KuliKain Seller', 'username' => 'seller_kulikain'],
-            ['email' => 'seller3@tokobagus.com', 'name' => 'Jaya Elektronik Seller', 'username' => 'seller_jayaelektronik'],
-            ['email' => 'seller4@tokobagus.com', 'name' => 'Warung Digital Seller', 'username' => 'seller_warungdigital'],
-            ['email' => 'seller5@tokobagus.com', 'name' => 'Mode Nusantara Seller', 'username' => 'seller_modenusantara'],
-        ];
-
-        $sellersMap = [];
-        foreach ($sellersData as $sData) {
-            $seller = User::firstOrCreate(
-                ['email' => $sData['email']],
-                [
-                    'name' => $sData['name'],
-                    'username' => $sData['username'],
-                    'password' => Hash::make('password123'),
-                    'role' => 'seller',
-                    'auth_provider' => 'email',
-                    'email_verified_at' => now(),
-                ]
-            );
-            $sellersMap[$sData['email']] = $seller;
-        }
+        // 2. Seed Nike Store Seller User
+        $seller = User::firstOrCreate(
+            ['email' => 'seller@nike.com'],
+            [
+                'name' => 'Nike Official Manager',
+                'username' => 'nike_official',
+                'password' => Hash::make('password123'),
+                'role' => 'seller',
+                'auth_provider' => 'email',
+                'email_verified_at' => now(),
+                'avatar' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop&auto=format',
+            ]
+        );
 
         // 3. Seed Admin User
         User::firstOrCreate(
-            ['email' => 'admin@toko-instan.com'],
+            ['email' => 'admin@nike.com'],
             [
-                'name' => 'Admin Master',
-                'username' => 'admin_master',
+                'name' => 'Nike Admin Master',
+                'username' => 'admin_nike',
                 'password' => Hash::make('password123'),
                 'role' => 'admin',
                 'auth_provider' => 'email',
@@ -75,419 +69,359 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 4. Seed Tenant for Primary Merchant
+        // 4. Seed Tenant
         $tenant = Tenant::firstOrCreate(
-            ['slug' => 'tokobagus'],
+            ['slug' => 'nike-indonesia'],
             [
-                'user_id' => $sellersMap['seller1@tokobagus.com']->id,
-                'name' => 'TokoBagus Official Tenant',
-                'plan' => 'premium',
+                'user_id' => $seller->id,
+                'name' => 'Nike Indonesia Official Tenant',
+                'plan' => 'enterprise',
                 'status' => 'active',
             ]
         );
 
-        // 5. Seed 5 Stores linked to their Seller Accounts
-        $storesData = [
-            [
-                'seller_email' => 'seller1@tokobagus.com',
-                'name' => 'NovaBatik Studio',
-                'slug' => 'novabatik-studio',
-                'category' => 'Fashion',
-                'description' => 'Batik tenun kualitas premium buatan pengrajin lokal Indonesia.',
-                'gmv' => 18400000,
-                'total_orders' => 412,
-                'rating' => 4.9,
-                'badge' => 'top',
-                'avatar_hue' => 220,
-                'balance' => 38400000,
-                'pending_escrow' => 6200000,
-            ],
-            [
-                'seller_email' => 'seller2@tokobagus.com',
-                'name' => 'KuliKain Official',
-                'slug' => 'kulikain-official',
-                'category' => 'Aksesoris',
-                'description' => 'Produk tas, dompet, dan aksesoris kulit asli buatan dalam negeri.',
-                'gmv' => 14100000,
-                'total_orders' => 318,
-                'rating' => 4.8,
-                'badge' => 'pro',
-                'avatar_hue' => 280,
-                'balance' => 18200000,
-                'pending_escrow' => 3100000,
-            ],
-            [
-                'seller_email' => 'seller3@tokobagus.com',
-                'name' => 'Jaya Elektronik',
-                'slug' => 'jaya-elektronik',
-                'category' => 'Elektronik',
-                'description' => 'Penyedia gadget, keyboard, headphone & aksesoris komputer terpercaya.',
-                'gmv' => 11700000,
-                'total_orders' => 287,
-                'rating' => 4.7,
-                'badge' => 'top',
-                'avatar_hue' => 190,
-                'balance' => 14500000,
-                'pending_escrow' => 2400000,
-            ],
-            [
-                'seller_email' => 'seller4@tokobagus.com',
-                'name' => 'Warung Digital ID',
-                'slug' => 'warung-digital-id',
-                'category' => 'Kuliner',
-                'description' => 'Aneka minuman serbuk, matcha latte, dan camilan nikmat berkualitas.',
-                'gmv' => 9200000,
-                'total_orders' => 234,
-                'rating' => 4.6,
-                'badge' => null,
-                'avatar_hue' => 150,
-                'balance' => 9800000,
-                'pending_escrow' => 1500000,
-            ],
-            [
-                'seller_email' => 'seller5@tokobagus.com',
-                'name' => 'Mode Nusantara',
-                'slug' => 'mode-nusantara',
-                'category' => 'Sepatu',
-                'description' => 'Sepatu casual, sneakers kulit, dan pakaian gaya modern anak muda.',
-                'gmv' => 7800000,
-                'total_orders' => 198,
-                'rating' => 4.5,
-                'badge' => 'pro',
-                'avatar_hue' => 30,
-                'balance' => 8200000,
-                'pending_escrow' => 1200000,
-            ],
-        ];
-
-        $storesMap = [];
-
-        foreach ($storesData as $s) {
-            $sellerEmail = $s['seller_email'];
-            unset($s['seller_email']);
-
-            $store = Store::updateOrCreate(
-                ['slug' => $s['slug']],
-                array_merge($s, ['tenant_id' => $tenant->id, 'status' => 'active'])
+        // Seed Categories, Labels, and Brands for Tenant
+        foreach (['Sneakers', 'Apparel', 'Accessories', 'Sportswear', 'Running'] as $catName) {
+            Category::firstOrCreate(
+                ['tenant_id' => $tenant->id, 'name' => $catName],
+                ['slug' => Str::slug($catName)]
             );
-            $storesMap[$s['name']] = $store;
         }
 
-        // 6. Seed 25+ Comprehensive Products
-        $productsData = [
-            // NovaBatik Studio (Fashion)
-            [
-                'store_name' => 'NovaBatik Studio',
-                'name' => 'Kemeja Batik Tenun Premium',
-                'slug' => 'kemeja-batik-tenun-premium',
-                'category' => 'Fashion',
-                'price' => 285000,
-                'sold' => 1240,
-                'rating' => 4.9,
-                'tag' => 'Bestseller',
-                'img' => 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400&h=400&fit=crop&auto=format',
-                'stock' => 150,
-            ],
-            [
-                'store_name' => 'NovaBatik Studio',
-                'name' => 'Celana Linen Wide Leg',
-                'slug' => 'celana-linen-wide-leg',
-                'category' => 'Fashion',
-                'price' => 320000,
-                'sold' => 763,
-                'rating' => 4.6,
-                'tag' => 'Baru',
-                'img' => 'https://images.unsplash.com/photo-1594938298603-c8148c4b4b58?w=400&h=400&fit=crop&auto=format',
-                'stock' => 95,
-            ],
-            [
-                'store_name' => 'NovaBatik Studio',
-                'name' => 'Gaun Batik Modern Elegan',
-                'slug' => 'gaun-batik-modern-elegan',
-                'category' => 'Fashion',
-                'price' => 450000,
-                'sold' => 512,
-                'rating' => 4.8,
-                'tag' => 'Hot',
-                'img' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop&auto=format',
-                'stock' => 60,
-            ],
-            [
-                'store_name' => 'NovaBatik Studio',
-                'name' => 'Outer Outerwear Motif Parang',
-                'slug' => 'outer-outerwear-motif-parang',
-                'category' => 'Fashion',
-                'price' => 275000,
-                'sold' => 340,
-                'rating' => 4.7,
-                'tag' => null,
-                'img' => 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&h=400&fit=crop&auto=format',
-                'stock' => 80,
-            ],
-            [
-                'store_name' => 'NovaBatik Studio',
-                'name' => 'Jaket Denim Kombinasi Batik',
-                'slug' => 'jaket-denim-kombinasi-batik',
-                'category' => 'Fashion',
-                'price' => 495000,
-                'sold' => 290,
-                'rating' => 4.8,
-                'tag' => 'Bestseller',
-                'img' => 'https://images.unsplash.com/photo-1543076447-215ad9ba6923?w=400&h=400&fit=crop&auto=format',
-                'stock' => 40,
-            ],
+        foreach (['BESTSELLER', 'NEW ARRIVAL', 'PROMO 8.8', 'GARANSI RESMI', 'LIMITED EDITION'] as $lbl) {
+            Label::firstOrCreate(
+                ['tenant_id' => $tenant->id, 'name' => $lbl],
+                ['slug' => Str::slug($lbl), 'color' => '#f59e0b']
+            );
+        }
 
-            // KuliKain Official (Aksesoris)
+        foreach (['Nike', 'Jordan', 'Adidas', 'Puma', 'Converse'] as $bnd) {
+            Brand::firstOrCreate(
+                ['tenant_id' => $tenant->id, 'name' => $bnd],
+                ['slug' => Str::slug($bnd)]
+            );
+        }
+
+        // 5. Seed Nike Official Store
+        $nikeStore = Store::updateOrCreate(
+            ['slug' => 'nike-official'],
             [
-                'store_name' => 'KuliKain Official',
-                'name' => 'Tas Kulit Selempang Minimalis',
-                'slug' => 'tas-kulit-selempang-minimalis',
-                'category' => 'Aksesoris',
-                'price' => 420000,
-                'sold' => 921,
-                'rating' => 4.8,
-                'tag' => 'Bestseller',
-                'img' => 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop&auto=format',
-                'stock' => 110,
-            ],
-            [
-                'store_name' => 'KuliKain Official',
-                'name' => 'Dompet Kulit Asli Slot Kartu',
-                'slug' => 'dompet-kulit-asli-slot-kartu',
-                'category' => 'Aksesoris',
-                'price' => 185000,
-                'sold' => 1430,
+                'tenant_id' => $tenant->id,
+                'name' => 'Nike Official Store',
+                'category' => 'Sportswear',
+                'description' => 'Toko Resmi Nike Indonesia. Garansi 100% Produk Asli & Original.',
+                'gmv' => 184500000,
+                'total_orders' => 2480,
                 'rating' => 4.9,
-                'tag' => 'Hot',
-                'img' => 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=400&fit=crop&auto=format',
-                'stock' => 200,
-            ],
+                'badge' => 'top',
+                'avatar_hue' => 25,
+                'balance' => 95400000,
+                'pending_escrow' => 12500000,
+                'status' => 'active',
+            ]
+        );
+
+        // 6. Seed Wallet & opening ledger (ke sini Dashboard/seller baca saldo)
+        $wallet = Wallet::firstOrCreate(
+            ['tenant_id' => $tenant->id],
             [
-                'store_name' => 'KuliKain Official',
-                'name' => 'Ikat Pinggang Kulit Sapi Premium',
-                'slug' => 'ikat-pinggang-kulit-sapi-premium',
-                'category' => 'Aksesoris',
-                'price' => 210000,
-                'sold' => 670,
-                'rating' => 4.7,
-                'tag' => null,
-                'img' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop&auto=format',
+                'balance' => 95400000,
+                'pending_balance' => 12500000,
+                'currency' => 'IDR',
+            ]
+        );
+
+        if ($wallet->transactions()->doesntExist()) {
+            $wallet->transactions()->create([
+                'tenant_id' => $tenant->id,
+                'type' => 'adjustment',
+                'direction' => 'credit',
+                'amount' => 95400000,
+                'balance_after' => 95400000,
+                'pending_after' => 12500000,
+                'reference_type' => null,
+                'reference_id' => null,
+                'description' => 'Saldo awal (seed)',
+                'created_at' => now(),
+            ]);
+        }
+
+        // 7. Seed 25+ Nike Official Products
+        $nikeProducts = [
+            // Sneakers & Footwear
+            [
+                'name' => "Nike Air Force 1 '07",
+                'slug' => 'nike-air-force-1-07',
+                'category' => 'Sneakers',
+                'price' => 1549000,
+                'sold' => 3420,
+                'rating' => 4.9,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&h=600&fit=crop&auto=format',
                 'stock' => 120,
             ],
             [
-                'store_name' => 'KuliKain Official',
-                'name' => 'Ransel Canvas Kulit Vintage',
-                'slug' => 'ransel-canvas-kulit-vintage',
-                'category' => 'Aksesoris',
-                'price' => 580000,
-                'sold' => 410,
+                'name' => 'Nike Air Max 270 Black Red',
+                'slug' => 'nike-air-max-270-black-red',
+                'category' => 'Sneakers',
+                'price' => 2299000,
+                'sold' => 1840,
                 'rating' => 4.8,
-                'tag' => 'Baru',
-                'img' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop&auto=format',
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop&auto=format',
+                'stock' => 85,
+            ],
+            [
+                'name' => 'Nike Dunk Low Retro Panda',
+                'slug' => 'nike-dunk-low-retro-panda',
+                'category' => 'Sneakers',
+                'price' => 1999000,
+                'sold' => 2950,
+                'rating' => 4.9,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=600&h=600&fit=crop&auto=format',
                 'stock' => 50,
             ],
-
-            // Jaya Elektronik (Elektronik)
             [
-                'store_name' => 'Jaya Elektronik',
-                'name' => 'Mechanical Keyboard TKL 75%',
-                'slug' => 'mechanical-keyboard-tkl-75',
-                'category' => 'Elektronik',
-                'price' => 890000,
-                'sold' => 632,
-                'rating' => 4.7,
-                'tag' => 'Hot',
-                'img' => 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&h=400&fit=crop&auto=format',
-                'stock' => 60,
-            ],
-            [
-                'store_name' => 'Jaya Elektronik',
-                'name' => 'Headphone Over-ear Wireless',
-                'slug' => 'headphone-over-ear-wireless',
-                'category' => 'Elektronik',
-                'price' => 1250000,
-                'sold' => 512,
-                'rating' => 4.8,
-                'tag' => 'Bestseller',
-                'img' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&auto=format',
-                'stock' => 35,
-            ],
-            [
-                'store_name' => 'Jaya Elektronik',
-                'name' => 'Mouse Gaming Ergonomis RGB',
-                'slug' => 'mouse-gaming-ergonomis-rgb',
-                'category' => 'Elektronik',
-                'price' => 345000,
-                'sold' => 890,
-                'rating' => 4.6,
-                'tag' => 'Baru',
-                'img' => 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=400&fit=crop&auto=format',
-                'stock' => 140,
-            ],
-            [
-                'store_name' => 'Jaya Elektronik',
-                'name' => 'Smartwatch Sport GPS Monitor',
-                'slug' => 'smartwatch-sport-gps-monitor',
-                'category' => 'Elektronik',
-                'price' => 1100000,
-                'sold' => 380,
-                'rating' => 4.7,
-                'tag' => 'Hot',
-                'img' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop&auto=format',
-                'stock' => 45,
-            ],
-            [
-                'store_name' => 'Jaya Elektronik',
-                'name' => 'Speaker Bluetooth Portable Bass',
-                'slug' => 'speaker-bluetooth-portable-bass',
-                'category' => 'Elektronik',
-                'price' => 475000,
-                'sold' => 720,
-                'rating' => 4.8,
-                'tag' => 'Bestseller',
-                'img' => 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop&auto=format',
-                'stock' => 90,
-            ],
-
-            // Warung Digital ID (Kuliner)
-            [
-                'store_name' => 'Warung Digital ID',
-                'name' => 'Matcha Latte Premium 200gr',
-                'slug' => 'matcha-latte-premium-200gr',
-                'category' => 'Kuliner',
-                'price' => 145000,
-                'sold' => 2103,
-                'rating' => 4.9,
-                'tag' => 'Hot',
-                'img' => 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop&auto=format',
-                'stock' => 500,
-            ],
-            [
-                'store_name' => 'Warung Digital ID',
-                'name' => 'Biji Kopi Arabika Gayo 250g',
-                'slug' => 'biji-kopi-arabika-gayo-250g',
-                'category' => 'Kuliner',
-                'price' => 98000,
-                'sold' => 1650,
-                'rating' => 4.9,
-                'tag' => 'Bestseller',
-                'img' => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=400&fit=crop&auto=format',
-                'stock' => 300,
-            ],
-            [
-                'store_name' => 'Warung Digital ID',
-                'name' => 'Teh Herbal Chamomile Organic',
-                'slug' => 'teh-herbal-chamomile-organic',
-                'category' => 'Kuliner',
-                'price' => 75000,
-                'sold' => 840,
+                'name' => "Nike Blazer Mid '77 Vintage",
+                'slug' => 'nike-blazer-mid-77-vintage',
+                'category' => 'Sneakers',
+                'price' => 1499000,
+                'sold' => 980,
                 'rating' => 4.7,
                 'tag' => 'Baru',
-                'img' => 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&h=400&fit=crop&auto=format',
-                'stock' => 220,
-            ],
-            [
-                'store_name' => 'Warung Digital ID',
-                'name' => 'Cokelat Artisan Dark 70%',
-                'slug' => 'cokelat-artisan-dark-70',
-                'category' => 'Kuliner',
-                'price' => 65000,
-                'sold' => 1120,
-                'rating' => 4.8,
-                'tag' => null,
-                'img' => 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&h=400&fit=crop&auto=format',
-                'stock' => 180,
-            ],
-
-            // Mode Nusantara (Sepatu & Aksesoris)
-            [
-                'store_name' => 'Mode Nusantara',
-                'name' => 'Sneakers Casual Kulit Asli',
-                'slug' => 'sneakers-casual-kulit-asli',
-                'category' => 'Sepatu',
-                'price' => 599000,
-                'sold' => 847,
-                'rating' => 4.8,
-                'tag' => 'Baru',
-                'img' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&auto=format',
-                'stock' => 80,
-            ],
-            [
-                'store_name' => 'Mode Nusantara',
-                'name' => 'Kacamata Frame Titanium',
-                'slug' => 'kacamata-frame-titanium',
-                'category' => 'Aksesoris',
-                'price' => 760000,
-                'sold' => 438,
-                'rating' => 4.7,
-                'tag' => 'Baru',
-                'img' => 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop&auto=format',
-                'stock' => 45,
-            ],
-            [
-                'store_name' => 'Mode Nusantara',
-                'name' => 'Sepatu Loafers Suede Brown',
-                'slug' => 'sepatu-loafers-suede-brown',
-                'category' => 'Sepatu',
-                'price' => 485000,
-                'sold' => 560,
-                'rating' => 4.7,
-                'tag' => 'Hot',
-                'img' => 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&h=400&fit=crop&auto=format',
+                'img' => 'https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=600&h=600&fit=crop&auto=format',
                 'stock' => 70,
             ],
             [
-                'store_name' => 'Mode Nusantara',
-                'name' => 'Sandal Slip-on Minimalis Leather',
-                'slug' => 'sandal-slip-on-minimalis-leather',
-                'category' => 'Sepatu',
-                'price' => 230000,
-                'sold' => 940,
+                'name' => 'Nike Court Vision Low White',
+                'slug' => 'nike-court-vision-low-white',
+                'category' => 'Sneakers',
+                'price' => 999000,
+                'sold' => 1420,
                 'rating' => 4.6,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=600&h=600&fit=crop&auto=format',
+                'stock' => 110,
+            ],
+            [
+                'name' => 'Nike Air Jordan 1 Low Shadow',
+                'slug' => 'nike-air-jordan-1-low-shadow',
+                'category' => 'Sneakers',
+                'price' => 2499000,
+                'sold' => 890,
+                'rating' => 4.9,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600&h=600&fit=crop&auto=format',
+                'stock' => 40,
+            ],
+
+            // Running Shoes
+            [
+                'name' => 'Nike Pegasus 40 Road Running',
+                'slug' => 'nike-pegasus-40-road-running',
+                'category' => 'Running',
+                'price' => 2099000,
+                'sold' => 1250,
+                'rating' => 4.9,
                 'tag' => 'Bestseller',
-                'img' => 'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=400&h=400&fit=crop&auto=format',
+                'img' => 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&h=600&fit=crop&auto=format',
+                'stock' => 90,
+            ],
+            [
+                'name' => 'Nike Invincible 3 Cushion',
+                'slug' => 'nike-invincible-3-cushion',
+                'category' => 'Running',
+                'price' => 2899000,
+                'sold' => 640,
+                'rating' => 4.8,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=600&h=600&fit=crop&auto=format',
+                'stock' => 45,
+            ],
+            [
+                'name' => 'Nike Revolution 6 Next Nature',
+                'slug' => 'nike-revolution-6-next-nature',
+                'category' => 'Running',
+                'price' => 849000,
+                'sold' => 2100,
+                'rating' => 4.6,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1582588678413-dbf45f4823e9?w=600&h=600&fit=crop&auto=format',
+                'stock' => 150,
+            ],
+            [
+                'name' => 'Nike InfinityRN 4 Gore-Tex',
+                'slug' => 'nike-infinityrn-4-gore-tex',
+                'category' => 'Running',
+                'price' => 2699000,
+                'sold' => 430,
+                'rating' => 4.8,
+                'tag' => 'Baru',
+                'img' => 'https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=600&h=600&fit=crop&auto=format',
+                'stock' => 55,
+            ],
+
+            // Apparel & Sportswear
+            [
+                'name' => 'Nike Tech Fleece Full-Zip Hoodie',
+                'slug' => 'nike-tech-fleece-full-zip-hoodie',
+                'category' => 'Apparel',
+                'price' => 1899000,
+                'sold' => 1560,
+                'rating' => 4.9,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&h=600&fit=crop&auto=format',
+                'stock' => 75,
+            ],
+            [
+                'name' => 'Nike Dri-FIT Hyverse Short-Sleeve',
+                'slug' => 'nike-dri-fit-hyverse-short-sleeve',
+                'category' => 'Apparel',
+                'price' => 499000,
+                'sold' => 2300,
+                'rating' => 4.8,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&h=600&fit=crop&auto=format',
+                'stock' => 200,
+            ],
+            [
+                'name' => 'Nike Club Fleece Jogger Pants',
+                'slug' => 'nike-club-fleece-jogger-pants',
+                'category' => 'Apparel',
+                'price' => 849000,
+                'sold' => 1140,
+                'rating' => 4.7,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=600&h=600&fit=crop&auto=format',
+                'stock' => 95,
+            ],
+            [
+                'name' => 'Nike Sportswear Essential Tee',
+                'slug' => 'nike-sportswear-essential-tee',
+                'category' => 'Apparel',
+                'price' => 399000,
+                'sold' => 1890,
+                'rating' => 4.7,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=600&h=600&fit=crop&auto=format',
                 'stock' => 160,
             ],
             [
-                'store_name' => 'Mode Nusantara',
-                'name' => 'Sepatu Boots Kulit High Top',
-                'slug' => 'sepatu-boots-kulit-high-top',
-                'category' => 'Sepatu',
-                'price' => 780000,
-                'sold' => 310,
-                'rating' => 4.9,
+                'name' => 'Nike Pro Warm Top Long Sleeve',
+                'slug' => 'nike-pro-warm-top-long-sleeve',
+                'category' => 'Apparel',
+                'price' => 699000,
+                'sold' => 620,
+                'rating' => 4.8,
                 'tag' => 'Baru',
-                'img' => 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=400&h=400&fit=crop&auto=format',
+                'img' => 'https://images.unsplash.com/photo-1518459031867-a89b944bffe4?w=600&h=600&fit=crop&auto=format',
+                'stock' => 80,
+            ],
+
+            // Basketball
+            [
+                'name' => 'Nike LeBron XXI Basketball',
+                'slug' => 'nike-lebron-xxi-basketball',
+                'category' => 'Basketball',
+                'price' => 3099000,
+                'sold' => 780,
+                'rating' => 4.9,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1579338559194-a162d19bf842?w=600&h=600&fit=crop&auto=format',
                 'stock' => 35,
+            ],
+            [
+                'name' => 'Nike G.T. Cut 3 EP',
+                'slug' => 'nike-g-t-cut-3-ep',
+                'category' => 'Basketball',
+                'price' => 2849000,
+                'sold' => 520,
+                'rating' => 4.8,
+                'tag' => 'Baru',
+                'img' => 'https://images.unsplash.com/photo-1543508282-6319a3e2621f?w=600&h=600&fit=crop&auto=format',
+                'stock' => 40,
+            ],
+
+            // Accessories
+            [
+                'name' => 'Nike Heritage Backpack 25L',
+                'slug' => 'nike-heritage-backpack-25l',
+                'category' => 'Accessories',
+                'price' => 549000,
+                'sold' => 2410,
+                'rating' => 4.8,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=600&fit=crop&auto=format',
+                'stock' => 130,
+            ],
+            [
+                'name' => 'Nike Everyday Socks (3 Pairs)',
+                'slug' => 'nike-everyday-socks-3-pairs',
+                'category' => 'Accessories',
+                'price' => 229000,
+                'sold' => 4500,
+                'rating' => 4.9,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=600&h=600&fit=crop&auto=format',
+                'stock' => 300,
+            ],
+            [
+                'name' => 'Nike Featherlight Adjustable Cap',
+                'slug' => 'nike-featherlight-adjustable-cap',
+                'category' => 'Accessories',
+                'price' => 349000,
+                'sold' => 1320,
+                'rating' => 4.7,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&h=600&fit=crop&auto=format',
+                'stock' => 140,
+            ],
+            [
+                'name' => 'Nike Brasilia Small Duffel Bag',
+                'slug' => 'nike-brasilia-small-duffel-bag',
+                'category' => 'Accessories',
+                'price' => 499000,
+                'sold' => 970,
+                'rating' => 4.8,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=600&h=600&fit=crop&auto=format',
+                'stock' => 85,
+            ],
+            [
+                'name' => 'Nike Swoosh Wristbands (Pair)',
+                'slug' => 'nike-swoosh-wristbands-pair',
+                'category' => 'Accessories',
+                'price' => 129000,
+                'sold' => 1890,
+                'rating' => 4.7,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1576243345690-4e4b79b63288?w=600&h=600&fit=crop&auto=format',
+                'stock' => 250,
             ],
         ];
 
-        foreach ($productsData as $pData) {
-            $store = $storesMap[$pData['store_name']];
-            unset($pData['store_name']);
-
+        foreach ($nikeProducts as $pData) {
             Product::updateOrCreate(
                 ['slug' => $pData['slug']],
-                array_merge($pData, ['store_id' => $store->id])
+                array_merge($pData, ['store_id' => $nikeStore->id, 'is_active' => true])
             );
         }
 
-        // 7. Seed Orders for Buyer (Niko Agustio)
-        $primaryStore = $storesMap['NovaBatik Studio'];
-
+        // 8. Seed Sample Orders for Buyer (Niko Agustio)
         $sampleOrders = [
-            ['order_number' => 'ORD-2026-08001', 'status' => 'pending', 'amount' => 285000],
-            ['order_number' => 'ORD-2026-08002', 'status' => 'paid', 'amount' => 599000],
-            ['order_number' => 'ORD-2026-08003', 'status' => 'shipped', 'amount' => 420000],
-            ['order_number' => 'ORD-2026-08004', 'status' => 'completed', 'amount' => 145000],
-            ['order_number' => 'ORD-2026-08005', 'status' => 'completed', 'amount' => 890000],
+            ['order_number' => 'ORD-NIKE-001', 'status' => 'pending', 'amount' => 1549000],
+            ['order_number' => 'ORD-NIKE-002', 'status' => 'paid', 'amount' => 2299000],
+            ['order_number' => 'ORD-NIKE-003', 'status' => 'shipped', 'amount' => 1899000],
+            ['order_number' => 'ORD-NIKE-004', 'status' => 'completed', 'amount' => 549000],
+            ['order_number' => 'ORD-NIKE-005', 'status' => 'completed', 'amount' => 2099000],
         ];
 
         foreach ($sampleOrders as $ord) {
             Order::firstOrCreate(
                 ['order_number' => $ord['order_number']],
                 [
-                    'store_id' => $primaryStore->id,
+                    'store_id' => $nikeStore->id,
                     'customer_name' => $buyer->name,
                     'customer_email' => $buyer->email,
                     'customer_phone' => $buyer->phone,
@@ -499,13 +433,16 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 8. Seed Withdrawal
-        Withdrawal::firstOrCreate(
+        // 9. Seed Withdrawal
+        Withdrawal::updateOrCreate(
             ['account_number' => '88392019481'],
             [
-                'store_id' => $primaryStore->id,
-                'amount' => 122700000,
+                'store_id' => $nikeStore->id,
+                'tenant_id' => $tenant->id,
+                'wallet_id' => $wallet->id,
+                'amount' => 95400000,
                 'fee' => 0,
+                'net_amount' => 95400000,
                 'bank_name' => 'BCA',
                 'status' => 'transferred',
                 'transferred_at' => now()->subDays(3),

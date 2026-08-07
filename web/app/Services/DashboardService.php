@@ -25,8 +25,9 @@ class DashboardService
         $totalOrders = $this->orderRepository->countTotalOrders();
         $avgOrder = $this->orderRepository->getAverageOrderValue();
 
-        $storeBalance = $primaryStore ? $primaryStore->balance : 38400000;
-        $pendingEscrow = $primaryStore ? $primaryStore->pending_escrow : 6200000;
+        $walletModel = $primaryStore?->wallet;
+        $storeBalance = (float) ($walletModel?->balance);
+        $pendingEscrow = (float) ($walletModel?->pending_balance);
 
         $kpis = [
             [

@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToTenant;
 use Database\Factories\StoreFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Store extends Model
 {
     /** @use HasFactory<StoreFactory> */
-    use HasFactory;
+    use HasFactory, ScopedToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -28,6 +30,19 @@ class Store extends Model
         'rating',
         'badge',
         'avatar_hue',
+        'banner_url',
+        'phone',
+        'email',
+        'address',
+        'instagram',
+        'tiktok',
+        'headline',
+        'is_active',
+        'npwp',
+        'nik',
+        'is_pkp',
+        'tax_name',
+        'tax_address',
     ];
 
     /**
@@ -36,6 +51,14 @@ class Store extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    /**
+     * @return HasOneThrough<Wallet, Tenant, $this>
+     */
+    public function wallet(): HasOneThrough
+    {
+        return $this->hasOneThrough(Wallet::class, Tenant::class, 'id', 'tenant_id', 'tenant_id', 'id');
     }
 
     /**

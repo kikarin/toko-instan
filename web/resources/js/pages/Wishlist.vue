@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { ArrowLeft, Heart, Package, ShoppingBag, Trash2 } from 'lucide-vue-next';
+import { ArrowLeft, Heart, ShoppingBag, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import CartDrawer from '@/components/marketplace/CartDrawer.vue';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
@@ -12,8 +12,19 @@ import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/lib/useCart';
 import { useWishlist } from '@/lib/useWishlist';
+import type { WishlistItem } from '@/stores/useWishlistStore';
 
-const { items: wishlistItems, count: wishlistCount, clear: clearWishlist } = useWishlist();
+interface Props {
+    products?: WishlistItem[];
+}
+
+const props = defineProps<Props>();
+
+const { items: wishlistItems, count: wishlistCount, clear: clearWishlist, replaceItems } = useWishlist();
+
+if (props.products) {
+    replaceItems(props.products);
+}
 
 // Cart
 const {
@@ -51,10 +62,18 @@ function addToCart(product: any, addQty = 1) {
     toast.success(`${product.name} ditambahkan ke keranjang!`);
 }
 
-function updateCartQty(id: number, delta: number) { updateQty(id, delta); }
-function removeFromCart(id: number) { removeCartItem(id); }
-function goCheckout() { isCartOpen.value = false; router.visit('/checkout'); }
-function openProductDetail(product: any) { activeProductModal.value = product; }
+function updateCartQty(id: number, delta: number) {
+ updateQty(id, delta); 
+}
+function removeFromCart(id: number) {
+ removeCartItem(id); 
+}
+function goCheckout() {
+ isCartOpen.value = false; router.visit('/checkout'); 
+}
+function openProductDetail(product: any) {
+ activeProductModal.value = product; 
+}
 </script>
 
 <template>

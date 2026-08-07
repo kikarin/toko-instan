@@ -2,21 +2,11 @@
 import { Head, router } from '@inertiajs/vue3';
 import {
     ArrowLeft,
-    User,
-    Home,
-    Lock,
-    Bell,
-    Globe,
     ChevronDown,
     LogOut,
-    Smartphone,
-    Info,
     ChevronRight,
 } from 'lucide-vue-next';
 import { ref } from 'vue';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { logoutUser } from '@/lib/firebase';
@@ -34,7 +24,7 @@ interface Props {
     user: UserInfo;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const appSettingsOpen = ref(false);
 const aboutAppOpen = ref(false);
@@ -59,80 +49,82 @@ function handleItemClick(title: string) {
         @open-cart="router.visit('/marketplace')"
         @search="(q: string) => router.visit('/marketplace', { data: { search: q } })"
     >
-        <main class="mx-auto w-full max-w-[800px] bg-white min-h-[calc(100vh-140px)] shadow-xs">
-            <!-- ── Top Bar Header ── -->
-            <div class="sticky top-14 z-30 flex items-center gap-3 border-b border-black/8 bg-white px-4 py-3.5 sm:px-6">
-                <button
-                    @click="router.visit('/account')"
-                    class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-[#1c1c22] hover:bg-black/5 transition-colors"
-                >
-                    <ArrowLeft class="h-5 w-5" />
-                </button>
-                <h1 class="text-lg font-bold text-[#1c1c22]">Settings</h1>
-            </div>
+        <main class="mx-auto w-full max-w-[800px] p-3 sm:p-6">
+            <div class="flex flex-col overflow-hidden rounded-2xl border border-black/6 bg-white shadow-xs">
 
-            <!-- ── Main Settings List ── -->
-            <div class="flex flex-col">
+                <!-- ── Header Bar ── -->
+                <div class="flex items-center gap-3 border-b border-black/6 px-4 py-4 sm:px-6">
+                    <button
+                        @click="router.visit('/account')"
+                        class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white border border-black/6 text-[#1c1c22] hover:bg-[#f5f4f0] transition-colors"
+                    >
+                        <ArrowLeft class="h-4 w-4" />
+                    </button>
+                    <h1 class="text-lg font-extrabold text-[#1c1c22]">Pengaturan Akun</h1>
+                </div>
 
-                <!-- 1. Ubah Profil -->
-                <button
-                    @click="router.visit('/profile/edit')"
-                    class="flex items-start gap-4 px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors text-left border-b border-black/5"
-                >
-                    <User class="h-5 w-5 shrink-0 text-[#1c1c22] mt-0.5" />
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-[#1c1c22]">Ubah Profil</p>
-                        <p class="text-xs text-[#9090a0] mt-0.5">Atur identitas dan foto profil kamu</p>
+                <!-- ── Menu Options Group 1 ── -->
+                <div class="flex flex-col divide-y divide-black/5 text-sm">
+                    <!-- Ubah Profil -->
+                    <div
+                        @click="router.visit('/profile/edit')"
+                        class="flex cursor-pointer items-center justify-between px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors"
+                    >
+                        <div>
+                            <p class="font-bold text-[#1c1c22]">Ubah Profil</p>
+                            <p class="text-xs text-[#9090a0] mt-0.5">Ubah foto, nama, username, & data pribadi</p>
+                        </div>
+                        <ChevronRight class="h-4 w-4 text-[#9090a0]" />
                     </div>
-                </button>
 
-                <!-- 2. Daftar Alamat -->
-                <button
-                    @click="handleItemClick('Daftar Alamat')"
-                    class="flex items-start gap-4 px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors text-left border-b border-black/5"
-                >
-                    <Home class="h-5 w-5 shrink-0 text-[#1c1c22] mt-0.5" />
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-[#1c1c22]">Daftar Alamat</p>
-                        <p class="text-xs text-[#9090a0] mt-0.5">Atur alamat pengiriman belanjaan</p>
+                    <!-- Daftar Alamat -->
+                    <div
+                        @click="handleItemClick('Daftar Alamat Pengiriman')"
+                        class="flex cursor-pointer items-center justify-between px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors"
+                    >
+                        <div>
+                            <p class="font-bold text-[#1c1c22]">Daftar Alamat</p>
+                            <p class="text-xs text-[#9090a0] mt-0.5">Atur alamat pengiriman pesanan kamu</p>
+                        </div>
+                        <ChevronRight class="h-4 w-4 text-[#9090a0]" />
                     </div>
-                </button>
 
-                <!-- 3. Keamanan Akun -->
-                <button
-                    @click="handleItemClick('Keamanan Akun')"
-                    class="flex items-start gap-4 px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors text-left border-b border-black/5"
-                >
-                    <Lock class="h-5 w-5 shrink-0 text-[#1c1c22] mt-0.5" />
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-[#1c1c22]">Keamanan Akun</p>
-                        <p class="text-xs text-[#9090a0] mt-0.5">Kata sandi, PIN, & verifikasi data diri</p>
+                    <!-- Keamanan Akun -->
+                    <div
+                        @click="handleItemClick('Keamanan Akun & Kata Sandi')"
+                        class="flex cursor-pointer items-center justify-between px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors"
+                    >
+                        <div>
+                            <p class="font-bold text-[#1c1c22]">Keamanan Akun</p>
+                            <p class="text-xs text-[#9090a0] mt-0.5">Kata sandi, PIN transaksi, & verifikasi 2 langkah</p>
+                        </div>
+                        <ChevronRight class="h-4 w-4 text-[#9090a0]" />
                     </div>
-                </button>
 
-                <!-- 4. Notifikasi -->
-                <button
-                    @click="handleItemClick('Notifikasi')"
-                    class="flex items-start gap-4 px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors text-left border-b border-black/5"
-                >
-                    <Bell class="h-5 w-5 shrink-0 text-[#1c1c22] mt-0.5" />
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-[#1c1c22]">Notifikasi</p>
-                        <p class="text-xs text-[#9090a0] mt-0.5">Atur segala jenis pesan notifikasi</p>
+                    <!-- Notifikasi -->
+                    <div
+                        @click="handleItemClick('Pengaturan Notifikasi')"
+                        class="flex cursor-pointer items-center justify-between px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors"
+                    >
+                        <div>
+                            <p class="font-bold text-[#1c1c22]">Notifikasi</p>
+                            <p class="text-xs text-[#9090a0] mt-0.5">Atur notifikasi promo & status pesanan</p>
+                        </div>
+                        <ChevronRight class="h-4 w-4 text-[#9090a0]" />
                     </div>
-                </button>
 
-                <!-- 5. Privasi Akun -->
-                <button
-                    @click="handleItemClick('Privasi Akun')"
-                    class="flex items-start gap-4 px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors text-left border-b border-black/5"
-                >
-                    <Globe class="h-5 w-5 shrink-0 text-[#1c1c22] mt-0.5" />
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-[#1c1c22]">Privasi Akun</p>
-                        <p class="text-xs text-[#9090a0] mt-0.5">Atur penggunaan data pribadimu di Toko Instan</p>
+                    <!-- Privasi Akun -->
+                    <div
+                        @click="handleItemClick('Privasi & Keamanan Data')"
+                        class="flex cursor-pointer items-center justify-between px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors"
+                    >
+                        <div>
+                            <p class="font-bold text-[#1c1c22]">Privasi Akun</p>
+                            <p class="text-xs text-[#9090a0] mt-0.5">Atur penggunaan data pribadimu di Nike Official Store</p>
+                        </div>
+                        <ChevronRight class="h-4 w-4 text-[#9090a0]" />
                     </div>
-                </button>
+                </div>
 
                 <!-- Grey Divider Bar -->
                 <div class="h-2.5 bg-[#f5f4f0] border-y border-black/5" />
@@ -147,28 +139,28 @@ function handleItemClick(title: string) {
                         <ChevronDown class="h-4 w-4 text-[#4a4a57] transition-transform duration-200" :class="appSettingsOpen ? 'rotate-180' : ''" />
                     </button>
                     <div v-if="appSettingsOpen" class="bg-[#faf9f6] px-6 py-3 flex flex-col gap-3 text-xs text-[#4a4a57] border-t border-black/5">
-                        <div class="flex justify-between items-center py-1 cursor-pointer" @click="handleItemClick('Bahasa')">
-                            <span>Bahasa Aplikasi</span>
+                        <div class="flex justify-between items-center py-1 cursor-pointer" @click="handleItemClick('Bahasa / Language')">
+                            <span>Bahasa / Language</span>
                             <span class="font-semibold text-[#9090a0]">Bahasa Indonesia</span>
                         </div>
-                        <div class="flex justify-between items-center py-1 cursor-pointer" @click="handleItemClick('Mode Gelap')">
-                            <span>Tema Tampilan</span>
+                        <div class="flex justify-between items-center py-1 cursor-pointer" @click="handleItemClick('Mode Tampilan')">
+                            <span>Mode Tampilan</span>
                             <span class="font-semibold text-[#9090a0]">Terang (Light)</span>
                         </div>
-                        <div class="flex justify-between items-center py-1 cursor-pointer" @click="handleItemClick('Hapus Cache')">
-                            <span>Bersihkan Cache</span>
+                        <div class="flex justify-between items-center py-1 cursor-pointer" @click="handleItemClick('Hapus Cache Aplikasi')">
+                            <span>Hapus Cache Aplikasi</span>
                             <span class="font-semibold text-[#9090a0]">12.4 MB</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- ── Expandable Accordion: Seputar Toko Instan ── -->
+                <!-- ── Expandable Accordion: Seputar Nike Official Store ── -->
                 <div class="border-b border-black/5">
                     <button
                         @click="aboutAppOpen = !aboutAppOpen"
                         class="flex w-full items-center justify-between px-4 py-4 sm:px-6 hover:bg-[#faf9f6] transition-colors text-left"
                     >
-                        <span class="text-sm font-bold text-[#1c1c22]">Seputar Toko Instan</span>
+                        <span class="text-sm font-bold text-[#1c1c22]">Seputar Nike Official Store</span>
                         <ChevronDown class="h-4 w-4 text-[#4a4a57] transition-transform duration-200" :class="aboutAppOpen ? 'rotate-180' : ''" />
                     </button>
                     <div v-if="aboutAppOpen" class="bg-[#faf9f6] px-6 py-3 flex flex-col gap-3 text-xs text-[#4a4a57] border-t border-black/5">

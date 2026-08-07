@@ -31,6 +31,7 @@ import {
 import { logoutUser } from '@/lib/firebase';
 import { usePage } from '@inertiajs/vue3';
 import { useActiveUser } from '@/lib/useActiveUser';
+import { useCart } from '@/lib/useCart';
 import { useWishlist } from '@/lib/useWishlist';
 import { LogOut, Store, Users as UsersIcon } from 'lucide-vue-next';
 
@@ -50,6 +51,9 @@ const emit = defineEmits<{
     (e: 'open-cart'): void;
     (e: 'search', q: string): void;
 }>();
+
+const { totalCount: dynamicCartCount } = useCart();
+const effectiveCartCount = computed(() => props.cartCount || dynamicCartCount.value);
 
 const { count: dynamicWishlistCount } = useWishlist();
 const effectiveWishlistCount = computed(() => props.wishlistCount || dynamicWishlistCount.value);
@@ -120,28 +124,31 @@ const bottomNavItems = [
 
                 <!-- Brand Logo -->
                 <div
-                    class="flex shrink-0 cursor-pointer items-center gap-2"
+                    class="flex shrink-0 cursor-pointer items-center gap-2.5"
                     @click="navigate('/marketplace')"
                 >
-                    <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-[#e07c28] to-[#c2500a] text-lg font-extrabold text-white shadow-md shadow-[#e07c28]/30 sm:h-10 sm:w-10 sm:text-xl">
-                        S
+                    <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-black text-lg font-black text-white shadow-md shadow-black/20 sm:h-10 sm:w-10 sm:text-xl">
+                        N
                     </div>
                     <!-- Hide full name on very small screens -->
                     <div class="hidden sm:block">
                         <div class="flex items-center gap-1.5">
-                            <span class="text-base leading-none font-extrabold tracking-tight text-[#1c1c22] sm:text-lg">
-                                Toko Instan
+                            <span class="text-base leading-none font-black tracking-wider uppercase text-[#1c1c22] sm:text-lg">
+                                NIKE
                             </span>
-                            <Badge variant="amber" class="px-1.5 py-0 text-[9px] uppercase">
-                                MARKETPLACE
+                            <Badge variant="amber" class="px-1.5 py-0 text-[9px] uppercase font-black bg-emerald-600 text-white border-none">
+                                OFFICIAL STORE
                             </Badge>
                         </div>
-                        <p class="mt-0.5 text-[10px] font-medium text-[#9090a0]">
-                            Platform Belanja Online Terpercaya
+                        <p class="mt-0.5 text-[10px] font-bold text-[#9090a0]">
+                            100% Original Guaranteed
                         </p>
                     </div>
                     <!-- Short name on mobile -->
-                    <span class="text-base font-extrabold text-[#1c1c22] sm:hidden">Toko Instan</span>
+                    <div class="flex items-center gap-1 sm:hidden">
+                        <span class="text-base font-black uppercase tracking-wider text-[#1c1c22]">NIKE</span>
+                        <Badge class="px-1 py-0 text-[8px] bg-emerald-600 text-white font-black">OFFICIAL</Badge>
+                    </div>
                 </div>
 
                 <!-- Search Bar — Desktop (center) -->
@@ -252,14 +259,14 @@ const bottomNavItems = [
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     v-if="userRole === 'seller' || userRole === 'admin'"
-                                    @click="navigate('/')"
+                                    @click="navigate('/dashboard')"
                                 >
                                     <Store class="mr-2 h-3.5 w-3.5" />
                                     <span>Dashboard Seller</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     v-if="userRole === 'admin'"
-                                    @click="navigate('/admin/users')"
+                                    @click="navigate('/admin')"
                                 >
                                     <UsersIcon class="mr-2 h-3.5 w-3.5" />
                                     <span>Dashboard Admin</span>
@@ -314,17 +321,17 @@ const bottomNavItems = [
             </Transition>
         </header>
 
-        <!-- Main Buyer Page Slot -->
-        <div class="flex-1 pb-16 md:pb-0">
+        <!-- ── Slot Content ── -->
+        <div class="flex-1">
             <slot />
         </div>
 
-        <!-- Footer -->
-        <footer class="mt-12 border-t border-black/8 bg-white py-6 text-center text-xs text-[#9090a0] sm:py-8">
-            <div class="mx-auto flex max-w-[1600px] flex-col items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6 md:flex-row">
+        <!-- ── Standard Buyer Footer ── -->
+        <footer class="border-t border-black/8 bg-white py-6 text-xs text-[#9090a0]">
+            <div class="mx-auto flex max-w-[1600px] flex-col items-center justify-between gap-3 px-4 sm:flex-row sm:px-6">
                 <div class="flex items-center gap-2">
-                    <span class="font-bold text-[#1c1c22]">Toko Instan SaaS</span>
-                    <span>· Multi-tenant E-Commerce Platform</span>
+                    <span class="font-extrabold text-[#1c1c22]">Nike Official Store</span>
+                    <span>· 100% Original Guaranteed</span>
                 </div>
                 <div class="flex items-center gap-4">
                     <a href="#" class="hover:underline">Tentang Kami</a>
@@ -342,24 +349,24 @@ const bottomNavItems = [
                     :key="item.label"
                     @click="item.match === '__cart' ? emit('open-cart') : navigate(item.href!)"
                     class="group relative flex flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors active:scale-95 touch-manipulation"
-                    :class="(item.match !== '__cart' && currentPath === item.match) || (item.match === '__store' && currentPath.startsWith('/store/')) ? 'text-[#e07c28]' : 'text-[#9090a0] hover:text-[#4a4a57]'"
+                    :class="(item.match !== '__cart' && currentPath === item.match) || (item.match === '__store' && currentPath.startsWith('/store/')) ? 'text-black font-extrabold' : 'text-[#9090a0] hover:text-[#4a4a57]'"
                 >
                     <!-- Cart badge -->
                     <div v-if="item.match === '__cart'" class="relative">
                         <component :is="item.icon" class="h-5 w-5" />
                         <span
-                            v-if="cartCount > 0"
-                            class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#e07c28] text-[9px] font-black text-white shadow-sm"
-                        >{{ cartCount > 9 ? '9+' : cartCount }}</span>
+                            v-if="effectiveCartCount > 0"
+                            class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[9px] font-black text-amber-400 shadow-sm"
+                        >{{ effectiveCartCount > 9 ? '9+' : effectiveCartCount }}</span>
                     </div>
                     <component v-else :is="item.icon" class="h-5 w-5" />
 
-                    <span class="text-[9px] font-semibold leading-none">{{ item.label }}</span>
+                    <span class="text-[9px] leading-none" :class="(item.match !== '__cart' && currentPath === item.match) ? 'font-black text-black' : 'font-semibold'">{{ item.label }}</span>
 
                     <!-- Active indicator line -->
                     <span
-                        v-if="(item.match !== '__cart' && item.match !== '__akun' && currentPath === item.match) || (item.match === '__store' && currentPath.startsWith('/store/'))"
-                        class="absolute bottom-0 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-[#e07c28]"
+                        v-if="(item.match !== '__cart' && currentPath === item.match) || (item.match === '__store' && currentPath.startsWith('/store/'))"
+                        class="absolute bottom-0 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-black"
                     />
                 </button>
             </div>
@@ -368,4 +375,3 @@ const bottomNavItems = [
         <Toaster richColors position="top-right" />
     </div>
 </template>
-

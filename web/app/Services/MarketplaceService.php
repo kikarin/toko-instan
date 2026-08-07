@@ -45,7 +45,7 @@ class MarketplaceService
             ];
         })->toArray();
 
-        $categories = ['Semua', 'Fashion', 'Elektronik', 'Sepatu', 'Aksesoris', 'Kuliner'];
+        $categories = ['Semua', 'Sneakers', 'Running', 'Apparel', 'Basketball', 'Accessories'];
 
         $stats = [
             'total_products' => number_format($this->productRepository->countTotalProducts() ?: 8341, 0, ',', '.'),

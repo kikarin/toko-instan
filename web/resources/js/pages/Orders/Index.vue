@@ -35,15 +35,15 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
 </script>
 
 <template>
-    <Head title="Pesanan Saya - Toko Instan" />
+    <Head title="Pesanan Saya — Nike Official Store" />
 
     <StorefrontLayout>
-        <div class="mx-auto flex w-full max-w-5xl flex-col gap-5 p-4 sm:p-6">
-            <div class="flex items-center gap-2">
+        <div class="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 pt-4 pb-28 sm:p-6">
+            <div class="flex items-center gap-2.5">
                 <div
-                    class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e07c2825] bg-[#e07c2818]"
+                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-black text-amber-400 shadow-xs"
                 >
-                    <ReceiptText class="h-4.5 w-4.5 text-[#e07c28]" />
+                    <ReceiptText class="h-4.5 w-4.5" />
                 </div>
                 <div>
                     <h1
@@ -52,7 +52,7 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
                         Pesanan Saya
                     </h1>
                     <p class="mt-0.5 text-[11px] text-[#9090a0]">
-                        Riwayat transaksi marketplace kamu
+                        Riwayat pesanan produk Nike kamu
                     </p>
                 </div>
             </div>

@@ -32,6 +32,8 @@ class ProductController extends Controller
     {
         return Inertia::render('Products/Form', [
             'categories' => $this->productService->categories(),
+            'labels' => $this->productService->labels(),
+            'brands' => $this->productService->brands(),
         ]);
     }
 
@@ -55,6 +57,8 @@ class ProductController extends Controller
         return Inertia::render('Products/Form', [
             'product' => $this->productService->format($product),
             'categories' => $this->productService->categories(),
+            'labels' => $this->productService->labels(),
+            'brands' => $this->productService->brands(),
         ]);
     }
 
@@ -134,6 +138,10 @@ class ProductController extends Controller
             'is_active' => ['nullable', 'boolean'],
             'tag' => ['nullable', 'string', 'max:50'],
             'img' => ['nullable', 'string', 'url', 'max:2048'],
+            'description' => ['nullable', 'string'],
+            'sku' => ['nullable', 'string', 'max:100'],
+            'brand' => ['nullable', 'string', 'max:100'],
+            'weight_gram' => ['nullable', 'integer', 'min:1'],
         ]);
     }
 }

@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -61,11 +63,39 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasOneThrough<Store, Tenant, $this>
+     */
+    public function store(): HasOneThrough
+    {
+        return $this->hasOneThrough(Store::class, Tenant::class, 'user_id', 'tenant_id', 'id', 'id');
+    }
+
+    /**
      * @return HasMany<Order, $this>
      */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'customer_email', 'email');
+    }
+
+    /**
+     * @return HasMany<Address, $this>
+     */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    /**
+     * Wishlist products (many-to-many through Wishlist pivot model).
+     *
+     * @return BelongsToMany<Product, $this>
+     */
+    public function wishlistProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'wishlists')
+            ->withTimestamps()
+            ->orderBy('wishlists.created_at', 'desc');
     }
 
     public function isSeller(): bool

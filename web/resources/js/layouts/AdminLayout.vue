@@ -6,6 +6,7 @@ import {
     ShieldCheck,
     LogOut,
     LogIn,
+    Banknote,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Avatar } from '@/components/ui/avatar';
@@ -33,7 +34,7 @@ import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/lib/useActiveUser';
 
 interface Props {
-    activePage?: 'Admin' | 'Users';
+    activePage?: 'Admin' | 'Users' | 'Penarikan';
 }
 
 withDefaults(defineProps<Props>(), {
@@ -55,6 +56,7 @@ const userInitial = computed(() => {
 const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', route: '/admin' },
     { icon: Users, label: 'Users', route: '/admin/users' },
+    { icon: Banknote, label: 'Penarikan', route: '/admin/withdrawals' },
 ];
 
 function navigate(url: string) {

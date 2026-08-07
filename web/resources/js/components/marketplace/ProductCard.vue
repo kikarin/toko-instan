@@ -142,8 +142,8 @@ function formatSold(n: number): string {
                 <span class="text-[10px] text-[#9090a0]">{{ formatSold(product.sold) }} terjual</span>
             </div>
 
-            <!-- Store name -->
-            <p class="truncate text-[9px] text-[#b0b0bf]">{{ product.store }}</p>
+            <!-- Store name badge -->
+            <p class="truncate text-[9px] font-bold text-zinc-400">Nike Official</p>
         </div>
     </div>
 </template>

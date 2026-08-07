@@ -10,6 +10,7 @@ import {
     Users,
     Star,
     ShieldCheck,
+    RotateCcw,
     Shirt,
     Cpu,
     Footprints,
@@ -333,19 +334,17 @@ function visitStoreBySlug(store: any) {
 }
 
 const categoryMenu = [
-    { label: 'Semua', icon: ShoppingBag, color: 'bg-[#e07c28]/10 text-[#e07c28]', active: 'bg-[#e07c28] text-white', cat: 'Semua' },
-    { label: 'Fashion', icon: Shirt, color: 'bg-violet-100 text-violet-600', active: 'bg-violet-500 text-white', cat: 'Fashion' },
-    { label: 'Elektronik', icon: Cpu, color: 'bg-blue-100 text-blue-600', active: 'bg-blue-500 text-white', cat: 'Elektronik' },
-    { label: 'Sepatu', icon: Footprints, color: 'bg-teal-100 text-teal-600', active: 'bg-teal-500 text-white', cat: 'Sepatu' },
-    { label: 'Aksesoris', icon: Watch, color: 'bg-amber-100 text-amber-600', active: 'bg-amber-500 text-white', cat: 'Aksesoris' },
-    { label: 'Kuliner', icon: UtensilsCrossed, color: 'bg-rose-100 text-rose-600', active: 'bg-rose-500 text-white', cat: 'Kuliner' },
-    { label: 'Flash Sale', icon: Percent, color: 'bg-red-100 text-red-600', active: 'bg-red-500 text-white', cat: '' },
-    { label: 'Brand Lokal', icon: Tag, color: 'bg-green-100 text-green-600', active: 'bg-green-500 text-white', cat: '' },
+    { label: 'Semua', icon: ShoppingBag, color: 'bg-black/10 text-black', active: 'bg-black text-white', cat: 'Semua' },
+    { label: 'Sneakers', icon: Footprints, color: 'bg-rose-100 text-rose-600', active: 'bg-rose-600 text-white', cat: 'Sneakers' },
+    { label: 'Running', icon: Flame, color: 'bg-blue-100 text-blue-600', active: 'bg-blue-600 text-white', cat: 'Running' },
+    { label: 'Apparel', icon: Shirt, color: 'bg-violet-100 text-violet-600', active: 'bg-violet-600 text-white', cat: 'Apparel' },
+    { label: 'Basketball', icon: Star, color: 'bg-amber-100 text-amber-600', active: 'bg-amber-600 text-white', cat: 'Basketball' },
+    { label: 'Accessories', icon: Watch, color: 'bg-emerald-100 text-emerald-600', active: 'bg-emerald-600 text-white', cat: 'Accessories' },
 ];
 </script>
 
 <template>
-    <Head title="Marketplace Pembeli - Toko Instan" />
+    <Head title="Nike Official Store — Toko Resmi Nike Indonesia" />
 
     <StorefrontLayout
         :cartCount="totalCartCount"
@@ -353,37 +352,35 @@ const categoryMenu = [
         @open-cart="isCartOpen = true"
         @search="applySearch"
     >
-        <main class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 p-3 sm:gap-6 sm:p-6">
+        <main class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 px-3 pt-3 pb-28 sm:gap-6 sm:p-6">
 
             <!-- ── Hero Banner ── -->
-            <div class="relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-[#e07c2825] bg-gradient-to-r from-[#fdf0e4] via-[#fef8f0] to-[#f5f4f0] p-5 shadow-sm sm:gap-6 sm:rounded-3xl sm:p-8 md:flex-row md:items-center">
-                <!-- Decorative circles — desktop only -->
-                <div class="pointer-events-none absolute -top-16 -right-16 hidden h-64 w-64 rounded-full bg-[#e07c28]/8 md:block" />
-                <div class="pointer-events-none absolute top-4 -right-8 hidden h-36 w-36 rounded-full bg-[#e07c28]/6 md:block" />
+            <div class="relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-black/10 bg-gradient-to-r from-zinc-900 via-black to-zinc-800 p-5 shadow-md sm:gap-6 sm:rounded-3xl sm:p-8 text-white md:flex-row md:items-center">
+                <!-- Decorative background accent -->
+                <div class="pointer-events-none absolute -top-16 -right-16 hidden h-64 w-64 rounded-full bg-white/5 md:block" />
 
                 <div class="relative z-10">
-                    <p class="mb-1 text-[10px] font-extrabold tracking-widest text-[#e07c28] uppercase sm:mb-1.5 sm:text-xs">
-                        Platform Belanja Pembeli
+                    <p class="mb-1 text-[10px] font-black tracking-widest text-amber-400 uppercase sm:mb-1.5 sm:text-xs flex items-center gap-1.5">
+                        <ShieldCheck class="h-4 w-4 text-emerald-400" />
+                        Nike Official Store Indonesia · 100% Original
                     </p>
-                    <h1 class="text-xl leading-tight font-extrabold text-[#1c1c22] sm:text-3xl lg:text-4xl">
-                        Temukan produk terbaik
-                        <span class="text-[#e07c28]"> dari ribuan toko terpercaya</span>
+                    <h1 class="text-2xl leading-tight font-black sm:text-4xl lg:text-5xl uppercase tracking-tight">
+                        JUST DO IT.
+                        <span class="text-amber-400 block text-lg sm:text-2xl font-bold normal-case mt-1">Koleksi Terbaru Sepatu & Clothing Nike</span>
                     </h1>
-                    <p class="mt-1.5 text-[10px] text-[#9090a0] sm:mt-2 sm:text-xs">
-                        {{ props.stats?.total_products || '8.341' }} produk ·
-                        {{ props.stats?.active_stores || '1.240' }} toko aktif ·
-                        54.921 pengunjung hari ini
+                    <p class="mt-2 text-xs text-zinc-300 max-w-xl">
+                        Dapatkan sepatu sneakers, running, apparel Dri-FIT, & aksesoris Nike original dengan garansi 100% keaslian dan layanan bebas ongkir seluruh Indonesia.
                     </p>
                     <!-- CTA desktop -->
                     <div class="mt-4 hidden gap-2 md:flex">
-                        <Badge variant="outline" class="cursor-pointer border-black/10 bg-white px-3 py-1.5 text-xs text-[#4a4a57] hover:bg-white/80">
-                            <Flame class="mr-1.5 h-3.5 w-3.5 fill-rose-500 text-rose-500" /> Flash Sale
+                        <Badge variant="outline" class="cursor-pointer border-white/20 bg-white/10 text-white hover:bg-white/20">
+                            <Flame class="mr-1.5 h-3.5 w-3.5 fill-rose-400 text-rose-400" /> Hot Release
                         </Badge>
-                        <Badge variant="outline" class="cursor-pointer border-black/10 bg-white px-3 py-1.5 text-xs text-[#4a4a57] hover:bg-white/80">
-                            <Sparkles class="mr-1.5 h-3.5 w-3.5 text-amber-500" /> Produk Baru
+                        <Badge variant="outline" class="cursor-pointer border-white/20 bg-white/10 text-white hover:bg-white/20">
+                            <Sparkles class="mr-1.5 h-3.5 w-3.5 text-amber-400" /> Garansi Retur 30 Hari
                         </Badge>
-                        <Badge variant="outline" class="cursor-pointer border-black/10 bg-white px-3 py-1.5 text-xs text-[#4a4a57] hover:bg-white/80">
-                            <Truck class="mr-1.5 h-3.5 w-3.5 text-teal-500" /> Gratis Ongkir
+                        <Badge variant="outline" class="cursor-pointer border-white/20 bg-white/10 text-white hover:bg-white/20">
+                            <Truck class="mr-1.5 h-3.5 w-3.5 text-emerald-400" /> Bebas Ongkir
                         </Badge>
                     </div>
                 </div>
@@ -561,20 +558,30 @@ const categoryMenu = [
                         </div>
                     </Card>
 
-                    <!-- Top Stores Sidebar -->
-                    <Card class="p-4">
-                        <p class="mb-3 text-xs font-extrabold tracking-widest text-[#9090a0] uppercase">Toko Unggulan</p>
-                        <div class="flex flex-col gap-3">
-                            <div v-for="(store, i) in displayStores.slice(0, 4)" :key="i" @click="visitStoreBySlug(store)" class="flex items-center gap-2.5 cursor-pointer rounded-xl px-2 py-1.5 transition-all hover:bg-[#f5f4f0]">
-                                <Avatar :fallback="store.avatar" :hue="store.hue" size="sm" />
-                                <div class="min-w-0 flex-1">
-                                    <p class="truncate text-xs font-bold text-[#1c1c22]">{{ store.name }}</p>
-                                    <div class="flex items-center gap-1">
-                                        <Star class="h-2.5 w-2.5 fill-amber-400 stroke-amber-400" />
-                                        <span class="text-[10px] text-[#9090a0]">{{ store.rating }}</span>
-                                    </div>
+                    <!-- Nike Official Advantages Sidebar -->
+                    <Card class="p-4 bg-zinc-900 text-white border-black/10">
+                        <p class="mb-3 text-xs font-black tracking-widest text-amber-400 uppercase">Jaminan Official</p>
+                        <div class="flex flex-col gap-3.5 text-xs">
+                            <div class="flex items-start gap-2.5">
+                                <ShieldCheck class="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+                                <div>
+                                    <p class="font-extrabold text-white">100% Original</p>
+                                    <p class="text-[10px] text-zinc-400">Langsung dari Nike Indonesia</p>
                                 </div>
-                                <Badge v-if="store.badge" :variant="store.badge === 'top' ? 'amberSolid' : 'violetSolid'" class="px-1.5 py-0 text-[8px] uppercase">{{ store.badge }}</Badge>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <Truck class="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                                <div>
+                                    <p class="font-extrabold text-white">Bebas Ongkir</p>
+                                    <p class="text-[10px] text-zinc-400">Pengiriman cepat seluruh Indonesia</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <RotateCcw class="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
+                                <div>
+                                    <p class="font-extrabold text-white">Retur 30 Hari</p>
+                                    <p class="text-[10px] text-zinc-400">Tukar ukuran atau garansi pengembalian</p>
+                                </div>
                             </div>
                         </div>
                     </Card>
@@ -674,20 +681,17 @@ const categoryMenu = [
                         <p class="mt-1 text-xs text-[#9090a0]">Coba kata kunci atau kategori lain</p>
                     </div>
 
-                    <!-- Featured Stores — only shown below product grid on mobile, hidden on desktop (shown in sidebar) -->
+                    <!-- Nike Official Special Badges — Mobile -->
                     <div class="lg:hidden">
-                        <h2 class="mb-3 text-sm font-bold text-[#1c1c22]">Toko Rekomendasi</h2>
-                        <div class="w-full overflow-x-auto">
-                            <div class="flex w-max gap-3 pb-2">
-                                <Card v-for="(store, i) in displayStores" :key="i" @click="visitStoreBySlug(store)" class="flex w-36 shrink-0 cursor-pointer flex-col items-center p-4 text-center transition-all hover:-translate-y-1 hover:shadow-md">
-                                    <Avatar :fallback="store.avatar" :hue="store.hue" size="lg" class="mb-3" />
-                                    <p class="mb-0.5 text-xs font-bold text-[#1c1c22]">{{ store.name }}</p>
-                                    <p class="mb-2 text-[10px] text-[#9090a0]">{{ store.orders }} pesanan</p>
-                                    <div class="flex items-center gap-1 font-mono text-xs font-semibold text-amber-500">
-                                        <Star class="h-3 w-3 fill-amber-400 stroke-amber-400" />{{ store.rating }}
-                                    </div>
-                                    <Badge v-if="store.badge" :variant="store.badge === 'top' ? 'amberSolid' : 'violetSolid'" class="mt-3 px-2 py-0.5 text-[9px] uppercase">{{ store.badge }}</Badge>
-                                </Card>
+                        <h2 class="mb-3 text-sm font-bold text-[#1c1c22]">Layanan Nike Official</h2>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="flex items-center gap-2 rounded-xl bg-zinc-900 text-white p-3 border border-black/10">
+                                <ShieldCheck class="h-4 w-4 text-emerald-400 shrink-0" />
+                                <span class="font-extrabold">100% Original</span>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-xl bg-zinc-900 text-white p-3 border border-black/10">
+                                <Truck class="h-4 w-4 text-amber-400 shrink-0" />
+                                <span class="font-extrabold">Bebas Ongkir</span>
                             </div>
                         </div>
                     </div>

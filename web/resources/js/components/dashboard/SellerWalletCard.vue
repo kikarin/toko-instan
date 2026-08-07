@@ -1,63 +1,66 @@
 <script setup lang="ts">
-import { Wallet, ArrowUpRight, CheckCircle2 } from 'lucide-vue-next';
+import { router } from '@inertiajs/vue3';
+import { Wallet, ArrowUpRight, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
+function goToWallet() {
+    router.visit('/wallet');
+}
 </script>
 
 <template>
     <div
-        class="flex flex-col gap-4 rounded-2xl border border-[#e07c2830] bg-gradient-to-br from-[#fdf6ee] to-[#fef9f3] p-5 shadow-sm"
+        class="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-50 via-orange-50/50 to-amber-100/30 p-6 shadow-lg flex flex-col justify-between gap-5"
     >
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
+        <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-amber-400/20 blur-2xl pointer-events-none" />
+
+        <div class="flex items-center justify-between relative z-10">
+            <div class="flex items-center gap-2.5">
                 <div
-                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#e07c281a] text-[#e07c28]"
+                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white font-bold shadow-md shadow-amber-500/30"
                 >
-                    <Wallet class="h-4 w-4" />
+                    <Wallet class="h-5 w-5" />
                 </div>
-                <span class="text-sm font-bold text-[#1c1c22]"
-                    >Dompet Seller</span
-                >
+                <div>
+                    <h4 class="text-sm font-black text-[#1c1c22]">Dompet Merchant</h4>
+                    <span class="text-[10px] text-zinc-500 font-semibold">Ledger Imutabel</span>
+                </div>
             </div>
             <Badge
                 variant="amber"
-                class="px-2 py-0.5 text-[9px] tracking-wider uppercase"
+                class="px-2.5 py-0.5 text-[9px] font-black tracking-widest uppercase shadow-2xs"
             >
                 PREMIUM
             </Badge>
         </div>
 
-        <div>
-            <p class="mb-1 text-[10px] text-[#9090a0]">Saldo Tersedia</p>
+        <div class="relative z-10">
+            <span class="mb-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Saldo Siap Ditarik</span>
             <p
-                class="font-mono text-2xl leading-none font-extrabold tracking-tight text-[#1c1c22]"
+                class="font-mono text-3xl leading-none font-black tracking-tight text-[#1c1c22]"
             >
-                Rp 38.4Jt
+                Rp 95.400.000
             </p>
         </div>
 
-        <div class="rounded-xl border border-[#e07c281a] bg-[#e07c280f] p-3">
-            <p class="mb-0.5 text-[10px] text-[#9090a0]">Pending Escrow</p>
-            <p class="font-mono text-base font-bold text-amber-600">Rp 6.2Jt</p>
+        <div class="relative z-10 rounded-2xl border border-amber-500/20 bg-white/70 backdrop-blur-md p-3.5 flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Pending Escrow</span>
+                <span class="text-xs font-mono font-bold text-amber-700">Rp 12.500.000</span>
+            </div>
+            <Badge variant="teal" class="text-[9px] px-2 py-0 font-extrabold">Pesanan Berjalan</Badge>
         </div>
 
-        <div class="flex flex-col gap-1.5 text-[11px]">
-            <div class="flex items-center justify-between">
-                <span class="text-[#9090a0]">Total Withdraw</span>
-                <span class="font-mono font-semibold text-[#4a4a57]"
-                    >Rp 122.7Jt</span
-                >
+        <div class="relative z-10 flex flex-col gap-2 text-[11px] font-semibold border-t border-amber-500/10 pt-3">
+            <div class="flex items-center justify-between text-zinc-600">
+                <span>Total Penarikan Akumulasi</span>
+                <span class="font-mono font-black text-[#1c1c22]">Rp 122.700.000</span>
             </div>
-            <div class="flex items-center justify-between">
-                <span class="text-[#9090a0]">Withdraw Terakhir</span>
-                <span class="font-mono font-semibold text-[#4a4a57]"
-                    >3 Agu 2026</span
-                >
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-[#9090a0]">Fee Withdraw</span>
-                <span class="flex items-center gap-1 font-bold text-[#22a15a]">
-                    <CheckCircle2 class="h-3 w-3" /> Gratis
+            <div class="flex items-center justify-between text-zinc-600">
+                <span>Withdraw Fee Admin</span>
+                <span class="flex items-center gap-1 font-bold text-emerald-600">
+                    <CheckCircle2 class="h-3.5 w-3.5" /> Gratis (Premium)
                 </span>
             </div>
         </div>
@@ -65,10 +68,11 @@ import { Button } from '@/components/ui/button';
         <Button
             variant="amber"
             size="lg"
-            class="mt-1 w-full font-bold shadow-md"
+            class="relative z-10 w-full font-extrabold text-xs h-11 rounded-2xl shadow-lg shadow-amber-500/25 cursor-pointer"
+            @click="goToWallet"
         >
-            Tarik Dana
-            <ArrowUpRight class="ml-1 h-4 w-4" />
+            Cairkan Saldo / Dompet
+            <ArrowUpRight class="ml-1.5 h-4 w-4" />
         </Button>
     </div>
 </template>

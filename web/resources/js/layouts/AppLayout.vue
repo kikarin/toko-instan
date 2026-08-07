@@ -14,9 +14,14 @@ import {
     Store,
     Bell,
     Settings,
+    Tags,
+    Sparkles,
+    PlusCircle,
+    Boxes,
+    ExternalLink,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-import { Avatar } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,7 +52,6 @@ import {
     SidebarRail,
     SidebarSeparator,
     SidebarTrigger,
-    useSidebar,
 } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
@@ -63,11 +67,11 @@ interface NavItem {
 
 interface Props {
     title?: string;
-    activePage?: 'Dashboard' | 'Produk' | 'Pesanan' | 'Pelanggan' | 'Dompet' | 'Voucher' | 'Analitik';
+    activePage?: 'Dashboard' | 'Katalog' | 'Produk' | 'Stok & Inventory' | 'Pesanan' | 'Pengaturan Toko' | 'Pelanggan' | 'Dompet' | 'Voucher' | 'Analitik';
     period?: 'Hari' | 'Minggu' | 'Bulan';
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     activePage: 'Dashboard',
     period: 'Bulan',
 });
@@ -79,41 +83,44 @@ const emit = defineEmits<{
 const activeUser = useActiveUser();
 
 const userDisplayName = computed(() => {
-    return activeUser.value?.displayName ?? activeUser.value?.email ?? 'Pengguna';
+    return activeUser.value?.displayName ?? activeUser.value?.email ?? 'Nike Official Manager';
 });
 
 const userInitial = computed(() => {
     const name = userDisplayName.value;
-    return name ? name.substring(0, 2).toUpperCase() : 'TB';
+    return name ? name.substring(0, 2).toUpperCase() : 'NK';
 });
 
 const userEmail = computed(() => {
-    return activeUser.value?.email ?? '';
+    return activeUser.value?.email ?? 'seller@nike.com';
 });
 
 // Nav groups
 const mainNavItems: NavItem[] = [
-    { icon: LayoutDashboard, label: 'Dashboard', route: '/' },
+    { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
+    { icon: Tags, label: 'Katalog', route: '/catalog' },
     {
         icon: Package,
         label: 'Produk',
         route: '/products',
         children: [
-            { label: 'Semua Produk', route: '/products' },
-            { label: 'Tambah Produk', route: '/products/create' },
+            { label: 'Katalog Produk', route: '/products' },
+            { label: '+ Tambah Produk', route: '/products/create' },
         ],
     },
+    { icon: Boxes, label: 'Stok & Inventory', route: '/inventory' },
     {
         icon: ShoppingCart,
         label: 'Pesanan',
-        route: '#',
+        route: '/orders',
         badge: 3,
     },
+    { icon: Settings, label: 'Pengaturan Toko', route: '/store-settings' },
     { icon: Users, label: 'Pelanggan', route: '#' },
 ];
 
 const financeNavItems: NavItem[] = [
-    { icon: Wallet, label: 'Dompet', route: '#' },
+    { icon: Wallet, label: 'Dompet', route: '/wallet' },
     { icon: Ticket, label: 'Voucher', route: '#' },
 ];
 
@@ -121,8 +128,10 @@ const analyticsNavItems: NavItem[] = [
     { icon: BarChart3, label: 'Analitik', route: '#' },
 ];
 
-// Track which sub-menus are open
-const openSubMenus = ref<Record<string, boolean>>({});
+// Track open submenus (default open if active)
+const openSubMenus = ref<Record<string, boolean>>({
+    Produk: props.activePage === 'Produk',
+});
 
 function toggleSubMenu(label: string) {
     openSubMenus.value[label] = !openSubMenus.value[label];
@@ -139,68 +148,81 @@ async function handleLogout() {
     router.post('/logout');
 }
 
-// Helper: is this nav item "active" (current page matches)
-function isActive(item: NavItem, activePage: string): boolean {
-    return activePage === item.label;
+function isActive(item: NavItem): boolean {
+    return props.activePage === item.label;
 }
 </script>
 
 <template>
     <SidebarProvider>
-        <Sidebar collapsible="icon" class="border-r-0">
+        <!-- ── Dark Luxury Charcoal Sidebar ── -->
+        <Sidebar collapsible="icon" class="border-r border-white/10 bg-[#18181c] text-white font-sans">
             <!-- ── Header: Brand / Store ── -->
-            <SidebarHeader>
+            <SidebarHeader class="p-3 group-data-[collapsible=icon]:p-1.5">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
-                            class="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                            @click="navigate('/')"
+                            tooltip="Nike Official Store"
+                            class="cursor-pointer rounded-2xl transition-all hover:bg-white/5 p-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                            @click="navigate('/dashboard')"
                         >
                             <div
-                                class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#e07c28] to-[#c2500a] text-sm font-extrabold text-white shadow-md shadow-[#e07c28]/30 select-none"
+                                class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-base font-black text-white shadow-lg shadow-amber-500/30 shrink-0"
                             >
-                                S
+                                <Store class="h-5 w-5" />
                             </div>
-                            <div class="grid flex-1 text-left text-sm leading-tight">
-                                <span class="truncate font-semibold text-[#1c1c22]">Toko Instan</span>
-                                <span class="truncate text-[10px] text-[#9090a0]">Seller Dashboard</span>
+                            <div class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="truncate font-black text-white">Nike Official Store</span>
+                                    <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" title="Toko Online" />
+                                </div>
+                                <span class="truncate text-[10px] text-amber-400 font-bold">Seller Command Center</span>
                             </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarSeparator class="bg-white/10" />
+
+            <SidebarContent class="px-2">
                 <!-- ── Main Menu ── -->
-                <SidebarGroup>
-                    <SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
+                <SidebarGroup class="py-2">
+                    <SidebarGroupLabel class="text-[10px] font-black uppercase text-zinc-500 tracking-wider px-3 group-data-[collapsible=icon]:hidden">
+                        Navigasi Utama
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent class="mt-1">
+                        <SidebarMenu class="gap-1">
                             <SidebarMenuItem v-for="item in mainNavItems" :key="item.label">
                                 <!-- Item with sub-menu -->
                                 <template v-if="item.children">
                                     <SidebarMenuButton
-                                        :is-active="isActive(item, activePage)"
+                                        :is-active="isActive(item)"
                                         :tooltip="item.label"
-                                        class="cursor-pointer"
+                                        class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                        :class="
+                                            isActive(item)
+                                                ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                                : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                                        "
                                         @click="toggleSubMenu(item.label)"
                                     >
-                                        <component :is="item.icon" class="h-4 w-4" />
-                                        <span>{{ item.label }}</span>
+                                        <component :is="item.icon" class="h-4 w-4 shrink-0" />
+                                        <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
                                         <ChevronRight
-                                            class="ml-auto h-4 w-4 transition-transform duration-200"
+                                            class="ml-auto h-4 w-4 transition-transform duration-200 group-data-[collapsible=icon]:hidden"
                                             :class="{ 'rotate-90': openSubMenus[item.label] }"
                                         />
                                     </SidebarMenuButton>
-                                    <SidebarMenuSub v-if="openSubMenus[item.label]">
+
+                                    <SidebarMenuSub v-if="openSubMenus[item.label]" class="ml-4 border-l border-amber-500/30 pl-2 group-data-[collapsible=icon]:hidden">
                                         <SidebarMenuSubItem
                                             v-for="child in item.children"
                                             :key="child.label"
                                         >
                                             <SidebarMenuSubButton
-                                                :is-active="false"
-                                                class="cursor-pointer"
+                                                class="cursor-pointer rounded-lg text-xs font-semibold py-1.5 text-zinc-400 hover:text-amber-400 transition-colors"
                                                 @click="navigate(child.route)"
                                             >
                                                 {{ child.label }}
@@ -212,14 +234,22 @@ function isActive(item: NavItem, activePage: string): boolean {
                                 <!-- Regular item -->
                                 <template v-else>
                                     <SidebarMenuButton
-                                        :is-active="isActive(item, activePage)"
+                                        :is-active="isActive(item)"
                                         :tooltip="item.label"
-                                        class="cursor-pointer"
+                                        class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                        :class="
+                                            isActive(item)
+                                                ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                                : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                                        "
                                         @click="navigate(item.route)"
                                     >
-                                        <component :is="item.icon" class="h-4 w-4" />
-                                        <span>{{ item.label }}</span>
-                                        <SidebarMenuBadge v-if="item.badge">
+                                        <component :is="item.icon" class="h-4 w-4 shrink-0" />
+                                        <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
+                                        <SidebarMenuBadge
+                                            v-if="item.badge"
+                                            class="bg-amber-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full shadow-xs group-data-[collapsible=icon]:hidden"
+                                        >
                                             {{ item.badge }}
                                         </SidebarMenuBadge>
                                     </SidebarMenuButton>
@@ -229,44 +259,58 @@ function isActive(item: NavItem, activePage: string): boolean {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarSeparator />
+                <SidebarSeparator class="bg-white/10" />
 
                 <!-- ── Finance Menu ── -->
-                <SidebarGroup>
-                    <SidebarGroupLabel>Keuangan</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
+                <SidebarGroup class="py-2">
+                    <SidebarGroupLabel class="text-[10px] font-black uppercase text-zinc-500 tracking-wider px-3 group-data-[collapsible=icon]:hidden">
+                        Dompet & Keuangan
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent class="mt-1">
+                        <SidebarMenu class="gap-1">
                             <SidebarMenuItem v-for="item in financeNavItems" :key="item.label">
                                 <SidebarMenuButton
-                                    :is-active="isActive(item, activePage)"
+                                    :is-active="isActive(item)"
                                     :tooltip="item.label"
-                                    class="cursor-pointer"
+                                    class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                    :class="
+                                        isActive(item)
+                                            ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                            : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                                    "
                                     @click="navigate(item.route)"
                                 >
-                                    <component :is="item.icon" class="h-4 w-4" />
-                                    <span>{{ item.label }}</span>
+                                    <component :is="item.icon" class="h-4 w-4 shrink-0" />
+                                    <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarSeparator />
+                <SidebarSeparator class="bg-white/10" />
 
                 <!-- ── Analytics Menu ── -->
-                <SidebarGroup>
-                    <SidebarGroupLabel>Performa</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
+                <SidebarGroup class="py-2">
+                    <SidebarGroupLabel class="text-[10px] font-black uppercase text-zinc-500 tracking-wider px-3 group-data-[collapsible=icon]:hidden">
+                        Laporan Performa
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent class="mt-1">
+                        <SidebarMenu class="gap-1">
                             <SidebarMenuItem v-for="item in analyticsNavItems" :key="item.label">
                                 <SidebarMenuButton
-                                    :is-active="isActive(item, activePage)"
+                                    :is-active="isActive(item)"
                                     :tooltip="item.label"
-                                    class="cursor-pointer"
+                                    class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                    :class="
+                                        isActive(item)
+                                            ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                            : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                                    "
                                     @click="navigate(item.route)"
                                 >
-                                    <component :is="item.icon" class="h-4 w-4" />
-                                    <span>{{ item.label }}</span>
+                                    <component :is="item.icon" class="h-4 w-4 shrink-0" />
+                                    <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -276,92 +320,91 @@ function isActive(item: NavItem, activePage: string): boolean {
 
             <SidebarRail />
 
-            <!-- ── Footer: User Profile ── -->
-            <SidebarFooter>
+            <!-- ── Footer: User Profile Dropdown ── -->
+            <SidebarFooter class="p-3 group-data-[collapsible=icon]:p-1.5">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <DropdownMenu v-if="activeUser">
                             <DropdownMenuTrigger as-child>
                                 <SidebarMenuButton
                                     size="lg"
-                                    class="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                                    tooltip="Profil Akun Seller"
+                                    class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-2 hover:bg-white/10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
                                 >
-                                    <Avatar
-                                        :src="activeUser.photoURL || undefined"
-                                        :fallback="userInitial"
-                                        :hue="270"
-                                        size="sm"
-                                    />
-                                    <div class="grid flex-1 text-left text-sm leading-tight">
-                                        <span class="truncate font-semibold text-[#1c1c22]">
+                                    <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
+                                        <AvatarImage v-if="activeUser.photoURL" :src="activeUser.photoURL" :alt="userDisplayName" />
+                                        <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                                            {{ userInitial }}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden">
+                                        <span class="truncate font-extrabold text-white">
                                             {{ userDisplayName }}
                                         </span>
-                                        <span class="truncate text-[10px] text-[#9090a0]">
+                                        <span class="truncate text-[10px] text-zinc-400 font-mono">
                                             {{ userEmail }}
                                         </span>
                                     </div>
-                                    <ChevronsUpDown class="ml-auto h-4 w-4 text-[#9090a0]" />
+                                    <ChevronsUpDown class="ml-auto h-4 w-4 text-zinc-400 group-data-[collapsible=icon]:hidden" />
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
+
                             <DropdownMenuContent
-                                class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                                side="bottom"
+                                class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-2xl p-2 shadow-2xl border-white/10 bg-zinc-900 text-white"
+                                side="right"
                                 align="end"
-                                :side-offset="4"
+                                :side-offset="8"
                             >
-                                <DropdownMenuLabel class="p-0 font-normal">
-                                    <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                        <Avatar
-                                            :src="activeUser.photoURL || undefined"
-                                            :fallback="userInitial"
-                                            :hue="270"
-                                            size="sm"
-                                        />
-                                        <div class="grid flex-1 text-left text-sm leading-tight">
-                                            <span class="truncate font-semibold">{{ userDisplayName }}</span>
-                                            <span class="truncate text-xs text-[#9090a0]">{{ userEmail }}</span>
+                                <DropdownMenuLabel class="p-1 font-normal">
+                                    <div class="flex items-center gap-2.5 px-2 py-1.5 text-left text-xs">
+                                        <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
+                                            <AvatarImage v-if="activeUser.photoURL" :src="activeUser.photoURL" :alt="userDisplayName" />
+                                            <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                                                {{ userInitial }}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div class="grid flex-1 text-left leading-tight">
+                                            <span class="truncate font-black text-white">{{ userDisplayName }}</span>
+                                            <span class="truncate text-[10px] text-zinc-400 font-mono">{{ userEmail }}</span>
                                         </div>
                                     </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem class="cursor-pointer gap-2" @click="navigate('/store')">
-                                    <Store class="h-4 w-4" />
-                                    Profil Toko
+                                <DropdownMenuSeparator class="bg-white/10" />
+                                <DropdownMenuItem class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white" @click="navigate('/store-settings')">
+                                    <Store class="h-4 w-4 text-amber-400" />
+                                    Pengaturan Toko
                                 </DropdownMenuItem>
-                                <DropdownMenuItem class="cursor-pointer gap-2" @click="navigate('#')">
-                                    <Bell class="h-4 w-4" />
-                                    Notifikasi
+                                <DropdownMenuItem class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white" @click="navigate('/marketplace')">
+                                    <ExternalLink class="h-4 w-4 text-indigo-400" />
+                                    Lihat Webstore Toko
                                 </DropdownMenuItem>
-                                <DropdownMenuItem class="cursor-pointer gap-2" @click="navigate('#')">
-                                    <Settings class="h-4 w-4" />
-                                    Pengaturan
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
+                                <DropdownMenuSeparator class="bg-white/10" />
                                 <DropdownMenuItem
-                                    class="cursor-pointer gap-2 text-red-500 focus:bg-red-50 focus:text-red-600"
+                                    class="cursor-pointer gap-2 rounded-xl text-xs font-bold text-rose-400 hover:bg-rose-500/10 focus:bg-rose-500/10 focus:text-rose-400"
                                     @click="handleLogout"
                                 >
                                     <LogOut class="h-4 w-4" />
-                                    Keluar
+                                    Keluar Akun
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <!-- Not logged in state -->
+                        <!-- Fallback user state -->
                         <SidebarMenuButton
                             v-else
                             size="lg"
-                            class="cursor-pointer"
+                            tooltip="Login Akun Seller"
+                            class="cursor-pointer rounded-2xl bg-white/5 border border-white/10 p-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
                             @click="navigate('/login')"
                         >
-                            <div
-                                class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f5f4f0] text-[#9090a0]"
-                            >
-                                <Users class="h-4 w-4" />
-                            </div>
-                            <div class="grid flex-1 text-left text-sm leading-tight">
-                                <span class="truncate font-semibold text-[#9090a0]">Belum Masuk</span>
-                                <span class="truncate text-[10px] text-[#c8c8d5]">Klik untuk login</span>
+                            <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
+                                <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                                    NK
+                                </AvatarFallback>
+                            </Avatar>
+                            <div class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden">
+                                <span class="truncate font-black text-white">Nike Official</span>
+                                <span class="truncate text-[10px] text-zinc-400">Merchant Active</span>
                             </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -370,34 +413,38 @@ function isActive(item: NavItem, activePage: string): boolean {
         </Sidebar>
 
         <!-- ── Main Content Area ── -->
-        <SidebarInset>
-            <!-- Top Header Bar -->
+        <SidebarInset class="bg-[#faf9f6]">
+            <!-- Top Header Bar (Mobile Responsive) -->
             <header
-                class="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-black/7 bg-white/95 px-4 backdrop-blur-md transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12!"
+                class="sticky top-0 z-20 flex h-14 sm:h-16 shrink-0 items-center justify-between gap-2 border-b border-black/8 bg-white/90 px-3 sm:px-6 backdrop-blur-md transition-all"
             >
-                <div class="flex items-center gap-3">
-                    <SidebarTrigger class="-ml-1" />
-                    <SidebarSeparator class="mr-2 h-4" orientation="vertical" />
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <SidebarTrigger class="-ml-1 shrink-0" />
+                    <SidebarSeparator class="mr-1 sm:mr-2 h-4 shrink-0" orientation="vertical" />
 
                     <!-- Breadcrumb current page label -->
-                    <span class="text-sm font-semibold text-[#1c1c22]">{{ activePage }}</span>
+                    <div class="flex items-center gap-1.5 truncate">
+                        <span class="text-[10px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider hidden xs:inline">Merchant Hub</span>
+                        <span class="text-zinc-300 hidden xs:inline">/</span>
+                        <span class="text-xs sm:text-sm font-black text-[#1c1c22] truncate">{{ activePage }}</span>
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 shrink-0">
                     <!-- Period Switcher (only on Dashboard) -->
                     <div
                         v-if="activePage === 'Dashboard'"
-                        class="flex gap-1 rounded-xl border border-black/7 bg-[#f5f4f0] p-1"
+                        class="hidden sm:flex gap-1 rounded-2xl border border-black/8 bg-[#faf9f6] p-1"
                     >
                         <button
                             v-for="p in ['Hari', 'Minggu', 'Bulan'] as const"
                             :key="p"
                             @click="emit('update:period', p)"
-                            class="cursor-pointer rounded-lg px-3 py-1 text-xs font-semibold transition-all duration-150"
+                            class="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-extrabold transition-all"
                             :class="[
                                 period === p
-                                    ? 'border border-black/10 bg-white text-[#1c1c22] shadow-xs'
-                                    : 'text-[#9090a0] hover:text-[#1c1c22]',
+                                    ? 'bg-white text-[#1c1c22] shadow-xs border border-black/8'
+                                    : 'text-zinc-400 hover:text-black',
                             ]"
                         >
                             {{ p }}
@@ -405,23 +452,25 @@ function isActive(item: NavItem, activePage: string): boolean {
                     </div>
 
                     <!-- Bell notification -->
-                    <Button variant="ghost" size="sm" class="relative h-8 w-8 p-0" @click="navigate('#')">
-                        <Bell class="h-4 w-4 text-[#4a4a57]" />
+                    <Button variant="ghost" size="sm" class="relative h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-xl hover:bg-zinc-100 shrink-0" @click="navigate('#')">
+                        <Bell class="h-4 w-4 sm:h-4.5 sm:w-4.5 text-zinc-600" />
                         <span
-                            class="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#e07c28]"
+                            class="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 h-2 w-2 rounded-full bg-amber-500 animate-ping"
+                        />
+                        <span
+                            class="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 h-2 w-2 rounded-full bg-amber-500"
                         />
                     </Button>
 
-                    <!-- User info chip -->
+                    <!-- User info chip (Responsive on mobile) -->
                     <div
-                        v-if="activeUser"
-                        class="flex items-center gap-2 rounded-xl border border-black/7 bg-[#f5f4f0] px-3 py-1.5 text-xs font-medium text-[#4a4a57]"
+                        class="hidden sm:flex items-center gap-2 rounded-2xl border border-black/8 bg-[#faf9f6] px-3.5 py-1.5 text-xs font-medium shrink-0"
                     >
-                        <span class="inline-block h-2 w-2 animate-pulse rounded-full bg-[#22a15a]" />
-                        <span class="max-w-28 truncate font-bold text-[#1c1c22]">
+                        <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span class="max-w-28 sm:max-w-32 truncate font-extrabold text-[#1c1c22]">
                             {{ userDisplayName }}
                         </span>
-                        <Badge variant="amber" class="px-1.5 py-0 text-[9px] font-bold">
+                        <Badge variant="amber" class="px-2 py-0.5 text-[9px] font-black tracking-wider uppercase shadow-2xs">
                             SELLER
                         </Badge>
                     </div>

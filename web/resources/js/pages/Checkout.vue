@@ -21,15 +21,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'vue-sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/lib/useCart';
+import { useActiveUser } from '@/lib/useActiveUser';
 
 // Cart is shared & persisted via localStorage composable
-const { items: cartItems } = useCart();
+const { items: cartItems, clear: clearCart } = useCart();
+const activeUser = useActiveUser();
 
 const isEmpty = computed(() => cartItems.value.length === 0);
 
-const customerName = ref('');
-const customerEmail = ref('');
-const customerPhone = ref('');
+const customerName = ref((activeUser.value as any)?.displayName || (activeUser.value as any)?.name || '');
+const customerEmail = ref(activeUser.value?.email || '');
+const customerPhone = ref((activeUser.value as any)?.phone || '');
 const shippingAddress = ref('');
 const selectedCourier = ref('JNE Reguler (Rp 15.000)');
 const selectedPayment = ref('qris');
@@ -81,33 +83,24 @@ const paymentMethods = [
     },
 ];
 
-const subtotal = computed(() => {
-    return cartItems.value.reduce(
-        (sum, item) => sum + item.price * item.qty,
-        0,
-    );
-});
+const subtotal = computed(() =>
+    cartItems.value.reduce((acc, item) => acc + item.price * item.qty, 0),
+);
 
 const currentShippingFee = computed(() => {
-    if (subtotal.value >= 300000) {
-        return 0;
-    }
-
     const found = couriers.find((c) => selectedCourier.value.includes(c.name));
-
     return found ? found.price : 15000;
 });
 
 const grandTotal = computed(() => subtotal.value + currentShippingFee.value);
 
-function fmtRp(n: number) {
-    return 'Rp ' + n.toLocaleString('id');
+function fmtRp(val: number) {
+    return 'Rp ' + val.toLocaleString('id-ID');
 }
 
 function handleCheckoutSubmit() {
     if (isEmpty.value) {
-        toast.error('Keranjang Anda kosong. Tambahkan produk terlebih dahulu.');
-
+        toast.error('Keranjang belanja Anda kosong!');
         return;
     }
 
@@ -145,7 +138,8 @@ function handleCheckoutSubmit() {
         },
         {
             onSuccess: () => {
-                toast.success('Pesanan berhasil dibuat!');
+                clearCart();
+                toast.success('Pesanan Nike berhasil dibuat!');
             },
             onFinish: () => {
                 isLoading.value = false;
@@ -161,10 +155,10 @@ function handleCheckoutSubmit() {
 </script>
 
 <template>
-    <Head title="Checkout Pemesanan - Toko Instan" />
+    <Head title="Checkout Pemesanan — Nike Official Store" />
 
     <StorefrontLayout :cartCount="cartItems.length">
-        <main class="mx-auto w-full max-w-[1400px] p-4 font-sans sm:p-6">
+        <main class="mx-auto w-full max-w-[1400px] px-4 pt-4 pb-28 sm:p-6 font-sans">
             <div class="mb-6">
                 <p
                     class="mb-1 text-xs font-extrabold tracking-widest text-[#e07c28] uppercase"

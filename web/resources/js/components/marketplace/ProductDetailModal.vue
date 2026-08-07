@@ -48,6 +48,10 @@ export interface ProductDetail {
     cat: string;
     discount?: number;
     originalPrice?: string;
+    description?: string;
+    sku?: string;
+    brand?: string;
+    weightGram?: number;
 }
 
 interface Props {
@@ -225,8 +229,14 @@ const ratingBreakdown = [
                         <div v-if="product?.discount" class="absolute top-0 left-0 rounded-br-2xl bg-[#e02020] px-3 py-1.5 text-sm font-bold text-white">
                             {{ product.discount }}% OFF
                         </div>
-                        <div v-else-if="product?.tag" class="absolute top-0 left-0 rounded-br-2xl px-3 py-1.5 text-sm font-bold text-white" :class="{ 'bg-[#e07c28]': product.tag === 'Bestseller', 'bg-[#e0405a]': product.tag === 'Hot', 'bg-[#0d9488]': product.tag === 'Baru' }">
-                            {{ product.tag }}
+                        <div v-else-if="product?.tag" class="absolute top-0 left-0 flex flex-wrap gap-1 p-2">
+                            <span
+                                v-for="t in product.tag.split(',')"
+                                :key="t"
+                                class="rounded-lg px-2.5 py-1 text-xs font-black shadow-xs bg-amber-400 text-black border border-amber-500"
+                            >
+                                {{ t.trim() }}
+                            </span>
                         </div>
                         <!-- Actions top-right -->
                         <div class="absolute top-3 right-3 flex flex-col gap-2">
@@ -280,9 +290,11 @@ const ratingBreakdown = [
                             <!-- Product headline -->
                             <div class="px-6 pt-6 pb-4">
                                 <!-- Category + Tag -->
-                                <div class="mb-2 flex items-center gap-2">
-                                    <Badge variant="outline" class="px-2 py-0 text-[10px]">{{ product.cat }}</Badge>
-                                    <Badge v-if="product.tag" variant="amber" class="px-2 py-0 text-[10px]">{{ product.tag }}</Badge>
+                                <div class="mb-2 flex flex-wrap items-center gap-1.5">
+                                    <Badge v-for="c in product.cat.split(',')" :key="c" variant="outline" class="px-2 py-0.5 text-[10px] font-bold">{{ c.trim() }}</Badge>
+                                    <template v-if="product.tag">
+                                        <Badge v-for="t in product.tag.split(',')" :key="t" variant="amber" class="px-2 py-0.5 text-[10px] font-extrabold">{{ t.trim() }}</Badge>
+                                    </template>
                                 </div>
 
                                 <h2 class="text-xl font-extrabold leading-snug text-[#1c1c22]">
@@ -335,17 +347,19 @@ const ratingBreakdown = [
                             <!-- Tab: Detail -->
                             <div v-if="activeTab === 'detail'" class="px-6 py-5">
                                 <p class="mb-5 text-sm leading-relaxed text-[#4a4a57]">
-                                    Produk berkualitas tinggi dari <strong>{{ product.store }}</strong>. Dibuat dengan bahan pilihan untuk memastikan kenyamanan dan daya tahan maksimal. Cocok untuk kebutuhan sehari-hari maupun hadiah spesial untuk orang tersayang.
+                                    {{ product.description || 'Produk Nike original dengan material premium, daya tahan tinggi, dan kenyamanan maksimal untuk aktivitas sehari-hari.' }}
                                 </p>
                                 <div class="rounded-2xl border border-black/8 bg-[#faf9f6] p-4">
-                                    <p class="mb-3 text-sm font-bold text-[#1c1c22]">Spesifikasi Produk</p>
+                                    <p class="mb-3 text-sm font-bold text-[#1c1c22]">Spesifikasi & Identitas Produk</p>
                                     <div class="grid grid-cols-2 gap-x-8 gap-y-2.5 text-sm">
+                                        <div class="flex justify-between"><span class="text-[#9090a0]">Merk / Brand</span><span class="font-bold text-[#1c1c22]">{{ product.brand || 'Nike' }}</span></div>
+                                        <div class="flex justify-between"><span class="text-[#9090a0]">Kode SKU</span><span class="font-mono font-bold text-[#1c1c22]">{{ product.sku || ('NK-' + product.id) }}</span></div>
                                         <div class="flex justify-between"><span class="text-[#9090a0]">Kategori</span><span class="font-medium text-[#1c1c22]">{{ product.cat }}</span></div>
-                                        <div class="flex justify-between"><span class="text-[#9090a0]">Kondisi</span><span class="font-medium text-[#1c1c22]">Baru</span></div>
-                                        <div class="flex justify-between"><span class="text-[#9090a0]">Berat</span><span class="font-medium text-[#1c1c22]">500 gram</span></div>
+                                        <div class="flex justify-between"><span class="text-[#9090a0]">Kondisi</span><span class="font-medium text-[#1c1c22]">100% Baru & Original</span></div>
+                                        <div class="flex justify-between"><span class="text-[#9090a0]">Berat Produk</span><span class="font-medium text-[#1c1c22]">{{ product.weightGram || 500 }} gram</span></div>
                                         <div class="flex justify-between"><span class="text-[#9090a0]">Terjual</span><span class="font-medium text-[#1c1c22]">{{ formatSold(product.sold) }} unit</span></div>
                                         <div class="flex justify-between"><span class="text-[#9090a0]">Rating</span><span class="font-medium text-[#1c1c22]">{{ product.rating }}/5.0</span></div>
-                                        <div class="flex justify-between"><span class="text-[#9090a0]">Garansi</span><span class="font-medium text-[#1c1c22]">7 hari retur</span></div>
+                                        <div class="flex justify-between"><span class="text-[#9090a0]">Garansi</span><span class="font-medium text-[#1c1c22]">Garansi Retur 100% Original</span></div>
                                     </div>
                                 </div>
                             </div>
