@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
+import { router, usePage as useInertiaPage } from '@inertiajs/vue3';
 import {
     ShoppingCart,
     Heart,
@@ -8,6 +8,11 @@ import {
     ReceiptText,
     X,
     Menu,
+    Home,
+    LayoutGrid,
+    ClipboardList,
+    UserCircle2,
+    ShoppingBag,
 } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import { Avatar } from '@/components/ui/avatar';
@@ -26,6 +31,7 @@ import {
 import { logoutUser } from '@/lib/firebase';
 import { usePage } from '@inertiajs/vue3';
 import { useActiveUser } from '@/lib/useActiveUser';
+import { useWishlist } from '@/lib/useWishlist';
 import { LogOut, Store, Users as UsersIcon } from 'lucide-vue-next';
 
 interface Props {
@@ -45,6 +51,9 @@ const emit = defineEmits<{
     (e: 'search', q: string): void;
 }>();
 
+const { count: dynamicWishlistCount } = useWishlist();
+const effectiveWishlistCount = computed(() => props.wishlistCount || dynamicWishlistCount.value);
+
 const searchInput = ref(props.searchQuery);
 const mobileSearchOpen = ref(false);
 
@@ -61,6 +70,11 @@ const userInitial = computed(() => {
 
 function handleSearch() {
     emit('search', searchInput.value);
+    router.get(
+        '/marketplace',
+        { search: searchInput.value },
+        { preserveState: true, preserveScroll: true },
+    );
     mobileSearchOpen.value = false;
 }
 
@@ -84,12 +98,24 @@ async function handleLogout() {
     await logoutUser();
     router.post('/logout');
 }
+
+// Bottom nav active route detection
+const currentPage = useInertiaPage();
+const currentPath = computed(() => (currentPage.url as string).split('?')[0]);
+
+const bottomNavItems = [
+    { label: 'Beranda', icon: Home, href: '/marketplace', match: '/marketplace' },
+    { label: 'Kategori', icon: LayoutGrid, href: '/marketplace', match: '__kategori' },
+    { label: 'Keranjang', icon: ShoppingBag, href: null, match: '__cart' },
+    { label: 'Pesanan', icon: ClipboardList, href: '/orders', match: '/orders' },
+    { label: 'Akun', icon: UserCircle2, href: '/account', match: '/account' },
+];
 </script>
 
 <template>
-    <div class="flex min-h-screen flex-col overflow-x-hidden bg-[#f5f4f0] font-sans">
+    <div class="flex min-h-screen flex-col overflow-x-clip bg-[#f5f4f0] font-sans">
         <!-- ── Top Buyer Header Bar ── -->
-        <header class="sticky top-0 z-30 border-b border-black/8 bg-white shadow-xs backdrop-blur-md select-none">
+        <header class="sticky top-0 z-50 border-b border-black/8 bg-white/95 shadow-xs backdrop-blur-md select-none">
             <div class="mx-auto flex max-w-[1600px] items-center gap-3 px-3 py-2.5 sm:gap-4 sm:px-6 sm:py-3">
 
                 <!-- Brand Logo -->
@@ -167,14 +193,15 @@ async function handleLogout() {
                     <!-- Wishlist — hide on mobile -->
                     <button
                         title="Wishlist Saya"
+                        @click="navigate('/wishlist')"
                         class="relative hidden h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-black/7 bg-[#f5f4f0] text-[#4a4a57] transition-all hover:bg-black/5 sm:flex"
                     >
-                        <Heart class="h-4 w-4" />
+                        <Heart class="h-4 w-4" :class="effectiveWishlistCount > 0 ? 'fill-[#e0405a] text-[#e0405a]' : ''" />
                         <span
-                            v-if="wishlistCount > 0"
-                            class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-[#e0405a] text-[9px] font-bold text-white"
+                            v-if="effectiveWishlistCount > 0"
+                            class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-[#e0405a] text-[9px] font-bold text-white shadow-xs"
                         >
-                            {{ wishlistCount }}
+                            {{ effectiveWishlistCount }}
                         </span>
                     </button>
 
@@ -182,7 +209,7 @@ async function handleLogout() {
                     <button
                         title="Keranjang Belanja"
                         @click="emit('open-cart')"
-                        class="relative flex cursor-pointer items-center gap-1.5 rounded-xl border border-[#e07c2830] bg-[#e07c2815] px-2.5 py-2 text-xs font-bold text-[#e07c28] shadow-2xs transition-all hover:bg-[#e07c2825] sm:gap-2 sm:px-3"
+                        class="relative flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-xl border border-[#e07c2830] bg-[#e07c2815] px-2.5 py-2 text-xs font-bold text-[#e07c28] shadow-2xs transition-all hover:bg-[#e07c2825] active:scale-95 touch-manipulation sm:gap-2 sm:px-3"
                     >
                         <ShoppingCart class="h-4 w-4" />
                         <span class="hidden sm:inline">Keranjang</span>
@@ -215,6 +242,10 @@ async function handleLogout() {
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
+                                <DropdownMenuItem @click="navigate('/account')">
+                                    <UserCircle2 class="mr-2 h-3.5 w-3.5" />
+                                    <span>Akun Saya</span>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem @click="navigate('/orders')">
                                     <ReceiptText class="mr-2 h-3.5 w-3.5" />
                                     <span>Pesanan Saya</span>
@@ -284,7 +315,7 @@ async function handleLogout() {
         </header>
 
         <!-- Main Buyer Page Slot -->
-        <div class="flex-1">
+        <div class="flex-1 pb-16 md:pb-0">
             <slot />
         </div>
 
@@ -303,6 +334,38 @@ async function handleLogout() {
             </div>
         </footer>
 
+        <!-- ── Mobile Bottom Navigation ── -->
+        <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-black/8 bg-white/95 backdrop-blur-md md:hidden" style="padding-bottom: env(safe-area-inset-bottom, 0px)">
+            <div class="flex items-stretch">
+                <button
+                    v-for="item in bottomNavItems"
+                    :key="item.label"
+                    @click="item.match === '__cart' ? emit('open-cart') : navigate(item.href!)"
+                    class="group relative flex flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors active:scale-95 touch-manipulation"
+                    :class="(item.match !== '__cart' && currentPath === item.match) || (item.match === '__store' && currentPath.startsWith('/store/')) ? 'text-[#e07c28]' : 'text-[#9090a0] hover:text-[#4a4a57]'"
+                >
+                    <!-- Cart badge -->
+                    <div v-if="item.match === '__cart'" class="relative">
+                        <component :is="item.icon" class="h-5 w-5" />
+                        <span
+                            v-if="cartCount > 0"
+                            class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#e07c28] text-[9px] font-black text-white shadow-sm"
+                        >{{ cartCount > 9 ? '9+' : cartCount }}</span>
+                    </div>
+                    <component v-else :is="item.icon" class="h-5 w-5" />
+
+                    <span class="text-[9px] font-semibold leading-none">{{ item.label }}</span>
+
+                    <!-- Active indicator line -->
+                    <span
+                        v-if="(item.match !== '__cart' && item.match !== '__akun' && currentPath === item.match) || (item.match === '__store' && currentPath.startsWith('/store/'))"
+                        class="absolute bottom-0 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-[#e07c28]"
+                    />
+                </button>
+            </div>
+        </nav>
+
         <Toaster richColors position="top-right" />
     </div>
 </template>
+

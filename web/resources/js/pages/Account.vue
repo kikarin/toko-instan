@@ -1,0 +1,402 @@
+<script setup lang="ts">
+import { Head, router } from '@inertiajs/vue3';
+import {
+    Settings,
+    HelpCircle,
+    ChevronRight,
+    CreditCard,
+    Package,
+    Truck,
+    CheckCircle2,
+    Star,
+    Store,
+    Share2,
+    Heart,
+    Building2,
+    Ticket,
+    Gift,
+    QrCode,
+    Sparkles,
+    ShoppingBag,
+    Percent,
+    ShoppingCart,
+} from 'lucide-vue-next';
+import { ref } from 'vue';
+import CartDrawer from '@/components/marketplace/CartDrawer.vue';
+import ProductCard from '@/components/marketplace/ProductCard.vue';
+import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue';
+import type { ProductDetail } from '@/components/marketplace/ProductDetailModal.vue';
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { toast } from '@/components/ui/sonner';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import { useActiveUser } from '@/lib/useActiveUser';
+import { useCart } from '@/lib/useCart';
+
+interface UserInfo {
+    id?: number;
+    name: string;
+    email?: string;
+    role: string;
+    avatar?: string | null;
+    created_at?: string;
+}
+
+interface Props {
+    user: UserInfo;
+    orderCounts: {
+        bayar: number;
+        diproses: number;
+        dikirim: number;
+        sudah_tiba: number;
+        ulasan: number;
+    };
+    vouchers: {
+        shopping: number;
+        shipping: number;
+    };
+    recommendedProducts: any[];
+}
+
+const props = defineProps<Props>();
+const activeUser = useActiveUser();
+
+const userName = computed(() => {
+    return activeUser.value?.displayName || activeUser.value?.name || props.user.name || 'Pengguna Toko Instan';
+});
+
+const userAvatar = computed(() => {
+    return activeUser.value?.photoURL || props.user.avatar || undefined;
+});
+
+const userInitial = computed(() => {
+    return userName.value.substring(0, 2).toUpperCase();
+});
+
+// Cart
+const {
+    items: cartItems,
+    totalCount: totalCartCount,
+    addItem,
+    updateQty,
+    removeItem,
+} = useCart();
+const isCartOpen = ref(false);
+
+// Modal
+const activeProductModal = ref<ProductDetail | null>(null);
+
+function addToCart(product: ProductDetail, addQty = 1) {
+    const rawPrice =
+        product.priceNum ||
+        parseInt(product.price.replace(/[^\d]/g, ''), 10) ||
+        100000;
+
+    addItem(
+        {
+            id: product.id,
+            name: product.name,
+            price: rawPrice,
+            formattedPrice: product.price,
+            img: product.img,
+            store: product.store,
+            qty: addQty,
+        },
+        addQty,
+    );
+
+    isCartOpen.value = true;
+    toast.success(`${product.name} ditambahkan ke keranjang!`);
+}
+
+function updateCartQty(id: number, delta: number) { updateQty(id, delta); }
+function removeFromCart(id: number) { removeItem(id); }
+function goCheckout() { isCartOpen.value = false; router.visit('/checkout'); }
+function openProductDetail(product: any) { activeProductModal.value = product; }
+</script>
+
+<script lang="ts">
+import { computed } from 'vue';
+</script>
+
+<template>
+    <Head title="Akun Saya — Toko Instan" />
+
+    <StorefrontLayout
+        :cartCount="totalCartCount"
+        @open-cart="isCartOpen = true"
+        @search="(q: string) => router.visit('/marketplace', { data: { search: q } })"
+    >
+        <main class="mx-auto w-full max-w-[1200px] p-3 sm:p-6 lg:p-8">
+            <div class="flex flex-col gap-6">
+
+                <!-- ── 1. Top User Profile Header ── -->
+                <div class="flex items-center justify-between pt-2">
+                    <div
+                        @click="router.visit('/profile/edit')"
+                        class="flex items-center gap-3.5 sm:gap-4 cursor-pointer group"
+                    >
+                        <Avatar
+                            :src="userAvatar"
+                            :fallback="userInitial"
+                            :hue="220"
+                            class="h-16 w-16 text-xl font-extrabold ring-4 ring-white shadow-md sm:h-20 sm:w-20 sm:text-2xl group-hover:scale-105 transition-transform"
+                        />
+                        <div class="flex flex-col gap-1">
+                            <h1 class="text-lg font-extrabold text-[#1c1c22] sm:text-2xl group-hover:text-[#e07c28] transition-colors">
+                                {{ userName }}
+                            </h1>
+                            <div class="flex items-center gap-2">
+                                <Button
+                                    variant="amber"
+                                    size="sm"
+                                    class="h-6 rounded-full px-2.5 text-[10px] font-black uppercase shadow-2xs gap-1"
+                                    @click="toast.info('Akun Anda sudah terverifikasi.')"
+                                >
+                                    <ShoppingBag class="h-3 w-3" />
+                                    Toko Instan VIP Member
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Action Icons -->
+                    <div class="flex items-center gap-2">
+                        <button
+                            title="Bantuan & Dukungan"
+                            @click="toast.info('Layanan Bantuan Toko Instan Siap 24/7!')"
+                            class="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xs border border-black/6 text-[#4a4a57] hover:bg-[#f5f4f0] transition-colors"
+                        >
+                            <HelpCircle class="h-4 w-4" />
+                        </button>
+                        <button
+                            title="Pengaturan"
+                            @click="router.visit('/settings')"
+                            class="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xs border border-black/6 text-[#4a4a57] hover:bg-[#f5f4f0] transition-colors"
+                        >
+                            <Settings class="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── 2. Top Promos & Loyalty Card ── -->
+                <Card class="overflow-hidden rounded-2xl border-black/6 shadow-xs bg-white">
+                    <CardContent class="p-4 sm:p-5 flex flex-col gap-4">
+                        <!-- Top Banner Split -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- Banner 1 -->
+                            <div class="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/60 p-3.5 border border-teal-200/50">
+                                <div>
+                                    <p class="text-xs font-bold text-teal-900 leading-tight">Yuk, mulai belanja pertamamu!</p>
+                                    <p class="text-[10px] text-teal-700 mt-0.5">Dapatkan cashback s.d Rp 50rb</p>
+                                </div>
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500 text-white shadow-xs">
+                                    <ShoppingBag class="h-5 w-5" />
+                                </div>
+                            </div>
+
+                            <!-- Banner 2 -->
+                            <div class="flex items-center justify-between rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 p-3.5 text-white shadow-xs">
+                                <div>
+                                    <div class="flex items-center gap-1">
+                                        <Sparkles class="h-3.5 w-3.5 fill-amber-200 text-amber-200" />
+                                        <span class="text-xs font-black uppercase tracking-wider text-amber-100">PLUS Member</span>
+                                    </div>
+                                    <p class="text-xs font-bold mt-0.5">Selalu diskon setiap belanja</p>
+                                </div>
+                                <Button size="sm" variant="outline" class="h-7 rounded-lg bg-white/20 border-white/40 text-[10px] font-bold text-white hover:bg-white/30">
+                                    Cek Status
+                                </Button>
+                            </div>
+                        </div>
+
+                        <!-- 4 Loyalty Stats Bar -->
+                        <div class="grid grid-cols-4 divide-x divide-black/6 pt-1 text-center">
+                            <!-- 1. Voucher Belanja -->
+                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Anda memiliki 5 Voucher Belanja!')">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-600 font-black text-xs">
+                                    %
+                                </div>
+                                <span class="font-mono text-xs font-black text-[#1c1c22]">{{ vouchers.shopping }}</span>
+                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Voucher Belanja</span>
+                            </div>
+
+                            <!-- 2. Voucher Ongkir -->
+                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Anda memiliki 6 Gratis Ongkir!')">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 font-black text-xs">
+                                    <Truck class="h-4 w-4" />
+                                </div>
+                                <span class="font-mono text-xs font-black text-[#1c1c22]">{{ vouchers.shipping }}</span>
+                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Voucher Ongkir</span>
+                            </div>
+
+                            <!-- 3. Belanja Bonus -->
+                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Kumpulkan bonus Toko Instan!')">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-600 font-black text-xs">
+                                    <Gift class="h-4 w-4" />
+                                </div>
+                                <span class="text-xs font-extrabold text-[#e07c28]">Bonus</span>
+                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Belanja Bonus</span>
+                            </div>
+
+                            <!-- 4. Tokopedia Card / Pass -->
+                            <div class="flex flex-col items-center gap-1 cursor-pointer px-1 py-1 hover:opacity-80" @click="toast.info('Kartu Loyalti Toko Instan')">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 font-black text-xs">
+                                    <QrCode class="h-4 w-4" />
+                                </div>
+                                <span class="text-xs font-extrabold text-indigo-600">Daftar</span>
+                                <span class="text-[9px] sm:text-[10px] font-semibold text-[#9090a0] leading-none">Instan Card</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <!-- ── 3. Transaksi Section ── -->
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-base font-extrabold text-[#1c1c22]">Transaksi</h2>
+                        <button
+                            @click="router.visit('/orders')"
+                            class="flex items-center gap-0.5 text-xs font-bold text-[#e07c28] hover:underline"
+                        >
+                            <span>Lihat Riwayat</span>
+                            <ChevronRight class="h-4 w-4" />
+                        </button>
+                    </div>
+
+                    <Card class="rounded-2xl border-black/6 shadow-xs bg-white p-4">
+                        <div class="grid grid-cols-5 text-center">
+                            <!-- Bayar -->
+                            <button @click="router.visit('/orders')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#faf9f6] border border-black/6 group-hover:scale-105 transition-all text-[#1c1c22]">
+                                    <CreditCard class="h-5 w-5" />
+                                    <span v-if="orderCounts.bayar > 0" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#e02020] text-[9px] font-black text-white">
+                                        {{ orderCounts.bayar }}
+                                    </span>
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Bayar</span>
+                            </button>
+
+                            <!-- Diproses -->
+                            <button @click="router.visit('/orders')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#faf9f6] border border-black/6 group-hover:scale-105 transition-all text-[#1c1c22]">
+                                    <Package class="h-5 w-5" />
+                                    <span v-if="orderCounts.diproses > 0" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#e07c28] text-[9px] font-black text-white">
+                                        {{ orderCounts.diproses }}
+                                    </span>
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Diproses</span>
+                            </button>
+
+                            <!-- Dikirim -->
+                            <button @click="router.visit('/orders')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#faf9f6] border border-black/6 group-hover:scale-105 transition-all text-[#1c1c22]">
+                                    <Truck class="h-5 w-5" />
+                                    <span v-if="orderCounts.dikirim > 0" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#3b82f6] text-[9px] font-black text-white">
+                                        {{ orderCounts.dikirim }}
+                                    </span>
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Dikirim</span>
+                            </button>
+
+                            <!-- Sudah Tiba -->
+                            <button @click="router.visit('/orders')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#faf9f6] border border-black/6 group-hover:scale-105 transition-all text-[#1c1c22]">
+                                    <CheckCircle2 class="h-5 w-5 text-emerald-600" />
+                                    <span v-if="orderCounts.sudah_tiba > 0" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-black text-white">
+                                        {{ orderCounts.sudah_tiba }}
+                                    </span>
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Sudah Tiba</span>
+                            </button>
+
+                            <!-- Ulasan -->
+                            <button @click="toast.info('Tidak ada ulasan tertunda!')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#faf9f6] border border-black/6 group-hover:scale-105 transition-all text-[#1c1c22]">
+                                    <Star class="h-5 w-5 text-amber-500" />
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Ulasan</span>
+                            </button>
+                        </div>
+                    </Card>
+                </div>
+
+                <!-- ── 4. Menu Lainnya Section ── -->
+                <div class="flex flex-col gap-3">
+                    <h2 class="text-base font-extrabold text-[#1c1c22]">Menu Lainnya</h2>
+
+                    <Card class="rounded-2xl border-black/6 shadow-xs bg-white p-4">
+                        <div class="grid grid-cols-4 text-center">
+                            <!-- Buka Toko -->
+                            <button @click="router.visit('/dashboard')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100/70 text-[#e07c28] group-hover:scale-105 transition-all">
+                                    <Store class="h-6 w-6" />
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Buka Toko</span>
+                            </button>
+
+                            <!-- Affiliate -->
+                            <button @click="toast.info('Program Affiliate Toko Instan!')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100/70 text-teal-600 group-hover:scale-105 transition-all">
+                                    <Share2 class="h-6 w-6" />
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Affiliate</span>
+                            </button>
+
+                            <!-- Wishlist -->
+                            <button @click="router.visit('/wishlist')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100/70 text-rose-600 group-hover:scale-105 transition-all">
+                                    <Heart class="h-6 w-6" />
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Wishlist</span>
+                            </button>
+
+                            <!-- Toko Favorit -->
+                            <button @click="toast.info('Daftar Toko Favorit')" class="group flex flex-col items-center gap-2 cursor-pointer p-1">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/70 text-indigo-600 group-hover:scale-105 transition-all">
+                                    <Building2 class="h-6 w-6" />
+                                </div>
+                                <span class="text-[11px] font-semibold text-[#4a4a57]">Toko Favorit</span>
+                            </button>
+                        </div>
+                    </Card>
+                </div>
+
+                <!-- ── 5. Rekomendasi Untuk Anda Section ── -->
+                <div class="flex flex-col gap-4">
+                    <h2 class="text-base font-extrabold text-[#1c1c22]">Rekomendasi Untuk Anda</h2>
+
+                    <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+                        <ProductCard
+                            v-for="p in recommendedProducts"
+                            :key="p.id"
+                            :product="p"
+                            @click="openProductDetail(p)"
+                            @add-to-cart="addToCart"
+                        />
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Cart Drawer -->
+        <CartDrawer
+            :isOpen="isCartOpen"
+            :items="cartItems"
+            @close="isCartOpen = false"
+            @update-qty="updateCartQty"
+            @remove-item="removeFromCart"
+            @checkout="goCheckout"
+        />
+
+        <!-- Product Detail Modal -->
+        <ProductDetailModal
+            :product="activeProductModal"
+            @close="activeProductModal = null"
+            @add-to-cart="addToCart"
+        />
+    </StorefrontLayout>
+</template>

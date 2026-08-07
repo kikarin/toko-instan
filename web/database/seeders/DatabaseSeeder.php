@@ -18,22 +18,56 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Seed Main Merchant User
-        $merchant = User::firstOrCreate(
-            ['email' => 'owner@tokobagus.com'],
+        // 1. Seed Buyer User (Niko Agustio)
+        $buyer = User::firstOrCreate(
+            ['email' => 'buyer@tokobagus.com'],
             [
-                'name' => 'TokoBagus Owner',
+                'name' => 'Niko Agustio',
+                'username' => 'nikoagustio',
+                'bio' => 'Pecinta produk lokal & teknologi',
+                'phone' => '+6285264415051',
+                'phone_verified_at' => now(),
+                'gender' => 'Pria',
+                'birth_date' => '01 January 1991',
                 'password' => Hash::make('password123'),
+                'role' => 'buyer',
                 'auth_provider' => 'email',
                 'email_verified_at' => now(),
+                'avatar' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&auto=format',
             ]
         );
 
-        // 1b. Seed Admin Master User
+        // 2. Seed 5 Dedicated Seller Users
+        $sellersData = [
+            ['email' => 'seller1@tokobagus.com', 'name' => 'Nova Batik Seller', 'username' => 'seller_novabatik'],
+            ['email' => 'seller2@tokobagus.com', 'name' => 'KuliKain Seller', 'username' => 'seller_kulikain'],
+            ['email' => 'seller3@tokobagus.com', 'name' => 'Jaya Elektronik Seller', 'username' => 'seller_jayaelektronik'],
+            ['email' => 'seller4@tokobagus.com', 'name' => 'Warung Digital Seller', 'username' => 'seller_warungdigital'],
+            ['email' => 'seller5@tokobagus.com', 'name' => 'Mode Nusantara Seller', 'username' => 'seller_modenusantara'],
+        ];
+
+        $sellersMap = [];
+        foreach ($sellersData as $sData) {
+            $seller = User::firstOrCreate(
+                ['email' => $sData['email']],
+                [
+                    'name' => $sData['name'],
+                    'username' => $sData['username'],
+                    'password' => Hash::make('password123'),
+                    'role' => 'seller',
+                    'auth_provider' => 'email',
+                    'email_verified_at' => now(),
+                ]
+            );
+            $sellersMap[$sData['email']] = $seller;
+        }
+
+        // 3. Seed Admin User
         User::firstOrCreate(
             ['email' => 'admin@toko-instan.com'],
             [
                 'name' => 'Admin Master',
+                'username' => 'admin_master',
                 'password' => Hash::make('password123'),
                 'role' => 'admin',
                 'auth_provider' => 'email',
@@ -41,24 +75,25 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Seed Tenant
+        // 4. Seed Tenant for Primary Merchant
         $tenant = Tenant::firstOrCreate(
             ['slug' => 'tokobagus'],
             [
-                'user_id' => $merchant->id,
+                'user_id' => $sellersMap['seller1@tokobagus.com']->id,
                 'name' => 'TokoBagus Official Tenant',
                 'plan' => 'premium',
                 'status' => 'active',
             ]
         );
 
-        // 3. Seed Top Stores
+        // 5. Seed 5 Stores linked to their Seller Accounts
         $storesData = [
             [
+                'seller_email' => 'seller1@tokobagus.com',
                 'name' => 'NovaBatik Studio',
                 'slug' => 'novabatik-studio',
                 'category' => 'Fashion',
-                'description' => 'Batik tenun kualitas premium buatan pengrajin lokal.',
+                'description' => 'Batik tenun kualitas premium buatan pengrajin lokal Indonesia.',
                 'gmv' => 18400000,
                 'total_orders' => 412,
                 'rating' => 4.9,
@@ -68,10 +103,11 @@ class DatabaseSeeder extends Seeder
                 'pending_escrow' => 6200000,
             ],
             [
+                'seller_email' => 'seller2@tokobagus.com',
                 'name' => 'KuliKain Official',
                 'slug' => 'kulikain-official',
                 'category' => 'Aksesoris',
-                'description' => 'Produk tas & dompet kulit asli Indonesia.',
+                'description' => 'Produk tas, dompet, dan aksesoris kulit asli buatan dalam negeri.',
                 'gmv' => 14100000,
                 'total_orders' => 318,
                 'rating' => 4.8,
@@ -81,23 +117,25 @@ class DatabaseSeeder extends Seeder
                 'pending_escrow' => 3100000,
             ],
             [
+                'seller_email' => 'seller3@tokobagus.com',
                 'name' => 'Jaya Elektronik',
                 'slug' => 'jaya-elektronik',
                 'category' => 'Elektronik',
-                'description' => 'Gadget & aksesoris komputer terpercaya.',
+                'description' => 'Penyedia gadget, keyboard, headphone & aksesoris komputer terpercaya.',
                 'gmv' => 11700000,
                 'total_orders' => 287,
                 'rating' => 4.7,
-                'badge' => null,
+                'badge' => 'top',
                 'avatar_hue' => 190,
                 'balance' => 14500000,
                 'pending_escrow' => 2400000,
             ],
             [
+                'seller_email' => 'seller4@tokobagus.com',
                 'name' => 'Warung Digital ID',
                 'slug' => 'warung-digital-id',
                 'category' => 'Kuliner',
-                'description' => 'Minuman & serbuk olahan kualitas terbaik.',
+                'description' => 'Aneka minuman serbuk, matcha latte, dan camilan nikmat berkualitas.',
                 'gmv' => 9200000,
                 'total_orders' => 234,
                 'rating' => 4.6,
@@ -107,14 +145,15 @@ class DatabaseSeeder extends Seeder
                 'pending_escrow' => 1500000,
             ],
             [
+                'seller_email' => 'seller5@tokobagus.com',
                 'name' => 'Mode Nusantara',
                 'slug' => 'mode-nusantara',
                 'category' => 'Sepatu',
-                'description' => 'Sepatu casual dan pakaian gaya terkini.',
+                'description' => 'Sepatu casual, sneakers kulit, dan pakaian gaya modern anak muda.',
                 'gmv' => 7800000,
                 'total_orders' => 198,
                 'rating' => 4.5,
-                'badge' => null,
+                'badge' => 'pro',
                 'avatar_hue' => 30,
                 'balance' => 8200000,
                 'pending_escrow' => 1200000,
@@ -124,6 +163,9 @@ class DatabaseSeeder extends Seeder
         $storesMap = [];
 
         foreach ($storesData as $s) {
+            $sellerEmail = $s['seller_email'];
+            unset($s['seller_email']);
+
             $store = Store::updateOrCreate(
                 ['slug' => $s['slug']],
                 array_merge($s, ['tenant_id' => $tenant->id, 'status' => 'active'])
@@ -131,8 +173,9 @@ class DatabaseSeeder extends Seeder
             $storesMap[$s['name']] = $store;
         }
 
-        // 4. Seed Products
+        // 6. Seed 25+ Comprehensive Products
         $productsData = [
+            // NovaBatik Studio (Fashion)
             [
                 'store_name' => 'NovaBatik Studio',
                 'name' => 'Kemeja Batik Tenun Premium',
@@ -146,29 +189,55 @@ class DatabaseSeeder extends Seeder
                 'stock' => 150,
             ],
             [
-                'store_name' => 'Mode Nusantara',
-                'name' => 'Sneakers Casual Kulit Asli',
-                'slug' => 'sneakers-casual-kulit-asli',
-                'category' => 'Sepatu',
-                'price' => 599000,
-                'sold' => 847,
-                'rating' => 4.8,
+                'store_name' => 'NovaBatik Studio',
+                'name' => 'Celana Linen Wide Leg',
+                'slug' => 'celana-linen-wide-leg',
+                'category' => 'Fashion',
+                'price' => 320000,
+                'sold' => 763,
+                'rating' => 4.6,
                 'tag' => 'Baru',
-                'img' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&auto=format',
+                'img' => 'https://images.unsplash.com/photo-1594938298603-c8148c4b4b58?w=400&h=400&fit=crop&auto=format',
+                'stock' => 95,
+            ],
+            [
+                'store_name' => 'NovaBatik Studio',
+                'name' => 'Gaun Batik Modern Elegan',
+                'slug' => 'gaun-batik-modern-elegan',
+                'category' => 'Fashion',
+                'price' => 450000,
+                'sold' => 512,
+                'rating' => 4.8,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop&auto=format',
+                'stock' => 60,
+            ],
+            [
+                'store_name' => 'NovaBatik Studio',
+                'name' => 'Outer Outerwear Motif Parang',
+                'slug' => 'outer-outerwear-motif-parang',
+                'category' => 'Fashion',
+                'price' => 275000,
+                'sold' => 340,
+                'rating' => 4.7,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&h=400&fit=crop&auto=format',
                 'stock' => 80,
             ],
             [
-                'store_name' => 'Jaya Elektronik',
-                'name' => 'Mechanical Keyboard TKL 75%',
-                'slug' => 'mechanical-keyboard-tkl-75',
-                'category' => 'Elektronik',
-                'price' => 890000,
-                'sold' => 632,
-                'rating' => 4.7,
-                'tag' => 'Hot',
-                'img' => 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&h=400&fit=crop&auto=format',
-                'stock' => 60,
+                'store_name' => 'NovaBatik Studio',
+                'name' => 'Jaket Denim Kombinasi Batik',
+                'slug' => 'jaket-denim-kombinasi-batik',
+                'category' => 'Fashion',
+                'price' => 495000,
+                'sold' => 290,
+                'rating' => 4.8,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1543076447-215ad9ba6923?w=400&h=400&fit=crop&auto=format',
+                'stock' => 40,
             ],
+
+            // KuliKain Official (Aksesoris)
             [
                 'store_name' => 'KuliKain Official',
                 'name' => 'Tas Kulit Selempang Minimalis',
@@ -182,6 +251,106 @@ class DatabaseSeeder extends Seeder
                 'stock' => 110,
             ],
             [
+                'store_name' => 'KuliKain Official',
+                'name' => 'Dompet Kulit Asli Slot Kartu',
+                'slug' => 'dompet-kulit-asli-slot-kartu',
+                'category' => 'Aksesoris',
+                'price' => 185000,
+                'sold' => 1430,
+                'rating' => 4.9,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=400&fit=crop&auto=format',
+                'stock' => 200,
+            ],
+            [
+                'store_name' => 'KuliKain Official',
+                'name' => 'Ikat Pinggang Kulit Sapi Premium',
+                'slug' => 'ikat-pinggang-kulit-sapi-premium',
+                'category' => 'Aksesoris',
+                'price' => 210000,
+                'sold' => 670,
+                'rating' => 4.7,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop&auto=format',
+                'stock' => 120,
+            ],
+            [
+                'store_name' => 'KuliKain Official',
+                'name' => 'Ransel Canvas Kulit Vintage',
+                'slug' => 'ransel-canvas-kulit-vintage',
+                'category' => 'Aksesoris',
+                'price' => 580000,
+                'sold' => 410,
+                'rating' => 4.8,
+                'tag' => 'Baru',
+                'img' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop&auto=format',
+                'stock' => 50,
+            ],
+
+            // Jaya Elektronik (Elektronik)
+            [
+                'store_name' => 'Jaya Elektronik',
+                'name' => 'Mechanical Keyboard TKL 75%',
+                'slug' => 'mechanical-keyboard-tkl-75',
+                'category' => 'Elektronik',
+                'price' => 890000,
+                'sold' => 632,
+                'rating' => 4.7,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&h=400&fit=crop&auto=format',
+                'stock' => 60,
+            ],
+            [
+                'store_name' => 'Jaya Elektronik',
+                'name' => 'Headphone Over-ear Wireless',
+                'slug' => 'headphone-over-ear-wireless',
+                'category' => 'Elektronik',
+                'price' => 1250000,
+                'sold' => 512,
+                'rating' => 4.8,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&auto=format',
+                'stock' => 35,
+            ],
+            [
+                'store_name' => 'Jaya Elektronik',
+                'name' => 'Mouse Gaming Ergonomis RGB',
+                'slug' => 'mouse-gaming-ergonomis-rgb',
+                'category' => 'Elektronik',
+                'price' => 345000,
+                'sold' => 890,
+                'rating' => 4.6,
+                'tag' => 'Baru',
+                'img' => 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=400&fit=crop&auto=format',
+                'stock' => 140,
+            ],
+            [
+                'store_name' => 'Jaya Elektronik',
+                'name' => 'Smartwatch Sport GPS Monitor',
+                'slug' => 'smartwatch-sport-gps-monitor',
+                'category' => 'Elektronik',
+                'price' => 1100000,
+                'sold' => 380,
+                'rating' => 4.7,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop&auto=format',
+                'stock' => 45,
+            ],
+            [
+                'store_name' => 'Jaya Elektronik',
+                'name' => 'Speaker Bluetooth Portable Bass',
+                'slug' => 'speaker-bluetooth-portable-bass',
+                'category' => 'Elektronik',
+                'price' => 475000,
+                'sold' => 720,
+                'rating' => 4.8,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop&auto=format',
+                'stock' => 90,
+            ],
+
+            // Warung Digital ID (Kuliner)
+            [
                 'store_name' => 'Warung Digital ID',
                 'name' => 'Matcha Latte Premium 200gr',
                 'slug' => 'matcha-latte-premium-200gr',
@@ -192,6 +361,56 @@ class DatabaseSeeder extends Seeder
                 'tag' => 'Hot',
                 'img' => 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop&auto=format',
                 'stock' => 500,
+            ],
+            [
+                'store_name' => 'Warung Digital ID',
+                'name' => 'Biji Kopi Arabika Gayo 250g',
+                'slug' => 'biji-kopi-arabika-gayo-250g',
+                'category' => 'Kuliner',
+                'price' => 98000,
+                'sold' => 1650,
+                'rating' => 4.9,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=400&fit=crop&auto=format',
+                'stock' => 300,
+            ],
+            [
+                'store_name' => 'Warung Digital ID',
+                'name' => 'Teh Herbal Chamomile Organic',
+                'slug' => 'teh-herbal-chamomile-organic',
+                'category' => 'Kuliner',
+                'price' => 75000,
+                'sold' => 840,
+                'rating' => 4.7,
+                'tag' => 'Baru',
+                'img' => 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&h=400&fit=crop&auto=format',
+                'stock' => 220,
+            ],
+            [
+                'store_name' => 'Warung Digital ID',
+                'name' => 'Cokelat Artisan Dark 70%',
+                'slug' => 'cokelat-artisan-dark-70',
+                'category' => 'Kuliner',
+                'price' => 65000,
+                'sold' => 1120,
+                'rating' => 4.8,
+                'tag' => null,
+                'img' => 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&h=400&fit=crop&auto=format',
+                'stock' => 180,
+            ],
+
+            // Mode Nusantara (Sepatu & Aksesoris)
+            [
+                'store_name' => 'Mode Nusantara',
+                'name' => 'Sneakers Casual Kulit Asli',
+                'slug' => 'sneakers-casual-kulit-asli',
+                'category' => 'Sepatu',
+                'price' => 599000,
+                'sold' => 847,
+                'rating' => 4.8,
+                'tag' => 'Baru',
+                'img' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&auto=format',
+                'stock' => 80,
             ],
             [
                 'store_name' => 'Mode Nusantara',
@@ -206,28 +425,40 @@ class DatabaseSeeder extends Seeder
                 'stock' => 45,
             ],
             [
-                'store_name' => 'Jaya Elektronik',
-                'name' => 'Headphone Over-ear Wireless',
-                'slug' => 'headphone-over-ear-wireless',
-                'category' => 'Elektronik',
-                'price' => 1250000,
-                'sold' => 512,
-                'rating' => 4.8,
-                'tag' => null,
-                'img' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&auto=format',
-                'stock' => 35,
+                'store_name' => 'Mode Nusantara',
+                'name' => 'Sepatu Loafers Suede Brown',
+                'slug' => 'sepatu-loafers-suede-brown',
+                'category' => 'Sepatu',
+                'price' => 485000,
+                'sold' => 560,
+                'rating' => 4.7,
+                'tag' => 'Hot',
+                'img' => 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&h=400&fit=crop&auto=format',
+                'stock' => 70,
             ],
             [
-                'store_name' => 'NovaBatik Studio',
-                'name' => 'Celana Linen Wide Leg',
-                'slug' => 'celana-linen-wide-leg',
-                'category' => 'Fashion',
-                'price' => 320000,
-                'sold' => 763,
+                'store_name' => 'Mode Nusantara',
+                'name' => 'Sandal Slip-on Minimalis Leather',
+                'slug' => 'sandal-slip-on-minimalis-leather',
+                'category' => 'Sepatu',
+                'price' => 230000,
+                'sold' => 940,
                 'rating' => 4.6,
-                'tag' => null,
-                'img' => 'https://images.unsplash.com/photo-1594938298603-c8148c4b4b58?w=400&h=400&fit=crop&auto=format',
-                'stock' => 95,
+                'tag' => 'Bestseller',
+                'img' => 'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=400&h=400&fit=crop&auto=format',
+                'stock' => 160,
+            ],
+            [
+                'store_name' => 'Mode Nusantara',
+                'name' => 'Sepatu Boots Kulit High Top',
+                'slug' => 'sepatu-boots-kulit-high-top',
+                'category' => 'Sepatu',
+                'price' => 780000,
+                'sold' => 310,
+                'rating' => 4.9,
+                'tag' => 'Baru',
+                'img' => 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=400&h=400&fit=crop&auto=format',
+                'stock' => 35,
             ],
         ];
 
@@ -241,26 +472,34 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 5. Seed Orders
+        // 7. Seed Orders for Buyer (Niko Agustio)
         $primaryStore = $storesMap['NovaBatik Studio'];
 
-        $statuses = ['completed', 'shipped', 'packed', 'processing', 'pending', 'cancelled'];
-        $customers = ['Budi Santoso', 'Siti Rahma', 'Aditya Pratama', 'Dewi Lestari', 'Rizky Febrian', 'Maya Indah'];
+        $sampleOrders = [
+            ['order_number' => 'ORD-2026-08001', 'status' => 'pending', 'amount' => 285000],
+            ['order_number' => 'ORD-2026-08002', 'status' => 'paid', 'amount' => 599000],
+            ['order_number' => 'ORD-2026-08003', 'status' => 'shipped', 'amount' => 420000],
+            ['order_number' => 'ORD-2026-08004', 'status' => 'completed', 'amount' => 145000],
+            ['order_number' => 'ORD-2026-08005', 'status' => 'completed', 'amount' => 890000],
+        ];
 
-        foreach (range(1, 15) as $index) {
+        foreach ($sampleOrders as $ord) {
             Order::firstOrCreate(
-                ['order_number' => 'ORD-2026-080'.sprintf('%02d', $index)],
+                ['order_number' => $ord['order_number']],
                 [
                     'store_id' => $primaryStore->id,
-                    'customer_name' => $customers[array_rand($customers)],
-                    'total_amount' => rand(150, 850) * 1000,
-                    'status' => $statuses[array_rand($statuses)],
-                    'created_at' => now()->subDays(rand(0, 10)),
+                    'customer_name' => $buyer->name,
+                    'customer_email' => $buyer->email,
+                    'customer_phone' => $buyer->phone,
+                    'shipping_address' => 'Jl. Jendral Sudirman No. 42, Jakarta Selatan, DKI Jakarta',
+                    'total_amount' => $ord['amount'],
+                    'status' => $ord['status'],
+                    'created_at' => now()->subDays(rand(1, 5)),
                 ]
             );
         }
 
-        // 6. Seed Withdrawal
+        // 8. Seed Withdrawal
         Withdrawal::firstOrCreate(
             ['account_number' => '88392019481'],
             [

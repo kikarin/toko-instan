@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { router } from '@inertiajs/vue3';
 import {
     Star,
     ShoppingCart,
@@ -17,6 +18,7 @@ import {
     Share2,
 } from 'lucide-vue-next';
 import { ref, watch, computed } from 'vue';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,6 +42,7 @@ export interface ProductDetail {
     sold: number;
     rating: number;
     store: string;
+    storeSlug?: string;
     img: string;
     tag: string | null;
     cat: string;
@@ -61,6 +64,9 @@ const qty = ref(1);
 const isLiked = ref(false);
 const activeTab = ref<'detail' | 'ulasan'>('detail');
 
+// Reactive mobile detection to prevent double-rendering Sheet + Dialog
+const { isMobile } = useIsMobile();
+
 watch(
     () => props.product,
     () => {
@@ -80,6 +86,14 @@ function handleAddToCart() {
     if (props.product) {
         emit('add-to-cart', props.product, qty.value);
         emit('close');
+    }
+}
+
+function visitStore() {
+    if (props.product) {
+        const slug = props.product.storeSlug || props.product.store.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        emit('close');
+        router.visit(`/store/${slug}`);
     }
 }
 
@@ -107,10 +121,10 @@ const ratingBreakdown = [
 
 <template>
     <!-- ─── MOBILE: Sheet slide-up from bottom ─── -->
-    <Sheet :open="isOpen" @update:open="handleOpenChange" class="md:hidden">
+    <Sheet v-if="isMobile" :open="isOpen" @update:open="handleOpenChange">
         <SheetContent
             side="bottom"
-            class="flex max-h-[92dvh] flex-col rounded-t-3xl p-0 md:hidden"
+            class="flex max-h-[92dvh] flex-col rounded-t-3xl p-0"
         >
             <div class="flex justify-center pt-3 pb-1">
                 <div class="h-1 w-10 rounded-full bg-black/15" />
@@ -151,7 +165,7 @@ const ratingBreakdown = [
                             <div class="flex items-center gap-1.5"><span class="truncate text-xs font-bold text-[#1c1c22]">{{ product.store }}</span><BadgeCheck class="h-3.5 w-3.5 shrink-0 text-teal-500" /></div>
                             <p class="text-[10px] text-[#9090a0]">Official Store · Respons cepat</p>
                         </div>
-                        <Button variant="outline" size="sm" class="shrink-0 text-xs"><Store class="mr-1 h-3 w-3" />Kunjungi</Button>
+                        <Button variant="outline" size="sm" class="shrink-0 text-xs" @click="visitStore"><Store class="mr-1 h-3 w-3" />Kunjungi</Button>
                     </div>
                     <Separator />
                     <div class="flex border-b border-black/8">
@@ -195,8 +209,8 @@ const ratingBreakdown = [
     </Sheet>
 
     <!-- ─── DESKTOP: Dialog centered 2-column modal ─── -->
-    <Dialog :open="isOpen" @update:open="handleOpenChange">
-        <DialogContent class="hidden max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-0 md:flex">
+    <Dialog v-else :open="isOpen" @update:open="handleOpenChange">
+        <DialogContent class="max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-0">
             <div class="flex h-full w-full">
                 <!-- LEFT: Image column -->
                 <div class="relative flex w-2/5 shrink-0 flex-col bg-[#f5f4f0]">
@@ -236,7 +250,7 @@ const ratingBreakdown = [
                                 </div>
                                 <p class="text-[11px] text-[#9090a0]">Official Store · Respons &lt; 1 jam</p>
                             </div>
-                            <Button variant="outline" size="sm" class="shrink-0 text-xs">
+                            <Button variant="outline" size="sm" class="shrink-0 text-xs" @click="visitStore">
                                 <Store class="mr-1 h-3 w-3" /> Kunjungi
                             </Button>
                         </div>

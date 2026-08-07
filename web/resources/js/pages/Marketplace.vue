@@ -10,8 +10,19 @@ import {
     Users,
     Star,
     ShieldCheck,
+    Shirt,
+    Cpu,
+    Footprints,
+    Watch,
+    UtensilsCrossed,
+    ShoppingBag,
+    Tag,
+    Percent,
+    Loader2,
+    ChevronLeft as ChevronLeftIcon,
+    ChevronRight as ChevronRightIcon,
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import CartDrawer from '@/components/marketplace/CartDrawer.vue';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
 import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue';
@@ -23,6 +34,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/lib/useCart';
+import { useProductPagination } from '@/lib/useProductPagination';
 
 interface Props {
     products?: any[];
@@ -36,6 +48,15 @@ const props = defineProps<Props>();
 
 const searchQ = ref(props.filters?.search || '');
 const selectedCat = ref(props.filters?.category || 'Semua');
+
+watch(
+    () => props.filters?.search,
+    (newVal) => {
+        if (newVal !== undefined) {
+            searchQ.value = newVal;
+        }
+    },
+);
 
 // Reactive Cart state (persisted in localStorage)
 const {
@@ -207,15 +228,42 @@ const displayCategories = computed(
         ],
 );
 
-const filteredProducts = computed(() =>
-    displayProducts.value.filter(
-        (p) =>
-            (selectedCat.value === 'Semua' || p.cat === selectedCat.value) &&
-            (!searchQ.value ||
-                p.name.toLowerCase().includes(searchQ.value.toLowerCase()) ||
-                p.store.toLowerCase().includes(searchQ.value.toLowerCase())),
-    ),
-);
+const filteredProducts = computed(() => {
+    const q = searchQ.value.trim().toLowerCase();
+    const words = q.split(/\s+/).filter(Boolean);
+
+    return displayProducts.value.filter((p) => {
+        const matchesCategory =
+            selectedCat.value === 'Semua' || p.cat === selectedCat.value;
+
+        if (!matchesCategory) return false;
+        if (!q) return true;
+
+        const name = (p.name || '').toLowerCase();
+        const cat = (p.cat || '').toLowerCase();
+        const tag = (p.tag || '').toLowerCase();
+        const store = (p.store || '').toLowerCase();
+
+        const fullText = `${name} ${cat} ${tag} ${store}`;
+
+        return fullText.includes(q) || words.some((w) => fullText.includes(w));
+    });
+});
+
+const {
+    isMobile,
+    currentPage,
+    totalPages,
+    displayedProducts,
+    isLoadingMore,
+    hasMoreMobile,
+    loadMoreTriggerRef,
+    setPage,
+} = useProductPagination(filteredProducts, {
+    itemsPerPage: 8,
+    initialMobileCount: 4,
+    mobileStep: 4,
+});
 
 function applySearch(q?: string) {
     if (q !== undefined) {
@@ -278,6 +326,22 @@ function goCheckout() {
 function openProductDetail(product: any) {
     activeProductModal.value = product;
 }
+
+function visitStoreBySlug(store: any) {
+    const slug = store.slug || store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    router.visit(`/store/${slug}`);
+}
+
+const categoryMenu = [
+    { label: 'Semua', icon: ShoppingBag, color: 'bg-[#e07c28]/10 text-[#e07c28]', active: 'bg-[#e07c28] text-white', cat: 'Semua' },
+    { label: 'Fashion', icon: Shirt, color: 'bg-violet-100 text-violet-600', active: 'bg-violet-500 text-white', cat: 'Fashion' },
+    { label: 'Elektronik', icon: Cpu, color: 'bg-blue-100 text-blue-600', active: 'bg-blue-500 text-white', cat: 'Elektronik' },
+    { label: 'Sepatu', icon: Footprints, color: 'bg-teal-100 text-teal-600', active: 'bg-teal-500 text-white', cat: 'Sepatu' },
+    { label: 'Aksesoris', icon: Watch, color: 'bg-amber-100 text-amber-600', active: 'bg-amber-500 text-white', cat: 'Aksesoris' },
+    { label: 'Kuliner', icon: UtensilsCrossed, color: 'bg-rose-100 text-rose-600', active: 'bg-rose-500 text-white', cat: 'Kuliner' },
+    { label: 'Flash Sale', icon: Percent, color: 'bg-red-100 text-red-600', active: 'bg-red-500 text-white', cat: '' },
+    { label: 'Brand Lokal', icon: Tag, color: 'bg-green-100 text-green-600', active: 'bg-green-500 text-white', cat: '' },
+];
 </script>
 
 <template>
@@ -362,6 +426,34 @@ function openProductDetail(product: any) {
                     </div>
                 </div>
             </div>
+
+            <!-- ── Category Quick-Menu ── -->
+            <Card class="overflow-hidden rounded-2xl border-black/6 shadow-xs">
+                <div class="flex items-center gap-2 border-b border-black/6 px-4 py-3">
+                    <Flame class="h-4 w-4 fill-rose-500 text-rose-500" />
+                    <span class="text-xs font-extrabold text-[#1c1c22]">Jelajahi Kategori</span>
+                </div>
+                <div class="grid grid-cols-4 divide-x divide-y divide-black/6 sm:grid-cols-8">
+                    <button
+                        v-for="item in categoryMenu"
+                        :key="item.label"
+                        @click="item.cat ? setCategory(item.cat) : null"
+                        class="group flex flex-col items-center gap-2 px-2 py-4 transition-all hover:bg-[#faf9f6] sm:px-3"
+                        :class="selectedCat === item.cat && item.cat ? 'bg-[#fdf0e4]' : ''"
+                    >
+                        <div
+                            class="flex h-11 w-11 items-center justify-center rounded-2xl transition-all group-hover:scale-105"
+                            :class="selectedCat === item.cat && item.cat ? item.active : item.color"
+                        >
+                            <component :is="item.icon" class="h-5 w-5" />
+                        </div>
+                        <span
+                            class="text-center text-[10px] font-semibold leading-tight sm:text-xs"
+                            :class="selectedCat === item.cat && item.cat ? 'text-[#e07c28]' : 'text-[#4a4a57]'"
+                        >{{ item.label }}</span>
+                    </button>
+                </div>
+            </Card>
 
             <!-- ── Stats Strip ── -->
             <div class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
@@ -473,7 +565,7 @@ function openProductDetail(product: any) {
                     <Card class="p-4">
                         <p class="mb-3 text-xs font-extrabold tracking-widest text-[#9090a0] uppercase">Toko Unggulan</p>
                         <div class="flex flex-col gap-3">
-                            <div v-for="(store, i) in displayStores.slice(0, 4)" :key="i" class="flex items-center gap-2.5 cursor-pointer rounded-xl px-2 py-1.5 transition-all hover:bg-[#f5f4f0]">
+                            <div v-for="(store, i) in displayStores.slice(0, 4)" :key="i" @click="visitStoreBySlug(store)" class="flex items-center gap-2.5 cursor-pointer rounded-xl px-2 py-1.5 transition-all hover:bg-[#f5f4f0]">
                                 <Avatar :fallback="store.avatar" :hue="store.hue" size="sm" />
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate text-xs font-bold text-[#1c1c22]">{{ store.name }}</p>
@@ -520,15 +612,60 @@ function openProductDetail(product: any) {
 
                     <!-- Product Grid -->
                     <div
-                        v-if="filteredProducts.length > 0"
+                        v-if="displayedProducts.length > 0"
                         class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
                     >
                         <ProductCard
-                            v-for="p in filteredProducts"
+                            v-for="p in displayedProducts"
                             :key="p.id"
                             :product="p"
                             @click="openProductDetail(p)"
+                            @add-to-cart="addToCart"
                         />
+                    </div>
+
+                    <!-- ── DESKTOP PAGINATION ── -->
+                    <div v-if="filteredProducts.length > 0 && totalPages > 1" class="hidden md:flex items-center justify-center gap-1.5 py-4">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            class="h-8 w-8 p-0 rounded-lg text-xs"
+                            :disabled="currentPage === 1"
+                            @click="setPage(currentPage - 1)"
+                        >
+                            <ChevronLeftIcon class="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                            v-for="page in totalPages"
+                            :key="page"
+                            :variant="currentPage === page ? 'amber' : 'outline'"
+                            size="sm"
+                            class="h-8 w-8 p-0 rounded-lg text-xs font-bold"
+                            @click="setPage(page)"
+                        >
+                            {{ page }}
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            class="h-8 w-8 p-0 rounded-lg text-xs"
+                            :disabled="currentPage === totalPages"
+                            @click="setPage(currentPage + 1)"
+                        >
+                            <ChevronRightIcon class="h-4 w-4" />
+                        </Button>
+                    </div>
+
+                    <!-- ── MOBILE AUTO-FETCH (INFINITE SCROLL) ── -->
+                    <div v-if="filteredProducts.length > 0" class="md:hidden flex flex-col items-center justify-center py-3">
+                        <div v-if="isLoadingMore" class="flex items-center gap-2 py-3 text-xs font-bold text-[#e07c28]">
+                            <Loader2 class="h-4 w-4 animate-spin text-[#e07c28]" />
+                            <span>Memuat produk lainnya...</span>
+                        </div>
+                        <div v-else-if="hasMoreMobile" ref="loadMoreTriggerRef" class="h-6 w-full" />
+                        <p v-else class="text-[11px] text-[#9090a0] py-2">Semua produk sudah ditampilkan</p>
                     </div>
 
                     <div v-else class="rounded-2xl bg-white py-16 text-center shadow-sm">
@@ -542,7 +679,7 @@ function openProductDetail(product: any) {
                         <h2 class="mb-3 text-sm font-bold text-[#1c1c22]">Toko Rekomendasi</h2>
                         <div class="w-full overflow-x-auto">
                             <div class="flex w-max gap-3 pb-2">
-                                <Card v-for="(store, i) in displayStores" :key="i" class="flex w-36 shrink-0 cursor-pointer flex-col items-center p-4 text-center transition-all hover:-translate-y-1 hover:shadow-md">
+                                <Card v-for="(store, i) in displayStores" :key="i" @click="visitStoreBySlug(store)" class="flex w-36 shrink-0 cursor-pointer flex-col items-center p-4 text-center transition-all hover:-translate-y-1 hover:shadow-md">
                                     <Avatar :fallback="store.avatar" :hue="store.hue" size="lg" class="mb-3" />
                                     <p class="mb-0.5 text-xs font-bold text-[#1c1c22]">{{ store.name }}</p>
                                     <p class="mb-2 text-[10px] text-[#9090a0]">{{ store.orders }} pesanan</p>

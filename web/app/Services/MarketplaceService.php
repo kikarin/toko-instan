@@ -22,9 +22,11 @@ class MarketplaceService
                 'id' => $product->id,
                 'name' => $product->name,
                 'price' => 'Rp '.number_format($product->price, 0, ',', '.'),
+                'priceNum' => (int) $product->price,
                 'sold' => $product->sold,
                 'rating' => (float) $product->rating,
                 'store' => $product->store ? $product->store->name : 'Official Store',
+                'storeSlug' => $product->store?->slug,
                 'img' => $product->img,
                 'tag' => $product->tag,
                 'cat' => $product->category,
@@ -34,6 +36,7 @@ class MarketplaceService
         $topStores = $this->storeRepository->getTopSellers(5)->map(function ($store) {
             return [
                 'name' => $store->name,
+                'slug' => $store->slug,
                 'orders' => $store->total_orders,
                 'rating' => (float) $store->rating,
                 'badge' => $store->badge,

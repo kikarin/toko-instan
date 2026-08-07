@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckoutController;
@@ -8,6 +9,10 @@ use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StorePageController;
+use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 // Guest (public) routes
@@ -22,11 +27,17 @@ Route::middleware(['guest'])->group(function () {
 // Authenticated routes (any role)
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 // Buyer area
 Route::middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
+    Route::get('/account', [AccountController::class, 'show'])->name('account');
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::get('/store/{slug}', [StorePageController::class, 'show'])->name('store.show');
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout', [CheckoutController::class, 'store']);
     Route::get('/orders/{orderNumber}/success', [CheckoutController::class, 'success'])->name('orders.success');
@@ -36,7 +47,6 @@ Route::middleware(['auth', 'role:buyer'])->group(function () {
 // Seller area
 Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');

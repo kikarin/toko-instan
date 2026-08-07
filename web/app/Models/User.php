@@ -17,7 +17,13 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
         'email',
+        'bio',
+        'phone',
+        'phone_verified_at',
+        'gender',
+        'birth_date',
         'password',
         'role',
         'firebase_uid',
@@ -52,6 +58,14 @@ class User extends Authenticatable
     public function primaryTenant(): HasOne
     {
         return $this->hasOne(Tenant::class)->latestOfMany();
+    }
+
+    /**
+     * @return HasMany<Order, $this>
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'customer_email', 'email');
     }
 
     public function isSeller(): bool

@@ -13,6 +13,11 @@ class StoreRepository
         return Store::first();
     }
 
+    public function findBySlug(string $slug): ?Store
+    {
+        return Store::where('slug', $slug)->first();
+    }
+
     /**
      * @return Collection<int, Store>
      */

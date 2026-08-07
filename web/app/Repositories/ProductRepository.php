@@ -16,11 +16,28 @@ class ProductRepository
         $query = Product::with('store')->where('is_active', true);
 
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                    ->orWhereHas('store', function ($sq) use ($search) {
-                        $sq->where('name', 'ilike', "%{$search}%");
+            $searchLower = mb_strtolower(trim($search));
+            $words = array_filter(explode(' ', $searchLower));
+
+            $query->where(function ($q) use ($searchLower, $words) {
+                // Exact full search phrase match on name, category, tag, or store name
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"])
+                    ->orWhereRaw('LOWER(category) LIKE ?', ["%{$searchLower}%"])
+                    ->orWhereRaw('LOWER(tag) LIKE ?', ["%{$searchLower}%"])
+                    ->orWhereHas('store', function ($sq) use ($searchLower) {
+                        $sq->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"]);
                     });
+
+                // Tokenized individual word matches
+                foreach ($words as $word) {
+                    $wordLower = mb_strtolower($word);
+                    $q->orWhereRaw('LOWER(name) LIKE ?', ["%{$wordLower}%"])
+                        ->orWhereRaw('LOWER(category) LIKE ?', ["%{$wordLower}%"])
+                        ->orWhereRaw('LOWER(tag) LIKE ?', ["%{$wordLower}%"])
+                        ->orWhereHas('store', function ($sq) use ($wordLower) {
+                            $sq->whereRaw('LOWER(name) LIKE ?', ["%{$wordLower}%"]);
+                        });
+                }
             });
         }
 

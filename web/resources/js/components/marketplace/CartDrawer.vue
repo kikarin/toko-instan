@@ -63,7 +63,7 @@ function handleOpenChange(open: boolean) {
 
 <template>
     <Sheet :open="isOpen" @update:open="handleOpenChange">
-        <SheetContent side="right" class="flex w-full max-w-md flex-col gap-0 p-0">
+        <SheetContent side="right" class="flex w-[85vw] max-w-md flex-col gap-0 p-0 sm:w-full">
             <!-- Sheet Header -->
             <SheetHeader class="border-b border-black/8 bg-[#faf9f6] px-5 py-4">
                 <div class="flex items-center gap-2.5">

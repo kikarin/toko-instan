@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Heart, Star, ShoppingBag } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { Heart, Star, ShoppingCart } from 'lucide-vue-next';
+import { toast } from '@/components/ui/sonner';
+import { useWishlist } from '@/lib/useWishlist';
 
 interface Product {
     id: number;
@@ -22,10 +23,22 @@ interface Props {
     product: Product;
 }
 
-defineProps<Props>();
-const emit = defineEmits<{ (e: 'click'): void }>();
+const props = defineProps<Props>();
+const emit = defineEmits<{
+    (e: 'click'): void;
+    (e: 'add-to-cart', product: Product): void;
+}>();
 
-const isLiked = ref(false);
+const { isInWishlist, toggleWishlist } = useWishlist();
+
+function handleToggleWishlist() {
+    const added = toggleWishlist(props.product);
+    if (added) {
+        toast.success(`${props.product.name} ditambahkan ke Wishlist!`);
+    } else {
+        toast.info(`${props.product.name} dihapus dari Wishlist`);
+    }
+}
 
 // Format sold count like Tokopedia: 1.2rb, 24rb, 1jt+
 function formatSold(n: number): string {
@@ -71,13 +84,22 @@ function formatSold(n: number): string {
 
             <!-- Wishlist button — top right -->
             <button
-                @click.stop="isLiked = !isLiked"
+                @click.stop="handleToggleWishlist"
                 class="absolute top-1.5 right-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-transform active:scale-90"
             >
                 <Heart
                     class="h-3.5 w-3.5 transition-colors"
-                    :class="isLiked ? 'fill-[#e0405a] text-[#e0405a]' : 'text-[#c8c8d5]'"
+                    :class="isInWishlist(product.id) ? 'fill-[#e0405a] text-[#e0405a]' : 'text-[#c8c8d5]'"
                 />
+            </button>
+
+            <!-- Add to cart button — bottom right -->
+            <button
+                title="Tambah ke keranjang"
+                @click.stop="emit('add-to-cart', props.product)"
+                class="absolute right-1.5 bottom-1.5 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[#1c1c22] text-white shadow-md backdrop-blur-sm transition-all hover:bg-[#e07c28] active:scale-90"
+            >
+                <ShoppingCart class="h-3.5 w-3.5" />
             </button>
 
             <!-- Free shipping label — bottom -->
