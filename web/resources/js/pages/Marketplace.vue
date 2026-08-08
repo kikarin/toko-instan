@@ -12,13 +12,9 @@ import {
     ShieldCheck,
     RotateCcw,
     Shirt,
-    Cpu,
     Footprints,
     Watch,
-    UtensilsCrossed,
     ShoppingBag,
-    Tag,
-    Percent,
     Loader2,
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon,
@@ -28,7 +24,6 @@ import CartDrawer from '@/components/marketplace/CartDrawer.vue';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
 import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue';
 import type { ProductDetail } from '@/components/marketplace/ProductDetailModal.vue';
-import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -173,50 +168,6 @@ const defaultProducts = [
 
 const displayProducts = computed(() => props.products || defaultProducts);
 
-const defaultStores = [
-    {
-        name: 'NovaBatik Studio',
-        orders: 412,
-        rating: 4.9,
-        badge: 'top' as const,
-        avatar: 'NB',
-        hue: 220,
-    },
-    {
-        name: 'KuliKain Official',
-        orders: 318,
-        rating: 4.8,
-        badge: 'pro' as const,
-        avatar: 'KK',
-        hue: 280,
-    },
-    {
-        name: 'Jaya Elektronik',
-        orders: 287,
-        rating: 4.7,
-        badge: null,
-        avatar: 'JE',
-        hue: 190,
-    },
-    {
-        name: 'Warung Digital ID',
-        orders: 234,
-        rating: 4.6,
-        badge: null,
-        avatar: 'WD',
-        hue: 150,
-    },
-    {
-        name: 'Mode Nusantara',
-        orders: 198,
-        rating: 4.5,
-        badge: null,
-        avatar: 'MN',
-        hue: 30,
-    },
-];
-
-const displayStores = computed(() => props.stores || defaultStores);
 const displayCategories = computed(
     () =>
         props.categories || [
@@ -257,7 +208,6 @@ const filteredProducts = computed(() => {
 });
 
 const {
-    isMobile,
     currentPage,
     totalPages,
     displayedProducts,
@@ -331,12 +281,6 @@ function goCheckout() {
 
 function openProductDetail(product: any) {
     activeProductModal.value = product;
-}
-
-function visitStoreBySlug(store: any) {
-    const slug =
-        store.slug || store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    router.visit(`/store/${slug}`);
 }
 
 const categoryMenu = [

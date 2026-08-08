@@ -21,7 +21,9 @@ export function useStoreTheme(themeOverride?: ThemePayload | null) {
     const page = usePage();
 
     const current = computed<ThemeColors>(() => {
-        const themeData = themeOverride ?? (page.props.theme as ThemePayload | undefined);
+        const themeData =
+            themeOverride ?? (page.props.theme as ThemePayload | undefined);
+
         return computedTheme(themeData);
     });
 
@@ -55,7 +57,10 @@ function computedTheme(theme?: ThemePayload | null): ThemeColors {
 }
 
 function applyThemeEffect(colors: ThemeColors): void {
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined') {
+        return;
+    }
+
     const root = document.documentElement;
 
     root.style.setProperty('--brand', colors.primary);

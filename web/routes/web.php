@@ -68,6 +68,8 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/store-settings', [StoreSettingsController::class, 'edit'])->name('store-settings.edit');
     Route::put('/store-settings', [StoreSettingsController::class, 'update'])->name('store-settings.update');
+    Route::get('/store-cms', [StoreCmsController::class, 'edit'])->name('store-cms.edit');
+    Route::put('/store-cms', [StoreCmsController::class, 'update'])->name('store-cms.update');
     Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');

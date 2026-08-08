@@ -9,12 +9,10 @@ import {
     Truck,
     Heart,
     Store,
-    ChevronRight,
     Package,
     BadgeCheck,
     ThumbsUp,
     ArrowRight,
-    X,
     Share2,
 } from 'lucide-vue-next';
 import { ref, watch, computed } from 'vue';
@@ -898,9 +896,7 @@ const ratingBreakdown = [
                                         </div>
                                         <span class="text-xs text-[#9090a0]"
                                             >dari
-                                            {{
-                                                mockReviews.length
-                                            }}
+                                            {{ mockReviews.length }}
                                             ulasan</span
                                         >
                                     </div>

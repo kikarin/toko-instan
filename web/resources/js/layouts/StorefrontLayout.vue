@@ -8,7 +8,6 @@ import {
     LogIn,
     ReceiptText,
     X,
-    Menu,
     Home,
     LayoutGrid,
     ClipboardList,
