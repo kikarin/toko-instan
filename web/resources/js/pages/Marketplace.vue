@@ -12,9 +12,13 @@ import {
     ShieldCheck,
     RotateCcw,
     Shirt,
+    Cpu,
     Footprints,
     Watch,
+    UtensilsCrossed,
     ShoppingBag,
+    Tag,
+    Percent,
     Loader2,
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon,
@@ -24,6 +28,7 @@ import CartDrawer from '@/components/marketplace/CartDrawer.vue';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
 import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue';
 import type { ProductDetail } from '@/components/marketplace/ProductDetailModal.vue';
+import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -168,6 +173,50 @@ const defaultProducts = [
 
 const displayProducts = computed(() => props.products || defaultProducts);
 
+const defaultStores = [
+    {
+        name: 'NovaBatik Studio',
+        orders: 412,
+        rating: 4.9,
+        badge: 'top' as const,
+        avatar: 'NB',
+        hue: 220,
+    },
+    {
+        name: 'KuliKain Official',
+        orders: 318,
+        rating: 4.8,
+        badge: 'pro' as const,
+        avatar: 'KK',
+        hue: 280,
+    },
+    {
+        name: 'Jaya Elektronik',
+        orders: 287,
+        rating: 4.7,
+        badge: null,
+        avatar: 'JE',
+        hue: 190,
+    },
+    {
+        name: 'Warung Digital ID',
+        orders: 234,
+        rating: 4.6,
+        badge: null,
+        avatar: 'WD',
+        hue: 150,
+    },
+    {
+        name: 'Mode Nusantara',
+        orders: 198,
+        rating: 4.5,
+        badge: null,
+        avatar: 'MN',
+        hue: 30,
+    },
+];
+
+const displayStores = computed(() => props.stores || defaultStores);
 const displayCategories = computed(
     () =>
         props.categories || [
@@ -208,6 +257,7 @@ const filteredProducts = computed(() => {
 });
 
 const {
+    isMobile,
     currentPage,
     totalPages,
     displayedProducts,
@@ -283,6 +333,12 @@ function openProductDetail(product: any) {
     activeProductModal.value = product;
 }
 
+function visitStoreBySlug(store: any) {
+    const slug =
+        store.slug || store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    router.visit(`/store/${slug}`);
+}
+
 const categoryMenu = [
     {
         label: 'Semua',
@@ -308,8 +364,8 @@ const categoryMenu = [
     {
         label: 'Apparel',
         icon: Shirt,
-        color: 'bg-violet-100 text-violet-600',
-        active: 'bg-violet-600 text-white',
+        color: 'bg-(--brand-soft) text-(--brand-secondary)',
+        active: 'bg-(--brand-secondary) text-white',
         cat: 'Apparel',
     },
     {
@@ -341,20 +397,35 @@ const categoryMenu = [
         <main
             class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 px-3 pt-3 pb-28 sm:gap-6 sm:p-6"
         >
-            <!-- ── Hero Banner ── -->
+            <!-- ── Dynamic 4-Hex Theme Hero Banner ── -->
             <div
-                class="relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-black/10 bg-gradient-to-r from-zinc-900 via-black to-zinc-800 p-5 text-white shadow-md sm:gap-6 sm:rounded-3xl sm:p-8 md:flex-row md:items-center"
+                class="relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-black/10 bg-zinc-900 p-5 text-white shadow-xl sm:gap-6 sm:rounded-3xl sm:p-8 md:flex-row md:items-center"
             >
-                <!-- Decorative background accent -->
+                <!-- Ambient 4-Hex Glows -->
                 <div
-                    class="pointer-events-none absolute -top-16 -right-16 hidden h-64 w-64 rounded-full bg-white/5 md:block"
+                    class="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full opacity-40 blur-3xl"
+                    :style="{
+                        background:
+                            'linear-gradient(135deg, var(--brand), var(--brand-secondary))',
+                    }"
+                />
+                <div
+                    class="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full opacity-35 blur-3xl"
+                    :style="{
+                        background:
+                            'linear-gradient(135deg, var(--brand-accent), var(--brand-strong))',
+                    }"
                 />
 
                 <div class="relative z-10">
                     <p
-                        class="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest text-amber-400 uppercase sm:mb-1.5 sm:text-xs"
+                        class="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest uppercase sm:mb-1.5 sm:text-xs"
+                        :style="{ color: 'var(--brand-accent)' }"
                     >
-                        <ShieldCheck class="h-4 w-4 text-emerald-400" />
+                        <ShieldCheck
+                            class="h-4 w-4"
+                            :style="{ color: 'var(--brand-secondary)' }"
+                        />
                         Nike Official Store Indonesia · 100% Original
                     </p>
                     <h1
@@ -362,9 +433,11 @@ const categoryMenu = [
                     >
                         JUST DO IT.
                         <span
-                            class="mt-1 block text-lg font-bold text-amber-400 normal-case sm:text-2xl"
-                            >Koleksi Terbaru Sepatu & Clothing Nike</span
+                            class="mt-1 block text-lg font-bold normal-case sm:text-2xl"
+                            :style="{ color: 'var(--brand-accent)' }"
                         >
+                            Koleksi Terbaru Sepatu & Clothing Nike
+                        </span>
                     </h1>
                     <p class="mt-2 max-w-xl text-xs text-zinc-300">
                         Dapatkan sepatu sneakers, running, apparel Dri-FIT, &
@@ -378,7 +451,11 @@ const categoryMenu = [
                             class="cursor-pointer border-white/20 bg-white/10 text-white hover:bg-white/20"
                         >
                             <Flame
-                                class="mr-1.5 h-3.5 w-3.5 fill-rose-400 text-rose-400"
+                                class="mr-1.5 h-3.5 w-3.5"
+                                :style="{
+                                    color: 'var(--brand-strong)',
+                                    fill: 'var(--brand-strong)',
+                                }"
                             />
                             Hot Release
                         </Badge>
@@ -387,7 +464,8 @@ const categoryMenu = [
                             class="cursor-pointer border-white/20 bg-white/10 text-white hover:bg-white/20"
                         >
                             <Sparkles
-                                class="mr-1.5 h-3.5 w-3.5 text-amber-400"
+                                class="mr-1.5 h-3.5 w-3.5"
+                                :style="{ color: 'var(--brand-accent)' }"
                             />
                             Garansi Retur 30 Hari
                         </Badge>
@@ -396,7 +474,8 @@ const categoryMenu = [
                             class="cursor-pointer border-white/20 bg-white/10 text-white hover:bg-white/20"
                         >
                             <Truck
-                                class="mr-1.5 h-3.5 w-3.5 text-emerald-400"
+                                class="mr-1.5 h-3.5 w-3.5"
+                                :style="{ color: 'var(--brand-secondary)' }"
                             />
                             Bebas Ongkir
                         </Badge>
@@ -427,8 +506,8 @@ const categoryMenu = [
                         variant="outline"
                         class="cursor-pointer border-black/10 bg-white text-[#4a4a57]"
                     >
-                        <Truck class="mr-1 h-3 w-3 text-teal-500" /> Gratis
-                        Ongkir
+                        <Truck class="mr-1 h-3 w-3 text-(--brand-secondary)" />
+                        Gratis Ongkir
                     </Badge>
                 </div>
 
@@ -437,65 +516,83 @@ const categoryMenu = [
                     class="relative z-10 hidden flex-col items-end gap-3 md:flex"
                 >
                     <div
-                        class="rounded-2xl border border-[#e07c2825] bg-white p-4 shadow-sm"
+                        class="rounded-2xl border border-white/10 bg-white/10 p-4 text-white shadow-md backdrop-blur-md"
                     >
                         <p
-                            class="mb-1 text-[10px] tracking-widest text-[#9090a0] uppercase"
+                            class="mb-1 text-[10px] font-extrabold tracking-widest text-zinc-300 uppercase"
                         >
                             Belanja Aman
                         </p>
                         <div
-                            class="flex items-center gap-2 text-sm font-bold text-[#1c1c22]"
+                            class="flex items-center gap-2 text-sm font-black text-white"
                         >
-                            <ShieldCheck class="h-5 w-5 text-[#22a15a]" />
+                            <ShieldCheck
+                                class="h-5 w-5"
+                                :style="{ color: 'var(--brand-accent)' }"
+                            />
                             Escrow & Buyer Protection
                         </div>
-                        <p class="mt-1 text-[10px] text-[#9090a0]">
+                        <p class="mt-1 text-[10px] text-zinc-300">
                             Uang kembali jika barang tidak sesuai
                         </p>
                     </div>
                     <div class="flex gap-2">
                         <div
-                            class="rounded-xl border border-black/8 bg-white px-3 py-2 text-center shadow-xs"
+                            class="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-center shadow-xs backdrop-blur-md"
                         >
                             <p
-                                class="font-mono text-lg font-extrabold text-[#e07c28]"
+                                class="font-mono text-lg font-black"
+                                :style="{ color: 'var(--brand)' }"
                             >
-                                {{ props.stats?.total_products || '8.3rb' }}
+                                {{ props.stats?.total_products || '23' }}
                             </p>
-                            <p class="text-[10px] text-[#9090a0]">Produk</p>
+                            <p class="text-[10px] font-bold text-zinc-300">
+                                Produk
+                            </p>
                         </div>
                         <div
-                            class="rounded-xl border border-black/8 bg-white px-3 py-2 text-center shadow-xs"
+                            class="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-center shadow-xs backdrop-blur-md"
                         >
                             <p
-                                class="font-mono text-lg font-extrabold text-[#6d4fc2]"
+                                class="font-mono text-lg font-black"
+                                :style="{ color: 'var(--brand-secondary)' }"
                             >
-                                {{ props.stats?.active_stores || '1.2rb' }}
+                                {{ props.stats?.active_stores || '1' }}
                             </p>
-                            <p class="text-[10px] text-[#9090a0]">Toko</p>
+                            <p class="text-[10px] font-bold text-zinc-300">
+                                Toko
+                            </p>
                         </div>
                         <div
-                            class="rounded-xl border border-black/8 bg-white px-3 py-2 text-center shadow-xs"
+                            class="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-center shadow-xs backdrop-blur-md"
                         >
                             <p
-                                class="font-mono text-lg font-extrabold text-[#22a15a]"
+                                class="font-mono text-lg font-black"
+                                :style="{ color: 'var(--brand-strong)' }"
                             >
                                 54rb+
                             </p>
-                            <p class="text-[10px] text-[#9090a0]">Pembeli</p>
+                            <p class="text-[10px] font-bold text-zinc-300">
+                                Pembeli
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ── Category Quick-Menu ── -->
-            <Card class="overflow-hidden rounded-2xl border-black/6 shadow-xs">
+            <!-- ── Dynamic 4-Hex Category Quick-Menu ── -->
+            <Card class="overflow-hidden rounded-2xl border-black/8 shadow-xs">
                 <div
-                    class="flex items-center gap-2 border-b border-black/6 px-4 py-3"
+                    class="flex items-center gap-2 border-b border-black/6 bg-[#faf9f6] px-4 py-3"
                 >
-                    <Flame class="h-4 w-4 fill-rose-500 text-rose-500" />
-                    <span class="text-xs font-extrabold text-[#1c1c22]"
+                    <Flame
+                        class="h-4 w-4"
+                        :style="{
+                            color: 'var(--brand-strong)',
+                            fill: 'var(--brand-strong)',
+                        }"
+                    />
+                    <span class="text-xs font-black text-[#1c1c22]"
                         >Jelajahi Kategori</span
                     >
                 </div>
@@ -506,118 +603,174 @@ const categoryMenu = [
                         v-for="item in categoryMenu"
                         :key="item.label"
                         @click="item.cat ? setCategory(item.cat) : null"
-                        class="group flex flex-col items-center gap-2 px-2 py-4 transition-all hover:bg-[#faf9f6] sm:px-3"
-                        :class="
+                        class="group flex cursor-pointer flex-col items-center gap-2 px-2 py-4 transition-all hover:bg-[#faf9f6] sm:px-3"
+                        :style="
                             selectedCat === item.cat && item.cat
-                                ? 'bg-[#fdf0e4]'
-                                : ''
+                                ? { backgroundColor: 'var(--brand-soft)' }
+                                : {}
                         "
                     >
                         <div
-                            class="flex h-11 w-11 items-center justify-center rounded-2xl transition-all group-hover:scale-105"
-                            :class="
+                            class="flex h-11 w-11 items-center justify-center rounded-2xl shadow-xs transition-all group-hover:scale-105"
+                            :style="
                                 selectedCat === item.cat && item.cat
-                                    ? item.active
-                                    : item.color
+                                    ? {
+                                          background:
+                                              'linear-gradient(135deg, var(--brand), var(--brand-secondary))',
+                                          color: '#ffffff',
+                                      }
+                                    : {
+                                          backgroundColor: 'var(--brand-soft)',
+                                          color: 'var(--brand)',
+                                      }
                             "
                         >
                             <component :is="item.icon" class="h-5 w-5" />
                         </div>
                         <span
-                            class="text-center text-[10px] leading-tight font-semibold sm:text-xs"
-                            :class="
-                                selectedCat === item.cat && item.cat
-                                    ? 'text-[#e07c28]'
-                                    : 'text-[#4a4a57]'
-                            "
+                            class="text-center text-[10px] leading-tight font-bold sm:text-xs"
+                            :style="{
+                                color:
+                                    selectedCat === item.cat && item.cat
+                                        ? 'var(--brand-strong)'
+                                        : '#4a4a57',
+                            }"
                             >{{ item.label }}</span
                         >
                     </button>
                 </div>
             </Card>
 
-            <!-- ── Stats Strip ── -->
+            <!-- ── Dynamic 4-Hex Theme Stats Strip (Vibrant Solid Color Gradients) ── -->
             <div class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-                <Card class="flex items-center gap-3 p-3 sm:gap-3.5 sm:p-4">
+                <Card
+                    class="relative flex cursor-pointer items-center gap-3 overflow-hidden rounded-2xl border-none p-3.5 text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl sm:p-4"
+                    :style="{
+                        background:
+                            'linear-gradient(135deg, var(--brand), var(--brand-secondary))',
+                    }"
+                >
                     <div
-                        class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e07c2830] bg-[#e07c281a] text-[#e07c28] sm:h-10 sm:w-10"
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 font-black text-white shadow-xs backdrop-blur-md"
                     >
-                        <Package class="h-4 w-4 sm:h-5 sm:w-5" />
+                        <Package class="h-6 w-6" />
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <p
-                            class="font-mono text-base leading-none font-extrabold text-[#1c1c22] sm:text-xl"
+                            class="truncate font-mono text-lg font-black text-white sm:text-2xl"
                         >
-                            {{ props.stats?.total_products || '8.341' }}
+                            {{ props.stats?.total_products || '23' }}
                         </p>
-                        <p class="mt-1 text-[10px] text-[#9090a0] sm:text-xs">
+                        <p
+                            class="mt-0.5 truncate text-[11px] font-bold text-white/90 sm:text-xs"
+                        >
                             Total Produk
                         </p>
                     </div>
                 </Card>
-                <Card class="flex items-center gap-3 p-3 sm:gap-3.5 sm:p-4">
+
+                <Card
+                    class="relative flex cursor-pointer items-center gap-3 overflow-hidden rounded-2xl border-none p-3.5 text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl sm:p-4"
+                    :style="{
+                        background:
+                            'linear-gradient(135deg, var(--brand-secondary), var(--brand-accent))',
+                    }"
+                >
                     <div
-                        class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#3b82f630] bg-[#3b82f61a] text-[#3b82f6] sm:h-10 sm:w-10"
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 font-black text-white shadow-xs backdrop-blur-md"
                     >
-                        <StoreIcon class="h-4 w-4 sm:h-5 sm:w-5" />
+                        <StoreIcon class="h-6 w-6" />
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <p
-                            class="font-mono text-base leading-none font-extrabold text-[#1c1c22] sm:text-xl"
+                            class="truncate font-mono text-lg font-black text-white sm:text-2xl"
                         >
-                            {{ props.stats?.active_stores || '1.240' }}
+                            {{ props.stats?.active_stores || '1' }}
                         </p>
-                        <p class="mt-1 text-[10px] text-[#9090a0] sm:text-xs">
+                        <p
+                            class="mt-0.5 truncate text-[11px] font-bold text-white/90 sm:text-xs"
+                        >
                             Toko Aktif
                         </p>
                     </div>
                 </Card>
-                <Card class="flex items-center gap-3 p-3 sm:gap-3.5 sm:p-4">
+
+                <Card
+                    class="relative flex cursor-pointer items-center gap-3 overflow-hidden rounded-2xl border-none p-3.5 text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl sm:p-4"
+                    :style="{
+                        background:
+                            'linear-gradient(135deg, var(--brand-accent), var(--brand-strong))',
+                    }"
+                >
                     <div
-                        class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#22a15a30] bg-[#22a15a1a] text-[#22a15a] sm:h-10 sm:w-10"
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 font-black text-white shadow-xs backdrop-blur-md"
                     >
-                        <TrendingUp class="h-4 w-4 sm:h-5 sm:w-5" />
+                        <TrendingUp class="h-6 w-6" />
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <p
-                            class="font-mono text-base leading-none font-extrabold text-[#1c1c22] sm:text-xl"
+                            class="truncate font-mono text-lg font-black text-white sm:text-2xl"
                         >
                             312
                         </p>
-                        <p class="mt-1 text-[10px] text-[#9090a0] sm:text-xs">
+                        <p
+                            class="mt-0.5 truncate text-[11px] font-bold text-white/90 sm:text-xs"
+                        >
                             Terjual Hari Ini
                         </p>
                     </div>
                 </Card>
-                <Card class="flex items-center gap-3 p-3 sm:gap-3.5 sm:p-4">
+
+                <Card
+                    class="relative flex cursor-pointer items-center gap-3 overflow-hidden rounded-2xl border-none p-3.5 text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl sm:p-4"
+                    :style="{
+                        background:
+                            'linear-gradient(135deg, var(--brand-strong), var(--brand))',
+                    }"
+                >
                     <div
-                        class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#6d4fc230] bg-[#6d4fc21a] text-[#6d4fc2] sm:h-10 sm:w-10"
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 font-black text-white shadow-xs backdrop-blur-md"
                     >
-                        <Users class="h-4 w-4 sm:h-5 sm:w-5" />
+                        <Users class="h-6 w-6" />
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <p
-                            class="font-mono text-base leading-none font-extrabold text-[#1c1c22] sm:text-xl"
+                            class="truncate font-mono text-lg font-black text-white sm:text-2xl"
                         >
                             54.921
                         </p>
-                        <p class="mt-1 text-[10px] text-[#9090a0] sm:text-xs">
+                        <p
+                            class="mt-0.5 truncate text-[11px] font-bold text-white/90 sm:text-xs"
+                        >
                             Pembeli Aktif
                         </p>
                     </div>
                 </Card>
             </div>
 
-            <!-- ── Main content: sidebar (desktop) + product grid ── -->
-            <div class="flex gap-6">
-                <!-- ─ Sidebar Filter — DESKTOP ONLY ─ -->
-                <aside
-                    class="hidden w-56 shrink-0 flex-col gap-4 lg:flex xl:w-64"
-                >
+            <!-- ── Main Grid Section ── -->
+            <div class="flex flex-col gap-6 lg:flex-row">
+                <!-- ─ Left Sidebar Filters (Desktop) ─ -->
+                <aside class="hidden w-64 shrink-0 flex-col gap-4 lg:flex">
                     <!-- Category filter -->
-                    <Card class="p-4">
+                    <Card
+                        class="relative overflow-hidden rounded-2xl border-2 p-4 shadow-md transition-all duration-300"
+                        :style="{
+                            background:
+                                'linear-gradient(180deg, #ffffff 40%, var(--brand-soft) 100%)',
+                            borderColor: 'var(--brand-soft)',
+                        }"
+                    >
+                        <div
+                            class="absolute top-0 right-0 left-0 h-1.5"
+                            :style="{
+                                background:
+                                    'linear-gradient(90deg, var(--brand), var(--brand-secondary))',
+                            }"
+                        />
                         <p
-                            class="mb-3 text-xs font-extrabold tracking-widest text-[#9090a0] uppercase"
+                            class="mt-1 mb-3 text-xs font-black tracking-widest uppercase"
+                            :style="{ color: 'var(--brand-strong)' }"
                         >
                             Kategori
                         </p>
@@ -626,17 +779,25 @@ const categoryMenu = [
                                 v-for="cat in displayCategories"
                                 :key="cat"
                                 @click="setCategory(cat)"
-                                class="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-all"
+                                class="flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-black transition-all"
                                 :class="
                                     selectedCat === cat
-                                        ? 'bg-[#e07c28] font-bold text-white shadow-sm'
-                                        : 'text-[#4a4a57] hover:bg-[#f5f4f0]'
+                                        ? 'text-white shadow-lg'
+                                        : 'text-[#4a4a57] hover:bg-white/80'
+                                "
+                                :style="
+                                    selectedCat === cat
+                                        ? {
+                                              background:
+                                                  'linear-gradient(135deg, var(--brand), var(--brand-secondary))',
+                                          }
+                                        : {}
                                 "
                             >
                                 <span>{{ cat }}</span>
                                 <span
                                     v-if="selectedCat === cat"
-                                    class="text-[10px] font-bold text-white/80"
+                                    class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black text-white/90"
                                 >
                                     {{ filteredProducts.length }}
                                 </span>
@@ -645,9 +806,24 @@ const categoryMenu = [
                     </Card>
 
                     <!-- Price Range filter -->
-                    <Card class="p-4">
+                    <Card
+                        class="relative overflow-hidden rounded-2xl border-2 p-4 shadow-md transition-all duration-300"
+                        :style="{
+                            background:
+                                'linear-gradient(180deg, #ffffff 40%, var(--brand-soft) 100%)',
+                            borderColor: 'var(--brand-soft)',
+                        }"
+                    >
+                        <div
+                            class="absolute top-0 right-0 left-0 h-1.5"
+                            :style="{
+                                background:
+                                    'linear-gradient(90deg, var(--brand-secondary), var(--brand-accent))',
+                            }"
+                        />
                         <p
-                            class="mb-3 text-xs font-extrabold tracking-widest text-[#9090a0] uppercase"
+                            class="mt-1 mb-3 text-xs font-black tracking-widest uppercase"
+                            :style="{ color: 'var(--brand-strong)' }"
                         >
                             Harga
                         </p>
@@ -670,20 +846,40 @@ const categoryMenu = [
                                     },
                                 ]"
                                 :key="range.val"
-                                class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-[#4a4a57] transition-all hover:bg-[#f5f4f0]"
+                                class="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-[#4a4a57] transition-all hover:bg-white/80"
                             >
                                 <div
-                                    class="h-3.5 w-3.5 rounded-full border-2 border-black/20 bg-white"
-                                />
+                                    class="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[var(--brand)] bg-white shadow-xs"
+                                >
+                                    <div
+                                        class="h-1.5 w-1.5 rounded-full"
+                                        :style="{ background: 'var(--brand)' }"
+                                    />
+                                </div>
                                 {{ range.label }}
                             </button>
                         </div>
                     </Card>
 
                     <!-- Rating filter -->
-                    <Card class="p-4">
+                    <Card
+                        class="relative overflow-hidden rounded-2xl border-2 p-4 shadow-md transition-all duration-300"
+                        :style="{
+                            background:
+                                'linear-gradient(180deg, #ffffff 40%, var(--brand-soft) 100%)',
+                            borderColor: 'var(--brand-soft)',
+                        }"
+                    >
+                        <div
+                            class="absolute top-0 right-0 left-0 h-1.5"
+                            :style="{
+                                background:
+                                    'linear-gradient(90deg, var(--brand-accent), var(--brand-strong))',
+                            }"
+                        />
                         <p
-                            class="mb-3 text-xs font-extrabold tracking-widest text-[#9090a0] uppercase"
+                            class="mt-1 mb-3 text-xs font-black tracking-widest uppercase"
+                            :style="{ color: 'var(--brand-strong)' }"
                         >
                             Rating
                         </p>
@@ -691,7 +887,7 @@ const categoryMenu = [
                             <button
                                 v-for="r in [5, 4, 3]"
                                 :key="r"
-                                class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-all hover:bg-[#f5f4f0]"
+                                class="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left transition-all hover:bg-white/80"
                             >
                                 <div class="flex gap-0.5">
                                     <Star
@@ -705,7 +901,7 @@ const categoryMenu = [
                                         "
                                     />
                                 </div>
-                                <span class="text-xs text-[#4a4a57]"
+                                <span class="text-xs font-bold text-[#4a4a57]"
                                     >ke atas</span
                                 >
                             </button>
@@ -713,16 +909,26 @@ const categoryMenu = [
                     </Card>
 
                     <!-- Nike Official Advantages Sidebar -->
-                    <Card class="border-black/10 bg-zinc-900 p-4 text-white">
+                    <Card
+                        class="relative overflow-hidden border-black/10 bg-zinc-900 p-4 text-white"
+                    >
+                        <div
+                            class="absolute -top-6 -right-6 h-32 w-32 rounded-full opacity-30 blur-2xl"
+                            :style="{ background: 'var(--brand)' }"
+                        />
                         <p
-                            class="mb-3 text-xs font-black tracking-widest text-amber-400 uppercase"
+                            class="mb-3 text-xs font-black tracking-widest uppercase"
+                            :style="{ color: 'var(--brand-accent)' }"
                         >
                             Jaminan Official
                         </p>
-                        <div class="flex flex-col gap-3.5 text-xs">
+                        <div
+                            class="relative z-10 flex flex-col gap-3.5 text-xs"
+                        >
                             <div class="flex items-start gap-2.5">
                                 <ShieldCheck
-                                    class="mt-0.5 h-5 w-5 shrink-0 text-emerald-400"
+                                    class="mt-0.5 h-5 w-5 shrink-0"
+                                    :style="{ color: 'var(--brand-accent)' }"
                                 />
                                 <div>
                                     <p class="font-extrabold text-white">
@@ -735,7 +941,8 @@ const categoryMenu = [
                             </div>
                             <div class="flex items-start gap-2.5">
                                 <Truck
-                                    class="mt-0.5 h-5 w-5 shrink-0 text-amber-400"
+                                    class="mt-0.5 h-5 w-5 shrink-0"
+                                    :style="{ color: 'var(--brand-secondary)' }"
                                 />
                                 <div>
                                     <p class="font-extrabold text-white">
@@ -748,7 +955,8 @@ const categoryMenu = [
                             </div>
                             <div class="flex items-start gap-2.5">
                                 <RotateCcw
-                                    class="mt-0.5 h-5 w-5 shrink-0 text-rose-400"
+                                    class="mt-0.5 h-5 w-5 shrink-0"
+                                    :style="{ color: 'var(--brand-strong)' }"
                                 />
                                 <div>
                                     <p class="font-extrabold text-white">
@@ -888,10 +1096,10 @@ const categoryMenu = [
                     >
                         <div
                             v-if="isLoadingMore"
-                            class="flex items-center gap-2 py-3 text-xs font-bold text-[#e07c28]"
+                            class="flex items-center gap-2 py-3 text-xs font-bold text-(--brand)"
                         >
                             <Loader2
-                                class="h-4 w-4 animate-spin text-[#e07c28]"
+                                class="h-4 w-4 animate-spin text-(--brand)"
                             />
                             <span>Memuat produk lainnya...</span>
                         </div>
@@ -940,7 +1148,7 @@ const categoryMenu = [
                                 class="flex items-center gap-2 rounded-xl border border-black/10 bg-zinc-900 p-3 text-white"
                             >
                                 <Truck
-                                    class="h-4 w-4 shrink-0 text-amber-400"
+                                    class="h-4 w-4 shrink-0 text-(--brand-accent)"
                                 />
                                 <span class="font-extrabold">Bebas Ongkir</span>
                             </div>

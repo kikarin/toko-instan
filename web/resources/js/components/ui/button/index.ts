@@ -20,7 +20,7 @@ export const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
         amber:
-          "bg-gradient-to-r from-[#e07c28] to-[#c2500a] text-white hover:opacity-95 shadow-md shadow-[#e07c28]/20",
+          "bg-(--brand) text-white hover:opacity-95 shadow-md shadow-(--brand)/20",
         brandViolet: "bg-[#6d4fc2] text-white hover:bg-[#5b3fb0] shadow-sm",
       },
       size: {

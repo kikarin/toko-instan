@@ -16,6 +16,7 @@ use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\StoreCmsController;
 use App\Http\Controllers\StorePageController;
 use App\Http\Controllers\StoreSettingsController;
 use App\Http\Controllers\UploadController;

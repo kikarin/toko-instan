@@ -16,6 +16,7 @@ import {
     Settings,
     Tags,
     Boxes,
+    Palette,
     ExternalLink,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -54,6 +55,7 @@ import {
 import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/lib/useActiveUser';
+import { useStoreTheme } from '@/lib/useStoreTheme';
 
 interface NavItem {
     icon: any;
@@ -75,7 +77,8 @@ interface Props {
         | 'Pelanggan'
         | 'Dompet'
         | 'Voucher'
-        | 'Analitik';
+        | 'Analitik'
+        | 'Tampilan & Konten';
     period?: 'Hari' | 'Minggu' | 'Bulan';
 }
 
@@ -89,6 +92,11 @@ const emit = defineEmits<{
 }>();
 
 const activeUser = useActiveUser();
+
+useStoreTheme();
+
+const activeNavClass =
+    'bg-[var(--brand-soft)] text-[var(--brand)] font-black border border-[var(--brand)]/40 shadow-md shadow-black/10 group-data-[collapsible=icon]:bg-(--brand) group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none';
 
 const userDisplayName = computed(() => {
     return (
@@ -129,6 +137,7 @@ const mainNavItems: NavItem[] = [
         badge: 3,
     },
     { icon: Settings, label: 'Pengaturan Toko', route: '/store-settings' },
+    { icon: Palette, label: 'Tampilan & Konten', route: '/store-cms' },
     { icon: Users, label: 'Pelanggan', route: '#' },
 ];
 
@@ -184,7 +193,11 @@ function isActive(item: NavItem): boolean {
                             @click="navigate('/dashboard')"
                         >
                             <div
-                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-base font-black text-white shadow-lg shadow-amber-500/30"
+                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base font-black text-white"
+                                :style="{
+                                    background:
+                                        'linear-gradient(135deg, var(--brand), var(--brand-secondary))',
+                                }"
                             >
                                 <Store class="h-5 w-5" />
                             </div>
@@ -201,7 +214,7 @@ function isActive(item: NavItem): boolean {
                                     />
                                 </div>
                                 <span
-                                    class="truncate text-[10px] font-bold text-amber-400"
+                                    class="truncate text-[10px] font-bold text-[var(--brand)]"
                                     >Seller Command Center</span
                                 >
                             </div>
@@ -234,7 +247,7 @@ function isActive(item: NavItem): boolean {
                                         class="h-10 cursor-pointer rounded-xl text-xs font-bold transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                                         :class="
                                             isActive(item)
-                                                ? 'border border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 font-black text-amber-400 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white'
+                                                ? activeNavClass
                                                 : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                         "
                                         @click="toggleSubMenu(item.label)"
@@ -258,14 +271,14 @@ function isActive(item: NavItem): boolean {
 
                                     <SidebarMenuSub
                                         v-if="openSubMenus[item.label]"
-                                        class="ml-4 border-l border-amber-500/30 pl-2 group-data-[collapsible=icon]:hidden"
+                                        class="ml-4 border-l border-[var(--brand)]/30 pl-2 group-data-[collapsible=icon]:hidden"
                                     >
                                         <SidebarMenuSubItem
                                             v-for="child in item.children"
                                             :key="child.label"
                                         >
                                             <SidebarMenuSubButton
-                                                class="cursor-pointer rounded-lg py-1.5 text-xs font-semibold text-zinc-400 transition-colors hover:text-amber-400"
+                                                class="cursor-pointer rounded-lg py-1.5 text-xs font-semibold text-zinc-400 transition-colors hover:text-(--brand)"
                                                 @click="navigate(child.route)"
                                             >
                                                 {{ child.label }}
@@ -282,7 +295,7 @@ function isActive(item: NavItem): boolean {
                                         class="h-10 cursor-pointer rounded-xl text-xs font-bold transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                                         :class="
                                             isActive(item)
-                                                ? 'border border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 font-black text-amber-400 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white'
+                                                ? activeNavClass
                                                 : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                         "
                                         @click="navigate(item.route)"
@@ -297,7 +310,7 @@ function isActive(item: NavItem): boolean {
                                         >
                                         <SidebarMenuBadge
                                             v-if="item.badge"
-                                            class="rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-black text-white shadow-xs group-data-[collapsible=icon]:hidden"
+                                            class="rounded-full bg-(--brand) px-1.5 py-0.5 text-[9px] font-black text-white shadow-xs group-data-[collapsible=icon]:hidden"
                                         >
                                             {{ item.badge }}
                                         </SidebarMenuBadge>
@@ -329,7 +342,7 @@ function isActive(item: NavItem): boolean {
                                     class="h-10 cursor-pointer rounded-xl text-xs font-bold transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                                     :class="
                                         isActive(item)
-                                            ? 'border border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 font-black text-amber-400 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white'
+                                            ? activeNavClass
                                             : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                     "
                                     @click="navigate(item.route)"
@@ -369,7 +382,7 @@ function isActive(item: NavItem): boolean {
                                     class="h-10 cursor-pointer rounded-xl text-xs font-bold transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                                     :class="
                                         isActive(item)
-                                            ? 'border border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 font-black text-amber-400 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white'
+                                            ? activeNavClass
                                             : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                     "
                                     @click="navigate(item.route)"
@@ -411,7 +424,7 @@ function isActive(item: NavItem): boolean {
                                             :alt="userDisplayName"
                                         />
                                         <AvatarFallback
-                                            class="rounded-xl bg-amber-500 text-xs font-black text-white"
+                                            class="rounded-xl bg-(--brand) text-xs font-black text-white"
                                         >
                                             {{ userInitial }}
                                         </AvatarFallback>
@@ -455,7 +468,7 @@ function isActive(item: NavItem): boolean {
                                                 :alt="userDisplayName"
                                             />
                                             <AvatarFallback
-                                                class="rounded-xl bg-amber-500 text-xs font-black text-white"
+                                                class="rounded-xl bg-(--brand) text-xs font-black text-white"
                                             >
                                                 {{ userInitial }}
                                             </AvatarFallback>
@@ -479,7 +492,7 @@ function isActive(item: NavItem): boolean {
                                     class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white"
                                     @click="navigate('/store-settings')"
                                 >
-                                    <Store class="h-4 w-4 text-amber-400" />
+                                    <Store class="h-4 w-4 text-(--brand)" />
                                     Pengaturan Toko
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
@@ -514,7 +527,7 @@ function isActive(item: NavItem): boolean {
                                 class="h-8 w-8 shrink-0 rounded-xl border border-white/20"
                             >
                                 <AvatarFallback
-                                    class="rounded-xl bg-amber-500 text-xs font-black text-white"
+                                    class="rounded-xl bg-(--brand) text-xs font-black text-white"
                                 >
                                     NK
                                 </AvatarFallback>
@@ -592,10 +605,10 @@ function isActive(item: NavItem): boolean {
                     >
                         <Bell class="h-4 w-4 text-zinc-600 sm:h-4.5 sm:w-4.5" />
                         <span
-                            class="absolute top-1.5 right-1.5 h-2 w-2 animate-ping rounded-full bg-amber-500 sm:top-2 sm:right-2"
+                            class="absolute top-1.5 right-1.5 h-2 w-2 animate-ping rounded-full bg-(--brand) sm:top-2 sm:right-2"
                         />
                         <span
-                            class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-amber-500 sm:top-2 sm:right-2"
+                            class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[var(--brand)] sm:top-2 sm:right-2"
                         />
                     </Button>
 

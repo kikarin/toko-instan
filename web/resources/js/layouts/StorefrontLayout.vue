@@ -8,6 +8,7 @@ import {
     LogIn,
     ReceiptText,
     X,
+    Menu,
     Home,
     LayoutGrid,
     ClipboardList,
@@ -32,6 +33,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/lib/useActiveUser';
 import { useCart } from '@/lib/useCart';
+import { useStoreTheme } from '@/lib/useStoreTheme';
 import { useWishlist } from '@/lib/useWishlist';
 
 interface Props {
@@ -45,6 +47,8 @@ const props = withDefaults(defineProps<Props>(), {
     wishlistCount: 0,
     searchQuery: '',
 });
+
+useStoreTheme();
 
 const emit = defineEmits<{
     (e: 'open-cart'): void;
@@ -137,7 +141,11 @@ const bottomNavItems = [
 
 <template>
     <div
-        class="flex min-h-screen flex-col overflow-x-clip bg-[#f5f4f0] font-sans"
+        class="relative flex min-h-screen flex-col overflow-x-clip font-sans"
+        :style="{
+            background:
+                'linear-gradient(180deg, var(--brand-soft) 0%, #f6f5f2 400px, #f6f5f2 100%)',
+        }"
     >
         <!-- ── Top Buyer Header Bar ── -->
         <header
@@ -152,7 +160,11 @@ const bottomNavItems = [
                     @click="navigate('/marketplace')"
                 >
                     <div
-                        class="flex h-9 w-9 items-center justify-center rounded-2xl bg-black text-lg font-black text-white shadow-md shadow-black/20 sm:h-10 sm:w-10 sm:text-xl"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-lg font-black text-white shadow-md shadow-black/20 sm:h-10 sm:w-10 sm:text-xl"
+                        :style="{
+                            background:
+                                'linear-gradient(135deg, var(--brand), var(--brand-secondary))',
+                        }"
                     >
                         N
                     </div>
@@ -165,8 +177,11 @@ const bottomNavItems = [
                                 NIKE
                             </span>
                             <Badge
-                                variant="amber"
-                                class="border-none bg-emerald-600 px-1.5 py-0 text-[9px] font-black text-white uppercase"
+                                class="border-none px-1.5 py-0 text-[9px] font-black text-white uppercase shadow-xs"
+                                :style="{
+                                    backgroundColor:
+                                        'var(--brand-strong, #f96e5b)',
+                                }"
                             >
                                 OFFICIAL STORE
                             </Badge>
@@ -182,7 +197,10 @@ const bottomNavItems = [
                             >NIKE</span
                         >
                         <Badge
-                            class="bg-emerald-600 px-1 py-0 text-[8px] font-black text-white"
+                            class="px-1 py-0 text-[8px] font-black text-white"
+                            :style="{
+                                backgroundColor: 'var(--brand-strong, #f96e5b)',
+                            }"
                             >OFFICIAL</Badge
                         >
                     </div>
@@ -191,7 +209,7 @@ const bottomNavItems = [
                 <!-- Search Bar — Desktop (center) -->
                 <form
                     @submit.prevent="handleSearch"
-                    class="hidden max-w-xl flex-1 items-center gap-2 rounded-2xl border border-black/10 bg-[#f5f4f0] px-4 py-2 shadow-2xs transition-all focus-within:border-[#e07c28] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#e07c28]/20 md:flex"
+                    class="hidden max-w-xl flex-1 items-center gap-2 rounded-2xl border border-black/10 bg-[#f5f4f0] px-4 py-2 shadow-2xs transition-all focus-within:border-[var(--brand)] focus-within:bg-white focus-within:ring-2 focus-within:ring-[var(--brand)]/20 md:flex"
                 >
                     <Search class="h-4 w-4 shrink-0 text-[#9090a0]" />
                     <Input
@@ -209,9 +227,12 @@ const bottomNavItems = [
                     </button>
                     <Button
                         type="submit"
-                        variant="amber"
                         size="sm"
-                        class="h-7 rounded-xl px-3 text-[11px] font-bold"
+                        class="h-7 rounded-xl px-3 text-[11px] font-bold text-white shadow-xs"
+                        :style="{
+                            background:
+                                'linear-gradient(135deg, var(--brand), var(--brand-secondary))',
+                        }"
                     >
                         Cari
                     </Button>
@@ -235,7 +256,10 @@ const bottomNavItems = [
                         class="hidden items-center gap-1.5 text-xs font-semibold text-[#4a4a57] hover:text-[#1c1c22] lg:flex"
                         @click="navigate('/orders')"
                     >
-                        <ReceiptText class="h-4 w-4 text-[#e07c28]" />
+                        <ReceiptText
+                            class="h-4 w-4"
+                            :style="{ color: 'var(--brand)' }"
+                        />
                         <span>Pesanan Saya</span>
                     </Button>
 
@@ -249,13 +273,14 @@ const bottomNavItems = [
                             class="h-4 w-4"
                             :class="
                                 effectiveWishlistCount > 0
-                                    ? 'fill-[#e0405a] text-[#e0405a]'
+                                    ? 'fill-[var(--brand-strong)] text-[var(--brand-strong)]'
                                     : ''
                             "
                         />
                         <span
                             v-if="effectiveWishlistCount > 0"
-                            class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-[#e0405a] text-[9px] font-bold text-white shadow-xs"
+                            class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white text-[9px] font-black text-white shadow-xs"
+                            :style="{ backgroundColor: 'var(--brand-strong)' }"
                         >
                             {{ effectiveWishlistCount }}
                         </span>
@@ -265,14 +290,18 @@ const bottomNavItems = [
                     <button
                         title="Keranjang Belanja"
                         @click="emit('open-cart')"
-                        class="relative flex min-h-[44px] cursor-pointer touch-manipulation items-center gap-1.5 rounded-xl border border-[#e07c2830] bg-[#e07c2815] px-2.5 py-2 text-xs font-bold text-[#e07c28] shadow-2xs transition-all hover:bg-[#e07c2825] active:scale-95 sm:gap-2 sm:px-3"
+                        class="relative flex min-h-[44px] cursor-pointer touch-manipulation items-center gap-1.5 rounded-xl border border-[var(--brand)]/30 bg-[var(--brand-soft)] px-2.5 py-2 text-xs font-bold text-[var(--brand)] shadow-2xs transition-all hover:bg-[var(--brand)]/20 active:scale-95 sm:gap-2 sm:px-3"
                     >
                         <ShoppingCart class="h-4 w-4" />
                         <span class="hidden sm:inline">Keranjang</span>
                         <span
-                            class="flex h-5 w-5 items-center justify-center rounded-full bg-[#e07c28] text-[10px] font-extrabold text-white shadow-xs"
+                            class="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black text-white shadow-xs"
+                            :style="{
+                                background:
+                                    'linear-gradient(135deg, var(--brand), var(--brand-secondary))',
+                            }"
                         >
-                            {{ cartCount }}
+                            {{ effectiveCartCount }}
                         </span>
                     </button>
 
@@ -288,7 +317,7 @@ const bottomNavItems = [
                                     :fallback="userInitial"
                                     :hue="220"
                                     size="sm"
-                                    class="cursor-pointer transition-all hover:ring-2 hover:ring-[#e07c28]"
+                                    class="cursor-pointer transition-all hover:ring-2 hover:ring-(--brand)"
                                 />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent class="w-52" align="end">
@@ -371,7 +400,7 @@ const bottomNavItems = [
                 >
                     <form
                         @submit.prevent="handleSearch"
-                        class="flex items-center gap-2 rounded-xl border border-black/10 bg-[#f5f4f0] px-3 py-2 focus-within:border-[#e07c28] focus-within:bg-white"
+                        class="flex items-center gap-2 rounded-xl border border-black/10 bg-[#f5f4f0] px-3 py-2 focus-within:border-(--brand) focus-within:bg-white"
                     >
                         <Search class="h-4 w-4 shrink-0 text-[#9090a0]" />
                         <Input
@@ -427,11 +456,19 @@ const bottomNavItems = [
             </div>
         </footer>
 
-        <!-- ── Mobile Bottom Navigation ── -->
+        <!-- ── Dynamic 4-Hex Theme Mobile Bottom Navigation ── -->
         <nav
-            class="fixed right-0 bottom-0 left-0 z-50 border-t border-black/8 bg-white/95 backdrop-blur-md md:hidden"
+            class="fixed right-0 bottom-0 left-0 z-50 border-t border-[var(--brand)]/20 bg-white/95 backdrop-blur-md md:hidden"
             style="padding-bottom: env(safe-area-inset-bottom, 0px)"
         >
+            <!-- 4-Hex Accent line top of mobile bottom nav -->
+            <div
+                class="h-0.5 w-full"
+                :style="{
+                    background:
+                        'linear-gradient(90deg, var(--brand), var(--brand-secondary), var(--brand-accent), var(--brand-strong))',
+                }"
+            />
             <div class="flex items-stretch">
                 <button
                     v-for="item in bottomNavItems"
@@ -441,22 +478,27 @@ const bottomNavItems = [
                             ? emit('open-cart')
                             : navigate(item.href!)
                     "
-                    class="group relative flex flex-1 touch-manipulation flex-col items-center justify-center gap-1 py-2.5 transition-colors active:scale-95"
-                    :class="
-                        (item.match !== '__cart' &&
-                            currentPath === item.match) ||
-                        (item.match === '__store' &&
-                            currentPath.startsWith('/store/'))
-                            ? 'font-extrabold text-black'
-                            : 'text-[#9090a0] hover:text-[#4a4a57]'
-                    "
+                    class="group relative flex flex-1 touch-manipulation flex-col items-center justify-center gap-1 py-2.5 transition-all active:scale-95"
+                    :style="{
+                        color:
+                            (item.match !== '__cart' &&
+                                currentPath === item.match) ||
+                            (item.match === '__store' &&
+                                currentPath.startsWith('/store/'))
+                                ? 'var(--brand)'
+                                : '#9090a0',
+                    }"
                 >
                     <!-- Cart badge -->
                     <div v-if="item.match === '__cart'" class="relative">
                         <component :is="item.icon" class="h-5 w-5" />
                         <span
                             v-if="effectiveCartCount > 0"
-                            class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[9px] font-black text-amber-400 shadow-sm"
+                            class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-white shadow-sm"
+                            :style="{
+                                background:
+                                    'linear-gradient(135deg, var(--brand-strong), var(--brand))',
+                            }"
                             >{{
                                 effectiveCartCount > 9
                                     ? '9+'
@@ -471,7 +513,7 @@ const bottomNavItems = [
                         :class="
                             item.match !== '__cart' &&
                             currentPath === item.match
-                                ? 'font-black text-black'
+                                ? 'font-black'
                                 : 'font-semibold'
                         "
                         >{{ item.label }}</span
@@ -485,7 +527,11 @@ const bottomNavItems = [
                             (item.match === '__store' &&
                                 currentPath.startsWith('/store/'))
                         "
-                        class="absolute bottom-0 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-black"
+                        class="absolute bottom-0 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full shadow-xs"
+                        :style="{
+                            background:
+                                'linear-gradient(90deg, var(--brand), var(--brand-secondary))',
+                        }"
                     />
                 </button>
             </div>

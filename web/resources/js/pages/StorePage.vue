@@ -52,6 +52,7 @@ interface StoreInfo {
     avatarHue: number;
     memberSince: string;
     gmv: string;
+    bannerUrl?: string | null;
 }
 
 interface Props {
@@ -59,9 +60,67 @@ interface Props {
     products: any[];
     categories: string[];
     filters: { category: string };
+    theme?: {
+        key: string;
+        label: string;
+        colors: {
+            primary: string;
+            secondary: string;
+            accent: string;
+            strong?: string;
+        };
+        font: string;
+    };
+    showcase?: {
+        hero?: {
+            title: string;
+            subtitle: string;
+            cta_label: string;
+            image?: string | null;
+        };
+        about?: { title: string; text: string };
+        testimonials?: {
+            name?: string;
+            role?: string;
+            text?: string;
+            rating?: number;
+        }[];
+        contact?: { show?: boolean };
+    };
+    featured?: any[];
 }
 
 const props = defineProps<Props>();
+
+const cmsStyle = computed(() => {
+    const c = props.theme?.colors ?? {
+        primary: '#3F9AAE',
+        secondary: '#79C9C5',
+        accent: '#FFE2AF',
+        strong: '#F96E5B',
+    };
+
+    return {
+        '--brand': c.primary,
+        '--brand-secondary': c.secondary,
+        '--brand-accent': c.accent,
+        '--brand-strong': c.strong ?? c.primary,
+        '--brand-font': props.theme?.font ?? 'Inter',
+    } as Record<string, string>;
+});
+
+const heroTitle = computed(
+    () => props.showcase?.hero?.title || props.store.name,
+);
+const heroSubtitle = computed(
+    () => props.showcase?.hero?.subtitle || props.store.description,
+);
+const heroImage = computed(
+    () => props.showcase?.hero?.image || props.store.bannerUrl || null,
+);
+const heroCtaLabel = computed(
+    () => props.showcase?.hero?.cta_label || 'Lihat Produk',
+);
 
 const selectedCat = ref(props.filters?.category || 'Semua');
 const searchQuery = ref('');
@@ -171,7 +230,7 @@ const statCards = computed(() => [
         label: 'Produk',
         value: formatCount(props.store.totalProducts),
         icon: Package,
-        color: 'text-violet-400',
+        color: 'text-(--brand-secondary)',
     },
     {
         label: 'Rating',
@@ -184,24 +243,24 @@ const statCards = computed(() => [
         label: 'Pesanan',
         value: formatCount(props.store.totalOrders),
         icon: ShoppingBag,
-        color: 'text-teal-400',
+        color: 'text-(--brand-accent)',
     },
     {
         label: 'GMV',
         value: props.store.gmv,
         icon: TrendingUp,
-        color: 'text-[#e07c28]',
+        color: 'text-(--brand)',
     },
 ]);
 
 const trustItems = [
     {
         icon: ShieldCheck,
-        color: 'text-[#22a15a]',
+        color: 'text-(--brand-accent)',
         label: 'Original & Bergaransi',
     },
-    { icon: Truck, color: 'text-[#e07c28]', label: 'Gratis Ongkir' },
-    { icon: Package, color: 'text-violet-500', label: 'Packing Aman' },
+    { icon: Truck, color: 'text-(--brand)', label: 'Gratis Ongkir' },
+    { icon: Package, color: 'text-(--brand-secondary)', label: 'Packing Aman' },
     { icon: ShoppingBag, color: 'text-blue-500', label: 'Escrow Aman' },
 ];
 </script>
@@ -216,20 +275,55 @@ const trustItems = [
             (q: string) => router.visit('/marketplace', { data: { search: q } })
         "
     >
-        <main class="mx-auto flex w-full max-w-[1600px] flex-col">
+        <main
+            class="mx-auto flex w-full max-w-[1600px] flex-col"
+            :style="cmsStyle"
+        >
+            <!-- ── Hero Banner (CMS) ── -->
+            <div
+                v-if="heroImage"
+                class="relative aspect-[21/8] w-full overflow-hidden sm:aspect-[21/6]"
+            >
+                <img
+                    :src="heroImage"
+                    :alt="heroTitle"
+                    class="absolute inset-0 h-full w-full object-cover"
+                />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/10"
+                />
+                <div class="absolute inset-x-0 bottom-0 z-10 px-4 pb-6 sm:px-8">
+                    <h1
+                        class="max-w-2xl text-2xl font-black text-white drop-shadow-lg sm:text-4xl"
+                    >
+                        {{ heroTitle }}
+                    </h1>
+                    <p class="mt-2 max-w-xl text-xs text-white/85 sm:text-sm">
+                        {{ heroSubtitle }}
+                    </p>
+                    <a
+                        href="#produk"
+                        class="mt-3 inline-flex h-9 items-center rounded-xl px-4 text-xs font-bold text-white shadow-lg sm:h-10 sm:text-sm"
+                        :style="{ backgroundColor: 'var(--brand)' }"
+                    >
+                        {{ heroCtaLabel }}
+                    </a>
+                </div>
+            </div>
+
             <!-- ── Hero Banner ── -->
             <div
                 class="relative isolate overflow-hidden bg-gradient-to-br from-[#16131f] via-[#231e35] to-[#16131f]"
             >
                 <!-- Glow orbs -->
                 <div
-                    class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-[#e07c28]/15 blur-3xl"
+                    class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-(--brand)/15 blur-3xl"
                 />
                 <div
                     class="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-violet-500/10 blur-3xl"
                 />
                 <div
-                    class="pointer-events-none absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-500/5 blur-3xl"
+                    class="pointer-events-none absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-(--brand)/10 blur-3xl"
                 />
 
                 <div class="relative z-10 px-4 pt-5 pb-0 sm:px-8 sm:pt-8">
@@ -259,7 +353,7 @@ const trustItems = [
                                 {{ store.avatar }}
                             </div>
                             <span
-                                class="absolute -right-1.5 -bottom-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#16131f] bg-teal-400 shadow-md"
+                                class="absolute -right-1.5 -bottom-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#16131f] bg-(--brand-accent) shadow-md"
                             >
                                 <BadgeCheck
                                     class="h-3.5 w-3.5 text-[#16131f]"
@@ -279,8 +373,8 @@ const trustItems = [
                                     v-if="store.badge"
                                     :class="
                                         store.badge === 'top'
-                                            ? 'border-transparent bg-gradient-to-r from-[#e07c28] to-[#f0933c] text-white'
-                                            : 'border-transparent bg-gradient-to-r from-violet-500 to-violet-400 text-white'
+                                            ? 'border-transparent bg-gradient-to-r from-(--brand) to-(--brand-secondary) text-white'
+                                            : 'border-transparent bg-gradient-to-r from-(--brand-secondary) to-(--brand-accent) text-white'
                                     "
                                     class="h-5 px-2 text-[9px] font-black tracking-widest uppercase"
                                     >⭐ {{ store.badge }}</Badge
@@ -320,7 +414,7 @@ const trustItems = [
                                 <Button
                                     variant="amber"
                                     size="sm"
-                                    class="gap-1.5 text-xs font-bold shadow-lg shadow-[#e07c28]/25"
+                                    class="gap-1.5 text-xs font-bold shadow-(--brand)/25 shadow-lg"
                                 >
                                     <MessageCircle class="h-3.5 w-3.5" /> Chat
                                     Penjual
@@ -355,7 +449,7 @@ const trustItems = [
                             <p
                                 class="font-mono text-base font-black text-white sm:text-xl"
                                 :class="
-                                    stat.label === 'GMV' ? 'text-[#e07c28]' : ''
+                                    stat.label === 'GMV' ? 'text-(--brand)' : ''
                                 "
                             >
                                 {{ stat.value }}
@@ -391,8 +485,48 @@ const trustItems = [
                 </div>
             </div>
 
+            <!-- ── Featured Products (CMS) ── -->
+            <div
+                v-if="featured?.length"
+                id="unggulan"
+                class="flex flex-col gap-4 bg-[#f5f4f0] px-4 pt-6 sm:px-8"
+            >
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h2
+                            class="text-base font-black text-[#1c1c22] sm:text-lg"
+                        >
+                            Produk Unggulan
+                        </h2>
+                        <p class="text-xs text-[#9090a0]">
+                            Pilihan terbaik dari {{ store.name }}
+                        </p>
+                    </div>
+                    <a
+                        href="#produk"
+                        class="text-xs font-bold"
+                        :style="{ color: 'var(--brand)' }"
+                        >Lihat semua →</a
+                    >
+                </div>
+                <div
+                    class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+                >
+                    <ProductCard
+                        v-for="p in featured"
+                        :key="p.id"
+                        :product="p"
+                        @click="openProductDetail(p)"
+                        @add-to-cart="addToCart"
+                    />
+                </div>
+            </div>
+
             <!-- ── Products Section ── -->
-            <div class="flex flex-col gap-5 bg-[#f5f4f0] p-3 sm:p-5 lg:p-7">
+            <div
+                id="produk"
+                class="flex flex-col gap-5 bg-[#f5f4f0] p-3 sm:p-5 lg:p-7"
+            >
                 <!-- Header row -->
                 <Card class="rounded-2xl border-black/6 shadow-xs">
                     <CardContent class="p-4 sm:p-5">
@@ -422,7 +556,7 @@ const trustItems = [
                                     v-model="searchQuery"
                                     type="text"
                                     placeholder="Cari produk di toko..."
-                                    class="h-9 w-full rounded-xl border border-black/10 bg-[#f5f4f0] pr-3 pl-8 text-xs font-medium text-[#1c1c22] transition-all outline-none placeholder:text-[#9090a0] focus:border-[#e07c28] focus:ring-1 focus:ring-[#e07c2830]"
+                                    class="h-9 w-full rounded-xl border border-black/10 bg-[#f5f4f0] pr-3 pl-8 text-xs font-medium text-[#1c1c22] transition-all outline-none placeholder:text-[#9090a0] focus:border-(--brand) focus:ring-1 focus:ring-(--brand)/30"
                                 />
                             </div>
                         </div>
@@ -514,9 +648,9 @@ const trustItems = [
                 >
                     <div
                         v-if="isLoadingMore"
-                        class="flex items-center gap-2 py-3 text-xs font-bold text-[#e07c28]"
+                        class="flex items-center gap-2 py-3 text-xs font-bold text-(--brand)"
                     >
-                        <Loader2 class="h-4 w-4 animate-spin text-[#e07c28]" />
+                        <Loader2 class="h-4 w-4 animate-spin text-(--brand)" />
                         <span>Memuat produk lainnya...</span>
                     </div>
                     <div
@@ -562,6 +696,66 @@ const trustItems = [
                         </Button>
                     </CardContent>
                 </Card>
+            </div>
+
+            <!-- ── About + Testimonials (CMS) ── -->
+            <div
+                v-if="showcase?.about?.text"
+                class="flex flex-col gap-6 bg-[#f5f4f0] px-4 pb-8 sm:px-8"
+            >
+                <Card class="rounded-2xl border-black/6 shadow-xs">
+                    <CardContent class="p-5 sm:p-7">
+                        <p
+                            class="mb-1 text-[10px] font-black tracking-widest uppercase"
+                            :style="{ color: 'var(--brand)' }"
+                        >
+                            Tentang Toko
+                        </p>
+                        <h2
+                            class="text-base font-black text-[#1c1c22] sm:text-lg"
+                        >
+                            {{ showcase.about.title }}
+                        </h2>
+                        <p
+                            class="mt-2 max-w-3xl text-xs leading-relaxed whitespace-pre-line text-[#4a4a57] sm:text-sm"
+                        >
+                            {{ showcase.about.text }}
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <div
+                    v-if="showcase.testimonials?.length"
+                    class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                >
+                    <Card
+                        v-for="(t, i) in showcase.testimonials"
+                        :key="i"
+                        class="rounded-2xl border-black/6 shadow-xs"
+                    >
+                        <CardContent class="flex flex-col gap-2.5 p-4 sm:p-5">
+                            <div class="flex items-center gap-1">
+                                <Star
+                                    v-for="s in Math.min(5, t.rating ?? 5)"
+                                    :key="s"
+                                    class="h-3.5 w-3.5 fill-amber-400 text-amber-400"
+                                />
+                            </div>
+                            <p class="text-xs leading-relaxed text-[#4a4a57]">
+                                “{{ t.text }}”
+                            </p>
+                            <p class="text-[11px] font-bold text-[#1c1c22]">
+                                {{ t.name }}
+                                <span
+                                    v-if="t.role"
+                                    class="font-normal text-[#9090a0]"
+                                >
+                                    — {{ t.role }}</span
+                                >
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </main>
 

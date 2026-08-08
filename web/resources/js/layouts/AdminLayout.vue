@@ -32,6 +32,7 @@ import {
 import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/lib/useActiveUser';
+import { useStoreTheme } from '@/lib/useStoreTheme';
 
 interface Props {
     activePage?: 'Admin' | 'Users' | 'Penarikan';
@@ -40,6 +41,8 @@ interface Props {
 withDefaults(defineProps<Props>(), {
     activePage: 'Admin',
 });
+
+useStoreTheme();
 
 const activeUser = useActiveUser();
 
@@ -79,7 +82,7 @@ async function handleLogout() {
                 <SidebarHeader class="items-center justify-center py-3">
                     <div
                         @click="navigate('/admin')"
-                        class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-br from-[#6d4fc2] to-[#4a3790] text-base font-extrabold text-white shadow-md shadow-[#6d4fc2]/30 select-none"
+                        class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-br from-(--brand) to-(--brand-secondary) text-base font-extrabold text-white shadow-md select-none"
                     >
                         S
                     </div>
@@ -135,7 +138,7 @@ async function handleLogout() {
                                 :fallback="userInitial"
                                 :hue="270"
                                 size="md"
-                                class="cursor-pointer hover:ring-2 hover:ring-[#6d4fc2]"
+                                class="cursor-pointer hover:ring-2 hover:ring-(--brand)"
                             />
                         </template>
                         <template v-else>
@@ -190,7 +193,7 @@ async function handleLogout() {
                             class="flex items-center gap-2 rounded-xl border border-black/7 bg-[#f5f4f0] px-3 py-1.5 text-xs font-medium text-[#4a4a57]"
                         >
                             <span
-                                class="inline-block h-2 w-2 animate-pulse rounded-full bg-[#6d4fc2]"
+                                class="inline-block h-2 w-2 animate-pulse rounded-full bg-(--brand)"
                             />
                             <span
                                 class="max-w-32 truncate font-bold text-[#1c1c22]"

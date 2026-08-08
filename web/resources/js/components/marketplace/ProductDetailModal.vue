@@ -9,10 +9,12 @@ import {
     Truck,
     Heart,
     Store,
+    ChevronRight,
     Package,
     BadgeCheck,
     ThumbsUp,
     ArrowRight,
+    X,
     Share2,
 } from 'lucide-vue-next';
 import { ref, watch, computed } from 'vue';
@@ -182,7 +184,7 @@ const ratingBreakdown = [
                     />
                     <div
                         v-if="product?.discount"
-                        class="absolute top-0 left-0 rounded-br-xl bg-[#e02020] px-2.5 py-1 text-xs font-bold text-white"
+                        class="absolute top-0 left-0 rounded-br-xl bg-(--brand-strong) px-2.5 py-1 text-xs font-bold text-white"
                     >
                         {{ product.discount }}% OFF
                     </div>
@@ -190,9 +192,9 @@ const ratingBreakdown = [
                         v-else-if="product?.tag"
                         class="absolute top-0 left-0 rounded-br-xl px-2.5 py-1 text-xs font-bold text-white"
                         :class="{
-                            'bg-[#e07c28]': product.tag === 'Bestseller',
-                            'bg-[#e0405a]': product.tag === 'Hot',
-                            'bg-[#0d9488]': product.tag === 'Baru',
+                            'bg-(--brand)': product.tag === 'Bestseller',
+                            'bg-(--brand-strong)': product.tag === 'Hot',
+                            'bg-(--brand-accent)': product.tag === 'Baru',
                         }"
                     >
                         {{ product.tag }}
@@ -205,7 +207,7 @@ const ratingBreakdown = [
                             class="h-4 w-4 transition-colors"
                             :class="
                                 isLiked
-                                    ? 'fill-[#e0405a] text-[#e0405a]'
+                                    ? 'fill-(--brand-strong) text-(--brand-strong)'
                                     : 'text-[#9090a0]'
                             "
                         />
@@ -216,7 +218,7 @@ const ratingBreakdown = [
                     <div class="px-4 pt-3 pb-2">
                         <div class="flex items-baseline gap-2">
                             <span
-                                class="text-2xl font-extrabold text-[#e02020]"
+                                class="text-2xl font-extrabold text-(--brand-strong)"
                                 >{{ product.price }}</span
                             >
                             <span
@@ -245,7 +247,7 @@ const ratingBreakdown = [
                             <span>·</span
                             ><button
                                 @click="activeTab = 'ulasan'"
-                                class="text-[#e07c28]"
+                                class="text-(--brand)"
                             >
                                 {{ mockReviews.length }} ulasan
                             </button>
@@ -253,9 +255,11 @@ const ratingBreakdown = [
                     </div>
                     <Separator />
                     <div
-                        class="flex items-center gap-2 bg-[#fff8f0] px-4 py-2.5"
+                        class="flex items-center gap-2 bg-(--brand-soft) px-4 py-2.5"
                     >
-                        <Truck class="h-4 w-4 shrink-0 text-[#e07c28]" />
+                        <Truck
+                            class="h-4 w-4 shrink-0 text-(--brand-secondary)"
+                        />
                         <span class="text-xs font-medium text-[#4a4a57]"
                             >Gratis Ongkir · Estimasi 2-3 hari</span
                         >
@@ -275,7 +279,7 @@ const ratingBreakdown = [
                                     class="truncate text-xs font-bold text-[#1c1c22]"
                                     >{{ product.store }}</span
                                 ><BadgeCheck
-                                    class="h-3.5 w-3.5 shrink-0 text-teal-500"
+                                    class="h-3.5 w-3.5 shrink-0 text-(--brand-accent)"
                                 />
                             </div>
                             <p class="text-[10px] text-[#9090a0]">
@@ -299,7 +303,7 @@ const ratingBreakdown = [
                             class="flex-1 py-3 text-xs font-bold capitalize transition-colors"
                             :class="
                                 activeTab === tab
-                                    ? 'border-b-2 border-[#e07c28] text-[#e07c28]'
+                                    ? 'border-b-2 border-(--brand) text-(--brand)'
                                     : 'text-[#9090a0]'
                             "
                         >
@@ -489,7 +493,7 @@ const ratingBreakdown = [
                     <Button
                         variant="outline"
                         size="lg"
-                        class="flex h-12 flex-1 items-center justify-center gap-1.5 border-[#e07c28] text-xs font-bold text-[#e07c28]"
+                        class="flex h-12 flex-1 items-center justify-center gap-1.5 border-(--brand) text-xs font-bold text-(--brand)"
                         @click="handleAddToCart"
                         ><ShoppingCart class="h-4 w-4" />Keranjang</Button
                     >
@@ -526,7 +530,7 @@ const ratingBreakdown = [
                         <!-- Discount / tag badge -->
                         <div
                             v-if="product?.discount"
-                            class="absolute top-0 left-0 rounded-br-2xl bg-[#e02020] px-3 py-1.5 text-sm font-bold text-white"
+                            class="absolute top-0 left-0 rounded-br-2xl bg-(--brand-strong) px-3 py-1.5 text-sm font-bold text-white"
                         >
                             {{ product.discount }}% OFF
                         </div>
@@ -537,7 +541,7 @@ const ratingBreakdown = [
                             <span
                                 v-for="t in product.tag.split(',')"
                                 :key="t"
-                                class="rounded-lg border border-amber-500 bg-amber-400 px-2.5 py-1 text-xs font-black text-black shadow-xs"
+                                class="rounded-lg border border-(--brand-accent) bg-(--brand-accent) px-2.5 py-1 text-xs font-black text-black shadow-xs"
                             >
                                 {{ t.trim() }}
                             </span>
@@ -552,7 +556,7 @@ const ratingBreakdown = [
                                     class="h-4 w-4 transition-colors"
                                     :class="
                                         isLiked
-                                            ? 'fill-[#e0405a] text-[#e0405a]'
+                                            ? 'fill-(--brand-strong) text-(--brand-strong)'
                                             : 'text-[#9090a0]'
                                     "
                                 />
@@ -585,7 +589,7 @@ const ratingBreakdown = [
                                         >{{ product.store }}</span
                                     >
                                     <BadgeCheck
-                                        class="h-4 w-4 shrink-0 text-teal-500"
+                                        class="h-4 w-4 shrink-0 text-(--brand-accent)"
                                     />
                                 </div>
                                 <p class="text-[11px] text-[#9090a0]">
@@ -607,7 +611,7 @@ const ratingBreakdown = [
                                 class="flex items-center gap-2 text-xs text-[#4a4a57]"
                             >
                                 <ShieldCheck
-                                    class="h-3.5 w-3.5 shrink-0 text-[#22a15a]"
+                                    class="h-3.5 w-3.5 shrink-0 text-(--brand-strong)"
                                 />
                                 <span>Produk 100% original bergaransi</span>
                             </div>
@@ -615,7 +619,7 @@ const ratingBreakdown = [
                                 class="flex items-center gap-2 text-xs text-[#4a4a57]"
                             >
                                 <Truck
-                                    class="h-3.5 w-3.5 shrink-0 text-[#e07c28]"
+                                    class="h-3.5 w-3.5 shrink-0 text-(--brand)"
                                 />
                                 <span>Gratis Ongkir · Estimasi 2-3 hari</span>
                             </div>
@@ -623,7 +627,7 @@ const ratingBreakdown = [
                                 class="flex items-center gap-2 text-xs text-[#4a4a57]"
                             >
                                 <Package
-                                    class="h-3.5 w-3.5 shrink-0 text-[#6d4fc2]"
+                                    class="h-3.5 w-3.5 shrink-0 text-(--brand-secondary)"
                                 />
                                 <span>Packing aman bubble wrap + kardus</span>
                             </div>
@@ -699,7 +703,7 @@ const ratingBreakdown = [
                                     <span class="text-black/20">|</span>
                                     <button
                                         @click="activeTab = 'ulasan'"
-                                        class="text-[#e07c28] hover:underline"
+                                        class="text-(--brand) hover:underline"
                                     >
                                         {{ mockReviews.length }} ulasan
                                     </button>
@@ -716,7 +720,7 @@ const ratingBreakdown = [
                                     </p>
                                     <div class="flex items-baseline gap-2.5">
                                         <span
-                                            class="font-mono text-3xl font-extrabold text-[#e02020]"
+                                            class="font-mono text-3xl font-extrabold text-(--brand-strong)"
                                             >{{ product.price }}</span
                                         >
                                         <span
@@ -726,7 +730,7 @@ const ratingBreakdown = [
                                         >
                                         <Badge
                                             v-if="product.discount"
-                                            class="bg-[#e02020] text-xs font-bold text-white"
+                                            class="bg-(--brand-strong) text-xs font-bold text-white"
                                             >Hemat
                                             {{ product.discount }}%</Badge
                                         >
@@ -747,7 +751,7 @@ const ratingBreakdown = [
                                     class="mr-6 py-3 text-sm font-bold capitalize transition-colors"
                                     :class="
                                         activeTab === tab
-                                            ? 'border-b-2 border-[#e07c28] text-[#e07c28]'
+                                            ? 'border-b-2 border-(--brand) text-(--brand)'
                                             : 'text-[#9090a0] hover:text-[#4a4a57]'
                                     "
                                 >
@@ -894,7 +898,9 @@ const ratingBreakdown = [
                                         </div>
                                         <span class="text-xs text-[#9090a0]"
                                             >dari
-                                            {{ mockReviews.length }}
+                                            {{
+                                                mockReviews.length
+                                            }}
                                             ulasan</span
                                         >
                                     </div>
@@ -994,7 +1000,7 @@ const ratingBreakdown = [
                                 </div>
 
                                 <button
-                                    class="mt-4 flex w-full items-center justify-center gap-1 py-3 text-sm font-bold text-[#e07c28] hover:underline"
+                                    class="mt-4 flex w-full items-center justify-center gap-1 py-3 text-sm font-bold text-(--brand) hover:underline"
                                 >
                                     Lihat Semua Ulasan
                                     <ArrowRight class="h-4 w-4" />
@@ -1037,7 +1043,7 @@ const ratingBreakdown = [
                             <Button
                                 variant="outline"
                                 size="lg"
-                                class="flex h-12 flex-1 items-center justify-center gap-2 border-[#e07c28] font-bold text-[#e07c28] hover:bg-[#e07c2808]"
+                                class="flex h-12 flex-1 items-center justify-center gap-2 border-(--brand) font-bold text-(--brand) hover:bg-(--brand)/5"
                                 @click="handleAddToCart"
                             >
                                 <ShoppingCart class="h-5 w-5" /> + Keranjang

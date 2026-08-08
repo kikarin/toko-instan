@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Store;
+use App\Services\StoreCmsService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -41,6 +43,28 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'theme' => $this->activeTheme(),
+        ];
+    }
+
+    /**
+     * Resolve the active storefront theme from the primary store.
+     *
+     * @return array{colors: array{primary: string, secondary: string, accent: string, strong: string}}|null
+     */
+    private function activeTheme(): ?array
+    {
+        $store = Store::first();
+
+        if (! $store) {
+            return null;
+        }
+
+        $theme = app(StoreCmsService::class)->resolve($store);
+
+        return [
+            'key' => $theme['key'],
+            'colors' => $theme['colors'],
         ];
     }
 }

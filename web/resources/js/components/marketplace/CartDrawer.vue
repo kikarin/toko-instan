@@ -73,7 +73,7 @@ function handleOpenChange(open: boolean) {
             <SheetHeader class="border-b border-black/8 bg-[#faf9f6] px-5 py-4">
                 <div class="flex items-center gap-2.5">
                     <div
-                        class="flex h-8 w-8 items-center justify-center rounded-xl bg-[#e07c281a] text-[#e07c28]"
+                        class="flex h-8 w-8 items-center justify-center rounded-xl bg-(--brand-soft) text-(--brand)"
                     >
                         <ShoppingCart class="h-4 w-4" />
                     </div>
@@ -90,11 +90,11 @@ function handleOpenChange(open: boolean) {
 
             <!-- Free Shipping Progress -->
             <div
-                class="flex flex-col gap-2 border-b border-[#e07c2815] bg-[#e07c280a] px-4 py-3"
+                class="flex flex-col gap-2 border-b border-(--brand)/15 bg-(--brand)/5 px-4 py-3"
             >
                 <div class="flex items-center justify-between text-xs">
                     <span
-                        class="flex items-center gap-1.5 font-bold text-[#e07c28]"
+                        class="flex items-center gap-1.5 font-bold text-(--brand)"
                     >
                         <Truck class="h-4 w-4" />
                         {{
@@ -114,7 +114,7 @@ function handleOpenChange(open: boolean) {
                     class="h-1.5 w-full overflow-hidden rounded-full bg-black/10"
                 >
                     <div
-                        class="h-full rounded-full bg-[#e07c28] transition-all duration-300"
+                        class="h-full rounded-full bg-(--brand) transition-all duration-300"
                         :style="{ width: `${shippingProgress}%` }"
                     />
                 </div>
@@ -160,7 +160,7 @@ function handleOpenChange(open: boolean) {
 
                             <div class="mt-2 flex items-end justify-between">
                                 <span
-                                    class="font-mono text-xs font-extrabold text-[#e07c28]"
+                                    class="font-mono text-xs font-extrabold text-(--brand)"
                                 >
                                     {{ fmtRp(item.price * item.qty) }}
                                 </span>
@@ -223,7 +223,7 @@ function handleOpenChange(open: boolean) {
                     </span>
                 </div>
                 <div
-                    class="flex items-center gap-2 text-[10px] font-medium text-[#22a15a]"
+                    class="flex items-center gap-2 text-[10px] font-medium text-(--brand-accent)"
                 >
                     <ShieldCheck class="h-3.5 w-3.5 shrink-0" />
                     <span

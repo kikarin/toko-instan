@@ -57,33 +57,54 @@ function formatSold(n: number): string {
 
 <template>
     <div
-        class="group flex cursor-pointer flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-200 active:scale-[0.98]"
+        class="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl active:scale-[0.98]"
+        :style="{
+            borderColor: 'var(--brand-soft)',
+            background:
+                'linear-gradient(180deg, #ffffff 40%, var(--brand-soft) 100%)',
+        }"
         @click="emit('click')"
     >
+        <!-- ── 4-Hex Theme Top Gradient Bar ── -->
+        <div
+            class="h-1.5 w-full transition-opacity duration-300"
+            :style="{
+                background:
+                    'linear-gradient(90deg, var(--brand), var(--brand-secondary), var(--brand-accent), var(--brand-strong))',
+            }"
+        />
+
         <!-- ── Product Image ── -->
         <div class="relative aspect-square w-full overflow-hidden bg-[#f5f4f0]">
             <img
                 :src="product.img"
                 :alt="product.name"
-                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
 
-            <!-- Discount Badge — top left (Tokopedia style red pill) -->
+            <!-- Discount Badge — top left (Dynamic Strong Color Gradient) -->
             <div
                 v-if="product.discount"
-                class="absolute top-0 left-0 rounded-br-xl bg-[#e02020] px-2 py-0.5 text-[10px] font-bold text-white"
+                class="absolute top-0 left-0 rounded-br-xl px-2.5 py-0.5 text-[10px] font-black text-white shadow-md"
+                :style="{
+                    background:
+                        'linear-gradient(135deg, var(--brand-strong), var(--brand-strong))',
+                }"
             >
-                {{ product.discount }}%
+                {{ product.discount }}% OFF
             </div>
 
-            <!-- Tag badge (Bestseller / Hot / Baru) — only if no discount -->
+            <!-- Tag badge (Bestseller / Hot / Baru) — dynamic theme 4-hex gradients -->
             <div
                 v-else-if="product.tag"
-                class="absolute top-0 left-0 rounded-br-xl px-2 py-0.5 text-[10px] font-bold text-white"
-                :class="{
-                    'bg-[#e07c28]': product.tag === 'Bestseller',
-                    'bg-[#e0405a]': product.tag === 'Hot',
-                    'bg-[#0d9488]': product.tag === 'Baru',
+                class="absolute top-0 left-0 rounded-br-xl px-2.5 py-0.5 text-[10px] font-black text-white shadow-md"
+                :style="{
+                    background:
+                        product.tag === 'Bestseller'
+                            ? 'linear-gradient(135deg, var(--brand), var(--brand-secondary))'
+                            : product.tag === 'Hot'
+                              ? 'linear-gradient(135deg, var(--brand-strong), var(--brand-accent))'
+                              : 'linear-gradient(135deg, var(--brand-accent), var(--brand-secondary))',
                 }"
             >
                 {{ product.tag }}
@@ -92,72 +113,89 @@ function formatSold(n: number): string {
             <!-- Wishlist button — top right -->
             <button
                 @click.stop="handleToggleWishlist"
-                class="absolute top-1.5 right-1.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-transform active:scale-90"
+                class="absolute top-2 right-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-xs backdrop-blur-sm transition-transform active:scale-90"
             >
                 <Heart
                     class="h-3.5 w-3.5 transition-colors"
                     :class="
                         isInWishlist(product.id)
-                            ? 'fill-[#e0405a] text-[#e0405a]'
+                            ? 'fill-[var(--brand-strong)] text-[var(--brand-strong)]'
                             : 'text-[#c8c8d5]'
                     "
                 />
             </button>
 
-            <!-- Add to cart button — bottom right -->
+            <!-- Add to cart button — bottom right (Dynamic 4-Hex Theme Gradient) -->
             <button
                 title="Tambah ke keranjang"
                 @click.stop="emit('add-to-cart', props.product)"
-                class="absolute right-1.5 bottom-1.5 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[#1c1c22] text-white shadow-md backdrop-blur-sm transition-all hover:bg-[#e07c28] active:scale-90"
+                class="absolute right-2 bottom-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-white shadow-lg backdrop-blur-sm transition-all hover:scale-110 active:scale-90"
+                :style="{
+                    background:
+                        'linear-gradient(135deg, var(--brand), var(--brand-strong))',
+                }"
             >
-                <ShoppingCart class="h-3.5 w-3.5" />
+                <ShoppingCart class="h-4 w-4" />
             </button>
 
             <!-- Free shipping label — bottom -->
             <div
                 v-if="product.freeShipping"
-                class="absolute right-0 bottom-0 left-0 flex items-center gap-1 bg-gradient-to-t from-[#00000060] to-transparent px-2 pt-3 pb-1.5"
+                class="absolute right-0 bottom-0 left-0 flex items-center gap-1 bg-gradient-to-t from-black/60 to-transparent px-2 pt-3 pb-1.5"
             >
                 <span
-                    class="rounded bg-[#00aa5b] px-1.5 py-0.5 text-[9px] font-bold text-white"
+                    class="rounded-md px-1.5 py-0.5 text-[9px] font-black tracking-wider text-white uppercase shadow-xs"
+                    :style="{
+                        background:
+                            'linear-gradient(90deg, var(--brand-accent), var(--brand-secondary))',
+                    }"
                 >
                     Gratis Ongkir
                 </span>
             </div>
         </div>
 
-        <!-- ── Product Info ── -->
-        <div class="flex flex-1 flex-col gap-1 px-2 pt-2 pb-2.5">
+        <!-- ── Product Info (Dynamic Theme Tint) ── -->
+        <div
+            class="flex flex-1 flex-col gap-1 p-3 transition-colors duration-300"
+        >
             <!-- Product name — 2 lines max -->
-            <p class="line-clamp-2 text-xs leading-snug text-[#1c1c22]">
+            <p
+                class="line-clamp-2 text-xs leading-snug font-bold text-[#1c1c22]"
+            >
                 {{ product.name }}
             </p>
 
-            <!-- Price row -->
+            <!-- Price row (Dynamic Strong Theme Color) -->
             <div class="mt-0.5">
                 <!-- Original price (strikethrough) if discount exists -->
                 <p
                     v-if="product.originalPrice"
-                    class="text-[9px] leading-none text-[#9090a0] line-through"
+                    class="font-mono text-[9px] leading-none text-[#9090a0] line-through"
                 >
                     {{ product.originalPrice }}
                 </p>
                 <!-- Main price -->
-                <p class="text-sm leading-tight font-extrabold text-[#e02020]">
+                <p
+                    class="font-mono text-sm leading-tight font-black sm:text-base"
+                    :style="{ color: 'var(--brand-strong, #e0405a)' }"
+                >
                     {{ product.price }}
                 </p>
             </div>
 
             <!-- Rating + Sold -->
-            <div class="mt-auto flex items-center gap-1.5 pt-1">
+            <div
+                class="mt-auto flex items-center gap-1.5 border-t border-[var(--brand)]/15 pt-1.5"
+            >
                 <div class="flex items-center gap-0.5">
-                    <Star class="h-2.5 w-2.5 fill-amber-400 stroke-amber-400" />
-                    <span class="text-[10px] text-[#9090a0]">{{
+                    <Star class="h-3 w-3 fill-amber-400 stroke-amber-400" />
+                    <span class="text-[10px] font-bold text-[#4a4a57]">{{
                         product.rating
                     }}</span>
                 </div>
                 <span class="text-[10px] text-[#c8c8d5]">·</span>
-                <span class="text-[10px] text-[#9090a0]"
+                <span class="text-[10px] font-medium text-[#9090a0]"
                     >{{ formatSold(product.sold) }} terjual</span
                 >
             </div>
