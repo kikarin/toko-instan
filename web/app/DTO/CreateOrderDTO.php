@@ -5,7 +5,7 @@ namespace App\DTO;
 class CreateOrderDTO
 {
     /**
-     * @param  array<array{id?: int, name: string, price: float|int, qty: int}>  $items
+     * @param  array<int, array{id?: int, variant_id?: int, name: string, price: float|int, qty: int}>  $items
      */
     public function __construct(
         public int $storeId,

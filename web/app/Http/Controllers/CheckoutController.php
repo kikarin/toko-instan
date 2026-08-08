@@ -30,6 +30,8 @@ class CheckoutController extends Controller
             'shipping_courier' => ['nullable', 'string'],
             'payment_method' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
+            'items.*.id' => ['nullable', 'integer', 'exists:products,id'],
+            'items.*.variant_id' => ['nullable', 'integer', 'exists:product_variants,id'],
             'items.*.name' => ['required', 'string'],
             'items.*.price' => ['required', 'numeric'],
             'items.*.qty' => ['required', 'integer', 'min:1'],

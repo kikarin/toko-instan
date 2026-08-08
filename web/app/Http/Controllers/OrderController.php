@@ -25,7 +25,7 @@ class OrderController extends Controller
                 $q->where('user_id', $user->id);
             })->first();
 
-            $sellerOrders = Order::with('store')
+            $sellerOrders = Order::with(['store', 'items'])
                 ->where('store_id', $store?->id ?: 1)
                 ->orderByDesc('created_at')
                 ->get()
@@ -42,6 +42,15 @@ class OrderController extends Controller
                         'total_num' => (float) $order->total_amount,
                         'status' => strtolower($order->status),
                         'created_at' => $order->created_at?->format('d M Y, H:i'),
+                        'notes' => $order->notes,
+                        'items' => $order->items->map(fn ($item) => [
+                            'id' => $item->id,
+                            'product_name' => $item->name,
+                            'sku' => $item->sku,
+                            'quantity' => $item->qty,
+                            'price' => (float) $item->price,
+                            'subtotal' => (float) $item->total,
+                        ])->values()->all(),
                     ];
                 })
                 ->values()
@@ -61,6 +70,13 @@ class OrderController extends Controller
                     'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
                     'status' => strtolower($order->status),
                     'created_at' => $order->created_at?->format('d M Y, H:i'),
+                    'items' => $order->items->map(fn ($item) => [
+                        'product_name' => $item->name,
+                        'sku' => $item->sku,
+                        'qty' => $item->qty,
+                        'price' => (float) $item->price,
+                        'subtotal' => (float) $item->total,
+                    ])->values()->all(),
                 ];
             })
             ->values()

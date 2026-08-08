@@ -9,6 +9,7 @@ use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\StoreRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class OrderService
@@ -22,27 +23,29 @@ class OrderService
 
     public function processCheckout(CreateOrderDTO $dto): Order
     {
-        $subtotal = 0;
-        foreach ($dto->items as $item) {
-            $price = (float) $item['price'];
-            $qty = (int) $item['qty'];
-            $subtotal += ($price * $qty);
+        return DB::transaction(function () use ($dto) {
+            $subtotal = 0;
+            foreach ($dto->items as $item) {
+                $price = (float) $item['price'];
+                $qty = (int) $item['qty'];
+                $subtotal += ($price * $qty);
 
-            if (isset($item['id'])) {
-                $this->productRepository->decrementStock($item['id'], $qty);
+                if (isset($item['id'])) {
+                    $this->productRepository->decrementStock($item['id'], $qty);
+                }
             }
-        }
 
-        $shippingFee = $subtotal >= 300000 ? 0 : 15000;
-        $totalAmount = $subtotal + $shippingFee;
+            $shippingFee = $subtotal >= 300000 ? 0 : 15000;
+            $totalAmount = $subtotal + $shippingFee;
 
-        $orderNumber = 'ORD-'.date('Ymd').'-'.strtoupper(Str::random(4));
+            $orderNumber = 'ORD-'.date('Ymd').'-'.strtoupper(Str::random(4));
 
-        $order = $this->orderRepository->createOrder($dto, $orderNumber, $totalAmount);
+            $order = $this->orderRepository->createOrder($dto, $orderNumber, $totalAmount);
 
-        $this->storeRepository->incrementTotalOrders($dto->storeId);
+            $this->storeRepository->incrementTotalOrders($order->store_id);
 
-        return $order;
+            return $order;
+        });
     }
 
     public function markOrderPaid(Order $order): void
@@ -119,6 +122,14 @@ class OrderService
             'status' => ucfirst($order->status),
             'store_name' => $order->store ? $order->store->name : 'NovaBatik Studio',
             'created_at' => $order->created_at ? $order->created_at->format('j M Y, H:i') : date('j M Y, H:i'),
+            'items' => $order->items->map(fn ($item) => [
+                'id' => $item->id,
+                'product_name' => $item->name,
+                'sku' => $item->sku,
+                'qty' => $item->qty,
+                'price' => (float) $item->price,
+                'subtotal' => (float) $item->total,
+            ])->values()->all(),
         ];
     }
 }

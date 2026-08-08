@@ -33,6 +33,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 interface OrderItem {
     id: number;
     product_name: string;
+    sku?: string | null;
     quantity: number;
     price: number;
     subtotal: number;
@@ -436,16 +437,19 @@ const statusBadgeMap: Record<string, { label: string; variant: 'amber' | 'teal' 
                         </span>
 
                         <div v-if="order.items && order.items.length > 0" class="divide-y divide-black/5 border rounded-2xl bg-white overflow-hidden text-xs">
-                            <div v-for="item in order.items" :key="item.id" class="p-3 flex items-center justify-between">
-                                <span class="font-bold text-[#1c1c22]">{{ item.product_name }}</span>
-                                <div class="flex items-center gap-4 font-mono">
+                            <div v-for="item in order.items" :key="item.id" class="p-3 flex items-center justify-between gap-3">
+                                <div class="min-w-0 flex flex-col">
+                                    <span class="font-bold text-[#1c1c22] truncate">{{ item.product_name }}</span>
+                                    <span v-if="item.sku" class="text-[10px] font-mono text-zinc-400">SKU {{ item.sku }}</span>
+                                </div>
+                                <div class="flex items-center gap-4 font-mono shrink-0">
                                     <span class="text-zinc-500">{{ item.quantity }} pcs x {{ formatRupiah(item.price) }}</span>
                                     <span class="font-black text-amber-600">{{ formatRupiah(item.subtotal) }}</span>
                                 </div>
                             </div>
                         </div>
                         <p v-else class="text-xs text-zinc-500 italic p-3 rounded-xl bg-white border border-black/5">
-                            Barang pesanan terdaftar resmi pada database merchant. Total tagihan: <b>{{ order.total_amount }}</b>.
+                            Belum ada line item tersimpan untuk pesanan ini (order lama sebelum snapshot). Total tagihan: <b>{{ order.total_amount }}</b>.
                         </p>
                     </div>
                 </Card>

@@ -37,6 +37,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/orders', [OrderController::class, 'index'])
+        ->middleware('role:buyer,seller')
+        ->name('orders.index');
 });
 
 // Buyer area
@@ -56,7 +60,6 @@ Route::middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout', [CheckoutController::class, 'store']);
     Route::get('/orders/{orderNumber}/success', [CheckoutController::class, 'success'])->name('orders.success');
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 });
 
 // Seller area
@@ -64,7 +67,6 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/store-settings', [StoreSettingsController::class, 'edit'])->name('store-settings.edit');
     Route::put('/store-settings', [StoreSettingsController::class, 'update'])->name('store-settings.update');
-    Route::get('/orders', [OrderController::class, 'index'])->name('seller.orders.index');
     Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');

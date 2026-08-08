@@ -12,13 +12,13 @@
 
 | Phase                     | Task    | Selesai    |
 | ------------------------- | ------- | ---------- |
-| Phase 0 — Foundation      | 17      | 8/17       |
-| Phase 1 — MVP             | 42      | 15/42      |
+| Phase 0 — Foundation      | 17      | 9/17       |
+| Phase 1 — MVP             | 42      | 16/42      |
 | Phase 1.5 — Beta & Launch | 10      | 0/10       |
 | Phase 2 — Growth          | 28      | 0/28       |
 | Phase 3 — Scale           | 18      | 0/18       |
 | Phase 4 — Enterprise      | 12      | 0/12       |
-| **Total**                 | **127** | **23/127** |
+| **Total**                 | **127** | **25/127** |
 
 
 > Update kolom "Selesai" manual saat milestone tercapai.
@@ -84,7 +84,7 @@
 
 ## 0.3 Dev Environment
 
-- [ ] **P0-021** — PostgreSQL schema setup
+- [x] **P0-021** — PostgreSQL schema setup
   - **Deliverable:** Migration schema `public`, `audit`, `logs`; koneksi DB OK
 
 - [ ] **P0-022** — Redis + Horizon
@@ -213,7 +213,7 @@
 - [ ] **P1-040** — Checkout page
   - **Deliverable:** Halaman checkout: **pilih alamat tersimpan**, ringkasan order, notes
 
-- [ ] **P1-041** — Create order
+- [x] **P1-041** — Create order
   - **Deliverable:** Order creation dengan status `Pending`, **order_items** + snapshot harga per item
 
 - [x] **P1-042** — Order status flow

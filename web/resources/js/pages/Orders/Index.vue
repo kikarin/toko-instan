@@ -7,7 +7,10 @@ import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 
 interface OrderItem {
     product_name: string;
+    sku?: string | null;
     qty: number;
+    price?: number;
+    subtotal?: number;
 }
 
 interface Order {
@@ -92,7 +95,7 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
                     <div class="flex flex-col gap-2 py-3">
                         <div
                             v-for="it in o.items ?? []"
-                            :key="it.product_name"
+                            :key="`${it.product_name}-${it.sku ?? ''}`"
                             class="flex items-center gap-2.5"
                         >
                             <div
@@ -100,13 +103,22 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
                             >
                                 <Package class="h-4 w-4 text-[#e07c28]" />
                             </div>
-                            <p
-                                class="flex-1 truncate text-xs font-semibold text-[#1c1c22]"
-                            >
-                                {{ it.product_name }}
-                            </p>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-xs font-semibold text-[#1c1c22]">
+                                    {{ it.product_name }}
+                                </p>
+                                <p v-if="it.sku" class="truncate text-[10px] font-mono text-[#9090a0]">
+                                    SKU {{ it.sku }}
+                                </p>
+                            </div>
                             <p class="text-xs text-[#9090a0]">{{ it.qty }}x</p>
                         </div>
+                        <p
+                            v-if="!(o.items ?? []).length"
+                            class="text-xs italic text-[#9090a0]"
+                        >
+                            Tidak ada rincian item untuk pesanan ini.
+                        </p>
                     </div>
 
                     <!-- footer -->
