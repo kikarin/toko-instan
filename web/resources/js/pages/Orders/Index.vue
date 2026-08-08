@@ -41,7 +41,9 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
     <Head title="Pesanan Saya — Nike Official Store" />
 
     <StorefrontLayout>
-        <div class="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 pt-4 pb-28 sm:p-6">
+        <div
+            class="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 pt-4 pb-28 sm:p-6"
+        >
             <div class="flex items-center gap-2.5">
                 <div
                     class="flex h-9 w-9 items-center justify-center rounded-xl bg-black text-amber-400 shadow-xs"
@@ -104,10 +106,15 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
                                 <Package class="h-4 w-4 text-[#e07c28]" />
                             </div>
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-xs font-semibold text-[#1c1c22]">
+                                <p
+                                    class="truncate text-xs font-semibold text-[#1c1c22]"
+                                >
                                     {{ it.product_name }}
                                 </p>
-                                <p v-if="it.sku" class="truncate text-[10px] font-mono text-[#9090a0]">
+                                <p
+                                    v-if="it.sku"
+                                    class="truncate font-mono text-[10px] text-[#9090a0]"
+                                >
                                     SKU {{ it.sku }}
                                 </p>
                             </div>
@@ -115,7 +122,7 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
                         </div>
                         <p
                             v-if="!(o.items ?? []).length"
-                            class="text-xs italic text-[#9090a0]"
+                            class="text-xs text-[#9090a0] italic"
                         >
                             Tidak ada rincian item untuk pesanan ini.
                         </p>

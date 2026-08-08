@@ -1,5 +1,5 @@
-import { useCartStore } from '@/stores/useCartStore';
 import { storeToRefs } from 'pinia';
+import { useCartStore } from '@/stores/useCartStore';
 
 export function useCart() {
     const store = useCartStore();

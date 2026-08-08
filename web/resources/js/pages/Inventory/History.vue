@@ -30,7 +30,11 @@ interface Props {
 defineProps<Props>();
 
 function typeLabel(type: string) {
-    return type === 'in' ? 'Stok Masuk' : type === 'out' ? 'Stok Keluar' : 'Penyesuaian';
+    return type === 'in'
+        ? 'Stok Masuk'
+        : type === 'out'
+          ? 'Stok Keluar'
+          : 'Penyesuaian';
 }
 </script>
 
@@ -40,19 +44,30 @@ function typeLabel(type: string) {
     <AppLayout title="Riwayat Stok" activePage="Stok & Inventory">
         <main class="mx-auto flex w-full max-w-3xl flex-col gap-5 p-4 sm:p-6">
             <div class="flex items-center gap-3">
-                <Button variant="outline" size="icon" class="h-9 w-9" @click="router.visit('/inventory')">
+                <Button
+                    variant="outline"
+                    size="icon"
+                    class="h-9 w-9"
+                    @click="router.visit('/inventory')"
+                >
                     <ArrowLeft class="h-4 w-4" />
                 </Button>
                 <div>
-                    <p class="text-xs font-extrabold tracking-widest text-[#e07c28] uppercase">
+                    <p
+                        class="text-xs font-extrabold tracking-widest text-[#e07c28] uppercase"
+                    >
                         Stock Movement
                     </p>
-                    <h1 class="flex items-center gap-2 text-xl font-extrabold text-[#1c1c22]">
+                    <h1
+                        class="flex items-center gap-2 text-xl font-extrabold text-[#1c1c22]"
+                    >
                         <Boxes class="h-5 w-5" /> Riwayat — {{ product?.name }}
                     </h1>
                     <p class="text-[11px] text-[#9090a0]">
                         {{ product?.sku || 'Tanpa SKU' }} • Stok saat ini
-                        <span class="font-bold text-[#1c1c22]">{{ product?.stock }}</span>
+                        <span class="font-bold text-[#1c1c22]">{{
+                            product?.stock
+                        }}</span>
                     </p>
                 </div>
             </div>
@@ -76,14 +91,22 @@ function typeLabel(type: string) {
                             <TrendingDown v-else class="h-4 w-4" />
                         </div>
                         <div>
-                            <p class="text-xs font-bold text-[#1c1c22]">{{ typeLabel(m.type) }}</p>
+                            <p class="text-xs font-bold text-[#1c1c22]">
+                                {{ typeLabel(m.type) }}
+                            </p>
                             <p class="text-[10px] text-[#9090a0]">
-                                {{ m.reason || 'Tanpa alasan' }} • {{ m.created_at }}
+                                {{ m.reason || 'Tanpa alasan' }} •
+                                {{ m.created_at }}
                             </p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="font-mono text-sm font-extrabold" :class="m.delta > 0 ? 'text-green-600' : 'text-red-500'">
+                        <p
+                            class="font-mono text-sm font-extrabold"
+                            :class="
+                                m.delta > 0 ? 'text-green-600' : 'text-red-500'
+                            "
+                        >
                             {{ m.delta > 0 ? '+' : '' }}{{ m.delta }}
                         </p>
                         <p class="text-[10px] text-[#9090a0]">
@@ -92,9 +115,14 @@ function typeLabel(type: string) {
                     </div>
                 </div>
 
-                <Card v-if="!(movements ?? []).length" class="py-14 text-center">
+                <Card
+                    v-if="!(movements ?? []).length"
+                    class="py-14 text-center"
+                >
                     <CardContent>
-                        <p class="text-sm font-semibold text-[#4a4a57]">Belum ada pergerakan stok</p>
+                        <p class="text-sm font-semibold text-[#4a4a57]">
+                            Belum ada pergerakan stok
+                        </p>
                         <p class="mt-1 text-xs text-[#9090a0]">
                             Catat stok masuk/keluar dari halaman inventory.
                         </p>

@@ -41,7 +41,7 @@ function navigate(url: string) {
 
     <StorefrontLayout>
         <main
-            class="mx-auto flex w-full max-w-2xl flex-col items-center px-4 pt-6 pb-28 sm:p-6 sm:py-12 font-sans"
+            class="mx-auto flex w-full max-w-2xl flex-col items-center px-4 pt-6 pb-28 font-sans sm:p-6 sm:py-12"
         >
             <!-- Success Icon Animation -->
             <div
@@ -56,12 +56,13 @@ function navigate(url: string) {
                 Pesanan Nike Berhasil Dibuat!
             </h1>
             <p class="mt-1 mb-8 max-w-md text-center text-xs text-[#9090a0]">
-                Terima kasih telah berbelanja di Nike Official Store. Pesanan Anda sedang diproses dengan garansi 100% keaslian.
+                Terima kasih telah berbelanja di Nike Official Store. Pesanan
+                Anda sedang diproses dengan garansi 100% keaslian.
             </p>
 
             <!-- Invoice Card -->
             <Card
-                class="flex w-full flex-col gap-5 border-black/10 p-6 shadow-md bg-white rounded-2xl"
+                class="flex w-full flex-col gap-5 rounded-2xl border-black/10 bg-white p-6 shadow-md"
             >
                 <div
                     class="flex items-center justify-between border-b border-black/8 pb-4"
@@ -80,7 +81,7 @@ function navigate(url: string) {
                     </div>
                     <Badge
                         variant="amber"
-                        class="px-2.5 py-1 text-xs font-bold uppercase bg-black text-amber-400 border-none"
+                        class="border-none bg-black px-2.5 py-1 text-xs font-bold text-amber-400 uppercase"
                     >
                         {{ invoice.status }}
                     </Badge>
@@ -110,8 +111,7 @@ function navigate(url: string) {
 
                     <div class="flex flex-col gap-1">
                         <span class="flex items-center gap-1.5 text-[#9090a0]">
-                            <User class="h-3.5 w-3.5 text-black" /> Nama
-                            Pembeli
+                            <User class="h-3.5 w-3.5 text-black" /> Nama Pembeli
                         </span>
                         <span class="font-bold text-[#1c1c22]">{{
                             invoice.customer_name
@@ -136,9 +136,7 @@ function navigate(url: string) {
                     <span class="text-xs font-bold text-zinc-300"
                         >Total Pembayaran</span
                     >
-                    <span
-                        class="font-mono text-xl font-black text-amber-400"
-                    >
+                    <span class="font-mono text-xl font-black text-amber-400">
                         {{ invoice.total_amount }}
                     </span>
                 </div>
@@ -147,7 +145,7 @@ function navigate(url: string) {
                 <div class="mt-2 flex flex-col items-center gap-3 sm:flex-row">
                     <Button
                         variant="amber"
-                        class="flex h-11 w-full items-center justify-center gap-2 text-xs font-bold bg-black text-amber-400 hover:bg-zinc-800 shadow-md"
+                        class="flex h-11 w-full items-center justify-center gap-2 bg-black text-xs font-bold text-amber-400 shadow-md hover:bg-zinc-800"
                         @click="navigate('/orders')"
                     >
                         <ShoppingBag class="h-4 w-4" />

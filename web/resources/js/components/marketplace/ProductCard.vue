@@ -33,6 +33,7 @@ const { isInWishlist, toggleWishlist } = useWishlist();
 
 function handleToggleWishlist() {
     const added = toggleWishlist(props.product);
+
     if (added) {
         toast.success(`${props.product.name} ditambahkan ke Wishlist!`);
     } else {
@@ -42,8 +43,14 @@ function handleToggleWishlist() {
 
 // Format sold count like Tokopedia: 1.2rb, 24rb, 1jt+
 function formatSold(n: number): string {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}jt+`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}rb+`;
+    if (n >= 1_000_000) {
+        return `${(n / 1_000_000).toFixed(1)}jt+`;
+    }
+
+    if (n >= 1_000) {
+        return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}rb+`;
+    }
+
     return String(n);
 }
 </script>
@@ -89,7 +96,11 @@ function formatSold(n: number): string {
             >
                 <Heart
                     class="h-3.5 w-3.5 transition-colors"
-                    :class="isInWishlist(product.id) ? 'fill-[#e0405a] text-[#e0405a]' : 'text-[#c8c8d5]'"
+                    :class="
+                        isInWishlist(product.id)
+                            ? 'fill-[#e0405a] text-[#e0405a]'
+                            : 'text-[#c8c8d5]'
+                    "
                 />
             </button>
 
@@ -105,9 +116,11 @@ function formatSold(n: number): string {
             <!-- Free shipping label — bottom -->
             <div
                 v-if="product.freeShipping"
-                class="absolute bottom-0 left-0 right-0 flex items-center gap-1 bg-gradient-to-t from-[#00000060] to-transparent px-2 pt-3 pb-1.5"
+                class="absolute right-0 bottom-0 left-0 flex items-center gap-1 bg-gradient-to-t from-[#00000060] to-transparent px-2 pt-3 pb-1.5"
             >
-                <span class="rounded bg-[#00aa5b] px-1.5 py-0.5 text-[9px] font-bold text-white">
+                <span
+                    class="rounded bg-[#00aa5b] px-1.5 py-0.5 text-[9px] font-bold text-white"
+                >
                     Gratis Ongkir
                 </span>
             </div>
@@ -123,11 +136,14 @@ function formatSold(n: number): string {
             <!-- Price row -->
             <div class="mt-0.5">
                 <!-- Original price (strikethrough) if discount exists -->
-                <p v-if="product.originalPrice" class="text-[9px] text-[#9090a0] line-through leading-none">
+                <p
+                    v-if="product.originalPrice"
+                    class="text-[9px] leading-none text-[#9090a0] line-through"
+                >
                     {{ product.originalPrice }}
                 </p>
                 <!-- Main price -->
-                <p class="text-sm font-extrabold leading-tight text-[#e02020]">
+                <p class="text-sm leading-tight font-extrabold text-[#e02020]">
                     {{ product.price }}
                 </p>
             </div>
@@ -136,14 +152,20 @@ function formatSold(n: number): string {
             <div class="mt-auto flex items-center gap-1.5 pt-1">
                 <div class="flex items-center gap-0.5">
                     <Star class="h-2.5 w-2.5 fill-amber-400 stroke-amber-400" />
-                    <span class="text-[10px] text-[#9090a0]">{{ product.rating }}</span>
+                    <span class="text-[10px] text-[#9090a0]">{{
+                        product.rating
+                    }}</span>
                 </div>
                 <span class="text-[10px] text-[#c8c8d5]">·</span>
-                <span class="text-[10px] text-[#9090a0]">{{ formatSold(product.sold) }} terjual</span>
+                <span class="text-[10px] text-[#9090a0]"
+                    >{{ formatSold(product.sold) }} terjual</span
+                >
             </div>
 
             <!-- Store name badge -->
-            <p class="truncate text-[9px] font-bold text-zinc-400">Nike Official</p>
+            <p class="truncate text-[9px] font-bold text-zinc-400">
+                Nike Official
+            </p>
         </div>
     </div>
 </template>

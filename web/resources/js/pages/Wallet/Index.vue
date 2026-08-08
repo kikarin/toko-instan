@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Wallet as WalletIcon, ArrowUpRight, Clock3, ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import {
+    Wallet as WalletIcon,
+    ArrowUpRight,
+    Clock3,
+    ChevronLeft,
+    ChevronRight,
+} from 'lucide-vue-next';
 import { reactive, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { Badge } from '@/components/ui/badge';
@@ -69,12 +75,13 @@ const statusLabel: Record<string, string> = {
     transferred: 'Ditransfer',
 };
 
-const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> = {
-    pending: 'amber',
-    approved: 'violetSolid',
-    rejected: 'rose',
-    transferred: 'teal',
-};
+const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
+    {
+        pending: 'amber',
+        approved: 'violetSolid',
+        rejected: 'rose',
+        transferred: 'teal',
+    };
 
 const typeLabel: Record<string, string> = {
     order_escrow: 'Escrow penjualan',
@@ -169,7 +176,9 @@ function goWithdrawPage(page: number) {
                     <p class="text-[10px] font-bold text-[#9090a0] uppercase">
                         Pending escrow
                     </p>
-                    <p class="mt-1 flex items-center gap-1.5 text-2xl font-extrabold text-[#d97706]">
+                    <p
+                        class="mt-1 flex items-center gap-1.5 text-2xl font-extrabold text-[#d97706]"
+                    >
                         <Clock3 class="h-5 w-5" />
                         {{ wallet?.pending_balance ?? 'Rp 0' }}
                     </p>
@@ -180,7 +189,10 @@ function goWithdrawPage(page: number) {
                 <CardTitle class="mb-3 flex items-center gap-1.5 text-sm">
                     <ArrowUpRight class="h-4 w-4" /> Tarik Saldo
                 </CardTitle>
-                <form class="flex flex-col gap-3" @submit.prevent="submitWithdraw">
+                <form
+                    class="flex flex-col gap-3"
+                    @submit.prevent="submitWithdraw"
+                >
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div class="flex flex-col gap-1.5">
                             <Label for="amount">Jumlah (Rp)</Label>
@@ -223,11 +235,14 @@ function goWithdrawPage(page: number) {
                         </div>
                     </div>
                     <p class="text-[10px] text-[#9090a0]">
-                        Biaya penarikan Rp5.000 (plan Free) dipotong dari jumlah.
+                        Biaya penarikan Rp5.000 (plan Free) dipotong dari
+                        jumlah.
                     </p>
                     <div>
                         <Button type="submit" :disabled="submitting">
-                            {{ submitting ? 'Memproses...' : 'Ajukan Penarikan' }}
+                            {{
+                                submitting ? 'Memproses...' : 'Ajukan Penarikan'
+                            }}
                         </Button>
                     </div>
                 </form>
@@ -235,7 +250,9 @@ function goWithdrawPage(page: number) {
 
             <Card class="p-5">
                 <CardTitle class="mb-3 text-sm">
-                    Riwayat Transaksi ({{ transactions?.pagination.total ?? 0 }})
+                    Riwayat Transaksi ({{
+                        transactions?.pagination.total ?? 0
+                    }})
                 </CardTitle>
                 <div class="flex flex-col gap-2.5">
                     <div
@@ -284,14 +301,23 @@ function goWithdrawPage(page: number) {
                         <Button
                             variant="outline"
                             size="sm"
-                            :disabled="(transactions?.pagination.current_page ?? 1) <= 1"
-                            @click="goPage((transactions?.pagination.current_page ?? 1) - 1)"
+                            :disabled="
+                                (transactions?.pagination.current_page ?? 1) <=
+                                1
+                            "
+                            @click="
+                                goPage(
+                                    (transactions?.pagination.current_page ??
+                                        1) - 1,
+                                )
+                            "
                         >
                             <ChevronLeft class="h-4 w-4" /> Sebelumnya
                         </Button>
                         <span class="text-[10px] text-[#9090a0]">
                             Halaman
-                            {{ transactions?.pagination.current_page ?? 1 }} dari
+                            {{ transactions?.pagination.current_page ?? 1 }}
+                            dari
                             {{ transactions?.pagination.last_page ?? 1 }}
                         </span>
                         <Button
@@ -301,7 +327,12 @@ function goWithdrawPage(page: number) {
                                 (transactions?.pagination.current_page ?? 1) >=
                                 (transactions?.pagination.last_page ?? 1)
                             "
-                            @click="goPage((transactions?.pagination.current_page ?? 1) + 1)"
+                            @click="
+                                goPage(
+                                    (transactions?.pagination.current_page ??
+                                        1) + 1,
+                                )
+                            "
                         >
                             Berikutnya <ChevronRight class="h-4 w-4" />
                         </Button>
@@ -350,10 +381,13 @@ function goWithdrawPage(page: number) {
                         <Button
                             variant="outline"
                             size="sm"
-                            :disabled="(withdrawals?.pagination.current_page ?? 1) <= 1"
+                            :disabled="
+                                (withdrawals?.pagination.current_page ?? 1) <= 1
+                            "
                             @click="
                                 goWithdrawPage(
-                                    (withdrawals?.pagination.current_page ?? 1) - 1,
+                                    (withdrawals?.pagination.current_page ??
+                                        1) - 1,
                                 )
                             "
                         >
@@ -373,7 +407,8 @@ function goWithdrawPage(page: number) {
                             "
                             @click="
                                 goWithdrawPage(
-                                    (withdrawals?.pagination.current_page ?? 1) + 1,
+                                    (withdrawals?.pagination.current_page ??
+                                        1) + 1,
                                 )
                             "
                         >

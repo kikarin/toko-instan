@@ -57,6 +57,7 @@ export function useProductPagination<T>(
             return items.value.slice(0, visibleMobileCount.value);
         } else {
             const start = (currentPage.value - 1) * itemsPerPage;
+
             return items.value.slice(start, start + itemsPerPage);
         }
     });

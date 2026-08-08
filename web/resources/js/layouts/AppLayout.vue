@@ -15,8 +15,6 @@ import {
     Bell,
     Settings,
     Tags,
-    Sparkles,
-    PlusCircle,
     Boxes,
     ExternalLink,
 } from 'lucide-vue-next';
@@ -67,7 +65,17 @@ interface NavItem {
 
 interface Props {
     title?: string;
-    activePage?: 'Dashboard' | 'Katalog' | 'Produk' | 'Stok & Inventory' | 'Pesanan' | 'Pengaturan Toko' | 'Pelanggan' | 'Dompet' | 'Voucher' | 'Analitik';
+    activePage?:
+        | 'Dashboard'
+        | 'Katalog'
+        | 'Produk'
+        | 'Stok & Inventory'
+        | 'Pesanan'
+        | 'Pengaturan Toko'
+        | 'Pelanggan'
+        | 'Dompet'
+        | 'Voucher'
+        | 'Analitik';
     period?: 'Hari' | 'Minggu' | 'Bulan';
 }
 
@@ -83,11 +91,16 @@ const emit = defineEmits<{
 const activeUser = useActiveUser();
 
 const userDisplayName = computed(() => {
-    return activeUser.value?.displayName ?? activeUser.value?.email ?? 'Nike Official Manager';
+    return (
+        activeUser.value?.displayName ??
+        activeUser.value?.email ??
+        'Nike Official Manager'
+    );
 });
 
 const userInitial = computed(() => {
     const name = userDisplayName.value;
+
     return name ? name.substring(0, 2).toUpperCase() : 'NK';
 });
 
@@ -156,7 +169,10 @@ function isActive(item: NavItem): boolean {
 <template>
     <SidebarProvider>
         <!-- ── Dark Luxury Charcoal Sidebar ── -->
-        <Sidebar collapsible="icon" class="border-r border-white/10 bg-[#18181c] text-white font-sans">
+        <Sidebar
+            collapsible="icon"
+            class="border-r border-white/10 bg-[#18181c] font-sans text-white"
+        >
             <!-- ── Header: Brand / Store ── -->
             <SidebarHeader class="p-3 group-data-[collapsible=icon]:p-1.5">
                 <SidebarMenu>
@@ -164,20 +180,30 @@ function isActive(item: NavItem): boolean {
                         <SidebarMenuButton
                             size="lg"
                             tooltip="Nike Official Store"
-                            class="cursor-pointer rounded-2xl transition-all hover:bg-white/5 p-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                            class="cursor-pointer rounded-2xl p-2 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 hover:bg-white/5"
                             @click="navigate('/dashboard')"
                         >
                             <div
-                                class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-base font-black text-white shadow-lg shadow-amber-500/30 shrink-0"
+                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-base font-black text-white shadow-lg shadow-amber-500/30"
                             >
                                 <Store class="h-5 w-5" />
                             </div>
-                            <div class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden">
+                            <div
+                                class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden"
+                            >
                                 <div class="flex items-center gap-1.5">
-                                    <span class="truncate font-black text-white">Nike Official Store</span>
-                                    <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" title="Toko Online" />
+                                    <span class="truncate font-black text-white"
+                                        >Nike Official Store</span
+                                    >
+                                    <span
+                                        class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"
+                                        title="Toko Online"
+                                    />
                                 </div>
-                                <span class="truncate text-[10px] text-amber-400 font-bold">Seller Command Center</span>
+                                <span
+                                    class="truncate text-[10px] font-bold text-amber-400"
+                                    >Seller Command Center</span
+                                >
                             </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -189,40 +215,57 @@ function isActive(item: NavItem): boolean {
             <SidebarContent class="px-2">
                 <!-- ── Main Menu ── -->
                 <SidebarGroup class="py-2">
-                    <SidebarGroupLabel class="text-[10px] font-black uppercase text-zinc-500 tracking-wider px-3 group-data-[collapsible=icon]:hidden">
+                    <SidebarGroupLabel
+                        class="px-3 text-[10px] font-black tracking-wider text-zinc-500 uppercase group-data-[collapsible=icon]:hidden"
+                    >
                         Navigasi Utama
                     </SidebarGroupLabel>
                     <SidebarGroupContent class="mt-1">
                         <SidebarMenu class="gap-1">
-                            <SidebarMenuItem v-for="item in mainNavItems" :key="item.label">
+                            <SidebarMenuItem
+                                v-for="item in mainNavItems"
+                                :key="item.label"
+                            >
                                 <!-- Item with sub-menu -->
                                 <template v-if="item.children">
                                     <SidebarMenuButton
                                         :is-active="isActive(item)"
                                         :tooltip="item.label"
-                                        class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                        class="h-10 cursor-pointer rounded-xl text-xs font-bold transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                                         :class="
                                             isActive(item)
-                                                ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                                ? 'border border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 font-black text-amber-400 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white'
                                                 : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                         "
                                         @click="toggleSubMenu(item.label)"
                                     >
-                                        <component :is="item.icon" class="h-4 w-4 shrink-0" />
-                                        <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
+                                        <component
+                                            :is="item.icon"
+                                            class="h-4 w-4 shrink-0"
+                                        />
+                                        <span
+                                            class="group-data-[collapsible=icon]:hidden"
+                                            >{{ item.label }}</span
+                                        >
                                         <ChevronRight
                                             class="ml-auto h-4 w-4 transition-transform duration-200 group-data-[collapsible=icon]:hidden"
-                                            :class="{ 'rotate-90': openSubMenus[item.label] }"
+                                            :class="{
+                                                'rotate-90':
+                                                    openSubMenus[item.label],
+                                            }"
                                         />
                                     </SidebarMenuButton>
 
-                                    <SidebarMenuSub v-if="openSubMenus[item.label]" class="ml-4 border-l border-amber-500/30 pl-2 group-data-[collapsible=icon]:hidden">
+                                    <SidebarMenuSub
+                                        v-if="openSubMenus[item.label]"
+                                        class="ml-4 border-l border-amber-500/30 pl-2 group-data-[collapsible=icon]:hidden"
+                                    >
                                         <SidebarMenuSubItem
                                             v-for="child in item.children"
                                             :key="child.label"
                                         >
                                             <SidebarMenuSubButton
-                                                class="cursor-pointer rounded-lg text-xs font-semibold py-1.5 text-zinc-400 hover:text-amber-400 transition-colors"
+                                                class="cursor-pointer rounded-lg py-1.5 text-xs font-semibold text-zinc-400 transition-colors hover:text-amber-400"
                                                 @click="navigate(child.route)"
                                             >
                                                 {{ child.label }}
@@ -236,19 +279,25 @@ function isActive(item: NavItem): boolean {
                                     <SidebarMenuButton
                                         :is-active="isActive(item)"
                                         :tooltip="item.label"
-                                        class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                        class="h-10 cursor-pointer rounded-xl text-xs font-bold transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                                         :class="
                                             isActive(item)
-                                                ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                                ? 'border border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 font-black text-amber-400 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white'
                                                 : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                         "
                                         @click="navigate(item.route)"
                                     >
-                                        <component :is="item.icon" class="h-4 w-4 shrink-0" />
-                                        <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
+                                        <component
+                                            :is="item.icon"
+                                            class="h-4 w-4 shrink-0"
+                                        />
+                                        <span
+                                            class="group-data-[collapsible=icon]:hidden"
+                                            >{{ item.label }}</span
+                                        >
                                         <SidebarMenuBadge
                                             v-if="item.badge"
-                                            class="bg-amber-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full shadow-xs group-data-[collapsible=icon]:hidden"
+                                            class="rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-black text-white shadow-xs group-data-[collapsible=icon]:hidden"
                                         >
                                             {{ item.badge }}
                                         </SidebarMenuBadge>
@@ -263,25 +312,36 @@ function isActive(item: NavItem): boolean {
 
                 <!-- ── Finance Menu ── -->
                 <SidebarGroup class="py-2">
-                    <SidebarGroupLabel class="text-[10px] font-black uppercase text-zinc-500 tracking-wider px-3 group-data-[collapsible=icon]:hidden">
+                    <SidebarGroupLabel
+                        class="px-3 text-[10px] font-black tracking-wider text-zinc-500 uppercase group-data-[collapsible=icon]:hidden"
+                    >
                         Dompet & Keuangan
                     </SidebarGroupLabel>
                     <SidebarGroupContent class="mt-1">
                         <SidebarMenu class="gap-1">
-                            <SidebarMenuItem v-for="item in financeNavItems" :key="item.label">
+                            <SidebarMenuItem
+                                v-for="item in financeNavItems"
+                                :key="item.label"
+                            >
                                 <SidebarMenuButton
                                     :is-active="isActive(item)"
                                     :tooltip="item.label"
-                                    class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                    class="h-10 cursor-pointer rounded-xl text-xs font-bold transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                                     :class="
                                         isActive(item)
-                                            ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                            ? 'border border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 font-black text-amber-400 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white'
                                             : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                     "
                                     @click="navigate(item.route)"
                                 >
-                                    <component :is="item.icon" class="h-4 w-4 shrink-0" />
-                                    <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
+                                    <component
+                                        :is="item.icon"
+                                        class="h-4 w-4 shrink-0"
+                                    />
+                                    <span
+                                        class="group-data-[collapsible=icon]:hidden"
+                                        >{{ item.label }}</span
+                                    >
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -292,25 +352,36 @@ function isActive(item: NavItem): boolean {
 
                 <!-- ── Analytics Menu ── -->
                 <SidebarGroup class="py-2">
-                    <SidebarGroupLabel class="text-[10px] font-black uppercase text-zinc-500 tracking-wider px-3 group-data-[collapsible=icon]:hidden">
+                    <SidebarGroupLabel
+                        class="px-3 text-[10px] font-black tracking-wider text-zinc-500 uppercase group-data-[collapsible=icon]:hidden"
+                    >
                         Laporan Performa
                     </SidebarGroupLabel>
                     <SidebarGroupContent class="mt-1">
                         <SidebarMenu class="gap-1">
-                            <SidebarMenuItem v-for="item in analyticsNavItems" :key="item.label">
+                            <SidebarMenuItem
+                                v-for="item in analyticsNavItems"
+                                :key="item.label"
+                            >
                                 <SidebarMenuButton
                                     :is-active="isActive(item)"
                                     :tooltip="item.label"
-                                    class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                    class="h-10 cursor-pointer rounded-xl text-xs font-bold transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                                     :class="
                                         isActive(item)
-                                            ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                            ? 'border border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 font-black text-amber-400 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white'
                                             : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                     "
                                     @click="navigate(item.route)"
                                 >
-                                    <component :is="item.icon" class="h-4 w-4 shrink-0" />
-                                    <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
+                                    <component
+                                        :is="item.icon"
+                                        class="h-4 w-4 shrink-0"
+                                    />
+                                    <span
+                                        class="group-data-[collapsible=icon]:hidden"
+                                        >{{ item.label }}</span
+                                    >
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -329,53 +400,95 @@ function isActive(item: NavItem): boolean {
                                 <SidebarMenuButton
                                     size="lg"
                                     tooltip="Profil Akun Seller"
-                                    class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-2 hover:bg-white/10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                                    class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-2 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 hover:bg-white/10"
                                 >
-                                    <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
-                                        <AvatarImage v-if="activeUser.photoURL" :src="activeUser.photoURL" :alt="userDisplayName" />
-                                        <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                                    <Avatar
+                                        class="h-8 w-8 shrink-0 rounded-xl border border-white/20"
+                                    >
+                                        <AvatarImage
+                                            v-if="activeUser.photoURL"
+                                            :src="activeUser.photoURL"
+                                            :alt="userDisplayName"
+                                        />
+                                        <AvatarFallback
+                                            class="rounded-xl bg-amber-500 text-xs font-black text-white"
+                                        >
                                             {{ userInitial }}
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden">
-                                        <span class="truncate font-extrabold text-white">
+                                    <div
+                                        class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden"
+                                    >
+                                        <span
+                                            class="truncate font-extrabold text-white"
+                                        >
                                             {{ userDisplayName }}
                                         </span>
-                                        <span class="truncate text-[10px] text-zinc-400 font-mono">
+                                        <span
+                                            class="truncate font-mono text-[10px] text-zinc-400"
+                                        >
                                             {{ userEmail }}
                                         </span>
                                     </div>
-                                    <ChevronsUpDown class="ml-auto h-4 w-4 text-zinc-400 group-data-[collapsible=icon]:hidden" />
+                                    <ChevronsUpDown
+                                        class="ml-auto h-4 w-4 text-zinc-400 group-data-[collapsible=icon]:hidden"
+                                    />
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
 
                             <DropdownMenuContent
-                                class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-2xl p-2 shadow-2xl border-white/10 bg-zinc-900 text-white"
+                                class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-2xl border-white/10 bg-zinc-900 p-2 text-white shadow-2xl"
                                 side="right"
                                 align="end"
                                 :side-offset="8"
                             >
                                 <DropdownMenuLabel class="p-1 font-normal">
-                                    <div class="flex items-center gap-2.5 px-2 py-1.5 text-left text-xs">
-                                        <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
-                                            <AvatarImage v-if="activeUser.photoURL" :src="activeUser.photoURL" :alt="userDisplayName" />
-                                            <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                                    <div
+                                        class="flex items-center gap-2.5 px-2 py-1.5 text-left text-xs"
+                                    >
+                                        <Avatar
+                                            class="h-8 w-8 shrink-0 rounded-xl border border-white/20"
+                                        >
+                                            <AvatarImage
+                                                v-if="activeUser.photoURL"
+                                                :src="activeUser.photoURL"
+                                                :alt="userDisplayName"
+                                            />
+                                            <AvatarFallback
+                                                class="rounded-xl bg-amber-500 text-xs font-black text-white"
+                                            >
                                                 {{ userInitial }}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div class="grid flex-1 text-left leading-tight">
-                                            <span class="truncate font-black text-white">{{ userDisplayName }}</span>
-                                            <span class="truncate text-[10px] text-zinc-400 font-mono">{{ userEmail }}</span>
+                                        <div
+                                            class="grid flex-1 text-left leading-tight"
+                                        >
+                                            <span
+                                                class="truncate font-black text-white"
+                                                >{{ userDisplayName }}</span
+                                            >
+                                            <span
+                                                class="truncate font-mono text-[10px] text-zinc-400"
+                                                >{{ userEmail }}</span
+                                            >
                                         </div>
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator class="bg-white/10" />
-                                <DropdownMenuItem class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white" @click="navigate('/store-settings')">
+                                <DropdownMenuItem
+                                    class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                                    @click="navigate('/store-settings')"
+                                >
                                     <Store class="h-4 w-4 text-amber-400" />
                                     Pengaturan Toko
                                 </DropdownMenuItem>
-                                <DropdownMenuItem class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white" @click="navigate('/marketplace')">
-                                    <ExternalLink class="h-4 w-4 text-indigo-400" />
+                                <DropdownMenuItem
+                                    class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                                    @click="navigate('/marketplace')"
+                                >
+                                    <ExternalLink
+                                        class="h-4 w-4 text-indigo-400"
+                                    />
                                     Lihat Webstore Toko
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator class="bg-white/10" />
@@ -394,17 +507,27 @@ function isActive(item: NavItem): boolean {
                             v-else
                             size="lg"
                             tooltip="Login Akun Seller"
-                            class="cursor-pointer rounded-2xl bg-white/5 border border-white/10 p-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
+                            class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                             @click="navigate('/login')"
                         >
-                            <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
-                                <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                            <Avatar
+                                class="h-8 w-8 shrink-0 rounded-xl border border-white/20"
+                            >
+                                <AvatarFallback
+                                    class="rounded-xl bg-amber-500 text-xs font-black text-white"
+                                >
                                     NK
                                 </AvatarFallback>
                             </Avatar>
-                            <div class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden">
-                                <span class="truncate font-black text-white">Nike Official</span>
-                                <span class="truncate text-[10px] text-zinc-400">Merchant Active</span>
+                            <div
+                                class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden"
+                            >
+                                <span class="truncate font-black text-white"
+                                    >Nike Official</span
+                                >
+                                <span class="truncate text-[10px] text-zinc-400"
+                                    >Merchant Active</span
+                                >
                             </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -416,25 +539,34 @@ function isActive(item: NavItem): boolean {
         <SidebarInset class="bg-[#faf9f6]">
             <!-- Top Header Bar (Mobile Responsive) -->
             <header
-                class="sticky top-0 z-20 flex h-14 sm:h-16 shrink-0 items-center justify-between gap-2 border-b border-black/8 bg-white/90 px-3 sm:px-6 backdrop-blur-md transition-all"
+                class="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-black/8 bg-white/90 px-3 backdrop-blur-md transition-all sm:h-16 sm:px-6"
             >
-                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div class="flex min-w-0 items-center gap-2 sm:gap-3">
                     <SidebarTrigger class="-ml-1 shrink-0" />
-                    <SidebarSeparator class="mr-1 sm:mr-2 h-4 shrink-0" orientation="vertical" />
+                    <SidebarSeparator
+                        class="mr-1 h-4 shrink-0 sm:mr-2"
+                        orientation="vertical"
+                    />
 
                     <!-- Breadcrumb current page label -->
                     <div class="flex items-center gap-1.5 truncate">
-                        <span class="text-[10px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider hidden xs:inline">Merchant Hub</span>
-                        <span class="text-zinc-300 hidden xs:inline">/</span>
-                        <span class="text-xs sm:text-sm font-black text-[#1c1c22] truncate">{{ activePage }}</span>
+                        <span
+                            class="xs:inline hidden text-[10px] font-bold tracking-wider text-zinc-400 uppercase sm:text-xs"
+                            >Merchant Hub</span
+                        >
+                        <span class="xs:inline hidden text-zinc-300">/</span>
+                        <span
+                            class="truncate text-xs font-black text-[#1c1c22] sm:text-sm"
+                            >{{ activePage }}</span
+                        >
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex shrink-0 items-center gap-2">
                     <!-- Period Switcher (only on Dashboard) -->
                     <div
                         v-if="activePage === 'Dashboard'"
-                        class="hidden sm:flex gap-1 rounded-2xl border border-black/8 bg-[#faf9f6] p-1"
+                        class="hidden gap-1 rounded-2xl border border-black/8 bg-[#faf9f6] p-1 sm:flex"
                     >
                         <button
                             v-for="p in ['Hari', 'Minggu', 'Bulan'] as const"
@@ -443,7 +575,7 @@ function isActive(item: NavItem): boolean {
                             class="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-extrabold transition-all"
                             :class="[
                                 period === p
-                                    ? 'bg-white text-[#1c1c22] shadow-xs border border-black/8'
+                                    ? 'border border-black/8 bg-white text-[#1c1c22] shadow-xs'
                                     : 'text-zinc-400 hover:text-black',
                             ]"
                         >
@@ -452,25 +584,37 @@ function isActive(item: NavItem): boolean {
                     </div>
 
                     <!-- Bell notification -->
-                    <Button variant="ghost" size="sm" class="relative h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-xl hover:bg-zinc-100 shrink-0" @click="navigate('#')">
-                        <Bell class="h-4 w-4 sm:h-4.5 sm:w-4.5 text-zinc-600" />
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        class="relative h-8 w-8 shrink-0 rounded-xl p-0 hover:bg-zinc-100 sm:h-9 sm:w-9"
+                        @click="navigate('#')"
+                    >
+                        <Bell class="h-4 w-4 text-zinc-600 sm:h-4.5 sm:w-4.5" />
                         <span
-                            class="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 h-2 w-2 rounded-full bg-amber-500 animate-ping"
+                            class="absolute top-1.5 right-1.5 h-2 w-2 animate-ping rounded-full bg-amber-500 sm:top-2 sm:right-2"
                         />
                         <span
-                            class="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 h-2 w-2 rounded-full bg-amber-500"
+                            class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-amber-500 sm:top-2 sm:right-2"
                         />
                     </Button>
 
                     <!-- User info chip (Responsive on mobile) -->
                     <div
-                        class="hidden sm:flex items-center gap-2 rounded-2xl border border-black/8 bg-[#faf9f6] px-3.5 py-1.5 text-xs font-medium shrink-0"
+                        class="hidden shrink-0 items-center gap-2 rounded-2xl border border-black/8 bg-[#faf9f6] px-3.5 py-1.5 text-xs font-medium sm:flex"
                     >
-                        <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span class="max-w-28 sm:max-w-32 truncate font-extrabold text-[#1c1c22]">
+                        <span
+                            class="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500"
+                        />
+                        <span
+                            class="max-w-28 truncate font-extrabold text-[#1c1c22] sm:max-w-32"
+                        >
                             {{ userDisplayName }}
                         </span>
-                        <Badge variant="amber" class="px-2 py-0.5 text-[9px] font-black tracking-wider uppercase shadow-2xs">
+                        <Badge
+                            variant="amber"
+                            class="px-2 py-0.5 text-[9px] font-black tracking-wider uppercase shadow-2xs"
+                        >
                             SELLER
                         </Badge>
                     </div>

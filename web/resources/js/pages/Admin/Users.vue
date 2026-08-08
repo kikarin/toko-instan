@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { Users, UserX } from 'lucide-vue-next';
+import { Search } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
+import { toast } from 'vue-sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import { toast } from 'vue-sonner';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-import { Search } from 'lucide-vue-next';
 
 interface AdminUser {
     id: number;
@@ -143,7 +143,9 @@ function runAction() {
             </div>
 
             <div class="relative max-w-sm">
-                <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#9090a0]" />
+                <Search
+                    class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#9090a0]"
+                />
                 <Input
                     v-model="searchQ"
                     placeholder="Cari nama atau email..."

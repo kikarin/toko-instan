@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, Link } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     ImagePlus,
@@ -61,17 +61,32 @@ const isEdit = ref(!!props.product);
 const name = ref(props.product?.name ?? '');
 
 const categoryOptions = computed(() => {
-    if (props.categories && props.categories.length > 0) return props.categories;
+    if (props.categories && props.categories.length > 0) {
+        return props.categories;
+    }
+
     return ['Sneakers', 'Apparel', 'Accessories', 'Sportswear', 'Running'];
 });
 
 const labelOptions = computed(() => {
-    if (props.labels && props.labels.length > 0) return props.labels;
-    return ['BESTSELLER', 'NEW ARRIVAL', 'PROMO 8.8', 'GARANSI RESMI', 'LIMITED EDITION'];
+    if (props.labels && props.labels.length > 0) {
+        return props.labels;
+    }
+
+    return [
+        'BESTSELLER',
+        'NEW ARRIVAL',
+        'PROMO 8.8',
+        'GARANSI RESMI',
+        'LIMITED EDITION',
+    ];
 });
 
 const brandOptions = computed(() => {
-    if (props.brands && props.brands.length > 0) return props.brands;
+    if (props.brands && props.brands.length > 0) {
+        return props.brands;
+    }
+
     return ['Nike', 'Jordan', 'Adidas', 'Puma', 'Converse'];
 });
 
@@ -83,9 +98,7 @@ const selectedCategory = ref<string>(
 );
 
 const selectedTag = ref<string>(
-    props.product?.tag
-        ? props.product.tag.split(',')[0].trim()
-        : '',
+    props.product?.tag ? props.product.tag.split(',')[0].trim() : '',
 );
 
 const selectedBrand = ref<string>(
@@ -103,7 +116,9 @@ const description = ref(
         'Produk original berkualitas tinggi dengan jaminan garansi keaslian 100%, material daya tahan maksimal, dan kenyamanan optimal.',
 );
 const sku = ref(props.product?.sku ?? '');
-const weightGram = ref(props.product?.weight_gram ? String(props.product.weight_gram) : '500');
+const weightGram = ref(
+    props.product?.weight_gram ? String(props.product.weight_gram) : '500',
+);
 const isLoading = ref(false);
 const uploading = ref(false);
 const errors = ref<Record<string, string>>({});
@@ -114,10 +129,14 @@ const formattedPricePreview = computed(() => {
     const num = Number(price.value);
 
     if (!num || Number.isNaN(num)) {
-return 'Rp 0';
-}
+        return 'Rp 0';
+    }
 
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+    }).format(num);
 });
 
 async function uploadImage(e: Event) {
@@ -125,8 +144,8 @@ async function uploadImage(e: Event) {
     const file = target.files?.[0];
 
     if (!file) {
-return;
-}
+        return;
+    }
 
     uploading.value = true;
 
@@ -181,7 +200,10 @@ function submit() {
         price: price.value,
         stock: stock.value,
         is_active: isActive.value,
-        tag: selectedTag.value && selectedTag.value !== 'none' ? selectedTag.value : null,
+        tag:
+            selectedTag.value && selectedTag.value !== 'none'
+                ? selectedTag.value
+                : null,
         img: img.value,
         description: description.value,
         sku: sku.value,
@@ -195,7 +217,11 @@ function submit() {
             errors.value = {};
         },
         onSuccess: () => {
-            toast.success(isEdit.value ? 'Produk berhasil diperbarui!' : 'Produk baru berhasil ditambahkan!');
+            toast.success(
+                isEdit.value
+                    ? 'Produk berhasil diperbarui!'
+                    : 'Produk baru berhasil ditambahkan!',
+            );
         },
         onError: (errs: Record<string, string>) => {
             errors.value = errs;
@@ -215,65 +241,112 @@ function submit() {
 </script>
 
 <template>
-    <Head :title="isEdit ? 'Edit Produk Studio — Dashboard Merchant' : 'Tambah Produk Baru — Dashboard Merchant'" />
+    <Head
+        :title="
+            isEdit
+                ? 'Edit Produk Studio — Dashboard Merchant'
+                : 'Tambah Produk Baru — Dashboard Merchant'
+        "
+    />
 
     <AppLayout activePage="Produk">
-        <div class="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <div
+            class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 sm:p-6 lg:p-8"
+        >
             <!-- ── Top Action Header ── -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div
+                class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
                 <div class="flex items-center gap-3">
-                    <Button variant="outline" size="sm" class="h-9 px-3 text-xs font-bold rounded-xl border-black/10" @click="back">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        class="h-9 rounded-xl border-black/10 px-3 text-xs font-bold"
+                        @click="back"
+                    >
                         <ArrowLeft class="mr-1.5 h-4 w-4" /> Kembali
                     </Button>
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-black text-amber-600 border border-amber-500/20">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-black text-amber-600"
+                            >
                                 <Sparkles class="h-3 w-3" /> PRODUCT STUDIO
                             </span>
                         </div>
-                        <h1 class="text-xl sm:text-2xl font-black text-[#1c1c22]">
-                            {{ isEdit ? 'Edit Rincian Produk' : 'Tambah Produk Baru ke Toko' }}
+                        <h1
+                            class="text-xl font-black text-[#1c1c22] sm:text-2xl"
+                        >
+                            {{
+                                isEdit
+                                    ? 'Edit Rincian Produk'
+                                    : 'Tambah Produk Baru ke Toko'
+                            }}
                         </h1>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <Button variant="outline" size="sm" class="h-10 px-4 text-xs font-bold rounded-xl" @click="back">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        class="h-10 rounded-xl px-4 text-xs font-bold"
+                        @click="back"
+                    >
                         Batal
                     </Button>
                     <Button
                         variant="amber"
                         size="sm"
-                        class="h-10 px-6 text-xs font-extrabold rounded-xl shadow-lg shadow-amber-500/20 cursor-pointer"
+                        class="h-10 cursor-pointer rounded-xl px-6 text-xs font-extrabold shadow-lg shadow-amber-500/20"
                         :disabled="isLoading"
                         @click="submit"
                     >
-                        <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2
+                            v-if="isLoading"
+                            class="mr-2 h-4 w-4 animate-spin"
+                        />
                         <Save v-else class="mr-2 h-4 w-4" />
-                        {{ isEdit ? 'Simpan Perubahan' : 'Terbitkan Produk Baru' }}
+                        {{
+                            isEdit
+                                ? 'Simpan Perubahan'
+                                : 'Terbitkan Produk Baru'
+                        }}
                     </Button>
                 </div>
             </div>
 
             <!-- ── Main Studio Grid (Form vs Live Preview Side-by-Side) ── -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
                 <!-- ── LEFT COLUMN: FORM EDITORS (8 Cols) ── -->
-                <form @submit.prevent="submit" class="lg:col-span-8 flex flex-col gap-6">
+                <form
+                    @submit.prevent="submit"
+                    class="flex flex-col gap-6 lg:col-span-8"
+                >
                     <!-- SECTION 1: Informasi Dasar Produk -->
-                    <Card class="rounded-3xl border-black/8 shadow-xs bg-white p-6">
-                        <CardHeader class="p-0 mb-5">
-                            <div class="flex items-center gap-2 text-base font-black text-[#1c1c22]">
-                                <div class="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                    <Card
+                        class="rounded-3xl border-black/8 bg-white p-6 shadow-xs"
+                    >
+                        <CardHeader class="mb-5 p-0">
+                            <div
+                                class="flex items-center gap-2 text-base font-black text-[#1c1c22]"
+                            >
+                                <div
+                                    class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 font-bold text-amber-600"
+                                >
                                     <Package class="h-4.5 w-4.5" />
                                 </div>
                                 <span>Informasi & Identitas Produk</span>
                             </div>
                         </CardHeader>
 
-                        <CardContent class="p-0 flex flex-col gap-5">
+                        <CardContent class="flex flex-col gap-5 p-0">
                             <!-- Nama Produk -->
                             <div class="flex flex-col gap-1.5">
-                                <Label for="product-name" class="text-xs font-bold text-[#1c1c22]">
+                                <Label
+                                    for="product-name"
+                                    class="text-xs font-bold text-[#1c1c22]"
+                                >
                                     Nama Produk Dagangan *
                                 </Label>
                                 <Input
@@ -281,28 +354,41 @@ function submit() {
                                     v-model="name"
                                     placeholder="Contoh: Nike Air Force 1 '07 Triple White Edition"
                                     required
-                                    class="h-11 text-xs rounded-xl"
+                                    class="h-11 rounded-xl text-xs"
                                 />
-                                <p v-if="errors.name" class="text-[11px] text-rose-500 font-semibold">
+                                <p
+                                    v-if="errors.name"
+                                    class="text-[11px] font-semibold text-rose-500"
+                                >
                                     {{ errors.name }}
                                 </p>
                             </div>
 
                             <!-- Kategori & Tag Promo -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <!-- Kategori Selector -->
                                 <div class="flex flex-col gap-1.5">
-                                    <Label class="text-xs font-bold text-[#1c1c22]">
+                                    <Label
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                    >
                                         Kategori Produk *
                                     </Label>
                                     <Select v-model="selectedCategory">
-                                        <SelectTrigger class="h-11 text-xs rounded-xl">
-                                            <SelectValue placeholder="Pilih Kategori">
+                                        <SelectTrigger
+                                            class="h-11 rounded-xl text-xs"
+                                        >
+                                            <SelectValue
+                                                placeholder="Pilih Kategori"
+                                            >
                                                 {{ selectedCategory || '—' }}
                                             </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem v-for="c in categoryOptions" :key="c" :value="c">
+                                            <SelectItem
+                                                v-for="c in categoryOptions"
+                                                :key="c"
+                                                :value="c"
+                                            >
                                                 {{ c }}
                                             </SelectItem>
                                         </SelectContent>
@@ -311,30 +397,48 @@ function submit() {
 
                                 <!-- Tag Promo Selector -->
                                 <div class="flex flex-col gap-1.5">
-                                    <Label class="text-xs font-bold text-[#1c1c22]">
+                                    <Label
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                    >
                                         Label / Tag Promo Storefront
                                     </Label>
                                     <Select v-model="selectedTag">
-                                        <SelectTrigger class="h-11 text-xs rounded-xl">
-                                            <SelectValue placeholder="Pilih Label (Opsional)">
-                                                {{ selectedTag && selectedTag !== 'none' ? selectedTag : 'Tanpa Label Promo' }}
+                                        <SelectTrigger
+                                            class="h-11 rounded-xl text-xs"
+                                        >
+                                            <SelectValue
+                                                placeholder="Pilih Label (Opsional)"
+                                            >
+                                                {{
+                                                    selectedTag &&
+                                                    selectedTag !== 'none'
+                                                        ? selectedTag
+                                                        : 'Tanpa Label Promo'
+                                                }}
                                             </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none">Tanpa Label Promo</SelectItem>
-                                            <SelectItem v-for="t in labelOptions" :key="t" :value="t">
+                                            <SelectItem value="none"
+                                                >Tanpa Label Promo</SelectItem
+                                            >
+                                            <SelectItem
+                                                v-for="t in labelOptions"
+                                                :key="t"
+                                                :value="t"
+                                            >
                                                 {{ t }}
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
-
-                                    
                                 </div>
                             </div>
 
                             <!-- Deskripsi Produk -->
                             <div class="flex flex-col gap-1.5">
-                                <Label for="product-description" class="text-xs font-bold text-[#1c1c22]">
+                                <Label
+                                    for="product-description"
+                                    class="text-xs font-bold text-[#1c1c22]"
+                                >
                                     Deskripsi & Keunggulan Produk
                                 </Label>
                                 <Textarea
@@ -342,28 +446,37 @@ function submit() {
                                     v-model="description"
                                     rows="4"
                                     placeholder="Tuliskan spesifikasi lengkap, keunggulan material, garansi toko, dan panduan ukuran..."
-                                    class="text-xs rounded-xl"
+                                    class="rounded-xl text-xs"
                                 />
                             </div>
                         </CardContent>
                     </Card>
 
                     <!-- SECTION 2: Harga, Stok, SKU & Brand -->
-                    <Card class="rounded-3xl border-black/8 shadow-xs bg-white p-6">
-                        <CardHeader class="p-0 mb-5">
-                            <div class="flex items-center gap-2 text-base font-black text-[#1c1c22]">
-                                <div class="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    <Card
+                        class="rounded-3xl border-black/8 bg-white p-6 shadow-xs"
+                    >
+                        <CardHeader class="mb-5 p-0">
+                            <div
+                                class="flex items-center gap-2 text-base font-black text-[#1c1c22]"
+                            >
+                                <div
+                                    class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 font-bold text-emerald-600"
+                                >
                                     <DollarSign class="h-4.5 w-4.5" />
                                 </div>
                                 <span>Harga & Inventaris Persediaan</span>
                             </div>
                         </CardHeader>
 
-                        <CardContent class="p-0 flex flex-col gap-5">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <CardContent class="flex flex-col gap-5 p-0">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <!-- Harga -->
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="product-price" class="text-xs font-bold text-[#1c1c22]">
+                                    <Label
+                                        for="product-price"
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                    >
                                         Harga Jual Pembeli (Rp) *
                                     </Label>
                                     <Input
@@ -373,13 +486,16 @@ function submit() {
                                         min="0"
                                         placeholder="1549000"
                                         required
-                                        class="h-11 text-xs font-mono font-bold rounded-xl"
+                                        class="h-11 rounded-xl font-mono text-xs font-bold"
                                     />
                                 </div>
 
                                 <!-- Stok -->
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="product-stock" class="text-xs font-bold text-[#1c1c22]">
+                                    <Label
+                                        for="product-stock"
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                    >
                                         Jumlah Stok Unit Tersedia *
                                     </Label>
                                     <Input
@@ -389,48 +505,68 @@ function submit() {
                                         min="0"
                                         placeholder="50"
                                         required
-                                        class="h-11 text-xs font-mono font-bold rounded-xl"
+                                        class="h-11 rounded-xl font-mono text-xs font-bold"
                                     />
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <!-- SKU -->
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="product-sku" class="text-xs font-bold text-[#1c1c22]">
+                                    <Label
+                                        for="product-sku"
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                    >
                                         Kode SKU Produk
                                     </Label>
                                     <Input
                                         id="product-sku"
                                         v-model="sku"
                                         placeholder="NK-AF1-WHITE"
-                                        class="h-10 text-xs font-mono rounded-xl"
+                                        class="h-10 rounded-xl font-mono text-xs"
                                     />
                                 </div>
 
                                 <!-- Brand -->
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="product-brand" class="text-xs font-bold text-[#1c1c22]">
+                                    <Label
+                                        for="product-brand"
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                    >
                                         Brand / Merek Produk
                                     </Label>
                                     <Select v-model="selectedBrand">
-                                        <SelectTrigger id="product-brand" class="h-10 text-xs rounded-xl font-semibold">
-                                            <SelectValue placeholder="Pilih Brand">
-                                                {{ selectedBrand || 'Pilih Brand' }}
+                                        <SelectTrigger
+                                            id="product-brand"
+                                            class="h-10 rounded-xl text-xs font-semibold"
+                                        >
+                                            <SelectValue
+                                                placeholder="Pilih Brand"
+                                            >
+                                                {{
+                                                    selectedBrand ||
+                                                    'Pilih Brand'
+                                                }}
                                             </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem v-for="b in brandOptions" :key="b" :value="b">
+                                            <SelectItem
+                                                v-for="b in brandOptions"
+                                                :key="b"
+                                                :value="b"
+                                            >
                                                 {{ b }}
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
-
                                 </div>
 
                                 <!-- Berat -->
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="product-weight" class="text-xs font-bold text-[#1c1c22]">
+                                    <Label
+                                        for="product-weight"
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                    >
                                         Berat Paket (Gram)
                                     </Label>
                                     <Input
@@ -439,7 +575,7 @@ function submit() {
                                         type="number"
                                         min="1"
                                         placeholder="500"
-                                        class="h-10 text-xs font-mono rounded-xl"
+                                        class="h-10 rounded-xl font-mono text-xs"
                                     />
                                 </div>
                             </div>
@@ -447,28 +583,42 @@ function submit() {
                     </Card>
 
                     <!-- SECTION 3: Gambar & Media Produk -->
-                    <Card class="rounded-3xl border-black/8 shadow-xs bg-white p-6">
-                        <CardHeader class="p-0 mb-5">
-                            <div class="flex items-center gap-2 text-base font-black text-[#1c1c22]">
-                                <div class="h-8 w-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                    <Card
+                        class="rounded-3xl border-black/8 bg-white p-6 shadow-xs"
+                    >
+                        <CardHeader class="mb-5 p-0">
+                            <div
+                                class="flex items-center gap-2 text-base font-black text-[#1c1c22]"
+                            >
+                                <div
+                                    class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 font-bold text-indigo-600"
+                                >
                                     <ImagePlus class="h-4.5 w-4.5" />
                                 </div>
                                 <span>Media Gambar Produk</span>
                             </div>
                         </CardHeader>
 
-                        <CardContent class="p-0 flex flex-col gap-4">
+                        <CardContent class="flex flex-col gap-4 p-0">
                             <!-- Drag & Drop Upload Zone -->
                             <div
                                 @click="fileInput!.click()"
-                                class="relative border-2 border-dashed border-black/15 hover:border-amber-500 bg-[#faf9f6] rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+                                class="group relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-black/15 bg-[#faf9f6] p-6 text-center transition-all hover:border-amber-500"
                             >
-                                <div class="h-12 w-12 rounded-2xl bg-white text-zinc-500 group-hover:text-amber-600 flex items-center justify-center shadow-xs border border-black/5 transition-transform group-hover:scale-110">
+                                <div
+                                    class="flex h-12 w-12 items-center justify-center rounded-2xl border border-black/5 bg-white text-zinc-500 shadow-xs transition-transform group-hover:scale-110 group-hover:text-amber-600"
+                                >
                                     <UploadCloud class="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <p class="text-xs font-extrabold text-[#1c1c22]">Klik untuk upload gambar dari perangkat</p>
-                                    <p class="text-[10px] text-zinc-400 mt-0.5">Format PNG, JPG, WEBP hingga 5MB</p>
+                                    <p
+                                        class="text-xs font-extrabold text-[#1c1c22]"
+                                    >
+                                        Klik untuk upload gambar dari perangkat
+                                    </p>
+                                    <p class="mt-0.5 text-[10px] text-zinc-400">
+                                        Format PNG, JPG, WEBP hingga 5MB
+                                    </p>
                                 </div>
                                 <input
                                     ref="fileInput"
@@ -479,41 +629,60 @@ function submit() {
                                 />
                             </div>
 
-                            <div class="flex items-center gap-2 text-xs font-bold text-zinc-400 text-center justify-center my-1">
-                                <span class="h-px bg-black/10 flex-1" />
+                            <div
+                                class="my-1 flex items-center justify-center gap-2 text-center text-xs font-bold text-zinc-400"
+                            >
+                                <span class="h-px flex-1 bg-black/10" />
                                 <span>ATAU METODE URL GAMBAR</span>
-                                <span class="h-px bg-black/10 flex-1" />
+                                <span class="h-px flex-1 bg-black/10" />
                             </div>
 
                             <!-- URL Input -->
                             <div class="flex flex-col gap-1.5">
-                                <Label for="product-img" class="text-xs font-bold text-[#1c1c22]">
+                                <Label
+                                    for="product-img"
+                                    class="text-xs font-bold text-[#1c1c22]"
+                                >
                                     Paste Link URL Gambar (Opsional)
                                 </Label>
                                 <Input
                                     id="product-img"
                                     v-model="img"
                                     placeholder="https://images.unsplash.com/photo-1542291026-7eec264c27ff"
-                                    class="h-10 text-xs font-mono rounded-xl"
+                                    class="h-10 rounded-xl font-mono text-xs"
                                 />
                             </div>
                         </CardContent>
                     </Card>
 
                     <!-- SECTION 4: Status Publikasi Switch -->
-                    <Card class="rounded-3xl border-black/8 shadow-xs bg-white p-6">
+                    <Card
+                        class="rounded-3xl border-black/8 bg-white p-6 shadow-xs"
+                    >
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="h-10 w-10 rounded-2xl flex items-center justify-center font-bold text-white shadow-xs"
-                                    :class="isActive ? 'bg-emerald-600' : 'bg-rose-500'"
+                                    class="flex h-10 w-10 items-center justify-center rounded-2xl font-bold text-white shadow-xs"
+                                    :class="
+                                        isActive
+                                            ? 'bg-emerald-600'
+                                            : 'bg-rose-500'
+                                    "
                                 >
                                     <CheckCircle2 class="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-black text-[#1c1c22]">Status Publikasi Produk</h4>
-                                    <p class="text-xs text-zinc-500 mt-0.5">
-                                        {{ isActive ? 'Produk aktif & dapat langsung dibeli oleh calon pelanggan di storefront.' : 'Produk disimpan sebagai draft & disembunyikan dari publik.' }}
+                                    <h4
+                                        class="text-sm font-black text-[#1c1c22]"
+                                    >
+                                        Status Publikasi Produk
+                                    </h4>
+                                    <p class="mt-0.5 text-xs text-zinc-500">
+                                        {{
+                                            isActive
+                                                ? 'Produk aktif & dapat langsung dibeli oleh calon pelanggan di storefront.'
+                                                : 'Produk disimpan sebagai draft & disembunyikan dari publik.'
+                                        }}
                                     </p>
                                 </div>
                             </div>
@@ -526,18 +695,27 @@ function submit() {
                 </form>
 
                 <!-- ── RIGHT COLUMN: STICKY LIVE STOREFRONT PREVIEW (4 Cols) ── -->
-                <div class="lg:col-span-4 sticky top-20 flex flex-col gap-4">
+                <div class="sticky top-20 flex flex-col gap-4 lg:col-span-4">
                     <div class="flex items-center justify-between">
-                        <span class="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#1c1c22]">
-                            <Eye class="h-4 w-4 text-amber-500" /> Live Preview Card
+                        <span
+                            class="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#1c1c22]"
+                        >
+                            <Eye class="h-4 w-4 text-amber-500" /> Live Preview
+                            Card
                         </span>
-                        <Badge variant="teal" class="text-[9px] font-bold">Real-time Storefront</Badge>
+                        <Badge variant="teal" class="text-[9px] font-bold"
+                            >Real-time Storefront</Badge
+                        >
                     </div>
 
                     <!-- Live Product Card Preview -->
-                    <div class="overflow-hidden rounded-3xl border border-black/10 bg-white shadow-xl">
+                    <div
+                        class="overflow-hidden rounded-3xl border border-black/10 bg-white shadow-xl"
+                    >
                         <!-- Image Container -->
-                        <div class="relative aspect-4/3 w-full bg-[#faf9f6] overflow-hidden">
+                        <div
+                            class="relative aspect-4/3 w-full overflow-hidden bg-[#faf9f6]"
+                        >
                             <img
                                 v-if="img"
                                 :src="img"
@@ -546,62 +724,105 @@ function submit() {
                             />
                             <div
                                 v-else
-                                class="flex h-full w-full items-center justify-center text-zinc-300 flex-col gap-2"
+                                class="flex h-full w-full flex-col items-center justify-center gap-2 text-zinc-300"
                             >
                                 <Package class="h-12 w-12" />
-                                <span class="text-[10px] font-bold text-zinc-400">Belum ada gambar</span>
+                                <span
+                                    class="text-[10px] font-bold text-zinc-400"
+                                    >Belum ada gambar</span
+                                >
                             </div>
 
                             <!-- Badges Overlay -->
-                            <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                                <Badge v-if="selectedTag" variant="amber" class="text-[9px] font-black uppercase shadow-xs px-2.5 py-0.5">
+                            <div
+                                class="absolute top-3 left-3 flex flex-wrap gap-1.5"
+                            >
+                                <Badge
+                                    v-if="selectedTag"
+                                    variant="amber"
+                                    class="px-2.5 py-0.5 text-[9px] font-black uppercase shadow-xs"
+                                >
                                     {{ selectedTag }}
                                 </Badge>
-                                <Badge v-if="!isActive" variant="rose" class="text-[9px] font-black uppercase shadow-xs px-2.5 py-0.5">
+                                <Badge
+                                    v-if="!isActive"
+                                    variant="rose"
+                                    class="px-2.5 py-0.5 text-[9px] font-black uppercase shadow-xs"
+                                >
                                     Nonaktif (Draft)
                                 </Badge>
                             </div>
 
                             <!-- Rating Pill -->
-                            <div class="absolute bottom-3 right-3 flex items-center gap-1 text-[11px] font-black text-amber-400 bg-black/60 px-2.5 py-1 rounded-xl backdrop-blur-xs text-white">
-                                <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> 4.9
+                            <div
+                                class="absolute right-3 bottom-3 flex items-center gap-1 rounded-xl bg-black/60 px-2.5 py-1 text-[11px] font-black text-amber-400 text-white backdrop-blur-xs"
+                            >
+                                <Star
+                                    class="h-3.5 w-3.5 fill-amber-400 text-amber-400"
+                                />
+                                4.9
                             </div>
                         </div>
 
                         <!-- Content Container -->
-                        <div class="p-5 flex flex-col gap-3">
+                        <div class="flex flex-col gap-3 p-5">
                             <div class="flex items-center justify-between">
-                                <Badge variant="outline" class="text-[10px] font-bold text-zinc-600 border-black/10">
+                                <Badge
+                                    variant="outline"
+                                    class="border-black/10 text-[10px] font-bold text-zinc-600"
+                                >
                                     {{ selectedCategory || 'Uncategorized' }}
                                 </Badge>
-                                <span class="text-[10px] font-bold text-zinc-400 font-mono">SKU: {{ sku || 'SKU-SAMPLE' }}</span>
+                                <span
+                                    class="font-mono text-[10px] font-bold text-zinc-400"
+                                    >SKU: {{ sku || 'SKU-SAMPLE' }}</span
+                                >
                             </div>
 
-                            <h3 class="text-sm font-black text-[#1c1c22] line-clamp-2 leading-snug">
+                            <h3
+                                class="line-clamp-2 text-sm leading-snug font-black text-[#1c1c22]"
+                            >
                                 {{ name || 'Nama Produk Dagangan Anda...' }}
                             </h3>
 
-                            <div class="flex items-end justify-between pt-2 border-t border-black/5">
+                            <div
+                                class="flex items-end justify-between border-t border-black/5 pt-2"
+                            >
                                 <div>
-                                    <span class="text-[10px] font-bold text-zinc-400 block uppercase">Harga Jual</span>
-                                    <span class="font-mono text-base font-black text-amber-600">
+                                    <span
+                                        class="block text-[10px] font-bold text-zinc-400 uppercase"
+                                        >Harga Jual</span
+                                    >
+                                    <span
+                                        class="font-mono text-base font-black text-amber-600"
+                                    >
                                         {{ formattedPricePreview }}
                                     </span>
                                 </div>
 
                                 <div class="text-right">
-                                    <span class="text-[10px] font-bold text-zinc-400 block uppercase">Stok Unit</span>
-                                    <span class="text-xs font-black text-zinc-700 font-mono">{{ stock || '0' }} pcs</span>
+                                    <span
+                                        class="block text-[10px] font-bold text-zinc-400 uppercase"
+                                        >Stok Unit</span
+                                    >
+                                    <span
+                                        class="font-mono text-xs font-black text-zinc-700"
+                                        >{{ stock || '0' }} pcs</span
+                                    >
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Guidance Info Box -->
-                    <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 text-xs text-amber-900">
-                        <Info class="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                        <p class="text-[11px] font-medium leading-relaxed">
-                            Pastikan data harga dan gambar sudah sesuai sebelum diterbitkan. Pembeli di toko Anda akan langsung melihat kartu produk ini pada katalog webstore.
+                    <div
+                        class="flex items-start gap-2.5 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs text-amber-900"
+                    >
+                        <Info class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                        <p class="text-[11px] leading-relaxed font-medium">
+                            Pastikan data harga dan gambar sudah sesuai sebelum
+                            diterbitkan. Pembeli di toko Anda akan langsung
+                            melihat kartu produk ini pada katalog webstore.
                         </p>
                     </div>
                 </div>

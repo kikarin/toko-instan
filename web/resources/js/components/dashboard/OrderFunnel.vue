@@ -19,7 +19,10 @@ const totalOrders = computed(() =>
 );
 
 function getPercent(n: number) {
-    if (!totalOrders.value) return '0%';
+    if (!totalOrders.value) {
+        return '0%';
+    }
+
     return `${((n / totalOrders.value) * 100).toFixed(1)}%`;
 }
 </script>
@@ -29,23 +32,27 @@ function getPercent(n: number) {
         <div
             v-for="(item, i) in orderFlow"
             :key="i"
-            class="group flex cursor-pointer items-center gap-3 transition-all duration-200 p-2 rounded-2xl hover:bg-zinc-50"
+            class="group flex cursor-pointer items-center gap-3 rounded-2xl p-2 transition-all duration-200 hover:bg-zinc-50"
             @mouseenter="hoveredIndex = i"
             @mouseleave="hoveredIndex = null"
         >
             <div class="w-24 shrink-0 text-left">
                 <span
-                    class="font-extrabold text-xs transition-colors block"
+                    class="block text-xs font-extrabold transition-colors"
                     :style="{ color: hoveredIndex === i ? item.c : '#1c1c22' }"
                 >
                     {{ item.label }}
                 </span>
-                <span class="text-[10px] text-zinc-400 font-mono font-bold">{{ getPercent(item.n) }}</span>
+                <span class="font-mono text-[10px] font-bold text-zinc-400">{{
+                    getPercent(item.n)
+                }}</span>
             </div>
 
-            <div class="h-6 flex-1 overflow-hidden rounded-xl bg-zinc-100 p-0.5 border border-black/5">
+            <div
+                class="h-6 flex-1 overflow-hidden rounded-xl border border-black/5 bg-zinc-100 p-0.5"
+            >
                 <div
-                    class="h-full rounded-lg transition-all duration-500 ease-out shadow-xs flex items-center justify-end pr-2"
+                    class="flex h-full items-center justify-end rounded-lg pr-2 shadow-xs transition-all duration-500 ease-out"
                     :style="{
                         width: `${Math.max(6, (item.n / totalOrders) * 100)}%`,
                         backgroundColor: item.c,

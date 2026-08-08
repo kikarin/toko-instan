@@ -20,7 +20,12 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const { items: wishlistItems, count: wishlistCount, clear: clearWishlist, replaceItems } = useWishlist();
+const {
+    items: wishlistItems,
+    count: wishlistCount,
+    clear: clearWishlist,
+    replaceItems,
+} = useWishlist();
 
 if (props.products) {
     replaceItems(props.products);
@@ -63,16 +68,17 @@ function addToCart(product: any, addQty = 1) {
 }
 
 function updateCartQty(id: number, delta: number) {
- updateQty(id, delta); 
+    updateQty(id, delta);
 }
 function removeFromCart(id: number) {
- removeCartItem(id); 
+    removeCartItem(id);
 }
 function goCheckout() {
- isCartOpen.value = false; router.visit('/checkout'); 
+    isCartOpen.value = false;
+    router.visit('/checkout');
 }
 function openProductDetail(product: any) {
- activeProductModal.value = product; 
+    activeProductModal.value = product;
 }
 </script>
 
@@ -83,27 +89,35 @@ function openProductDetail(product: any) {
         :cartCount="totalCartCount"
         :wishlistCount="wishlistCount"
         @open-cart="isCartOpen = true"
-        @search="(q: string) => router.visit('/marketplace', { data: { search: q } })"
+        @search="
+            (q: string) => router.visit('/marketplace', { data: { search: q } })
+        "
     >
         <main class="mx-auto w-full max-w-[1200px] p-3 sm:p-6 lg:p-8">
             <div class="flex flex-col gap-6">
-
                 <!-- ── Header ── -->
                 <div class="flex items-center justify-between pt-2">
                     <div class="flex items-center gap-3">
                         <button
                             @click="router.visit('/account')"
-                            class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white shadow-xs border border-black/6 text-[#1c1c22] hover:bg-black/5 transition-colors"
+                            class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-black/6 bg-white text-[#1c1c22] shadow-xs transition-colors hover:bg-black/5"
                         >
                             <ArrowLeft class="h-4 w-4" />
                         </button>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h1 class="text-xl font-extrabold text-[#1c1c22]">Wishlist Saya</h1>
-                                <Heart class="h-5 w-5 fill-[#e0405a] text-[#e0405a]" />
+                                <h1
+                                    class="text-xl font-extrabold text-[#1c1c22]"
+                                >
+                                    Wishlist Saya
+                                </h1>
+                                <Heart
+                                    class="h-5 w-5 fill-[#e0405a] text-[#e0405a]"
+                                />
                             </div>
                             <p class="text-xs text-[#9090a0]">
-                                {{ wishlistCount }} produk tersimpan di barang impianmu
+                                {{ wishlistCount }} produk tersimpan di barang
+                                impianmu
                             </p>
                         </div>
                     </div>
@@ -113,8 +127,13 @@ function openProductDetail(product: any) {
                         v-if="wishlistCount > 0"
                         variant="outline"
                         size="sm"
-                        class="h-8 border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold gap-1.5"
-                        @click="() => { clearWishlist(); toast.info('Wishlist telah dikosongkan'); }"
+                        class="h-8 gap-1.5 border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                        @click="
+                            () => {
+                                clearWishlist();
+                                toast.info('Wishlist telah dikosongkan');
+                            }
+                        "
                     >
                         <Trash2 class="h-3.5 w-3.5" />
                         Kosongkan
@@ -136,21 +155,31 @@ function openProductDetail(product: any) {
                 </div>
 
                 <!-- ── Empty State ── -->
-                <Card v-else class="rounded-2xl border-black/6 shadow-xs bg-white">
-                    <CardContent class="flex flex-col items-center justify-center py-20 text-center gap-3">
-                        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-rose-50 border border-rose-100">
+                <Card
+                    v-else
+                    class="rounded-2xl border-black/6 bg-white shadow-xs"
+                >
+                    <CardContent
+                        class="flex flex-col items-center justify-center gap-3 py-20 text-center"
+                    >
+                        <div
+                            class="flex h-20 w-20 items-center justify-center rounded-full border border-rose-100 bg-rose-50"
+                        >
                             <Heart class="h-10 w-10 text-rose-400" />
                         </div>
                         <div>
-                            <h2 class="text-base font-extrabold text-[#1c1c22]">Wishlist Kamu Masih Kosong</h2>
-                            <p class="text-xs text-[#9090a0] mt-1 max-w-sm">
-                                Simpan produk barang impianmu dengan menekan ikon hati pada produk pilihanmu.
+                            <h2 class="text-base font-extrabold text-[#1c1c22]">
+                                Wishlist Kamu Masih Kosong
+                            </h2>
+                            <p class="mt-1 max-w-sm text-xs text-[#9090a0]">
+                                Simpan produk barang impianmu dengan menekan
+                                ikon hati pada produk pilihanmu.
                             </p>
                         </div>
                         <Button
                             variant="amber"
                             size="sm"
-                            class="mt-2 rounded-xl text-xs font-bold px-6 shadow-md gap-2"
+                            class="mt-2 gap-2 rounded-xl px-6 text-xs font-bold shadow-md"
                             @click="router.visit('/marketplace')"
                         >
                             <ShoppingBag class="h-4 w-4" />
@@ -158,7 +187,6 @@ function openProductDetail(product: any) {
                         </Button>
                     </CardContent>
                 </Card>
-
             </div>
         </main>
 

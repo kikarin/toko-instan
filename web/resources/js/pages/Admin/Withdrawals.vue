@@ -38,12 +38,13 @@ const statusLabel: Record<string, string> = {
     transferred: 'Ditransfer',
 };
 
-const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> = {
-    pending: 'amber',
-    approved: 'violetSolid',
-    rejected: 'rose',
-    transferred: 'teal',
-};
+const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
+    {
+        pending: 'amber',
+        approved: 'violetSolid',
+        rejected: 'rose',
+        transferred: 'teal',
+    };
 
 function approve(w: WithdrawalRow) {
     router.patch(`/admin/withdrawals/${w.id}/approve`, undefined, {
@@ -183,7 +184,11 @@ function submitReject() {
                         class="min-h-24"
                     />
                     <div class="mt-4 flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" @click="rejectId = null">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            @click="rejectId = null"
+                        >
                             Batal
                         </Button>
                         <Button

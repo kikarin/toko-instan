@@ -46,10 +46,13 @@ function getSparkPaths(data: number[]) {
 
 <template>
     <Card
-        class="group relative overflow-hidden rounded-2xl border border-black/8 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-amber-500/20 flex flex-col justify-between gap-2.5"
+        class="group relative flex flex-col justify-between gap-2.5 overflow-hidden rounded-2xl border border-black/8 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/20 hover:shadow-xl"
     >
         <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-zinc-500 group-hover:text-black transition-colors">{{ label }}</span>
+            <span
+                class="text-xs font-bold text-zinc-500 transition-colors group-hover:text-black"
+                >{{ label }}</span
+            >
             <div
                 class="flex h-9 w-9 items-center justify-center rounded-xl text-base shadow-xs transition-transform duration-300 group-hover:scale-110"
                 :style="{ backgroundColor: softColor }"
@@ -70,7 +73,7 @@ function getSparkPaths(data: number[]) {
 
         <div class="flex items-center justify-between pt-1">
             <span
-                class="inline-flex items-center gap-0.5 font-mono text-[11px] font-extrabold px-2 py-0.5 rounded-full"
+                class="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-mono text-[11px] font-extrabold"
                 :class="[
                     up === null
                         ? 'bg-emerald-50 text-emerald-600'
@@ -122,6 +125,10 @@ function getSparkPaths(data: number[]) {
             </svg>
         </div>
 
-        <p class="text-[10px] font-medium text-zinc-400 border-t border-black/5 pt-1.5">{{ sub }}</p>
+        <p
+            class="border-t border-black/5 pt-1.5 text-[10px] font-medium text-zinc-400"
+        >
+            {{ sub }}
+        </p>
     </Card>
 </template>

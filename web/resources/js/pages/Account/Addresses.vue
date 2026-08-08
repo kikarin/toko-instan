@@ -88,7 +88,8 @@ function save() {
             editingId.value = null;
             toast.success('Alamat tersimpan.');
         },
-        onError: () => toast.error('Gagal menyimpan alamat. Periksa kembali formulir.'),
+        onError: () =>
+            toast.error('Gagal menyimpan alamat. Periksa kembali formulir.'),
     };
 
     if (editingId.value === null) {
@@ -136,51 +137,103 @@ function confirmDelete() {
                         <MapPin class="h-6 w-6" /> Alamat Saya
                     </h1>
                 </div>
-                <Button v-if="!showForm" variant="amber" size="sm" @click="openNew">
+                <Button
+                    v-if="!showForm"
+                    variant="amber"
+                    size="sm"
+                    @click="openNew"
+                >
                     <Plus class="mr-1.5 h-3.5 w-3.5" /> Tambah Alamat
                 </Button>
             </div>
 
             <Card v-if="showForm" class="p-5">
                 <CardTitle class="mb-4 text-sm">
-                    {{ editingId === null ? 'Tambah Alamat Baru' : 'Ubah Alamat' }}
+                    {{
+                        editingId === null
+                            ? 'Tambah Alamat Baru'
+                            : 'Ubah Alamat'
+                    }}
                 </CardTitle>
                 <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="save">
                     <div class="flex flex-col gap-1.5">
                         <Label for="addr-label">Label (opsional)</Label>
-                        <Input id="addr-label" v-model="form.label" placeholder="cth: Rumah / Kantor" />
+                        <Input
+                            id="addr-label"
+                            v-model="form.label"
+                            placeholder="cth: Rumah / Kantor"
+                        />
                     </div>
                     <div class="flex flex-col gap-1.5 sm:col-span-1">
-                        <Label for="addr-name" class="required">Nama Penerima</Label>
-                        <Input id="addr-name" v-model="form.recipient_name" required placeholder="Nama penerima" />
+                        <Label for="addr-name" class="required"
+                            >Nama Penerima</Label
+                        >
+                        <Input
+                            id="addr-name"
+                            v-model="form.recipient_name"
+                            required
+                            placeholder="Nama penerima"
+                        />
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <Label for="addr-phone">No. HP</Label>
-                        <Input id="addr-phone" v-model="form.phone" required placeholder="08xxxx" />
+                        <Input
+                            id="addr-phone"
+                            v-model="form.phone"
+                            required
+                            placeholder="08xxxx"
+                        />
                     </div>
                     <div class="flex flex-col gap-1.5 sm:col-span-2">
                         <Label for="addr-address">Alamat Lengkap</Label>
-                        <Input id="addr-address" v-model="form.address" required placeholder="Jalan, nomor, RT/RW, kelurahan..." />
+                        <Input
+                            id="addr-address"
+                            v-model="form.address"
+                            required
+                            placeholder="Jalan, nomor, RT/RW, kelurahan..."
+                        />
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <Label for="addr-city">Kota/Kabupaten</Label>
-                        <Input id="addr-city" v-model="form.city" required placeholder="Jakarta Selatan" />
+                        <Input
+                            id="addr-city"
+                            v-model="form.city"
+                            required
+                            placeholder="Jakarta Selatan"
+                        />
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <Label for="addr-province">Provinsi</Label>
-                        <Input id="addr-province" v-model="form.province" required placeholder="DKI Jakarta" />
+                        <Input
+                            id="addr-province"
+                            v-model="form.province"
+                            required
+                            placeholder="DKI Jakarta"
+                        />
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <Label for="addr-postal">Kode Pos</Label>
-                        <Input id="addr-postal" v-model="form.postal_code" required placeholder="12190" />
+                        <Input
+                            id="addr-postal"
+                            v-model="form.postal_code"
+                            required
+                            placeholder="12190"
+                        />
                     </div>
                     <div class="flex items-end gap-3 pb-1">
                         <Label class="text-xs">Jadikan alamat utama</Label>
-                        <Switch :checked="form.is_default" @update:checked="form.is_default = $event" />
+                        <Switch
+                            :checked="form.is_default"
+                            @update:checked="form.is_default = $event"
+                        />
                     </div>
                     <div class="flex gap-2 sm:col-span-2">
                         <Button type="submit" variant="amber">Simpan</Button>
-                        <Button type="button" variant="outline" @click="showForm = false">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            @click="showForm = false"
+                        >
                             Batal
                         </Button>
                     </div>
@@ -210,22 +263,35 @@ function confirmDelete() {
                                     <p class="text-sm font-bold text-[#1c1c22]">
                                         {{ a.recipient_name }}
                                     </p>
-                                    <Badge v-if="a.is_default" variant="amber" class="px-2 py-0 text-[9px] uppercase">
+                                    <Badge
+                                        v-if="a.is_default"
+                                        variant="amber"
+                                        class="px-2 py-0 text-[9px] uppercase"
+                                    >
                                         Utama
                                     </Badge>
                                 </div>
                                 <p class="mt-0.5 text-[11px] text-[#9090a0]">
                                     {{ a.phone }}
-                                    <template v-if="a.label"> • {{ a.label }}</template>
+                                    <template v-if="a.label">
+                                        • {{ a.label }}</template
+                                    >
                                 </p>
-                                <p class="mt-1 text-xs leading-relaxed text-[#4a4a57]">
-                                    {{ a.address }}, {{ a.city }}, {{ a.province }}
+                                <p
+                                    class="mt-1 text-xs leading-relaxed text-[#4a4a57]"
+                                >
+                                    {{ a.address }}, {{ a.city }},
+                                    {{ a.province }}
                                     {{ a.postal_code }}
                                 </p>
                             </div>
                         </div>
                         <div class="flex shrink-0 items-center gap-1">
-                            <Button variant="ghost" size="sm" @click="openEdit(a)">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                @click="openEdit(a)"
+                            >
                                 <Pencil class="h-3.5 w-3.5" />
                             </Button>
                             <Button
@@ -249,7 +315,10 @@ function confirmDelete() {
                     </Button>
                 </div>
 
-                <Card v-if="!(addresses ?? []).length && !showForm" class="py-14 text-center">
+                <Card
+                    v-if="!(addresses ?? []).length && !showForm"
+                    class="py-14 text-center"
+                >
                     <div
                         class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f5f4f0]"
                     >
@@ -261,7 +330,12 @@ function confirmDelete() {
                     <p class="mt-1 text-xs text-[#9090a0]">
                         Tambahkan alamat pengiriman pertamamu.
                     </p>
-                    <Button variant="amber" size="sm" class="mt-3 text-xs font-bold" @click="openNew">
+                    <Button
+                        variant="amber"
+                        size="sm"
+                        class="mt-3 text-xs font-bold"
+                        @click="openNew"
+                    >
                         <Plus class="mr-1.5 h-3.5 w-3.5" /> Tambah Alamat
                     </Button>
                 </Card>

@@ -36,7 +36,13 @@ const form = reactive({
 });
 
 const editingId = ref<number | null>(null);
-const editingForm = reactive({ name: '', sku: '', price: '', stock: '0', is_active: true });
+const editingForm = reactive({
+    name: '',
+    sku: '',
+    price: '',
+    stock: '0',
+    is_active: true,
+});
 const deleteTarget = ref<Variant | null>(null);
 
 function saveVariant(productId: number) {
@@ -148,7 +154,11 @@ function confirmDelete(productId: number) {
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <Label for="v-sku">SKU</Label>
-                        <Input id="v-sku" v-model="form.sku" placeholder="NK-AF1-BLK42" />
+                        <Input
+                            id="v-sku"
+                            v-model="form.sku"
+                            placeholder="NK-AF1-BLK42"
+                        />
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <Label for="v-price">Harga (opsional)</Label>
@@ -162,7 +172,12 @@ function confirmDelete(productId: number) {
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <Label for="v-stock">Stok</Label>
-                        <Input id="v-stock" v-model="form.stock" type="number" min="0" />
+                        <Input
+                            id="v-stock"
+                            v-model="form.stock"
+                            type="number"
+                            min="0"
+                        />
                     </div>
                     <div>
                         <Button type="submit">Tambah Varian</Button>
@@ -180,13 +195,35 @@ function confirmDelete(productId: number) {
                     >
                         <template v-if="editingId === v.id">
                             <div class="grid flex-1 gap-2 sm:grid-cols-3">
-                                <Input v-model="editingForm.name" class="text-xs" />
-                                <Input v-model="editingForm.price" type="number" class="text-xs" placeholder="Harga" />
-                                <Input v-model="editingForm.stock" type="number" class="text-xs" placeholder="Stok" />
+                                <Input
+                                    v-model="editingForm.name"
+                                    class="text-xs"
+                                />
+                                <Input
+                                    v-model="editingForm.price"
+                                    type="number"
+                                    class="text-xs"
+                                    placeholder="Harga"
+                                />
+                                <Input
+                                    v-model="editingForm.stock"
+                                    type="number"
+                                    class="text-xs"
+                                    placeholder="Stok"
+                                />
                             </div>
                             <div class="flex gap-1">
-                                <Button variant="outline" size="sm" @click="commitEdit">Simpan</Button>
-                                <Button variant="ghost" size="sm" @click="editingId = null">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    @click="commitEdit"
+                                    >Simpan</Button
+                                >
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    @click="editingId = null"
+                                >
                                     Batal
                                 </Button>
                             </div>

@@ -16,8 +16,17 @@ test('postgresql schema migration creates audit and logs schemas on pgsql driver
         ->toContain('CREATE SCHEMA IF NOT EXISTS audit')
         ->toContain('CREATE SCHEMA IF NOT EXISTS logs');
 
+    $driver = DB::getDriverName();
 
-    expect(DB::getDriverName())->toBe('sqlite');
+    expect(in_array($driver, ['sqlite', 'pgsql'], true))->toBeTrue();
+
+    if ($driver === 'pgsql') {
+        $schemas = collect(DB::select('SELECT schema_name FROM information_schema.schemata'))
+            ->pluck('schema_name')
+            ->all();
+
+        expect($schemas)->toContain('audit')->toContain('logs');
+    }
 });
 
 test('order_items table exists after migrations', function () {

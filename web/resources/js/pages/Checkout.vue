@@ -12,16 +12,16 @@ import {
     CheckCircle2,
 } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
+import { toast } from 'vue-sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'vue-sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useCart } from '@/lib/useCart';
 import { useActiveUser } from '@/lib/useActiveUser';
+import { useCart } from '@/lib/useCart';
 
 // Cart is shared & persisted via localStorage composable
 const { items: cartItems, clear: clearCart } = useCart();
@@ -29,7 +29,11 @@ const activeUser = useActiveUser();
 
 const isEmpty = computed(() => cartItems.value.length === 0);
 
-const customerName = ref((activeUser.value as any)?.displayName || (activeUser.value as any)?.name || '');
+const customerName = ref(
+    (activeUser.value as any)?.displayName ||
+        (activeUser.value as any)?.name ||
+        '',
+);
 const customerEmail = ref(activeUser.value?.email || '');
 const customerPhone = ref((activeUser.value as any)?.phone || '');
 const shippingAddress = ref('');
@@ -89,6 +93,7 @@ const subtotal = computed(() =>
 
 const currentShippingFee = computed(() => {
     const found = couriers.find((c) => selectedCourier.value.includes(c.name));
+
     return found ? found.price : 15000;
 });
 
@@ -101,6 +106,7 @@ function fmtRp(val: number) {
 function handleCheckoutSubmit() {
     if (isEmpty.value) {
         toast.error('Keranjang belanja Anda kosong!');
+
         return;
     }
 
@@ -158,7 +164,9 @@ function handleCheckoutSubmit() {
     <Head title="Checkout Pemesanan — Nike Official Store" />
 
     <StorefrontLayout :cartCount="cartItems.length">
-        <main class="mx-auto w-full max-w-[1400px] px-4 pt-4 pb-28 sm:p-6 font-sans">
+        <main
+            class="mx-auto w-full max-w-[1400px] px-4 pt-4 pb-28 font-sans sm:p-6"
+        >
             <div class="mb-6">
                 <p
                     class="mb-1 text-xs font-extrabold tracking-widest text-[#e07c28] uppercase"
@@ -198,7 +206,9 @@ function handleCheckoutSubmit() {
                 class="flex flex-col gap-5 lg:grid lg:grid-cols-12 lg:gap-6"
             >
                 <!-- Left Form Column — appears second on mobile -->
-                <div class="order-2 flex flex-col gap-5 lg:order-1 lg:col-span-7">
+                <div
+                    class="order-2 flex flex-col gap-5 lg:order-1 lg:col-span-7"
+                >
                     <!-- Customer Information Card -->
                     <Card class="p-6">
                         <CardHeader class="mb-4 p-0">
@@ -211,7 +221,11 @@ function handleCheckoutSubmit() {
                         </CardHeader>
                         <CardContent class="flex flex-col gap-4 p-0">
                             <div class="flex flex-col gap-1.5">
-                                <Label for="c-name" class="text-xs font-bold text-[#1c1c22]">Nama Lengkap *</Label>
+                                <Label
+                                    for="c-name"
+                                    class="text-xs font-bold text-[#1c1c22]"
+                                    >Nama Lengkap *</Label
+                                >
                                 <Input
                                     id="c-name"
                                     v-model="customerName"
@@ -222,12 +236,32 @@ function handleCheckoutSubmit() {
 
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="c-email" class="text-xs font-bold text-[#1c1c22]">Email *</Label>
-                                    <Input id="c-email" v-model="customerEmail" type="email" placeholder="budi@email.com" required />
+                                    <Label
+                                        for="c-email"
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                        >Email *</Label
+                                    >
+                                    <Input
+                                        id="c-email"
+                                        v-model="customerEmail"
+                                        type="email"
+                                        placeholder="budi@email.com"
+                                        required
+                                    />
                                 </div>
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="c-phone" class="text-xs font-bold text-[#1c1c22]">Nomor WhatsApp / HP *</Label>
-                                    <Input id="c-phone" v-model="customerPhone" type="tel" placeholder="08123456789" required />
+                                    <Label
+                                        for="c-phone"
+                                        class="text-xs font-bold text-[#1c1c22]"
+                                        >Nomor WhatsApp / HP *</Label
+                                    >
+                                    <Input
+                                        id="c-phone"
+                                        v-model="customerPhone"
+                                        type="tel"
+                                        placeholder="08123456789"
+                                        required
+                                    />
                                 </div>
                             </div>
                         </CardContent>
@@ -245,8 +279,12 @@ function handleCheckoutSubmit() {
                         </CardHeader>
                         <CardContent class="flex flex-col gap-4 p-0">
                             <div class="flex flex-col gap-1.5">
-                                <Label for="c-address" class="text-xs font-bold text-[#1c1c22]">
-                                    Alamat Lengkap (Jalan, No. Rumah, RT/RW, Kecamatan, Kota) *
+                                <Label
+                                    for="c-address"
+                                    class="text-xs font-bold text-[#1c1c22]"
+                                >
+                                    Alamat Lengkap (Jalan, No. Rumah, RT/RW,
+                                    Kecamatan, Kota) *
                                 </Label>
                                 <Textarea
                                     id="c-address"
@@ -369,7 +407,9 @@ function handleCheckoutSubmit() {
                 </div>
 
                 <!-- Right Summary Column — appears FIRST on mobile -->
-                <div class="order-1 flex flex-col gap-5 lg:order-2 lg:col-span-5">
+                <div
+                    class="order-1 flex flex-col gap-5 lg:order-2 lg:col-span-5"
+                >
                     <Card class="sticky top-24 p-6">
                         <CardTitle
                             class="mb-4 flex items-center justify-between text-base"
