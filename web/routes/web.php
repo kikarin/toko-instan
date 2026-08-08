@@ -16,6 +16,7 @@ use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\StoreCmsController;
 use App\Http\Controllers\StorePageController;
 use App\Http\Controllers\StoreSettingsController;
 use App\Http\Controllers\UploadController;
@@ -64,6 +65,8 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/store-settings', [StoreSettingsController::class, 'edit'])->name('store-settings.edit');
     Route::put('/store-settings', [StoreSettingsController::class, 'update'])->name('store-settings.update');
+    Route::get('/store-cms', [StoreCmsController::class, 'edit'])->name('store-cms.edit');
+    Route::put('/store-cms', [StoreCmsController::class, 'update'])->name('store-cms.update');
     Route::get('/orders', [OrderController::class, 'index'])->name('seller.orders.index');
     Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');

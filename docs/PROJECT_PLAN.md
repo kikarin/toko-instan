@@ -368,16 +368,16 @@
 
 ## 2.4 Theme & Store CMS
 
-- [ ] **P2-030** — Theme engine
+- [x] **P2-030** — Theme engine
   - **Deliverable:** Sistem swap theme per store, config theme (warna, font)
 
-- [ ] **P2-031** — Theme: Modern
+- [x] **P2-031** — Theme: Modern
   - **Deliverable:** 1 theme lengkap — homepage, katalog, detail, checkout
 
 - [ ] **P2-032** — Theme: Fashion & Food
   - **Deliverable:** 2 theme tambahan
 
-- [ ] **P2-033** — Store CMS (landing page)
+- [x] **P2-033** — Store CMS (landing page)
   - **Deliverable:** Edit hero, banner, featured product, testimonial, about, contact
 
 ---

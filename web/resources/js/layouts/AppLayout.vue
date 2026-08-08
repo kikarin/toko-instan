@@ -15,9 +15,8 @@ import {
     Bell,
     Settings,
     Tags,
-    Sparkles,
-    PlusCircle,
     Boxes,
+    Palette,
     ExternalLink,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -56,6 +55,7 @@ import {
 import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/lib/useActiveUser';
+import { useStoreTheme } from '@/lib/useStoreTheme';
 
 interface NavItem {
     icon: any;
@@ -67,7 +67,7 @@ interface NavItem {
 
 interface Props {
     title?: string;
-    activePage?: 'Dashboard' | 'Katalog' | 'Produk' | 'Stok & Inventory' | 'Pesanan' | 'Pengaturan Toko' | 'Pelanggan' | 'Dompet' | 'Voucher' | 'Analitik';
+    activePage?: 'Dashboard' | 'Katalog' | 'Produk' | 'Stok & Inventory' | 'Pesanan' | 'Pengaturan Toko' | 'Pelanggan' | 'Dompet' | 'Voucher' | 'Analitik' | 'Tampilan & Konten';
     period?: 'Hari' | 'Minggu' | 'Bulan';
 }
 
@@ -82,12 +82,17 @@ const emit = defineEmits<{
 
 const activeUser = useActiveUser();
 
+useStoreTheme();
+
+const activeNavClass = 'bg-[var(--brand-soft)] text-[var(--brand)] font-black border border-[var(--brand)]/40 shadow-md shadow-black/10 group-data-[collapsible=icon]:bg-(--brand) group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none';
+
 const userDisplayName = computed(() => {
     return activeUser.value?.displayName ?? activeUser.value?.email ?? 'Nike Official Manager';
 });
 
 const userInitial = computed(() => {
     const name = userDisplayName.value;
+
     return name ? name.substring(0, 2).toUpperCase() : 'NK';
 });
 
@@ -116,6 +121,7 @@ const mainNavItems: NavItem[] = [
         badge: 3,
     },
     { icon: Settings, label: 'Pengaturan Toko', route: '/store-settings' },
+    { icon: Palette, label: 'Tampilan & Konten', route: '/store-cms' },
     { icon: Users, label: 'Pelanggan', route: '#' },
 ];
 
@@ -168,7 +174,8 @@ function isActive(item: NavItem): boolean {
                             @click="navigate('/dashboard')"
                         >
                             <div
-                                class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-base font-black text-white shadow-lg shadow-amber-500/30 shrink-0"
+                                class="flex h-9 w-9 items-center justify-center rounded-xl text-base font-black text-white shrink-0"
+                                :style="{ background: 'linear-gradient(135deg, var(--brand), var(--brand-secondary))' }"
                             >
                                 <Store class="h-5 w-5" />
                             </div>
@@ -177,7 +184,7 @@ function isActive(item: NavItem): boolean {
                                     <span class="truncate font-black text-white">Nike Official Store</span>
                                     <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" title="Toko Online" />
                                 </div>
-                                <span class="truncate text-[10px] text-amber-400 font-bold">Seller Command Center</span>
+                                <span class="truncate text-[10px] text-[var(--brand)] font-bold">Seller Command Center</span>
                             </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -203,7 +210,7 @@ function isActive(item: NavItem): boolean {
                                         class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
                                         :class="
                                             isActive(item)
-                                                ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                                ? activeNavClass
                                                 : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                         "
                                         @click="toggleSubMenu(item.label)"
@@ -216,13 +223,13 @@ function isActive(item: NavItem): boolean {
                                         />
                                     </SidebarMenuButton>
 
-                                    <SidebarMenuSub v-if="openSubMenus[item.label]" class="ml-4 border-l border-amber-500/30 pl-2 group-data-[collapsible=icon]:hidden">
+                                    <SidebarMenuSub v-if="openSubMenus[item.label]" class="ml-4 border-l border-[var(--brand)]/30 pl-2 group-data-[collapsible=icon]:hidden">
                                         <SidebarMenuSubItem
                                             v-for="child in item.children"
                                             :key="child.label"
                                         >
                                             <SidebarMenuSubButton
-                                                class="cursor-pointer rounded-lg text-xs font-semibold py-1.5 text-zinc-400 hover:text-amber-400 transition-colors"
+                                                class="cursor-pointer rounded-lg text-xs font-semibold py-1.5 text-zinc-400 hover:text-(--brand) transition-colors"
                                                 @click="navigate(child.route)"
                                             >
                                                 {{ child.label }}
@@ -239,7 +246,7 @@ function isActive(item: NavItem): boolean {
                                         class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
                                         :class="
                                             isActive(item)
-                                                ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                                ? activeNavClass
                                                 : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                         "
                                         @click="navigate(item.route)"
@@ -248,7 +255,7 @@ function isActive(item: NavItem): boolean {
                                         <span class="group-data-[collapsible=icon]:hidden">{{ item.label }}</span>
                                         <SidebarMenuBadge
                                             v-if="item.badge"
-                                            class="bg-amber-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full shadow-xs group-data-[collapsible=icon]:hidden"
+                                            class="bg-(--brand) text-white font-black text-[9px] px-1.5 py-0.5 rounded-full shadow-xs group-data-[collapsible=icon]:hidden"
                                         >
                                             {{ item.badge }}
                                         </SidebarMenuBadge>
@@ -275,7 +282,7 @@ function isActive(item: NavItem): boolean {
                                     class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
                                     :class="
                                         isActive(item)
-                                            ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                            ? activeNavClass
                                             : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                     "
                                     @click="navigate(item.route)"
@@ -304,7 +311,7 @@ function isActive(item: NavItem): boolean {
                                     class="cursor-pointer rounded-xl font-bold text-xs h-10 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center"
                                     :class="
                                         isActive(item)
-                                            ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 text-amber-400 font-black border border-amber-500/30 shadow-md shadow-amber-500/10 group-data-[collapsible=icon]:bg-amber-500 group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none'
+                                            ? activeNavClass
                                             : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                     "
                                     @click="navigate(item.route)"
@@ -333,7 +340,7 @@ function isActive(item: NavItem): boolean {
                                 >
                                     <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
                                         <AvatarImage v-if="activeUser.photoURL" :src="activeUser.photoURL" :alt="userDisplayName" />
-                                        <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                                        <AvatarFallback class="bg-(--brand) text-white font-black text-xs rounded-xl">
                                             {{ userInitial }}
                                         </AvatarFallback>
                                     </Avatar>
@@ -359,7 +366,7 @@ function isActive(item: NavItem): boolean {
                                     <div class="flex items-center gap-2.5 px-2 py-1.5 text-left text-xs">
                                         <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
                                             <AvatarImage v-if="activeUser.photoURL" :src="activeUser.photoURL" :alt="userDisplayName" />
-                                            <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                                            <AvatarFallback class="bg-(--brand) text-white font-black text-xs rounded-xl">
                                                 {{ userInitial }}
                                             </AvatarFallback>
                                         </Avatar>
@@ -371,7 +378,7 @@ function isActive(item: NavItem): boolean {
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator class="bg-white/10" />
                                 <DropdownMenuItem class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white" @click="navigate('/store-settings')">
-                                    <Store class="h-4 w-4 text-amber-400" />
+                                    <Store class="h-4 w-4 text-(--brand)" />
                                     Pengaturan Toko
                                 </DropdownMenuItem>
                                 <DropdownMenuItem class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white" @click="navigate('/marketplace')">
@@ -398,7 +405,7 @@ function isActive(item: NavItem): boolean {
                             @click="navigate('/login')"
                         >
                             <Avatar class="h-8 w-8 rounded-xl border border-white/20 shrink-0">
-                                <AvatarFallback class="bg-amber-500 text-white font-black text-xs rounded-xl">
+                                <AvatarFallback class="bg-(--brand) text-white font-black text-xs rounded-xl">
                                     NK
                                 </AvatarFallback>
                             </Avatar>
@@ -455,10 +462,10 @@ function isActive(item: NavItem): boolean {
                     <Button variant="ghost" size="sm" class="relative h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-xl hover:bg-zinc-100 shrink-0" @click="navigate('#')">
                         <Bell class="h-4 w-4 sm:h-4.5 sm:w-4.5 text-zinc-600" />
                         <span
-                            class="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 h-2 w-2 rounded-full bg-amber-500 animate-ping"
+                            class="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 h-2 w-2 rounded-full bg-(--brand) animate-ping"
                         />
                         <span
-                            class="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 h-2 w-2 rounded-full bg-amber-500"
+                            class="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 h-2 w-2 rounded-full bg-[var(--brand)]"
                         />
                     </Button>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Repositories\ProductRepository;
 use App\Repositories\StoreRepository;
+use App\Services\StoreCmsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,7 +14,8 @@ class StorePageController extends Controller
 {
     public function __construct(
         protected StoreRepository $storeRepository,
-        protected ProductRepository $productRepository
+        protected ProductRepository $productRepository,
+        protected StoreCmsService $cmsService
     ) {}
 
     public function show(Request $request, string $slug): Response|HttpResponse
@@ -56,6 +58,18 @@ class StorePageController extends Controller
             ->values()
             ->toArray()];
 
+        $showcase = $this->cmsService->normalize($store->showcase);
+
+        $featuredIds = array_values(array_filter(
+            (array) ($showcase['featured_product_ids'] ?? []),
+            fn ($id) => is_int($id) || (is_string($id) && ctype_digit($id)),
+        ));
+
+        $featured = array_values(array_filter(array_map(
+            fn ($id) => collect($products)->firstWhere('id', (int) $id),
+            $featuredIds,
+        )));
+
         return Inertia::render('StorePage', [
             'store' => [
                 'id' => $store->id,
@@ -72,7 +86,11 @@ class StorePageController extends Controller
                 'avatarHue' => $store->avatar_hue ?: 220,
                 'memberSince' => $store->created_at?->format('M Y'),
                 'gmv' => 'Rp '.number_format($store->gmv, 0, ',', '.'),
+                'bannerUrl' => $store->banner_url,
             ],
+            'theme' => $this->cmsService->resolve($store),
+            'showcase' => $showcase,
+            'featured' => $featured,
             'products' => $products,
             'categories' => $categories,
             'filters' => [

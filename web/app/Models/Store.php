@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
+/**
+ * @property array<string, mixed>|null $showcase
+ * @property array{primary?: string, secondary?: string, accent?: string, strong?: string}|null $theme_colors
+ */
 class Store extends Model
 {
     /** @use HasFactory<StoreFactory> */
@@ -43,6 +47,14 @@ class Store extends Model
         'is_pkp',
         'tax_name',
         'tax_address',
+        'theme',
+        'theme_colors',
+        'showcase',
+    ];
+
+    protected $casts = [
+        'theme_colors' => 'array',
+        'showcase' => 'array',
     ];
 
     /**

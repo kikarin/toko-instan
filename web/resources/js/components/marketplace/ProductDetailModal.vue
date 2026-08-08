@@ -18,21 +18,21 @@ import {
     Share2,
 } from 'lucide-vue-next';
 import { ref, watch, computed } from 'vue';
-import { useIsMobile } from '@/lib/useIsMobile';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
     Dialog,
     DialogContent,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 import {
     Sheet,
     SheetContent,
     SheetTitle,
 } from '@/components/ui/sheet';
+import { useIsMobile } from '@/lib/useIsMobile';
 
 export interface ProductDetail {
     id: number;
@@ -83,7 +83,9 @@ watch(
 const isOpen = computed(() => !!props.product);
 
 function handleOpenChange(open: boolean) {
-    if (!open) emit('close');
+    if (!open) {
+emit('close');
+}
 }
 
 function handleAddToCart() {
@@ -102,8 +104,14 @@ function visitStore() {
 }
 
 function formatSold(n: number): string {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}jt+`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}rb+`;
+    if (n >= 1_000_000) {
+return `${(n / 1_000_000).toFixed(1)}jt+`;
+}
+
+    if (n >= 1_000) {
+return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}rb+`;
+}
+
     return String(n);
 }
 
@@ -137,43 +145,43 @@ const ratingBreakdown = [
                 <!-- Image -->
                 <div class="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-[#f5f4f0]">
                     <img v-if="product" :src="product.img" :alt="product.name" class="h-full w-full object-cover" />
-                    <div v-if="product?.discount" class="absolute top-0 left-0 rounded-br-xl bg-[#e02020] px-2.5 py-1 text-xs font-bold text-white">{{ product.discount }}% OFF</div>
-                    <div v-else-if="product?.tag" class="absolute top-0 left-0 rounded-br-xl px-2.5 py-1 text-xs font-bold text-white" :class="{ 'bg-[#e07c28]': product.tag === 'Bestseller', 'bg-[#e0405a]': product.tag === 'Hot', 'bg-[#0d9488]': product.tag === 'Baru' }">{{ product.tag }}</div>
+                    <div v-if="product?.discount" class="absolute top-0 left-0 rounded-br-xl bg-(--brand-strong) px-2.5 py-1 text-xs font-bold text-white">{{ product.discount }}% OFF</div>
+                    <div v-else-if="product?.tag" class="absolute top-0 left-0 rounded-br-xl px-2.5 py-1 text-xs font-bold text-white" :class="{ 'bg-(--brand)': product.tag === 'Bestseller', 'bg-(--brand-strong)': product.tag === 'Hot', 'bg-(--brand-accent)': product.tag === 'Baru' }">{{ product.tag }}</div>
                     <button @click="isLiked = !isLiked" class="absolute top-2.5 right-2.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm">
-                        <Heart class="h-4 w-4 transition-colors" :class="isLiked ? 'fill-[#e0405a] text-[#e0405a]' : 'text-[#9090a0]'" />
+                        <Heart class="h-4 w-4 transition-colors" :class="isLiked ? 'fill-(--brand-strong) text-(--brand-strong)' : 'text-[#9090a0]'" />
                     </button>
                 </div>
 
                 <div v-if="product" class="flex flex-col gap-0">
                     <div class="px-4 pt-3 pb-2">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-2xl font-extrabold text-[#e02020]">{{ product.price }}</span>
+                            <span class="text-2xl font-extrabold text-(--brand-strong)">{{ product.price }}</span>
                             <span v-if="product.originalPrice" class="text-sm text-[#9090a0] line-through">{{ product.originalPrice }}</span>
                         </div>
                         <h2 class="mt-1.5 text-sm font-semibold leading-snug text-[#1c1c22]">{{ product.name }}</h2>
                         <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#9090a0]">
                             <div class="flex items-center gap-1"><Star class="h-3.5 w-3.5 fill-amber-400 stroke-amber-400" /><span class="font-bold text-[#4a4a57]">{{ product.rating }}</span></div>
                             <span>·</span><span>{{ formatSold(product.sold) }} terjual</span>
-                            <span>·</span><button @click="activeTab = 'ulasan'" class="text-[#e07c28]">{{ mockReviews.length }} ulasan</button>
+                            <span>·</span><button @click="activeTab = 'ulasan'" class="text-(--brand)">{{ mockReviews.length }} ulasan</button>
                         </div>
                     </div>
                     <Separator />
-                    <div class="flex items-center gap-2 bg-[#fff8f0] px-4 py-2.5">
-                        <Truck class="h-4 w-4 shrink-0 text-[#e07c28]" />
+                    <div class="flex items-center gap-2 bg-(--brand-soft) px-4 py-2.5">
+                        <Truck class="h-4 w-4 shrink-0 text-(--brand-secondary)" />
                         <span class="text-xs font-medium text-[#4a4a57]">Gratis Ongkir · Estimasi 2-3 hari</span>
                     </div>
                     <Separator />
                     <div class="flex items-center gap-3 px-4 py-3">
                         <Avatar :fallback="product.store.substring(0,2).toUpperCase()" :hue="200" size="sm" />
                         <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-1.5"><span class="truncate text-xs font-bold text-[#1c1c22]">{{ product.store }}</span><BadgeCheck class="h-3.5 w-3.5 shrink-0 text-teal-500" /></div>
+                            <div class="flex items-center gap-1.5"><span class="truncate text-xs font-bold text-[#1c1c22]">{{ product.store }}</span><BadgeCheck class="h-3.5 w-3.5 shrink-0 text-(--brand-accent)" /></div>
                             <p class="text-[10px] text-[#9090a0]">Official Store · Respons cepat</p>
                         </div>
                         <Button variant="outline" size="sm" class="shrink-0 text-xs" @click="visitStore"><Store class="mr-1 h-3 w-3" />Kunjungi</Button>
                     </div>
                     <Separator />
                     <div class="flex border-b border-black/8">
-                        <button v-for="tab in ['detail', 'ulasan']" :key="tab" @click="activeTab = (tab as 'detail' | 'ulasan')" class="flex-1 py-3 text-xs font-bold capitalize transition-colors" :class="activeTab === tab ? 'border-b-2 border-[#e07c28] text-[#e07c28]' : 'text-[#9090a0]'">
+                        <button v-for="tab in ['detail', 'ulasan']" :key="tab" @click="activeTab = (tab as 'detail' | 'ulasan')" class="flex-1 py-3 text-xs font-bold capitalize transition-colors" :class="activeTab === tab ? 'border-b-2 border-(--brand) text-(--brand)' : 'text-[#9090a0]'">
                             {{ tab === 'detail' ? 'Deskripsi' : 'Ulasan' }}<span v-if="tab === 'ulasan'" class="ml-1 text-[10px]">({{ mockReviews.length }})</span>
                         </button>
                     </div>
@@ -204,7 +212,7 @@ const ratingBreakdown = [
                     </div>
                 </div>
                 <div class="flex gap-2.5">
-                    <Button variant="outline" size="lg" class="flex h-12 flex-1 items-center justify-center gap-1.5 border-[#e07c28] text-xs font-bold text-[#e07c28]" @click="handleAddToCart"><ShoppingCart class="h-4 w-4" />Keranjang</Button>
+                    <Button variant="outline" size="lg" class="flex h-12 flex-1 items-center justify-center gap-1.5 border-(--brand) text-xs font-bold text-(--brand)" @click="handleAddToCart"><ShoppingCart class="h-4 w-4" />Keranjang</Button>
                     <Button variant="amber" size="lg" class="flex h-12 flex-[2] items-center justify-center gap-1.5 text-xs font-bold shadow-md" @click="handleAddToCart"><ArrowRight class="h-4 w-4" />Beli Sekarang</Button>
                 </div>
             </div>
@@ -226,14 +234,14 @@ const ratingBreakdown = [
                             class="h-full w-full object-cover"
                         />
                         <!-- Discount / tag badge -->
-                        <div v-if="product?.discount" class="absolute top-0 left-0 rounded-br-2xl bg-[#e02020] px-3 py-1.5 text-sm font-bold text-white">
+                        <div v-if="product?.discount" class="absolute top-0 left-0 rounded-br-2xl bg-(--brand-strong) px-3 py-1.5 text-sm font-bold text-white">
                             {{ product.discount }}% OFF
                         </div>
                         <div v-else-if="product?.tag" class="absolute top-0 left-0 flex flex-wrap gap-1 p-2">
                             <span
                                 v-for="t in product.tag.split(',')"
                                 :key="t"
-                                class="rounded-lg px-2.5 py-1 text-xs font-black shadow-xs bg-amber-400 text-black border border-amber-500"
+                                class="rounded-lg px-2.5 py-1 text-xs font-black shadow-xs bg-(--brand-accent) text-black border border-(--brand-accent)"
                             >
                                 {{ t.trim() }}
                             </span>
@@ -241,7 +249,7 @@ const ratingBreakdown = [
                         <!-- Actions top-right -->
                         <div class="absolute top-3 right-3 flex flex-col gap-2">
                             <button @click="isLiked = !isLiked" class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-transform active:scale-90">
-                                <Heart class="h-4 w-4 transition-colors" :class="isLiked ? 'fill-[#e0405a] text-[#e0405a]' : 'text-[#9090a0]'" />
+<Heart class="h-4 w-4 transition-colors" :class="isLiked ? 'fill-(--brand-strong) text-(--brand-strong)' : 'text-[#9090a0]'" />
                             </button>
                             <button class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm">
                                 <Share2 class="h-4 w-4 text-[#9090a0]" />
@@ -256,7 +264,7 @@ const ratingBreakdown = [
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5">
                                     <span class="truncate text-sm font-bold text-[#1c1c22]">{{ product.store }}</span>
-                                    <BadgeCheck class="h-4 w-4 shrink-0 text-teal-500" />
+                                    <BadgeCheck class="h-4 w-4 shrink-0 text-(--brand-accent)" />
                                 </div>
                                 <p class="text-[11px] text-[#9090a0]">Official Store · Respons &lt; 1 jam</p>
                             </div>
@@ -267,15 +275,15 @@ const ratingBreakdown = [
                         <!-- Trust badges -->
                         <div class="mt-3 flex flex-col gap-1.5">
                             <div class="flex items-center gap-2 text-xs text-[#4a4a57]">
-                                <ShieldCheck class="h-3.5 w-3.5 shrink-0 text-[#22a15a]" />
+                                <ShieldCheck class="h-3.5 w-3.5 shrink-0 text-(--brand-strong)" />
                                 <span>Produk 100% original bergaransi</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs text-[#4a4a57]">
-                                <Truck class="h-3.5 w-3.5 shrink-0 text-[#e07c28]" />
+                                <Truck class="h-3.5 w-3.5 shrink-0 text-(--brand)" />
                                 <span>Gratis Ongkir · Estimasi 2-3 hari</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs text-[#4a4a57]">
-                                <Package class="h-3.5 w-3.5 shrink-0 text-[#6d4fc2]" />
+                                <Package class="h-3.5 w-3.5 shrink-0 text-(--brand-secondary)" />
                                 <span>Packing aman bubble wrap + kardus</span>
                             </div>
                         </div>
@@ -312,7 +320,7 @@ const ratingBreakdown = [
                                     <span class="text-black/20">|</span>
                                     <span>{{ formatSold(product.sold) }} terjual</span>
                                     <span class="text-black/20">|</span>
-                                    <button @click="activeTab = 'ulasan'" class="text-[#e07c28] hover:underline">
+                                    <button @click="activeTab = 'ulasan'" class="text-(--brand) hover:underline">
                                         {{ mockReviews.length }} ulasan
                                     </button>
                                 </div>
@@ -321,9 +329,9 @@ const ratingBreakdown = [
                                 <div class="mt-4 rounded-2xl bg-gradient-to-r from-[#fff1e8] to-[#faf9f6] p-4">
                                     <p class="mb-0.5 text-[11px] font-medium text-[#9090a0]">Harga</p>
                                     <div class="flex items-baseline gap-2.5">
-                                        <span class="font-mono text-3xl font-extrabold text-[#e02020]">{{ product.price }}</span>
+                                        <span class="font-mono text-3xl font-extrabold text-(--brand-strong)">{{ product.price }}</span>
                                         <span v-if="product.originalPrice" class="text-base text-[#9090a0] line-through">{{ product.originalPrice }}</span>
-                                        <Badge v-if="product.discount" class="bg-[#e02020] text-white text-xs font-bold">Hemat {{ product.discount }}%</Badge>
+                                        <Badge v-if="product.discount" class="bg-(--brand-strong) text-white text-xs font-bold">Hemat {{ product.discount }}%</Badge>
                                     </div>
                                 </div>
                             </div>
@@ -337,7 +345,7 @@ const ratingBreakdown = [
                                     :key="tab"
                                     @click="activeTab = (tab as 'detail' | 'ulasan')"
                                     class="mr-6 py-3 text-sm font-bold capitalize transition-colors"
-                                    :class="activeTab === tab ? 'border-b-2 border-[#e07c28] text-[#e07c28]' : 'text-[#9090a0] hover:text-[#4a4a57]'"
+                                    :class="activeTab === tab ? 'border-b-2 border-(--brand) text-(--brand)' : 'text-[#9090a0] hover:text-[#4a4a57]'"
                                 >
                                     {{ tab === 'detail' ? 'Deskripsi' : 'Ulasan' }}
                                     <span v-if="tab === 'ulasan'" class="ml-1 text-xs">({{ mockReviews.length }})</span>
@@ -409,7 +417,7 @@ const ratingBreakdown = [
                                     </div>
                                 </div>
 
-                                <button class="mt-4 flex w-full items-center justify-center gap-1 py-3 text-sm font-bold text-[#e07c28] hover:underline">
+                                <button class="mt-4 flex w-full items-center justify-center gap-1 py-3 text-sm font-bold text-(--brand) hover:underline">
                                     Lihat Semua Ulasan <ArrowRight class="h-4 w-4" />
                                 </button>
                             </div>
@@ -427,7 +435,7 @@ const ratingBreakdown = [
                             </div>
                         </div>
                         <div class="flex gap-3">
-                            <Button variant="outline" size="lg" class="flex h-12 flex-1 items-center justify-center gap-2 border-[#e07c28] font-bold text-[#e07c28] hover:bg-[#e07c2808]" @click="handleAddToCart">
+                            <Button variant="outline" size="lg" class="flex h-12 flex-1 items-center justify-center gap-2 border-(--brand) font-bold text-(--brand) hover:bg-(--brand)/5" @click="handleAddToCart">
                                 <ShoppingCart class="h-5 w-5" /> + Keranjang
                             </Button>
                             <Button variant="amber" size="lg" class="flex h-12 flex-[2] items-center justify-center gap-2 font-bold shadow-lg" @click="handleAddToCart">
