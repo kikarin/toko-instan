@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminWithdrawalController;
@@ -70,6 +71,7 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::put('/store-settings', [StoreSettingsController::class, 'update'])->name('store-settings.update');
     Route::get('/store-cms', [StoreCmsController::class, 'edit'])->name('store-cms.edit');
     Route::put('/store-cms', [StoreCmsController::class, 'update'])->name('store-cms.update');
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
     Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');

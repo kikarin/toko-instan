@@ -2,6 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\StockMovement;
+use App\Models\Store;
+use App\Models\Withdrawal;
+use App\Observers\OrderObserver;
+use App\Observers\ProductObserver;
+use App\Observers\StockMovementObserver;
+use App\Observers\StoreObserver;
+use App\Observers\WithdrawalObserver;
 use App\Services\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -25,6 +35,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Product::observe(ProductObserver::class);
+        StockMovement::observe(StockMovementObserver::class);
+        Order::observe(OrderObserver::class);
+        Withdrawal::observe(WithdrawalObserver::class);
+        Store::observe(StoreObserver::class);
     }
 
     /**
