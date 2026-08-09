@@ -23,9 +23,9 @@ class ProductService
     /**
      * @return Collection<int, Product>
      */
-    public function listForSeller(): Collection
+    public function listForSeller(int $userId): Collection
     {
-        $store = $this->storeRepository->getPrimaryStore();
+        $store = $this->storeRepository->getStoreForUser($userId);
 
         if (! $store) {
             return new Collection;
@@ -34,14 +34,14 @@ class ProductService
         return $this->productRepository->getForStore($store->id);
     }
 
-    public function create(ProductData $data): Product
+    public function create(ProductData $data, int $userId): Product
     {
-        return $this->productRepository->createForStore($this->requireStore()->id, $data);
+        return $this->productRepository->createForStore($this->requireStore($userId)->id, $data);
     }
 
-    public function findForSeller(int $id): ?Product
+    public function findForSeller(int $id, int $userId): ?Product
     {
-        $store = $this->storeRepository->getPrimaryStore();
+        $store = $this->storeRepository->getStoreForUser($userId);
 
         if (! $store) {
             return null;
@@ -50,27 +50,27 @@ class ProductService
         return $this->productRepository->findForStore($id, $store->id);
     }
 
-    public function update(Product $product, ProductData $data): void
+    public function update(Product $product, ProductData $data, int $userId): void
     {
-        $this->requireStore();
+        $this->requireStore($userId);
         $this->productRepository->updateProduct($product, $data);
     }
 
-    public function delete(Product $product): void
+    public function delete(Product $product, int $userId): void
     {
-        $this->requireStore();
+        $this->requireStore($userId);
         $this->productRepository->deleteProduct($product);
     }
 
-    public function updateStock(Product $product, int $stock): void
+    public function updateStock(Product $product, int $stock, int $userId): void
     {
-        $this->requireStore();
+        $this->requireStore($userId);
         $this->productRepository->updateStock($product, $stock);
     }
 
-    public function toggleActive(Product $product): bool
+    public function toggleActive(Product $product, int $userId): bool
     {
-        $this->requireStore();
+        $this->requireStore($userId);
 
         return $this->productRepository->toggleActive($product);
     }
@@ -78,9 +78,9 @@ class ProductService
     /**
      * @return array<int, string>
      */
-    public function categories(): array
+    public function categories(int $userId): array
     {
-        $store = $this->storeRepository->getPrimaryStore();
+        $store = $this->storeRepository->getStoreForUser($userId);
 
         $query = Category::query();
         if ($store) {
@@ -101,9 +101,9 @@ class ProductService
     /**
      * @return array<int, string>
      */
-    public function labels(): array
+    public function labels(int $userId): array
     {
-        $store = $this->storeRepository->getPrimaryStore();
+        $store = $this->storeRepository->getStoreForUser($userId);
 
         $query = Label::query();
         if ($store) {
@@ -124,9 +124,9 @@ class ProductService
     /**
      * @return array<int, string>
      */
-    public function brands(): array
+    public function brands(int $userId): array
     {
-        $store = $this->storeRepository->getPrimaryStore();
+        $store = $this->storeRepository->getStoreForUser($userId);
 
         $query = Brand::query();
         if ($store) {
@@ -161,16 +161,16 @@ class ProductService
             'rating' => (float) $product->rating,
             'tag' => $product->tag,
             'img' => $product->img,
-            'description' => $product->description ?: 'Produk Nike original dengan material premium, daya tahan tinggi, dan kenyamanan maksimal untuk aktivitas sehari-hari.',
+            'description' => $product->description ?: 'Produk original dengan material premium, daya tahan tinggi, dan kenyamanan maksimal untuk aktivitas sehari-hari.',
             'sku' => $product->sku ?: ('NK-'.strtoupper(substr(md5((string) $product->id), 0, 6))),
             'brand' => $product->brand ?: 'Nike',
             'weight_gram' => $product->weight_gram ?: 500,
         ];
     }
 
-    private function requireStore(): Store
+    private function requireStore(int $userId): Store
     {
-        $store = $this->storeRepository->getPrimaryStore();
+        $store = $this->storeRepository->getStoreForUser($userId);
 
         if (! $store) {
             throw new LogicException('Toko belum tersedia untuk akun ini.');

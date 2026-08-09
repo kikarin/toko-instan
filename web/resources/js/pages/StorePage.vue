@@ -1,156 +1,149 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
+import emblaCarouselVue from 'embla-carousel-vue';
+import Autoplay from 'embla-carousel-autoplay';
+import Fade from 'embla-carousel-fade';
 import {
-    Star,
-    ShieldCheck,
+    Flame,
+    Sparkles,
     Truck,
     Package,
-    BadgeCheck,
-    MapPin,
-    CalendarDays,
-    ShoppingBag,
-    ChevronLeft,
-    MessageCircle,
-    Share2,
     TrendingUp,
-    Search,
+    Users,
+    Star,
+    ShieldCheck,
+    RotateCcw,
     Loader2,
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon,
+    ShoppingCart,
+    LayoutGrid,
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
-import CartDrawer from '@/components/marketplace/CartDrawer.vue';
+import { computed, ref, watch } from 'vue';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
 import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue';
-import type { ProductDetail } from '@/components/marketplace/ProductDetailModal.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardTitle,
-    CardDescription,
-} from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { toast } from '@/components/ui/sonner';
+import { Card } from '@/components/ui/card';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useCart } from '@/lib/useCart';
+import { useMarketplaceCart } from '@/lib/useMarketplaceCart';
+import { useMarketplaceCatalog } from '@/lib/useMarketplaceCatalog';
+import { useMarketplaceFilters } from '@/lib/useMarketplaceFilters';
 import { useProductPagination } from '@/lib/useProductPagination';
+import type { ProductDetail } from '@/types/product';
+import type { StorefrontInfo } from '@/types/store';
 
-interface StoreInfo {
-    id: number;
-    name: string;
-    slug: string;
-    description: string;
-    logo: string | null;
-    category: string | null;
-    rating: number;
-    totalOrders: number;
-    totalProducts: number;
-    badge: string | null;
-    avatar: string;
-    avatarHue: number;
-    memberSince: string;
-    gmv: string;
-    bannerUrl?: string | null;
+const page = usePage();
+const storefront = computed<StorefrontInfo | null>(
+    () => (page.props.store as StorefrontInfo | undefined) ?? null,
+);
+
+const activeBanners = computed(() => {
+    if (storefront.value?.banner_urls && storefront.value.banner_urls.length > 0) {
+        return storefront.value.banner_urls;
+    }
+    if (storefront.value?.banner_url) {
+        return [storefront.value.banner_url];
+    }
+    return [];
+});
+
+const [emblaRef, emblaApi] = emblaCarouselVue(
+    { loop: true, duration: 30 },
+    [
+        Autoplay({ delay: 5000, stopOnInteraction: false }),
+        Fade()
+    ]
+);
+
+const selectedIndex = ref(0);
+const scrollSnaps = ref<number[]>([]);
+
+watch(emblaApi, (newApi) => {
+    if (newApi) {
+        scrollSnaps.value = newApi.scrollSnapList();
+        newApi.on('select', () => {
+            selectedIndex.value = newApi.selectedScrollSnap();
+        });
+        selectedIndex.value = newApi.selectedScrollSnap();
+    }
+});
+
+function scrollTo(index: number) {
+    if (emblaApi.value) {
+        emblaApi.value.scrollTo(index);
+    }
 }
 
 interface Props {
-    store: StoreInfo;
-    products: any[];
-    categories: string[];
-    filters: { category: string };
-    theme?: {
-        key: string;
-        label: string;
-        colors: {
-            primary: string;
-            secondary: string;
-            accent: string;
-            strong?: string;
-        };
-        font: string;
-    };
-    showcase?: {
-        hero?: {
-            title: string;
-            subtitle: string;
-            cta_label: string;
-            image?: string | null;
-        };
-        about?: { title: string; text: string };
-        testimonials?: {
-            name?: string;
-            role?: string;
-            text?: string;
-            rating?: number;
-        }[];
-        contact?: { show?: boolean };
-    };
-    featured?: any[];
+    products?: any[];
+    categories?: string[];
+    stats?: any;
+    filters?: { search: string; category: string };
+    store?: any;
+    theme?: any;
+    showcase?: any;
+    featured?: any;
 }
 
 const props = defineProps<Props>();
 
-const cmsStyle = computed(() => {
-    const c = props.theme?.colors ?? {
-        primary: '#3F9AAE',
-        secondary: '#79C9C5',
-        accent: '#FFE2AF',
-        strong: '#F96E5B',
-    };
-
-    return {
-        '--brand': c.primary,
-        '--brand-secondary': c.secondary,
-        '--brand-accent': c.accent,
-        '--brand-strong': c.strong ?? c.primary,
-        '--brand-font': props.theme?.font ?? 'Inter',
-    } as Record<string, string>;
-});
-
-const heroTitle = computed(
-    () => props.showcase?.hero?.title || props.store.name,
-);
-const heroSubtitle = computed(
-    () => props.showcase?.hero?.subtitle || props.store.description,
-);
-const heroImage = computed(
-    () => props.showcase?.hero?.image || props.store.bannerUrl || null,
-);
-const heroCtaLabel = computed(
-    () => props.showcase?.hero?.cta_label || 'Lihat Produk',
+const productsRef = computed(() =>
+    props.products !== undefined ? props.products : undefined,
 );
 
-const selectedCat = ref(props.filters?.category || 'Semua');
-const searchQuery = ref('');
+const { displayProducts } = useMarketplaceCatalog(productsRef);
 
-// Cart
 const {
-    items: cartItems,
-    totalCount: totalCartCount,
-    addItem,
-    updateQty,
-    removeItem,
-} = useCart();
-const isCartOpen = ref(false);
+    searchQ,
+    selectedCat,
+    displayCategories,
+    filteredProducts,
+    categoryMenu,
+    applySearch,
+    setCategory,
+} = useMarketplaceFilters(displayProducts, props);
 
-// Product detail modal
-const activeProductModal = ref<ProductDetail | null>(null);
+const sortOption = ref<'popular' | 'newest' | 'price_asc' | 'price_desc'>('popular');
+const priceRangeFilter = ref<string>('all');
+const ratingFilter = ref<number>(0);
 
-const filteredProducts = computed(() => {
-    let list = props.products;
+const processedProducts = computed(() => {
+    let result = [...filteredProducts.value];
 
-    if (selectedCat.value !== 'Semua') {
-        list = list.filter((p) => p.cat === selectedCat.value);
+    if (priceRangeFilter.value !== 'all') {
+        const [minStr, maxStr] = priceRangeFilter.value.split('-');
+        const min = Number(minStr);
+        const max = Number(maxStr);
+        result = result.filter((p) => {
+            const num = p.priceNum ?? Number(String(p.price || '').replace(/[^0-9]/g, ''));
+            return num >= min && num <= max;
+        });
     }
 
-    if (searchQuery.value.trim()) {
-        const q = searchQuery.value.toLowerCase();
-        list = list.filter((p) => p.name.toLowerCase().includes(q));
+    if (ratingFilter.value > 0) {
+        result = result.filter((p) => (p.rating ?? 0) >= ratingFilter.value);
     }
 
-    return list;
+    if (sortOption.value === 'newest') {
+        result.sort((a, b) => b.id - a.id);
+    } else if (sortOption.value === 'price_asc') {
+        result.sort((a, b) => {
+            const numA = a.priceNum ?? Number(String(a.price || '').replace(/[^0-9]/g, ''));
+            const numB = b.priceNum ?? Number(String(b.price || '').replace(/[^0-9]/g, ''));
+            return numA - numB;
+        });
+    } else if (sortOption.value === 'price_desc') {
+        result.sort((a, b) => {
+            const numA = a.priceNum ?? Number(String(a.price || '').replace(/[^0-9]/g, ''));
+            const numB = b.priceNum ?? Number(String(b.price || '').replace(/[^0-9]/g, ''));
+            return numB - numA;
+        });
+    } else {
+        result.sort((a, b) => (b.sold ?? 0) - (a.sold ?? 0));
+    }
+
+    return result;
 });
 
 const {
@@ -161,619 +154,400 @@ const {
     hasMoreMobile,
     loadMoreTriggerRef,
     setPage,
-} = useProductPagination(filteredProducts, {
-    itemsPerPage: 12,
-    initialMobileCount: 6,
-    mobileStep: 6,
+} = useProductPagination(processedProducts, {
+    itemsPerPage: 8,
+    initialMobileCount: 4,
+    mobileStep: 4,
 });
 
-function setCategory(cat: string) {
-    selectedCat.value = cat;
-    router.get(
-        `/store/${props.store.slug}`,
-        { category: cat },
-        { preserveState: true, preserveScroll: true },
-    );
-}
+const {
+    cartItems,
+    totalCartCount,
+    isCartOpen,
+    openCart,
+    addToCart,
+    updateCartQty,
+    removeFromCart,
+    goCheckout,
+} = useMarketplaceCart();
 
-function addToCart(product: ProductDetail, addQty = 1) {
-    const rawPrice =
-        product.priceNum ||
-        parseInt(product.price.replace(/[^\d]/g, ''), 10) ||
-        100000;
+const activeProductModal = ref<ProductDetail | null>(null);
 
-    addItem(
-        {
-            id: product.id,
-            name: product.name,
-            price: rawPrice,
-            formattedPrice: product.price,
-            img: product.img,
-            store: product.store,
-            qty: addQty,
-        },
-        addQty,
-    );
-
-    isCartOpen.value = true;
-    toast.success(`${product.name} ditambahkan ke keranjang!`);
-}
-
-function updateCartQty(id: number, delta: number) {
-    updateQty(id, delta);
-}
-function removeFromCart(id: number) {
-    removeItem(id);
-}
-function goCheckout() {
-    isCartOpen.value = false;
-    router.visit('/checkout');
-}
 function openProductDetail(product: any) {
     activeProductModal.value = product;
 }
-
-function formatCount(n: number): string {
-    if (n >= 1_000_000) {
-        return `${(n / 1_000_000).toFixed(1)}jt`;
-    }
-
-    if (n >= 1_000) {
-        return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}rb`;
-    }
-
-    return String(n);
-}
-
-const statCards = computed(() => [
-    {
-        label: 'Produk',
-        value: formatCount(props.store.totalProducts),
-        icon: Package,
-        color: 'text-(--brand-secondary)',
-    },
-    {
-        label: 'Rating',
-        value: String(props.store.rating),
-        icon: Star,
-        color: 'text-amber-400',
-        star: true,
-    },
-    {
-        label: 'Pesanan',
-        value: formatCount(props.store.totalOrders),
-        icon: ShoppingBag,
-        color: 'text-(--brand-accent)',
-    },
-    {
-        label: 'GMV',
-        value: props.store.gmv,
-        icon: TrendingUp,
-        color: 'text-(--brand)',
-    },
-]);
-
-const trustItems = [
-    {
-        icon: ShieldCheck,
-        color: 'text-(--brand-accent)',
-        label: 'Original & Bergaransi',
-    },
-    { icon: Truck, color: 'text-(--brand)', label: 'Gratis Ongkir' },
-    { icon: Package, color: 'text-(--brand-secondary)', label: 'Packing Aman' },
-    { icon: ShoppingBag, color: 'text-blue-500', label: 'Escrow Aman' },
-];
 </script>
 
 <template>
-    <Head :title="`${store.name} — Toko Instan`" />
 
-    <StorefrontLayout
-        :cartCount="totalCartCount"
-        @open-cart="isCartOpen = true"
-        @search="
-            (q: string) => router.visit('/marketplace', { data: { search: q } })
-        "
-    >
-        <main
-            class="mx-auto flex w-full max-w-[1600px] flex-col"
-            :style="cmsStyle"
-        >
-            <!-- ── Hero Banner (CMS) ── -->
-            <div
-                v-if="heroImage"
-                class="relative aspect-[21/8] w-full overflow-hidden sm:aspect-[21/6]"
+    <Head :title="`${storefront?.name ?? 'Toko Resmi'} — Marketplace`" />
+
+    <StorefrontLayout :cartCount="totalCartCount" :searchQuery="searchQ" @open-cart="isCartOpen = true" @search="applySearch">
+        <main class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 px-3 pt-3 pb-28 sm:gap-6 sm:p-6">
+            <!-- ── Dynamic 4-Hex Theme Hero Banner ── -->
+            <div v-if="activeBanners.length > 0"
+                class="relative overflow-hidden rounded-2xl border border-black/10 bg-zinc-900 shadow-xl sm:rounded-3xl"
             >
-                <img
-                    :src="heroImage"
-                    :alt="heroTitle"
-                    class="absolute inset-0 h-full w-full object-cover"
-                />
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/10"
-                />
-                <div class="absolute inset-x-0 bottom-0 z-10 px-4 pb-6 sm:px-8">
-                    <h1
-                        class="max-w-2xl text-2xl font-black text-white drop-shadow-lg sm:text-4xl"
-                    >
-                        {{ heroTitle }}
-                    </h1>
-                    <p class="mt-2 max-w-xl text-xs text-white/85 sm:text-sm">
-                        {{ heroSubtitle }}
-                    </p>
-                    <a
-                        href="#produk"
-                        class="mt-3 inline-flex h-9 items-center rounded-xl px-4 text-xs font-bold text-white shadow-lg sm:h-10 sm:text-sm"
-                        :style="{ backgroundColor: 'var(--brand)' }"
-                    >
-                        {{ heroCtaLabel }}
-                    </a>
-                </div>
-            </div>
-
-            <!-- ── Hero Banner ── -->
-            <div
-                class="relative isolate overflow-hidden bg-gradient-to-br from-[#16131f] via-[#231e35] to-[#16131f]"
-            >
-                <!-- Glow orbs -->
-                <div
-                    class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-(--brand)/15 blur-3xl"
-                />
-                <div
-                    class="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-violet-500/10 blur-3xl"
-                />
-                <div
-                    class="pointer-events-none absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-(--brand)/10 blur-3xl"
-                />
-
-                <div class="relative z-10 px-4 pt-5 pb-0 sm:px-8 sm:pt-8">
-                    <!-- Back nav -->
-                    <button
-                        @click="router.visit('/marketplace')"
-                        class="mb-5 flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-white/50 transition-colors hover:text-white/90"
-                    >
-                        <ChevronLeft class="h-3.5 w-3.5" />
-                        Kembali ke Marketplace
-                    </button>
-
-                    <!-- Profile row -->
-                    <div
-                        class="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-7"
-                    >
-                        <!-- Avatar + badge -->
-                        <div class="relative shrink-0 self-start">
+                <!-- Embla Carousel Background -->
+                <div class="absolute inset-0 z-0 overflow-hidden" ref="emblaRef">
+                    <div class="flex h-full w-full">
+                        <div v-for="banner in activeBanners" :key="banner" class="flex-[0_0_100%] min-w-0 relative h-full">
                             <div
-                                class="flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-black shadow-2xl ring-[3px] ring-white/10 sm:h-[88px] sm:w-[88px] sm:text-3xl"
+                                class="absolute inset-0"
                                 :style="{
-                                    background: `linear-gradient(145deg, hsl(${store.avatarHue}, 60%, 55%), hsl(${store.avatarHue}, 60%, 38%))`,
-                                    color: 'white',
-                                    textShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                    backgroundImage: `url(${banner})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
                                 }"
-                            >
-                                {{ store.avatar }}
-                            </div>
-                            <span
-                                class="absolute -right-1.5 -bottom-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#16131f] bg-(--brand-accent) shadow-md"
-                            >
-                                <BadgeCheck
-                                    class="h-3.5 w-3.5 text-[#16131f]"
-                                />
-                            </span>
-                        </div>
-
-                        <!-- Store info -->
-                        <div class="flex flex-1 flex-col gap-1.5">
-                            <div class="flex flex-wrap items-center gap-2.5">
-                                <h1
-                                    class="text-xl leading-tight font-black text-white sm:text-2xl lg:text-3xl"
-                                >
-                                    {{ store.name }}
-                                </h1>
-                                <Badge
-                                    v-if="store.badge"
-                                    :class="
-                                        store.badge === 'top'
-                                            ? 'border-transparent bg-gradient-to-r from-(--brand) to-(--brand-secondary) text-white'
-                                            : 'border-transparent bg-gradient-to-r from-(--brand-secondary) to-(--brand-accent) text-white'
-                                    "
-                                    class="h-5 px-2 text-[9px] font-black tracking-widest uppercase"
-                                    >⭐ {{ store.badge }}</Badge
-                                >
-                            </div>
-
-                            <p
-                                class="max-w-lg text-xs leading-relaxed text-white/45 sm:text-sm"
-                            >
-                                {{ store.description }}
-                            </p>
-
-                            <!-- Meta pills -->
-                            <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1.5">
-                                <span
-                                    class="flex items-center gap-1 text-[11px] text-white/35"
-                                >
-                                    <MapPin class="h-3 w-3" /> Jakarta,
-                                    Indonesia
-                                </span>
-                                <span
-                                    class="flex items-center gap-1 text-[11px] text-white/35"
-                                >
-                                    <CalendarDays class="h-3 w-3" /> Bergabung
-                                    {{ store.memberSince }}
-                                </span>
-                                <span
-                                    class="flex items-center gap-1 text-[11px] text-white/35"
-                                >
-                                    <MessageCircle class="h-3 w-3" /> Respons
-                                    &lt; 1 jam
-                                </span>
-                            </div>
-
-                            <!-- CTA buttons -->
-                            <div class="mt-3 flex gap-2">
-                                <Button
-                                    variant="amber"
-                                    size="sm"
-                                    class="gap-1.5 text-xs font-bold shadow-(--brand)/25 shadow-lg"
-                                >
-                                    <MessageCircle class="h-3.5 w-3.5" /> Chat
-                                    Penjual
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    class="gap-1.5 border border-white/15 bg-white/8 text-xs font-semibold text-white/80 hover:bg-white/14 hover:text-white"
-                                >
-                                    <Share2 class="h-3.5 w-3.5" /> Bagikan
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ── Stat Cards Strip ── -->
-                    <div
-                        class="mt-7 grid grid-cols-4 divide-x divide-white/8 overflow-hidden rounded-t-2xl border border-b-0 border-white/8 bg-white/[0.03] backdrop-blur-sm"
-                    >
-                        <div
-                            v-for="stat in statCards"
-                            :key="stat.label"
-                            class="flex flex-col items-center gap-1 px-3 py-4 sm:px-5"
-                        >
-                            <component
-                                :is="stat.icon"
-                                class="h-4 w-4 sm:h-5 sm:w-5"
-                                :class="[
-                                    stat.color,
-                                    stat.star ? 'fill-amber-400' : '',
-                                ]"
-                            />
-                            <p
-                                class="font-mono text-base font-black text-white sm:text-xl"
-                                :class="
-                                    stat.label === 'GMV' ? 'text-(--brand)' : ''
-                                "
-                            >
-                                {{ stat.value }}
-                            </p>
-                            <p
-                                class="text-[9px] font-semibold tracking-widest text-white/35 uppercase sm:text-[10px]"
-                            >
-                                {{ stat.label }}
-                            </p>
+                            ></div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- ── Trust Bar ── -->
-            <div
-                class="flex items-center gap-0 overflow-x-auto border-b border-black/8 bg-white"
-            >
-                <div
-                    v-for="(item, i) in trustItems"
-                    :key="i"
-                    class="flex shrink-0 items-center gap-2 border-r border-black/6 px-4 py-3 last:border-r-0 sm:px-5"
-                >
-                    <component
-                        :is="item.icon"
-                        class="h-4 w-4 shrink-0"
-                        :class="item.color"
-                    />
-                    <span
-                        class="text-[11px] font-semibold whitespace-nowrap text-[#4a4a57] sm:text-xs"
-                        >{{ item.label }}</span
-                    >
-                </div>
-            </div>
+                <!-- Gradient Overlay -->
+                <div class="absolute inset-0 z-0 bg-black/60"></div>
 
-            <!-- ── Featured Products (CMS) ── -->
-            <div
-                v-if="featured?.length"
-                id="unggulan"
-                class="flex flex-col gap-4 bg-[#f5f4f0] px-4 pt-6 sm:px-8"
-            >
-                <div class="flex items-end justify-between">
-                    <div>
-                        <h2
-                            class="text-base font-black text-[#1c1c22] sm:text-lg"
-                        >
-                            Produk Unggulan
-                        </h2>
-                        <p class="text-xs text-[#9090a0]">
-                            Pilihan terbaik dari {{ store.name }}
-                        </p>
-                    </div>
-                    <a
-                        href="#produk"
-                        class="text-xs font-bold"
-                        :style="{ color: 'var(--brand)' }"
-                        >Lihat semua →</a
-                    >
-                </div>
-                <div
-                    class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
-                >
-                    <ProductCard
-                        v-for="p in featured"
-                        :key="p.id"
-                        :product="p"
-                        @click="openProductDetail(p)"
-                        @add-to-cart="addToCart"
-                    />
-                </div>
-            </div>
+                <!-- Content Container -->
+                <div class="relative z-10 flex min-h-[260px] sm:min-h-[320px] md:min-h-[380px] lg:min-h-[650px] flex-col justify-center gap-4 p-5 text-white sm:gap-6 sm:p-10 md:flex-row md:items-center md:justify-between">
+                    <!-- Background glows (using theme colors) -->
+                <div class="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full opacity-40 blur-3xl bg-brand" />
+                <div class="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full opacity-35 blur-3xl bg-brand-secondary" />
 
-            <!-- ── Products Section ── -->
-            <div
-                id="produk"
-                class="flex flex-col gap-5 bg-[#f5f4f0] p-3 sm:p-5 lg:p-7"
-            >
-                <!-- Header row -->
-                <Card class="rounded-2xl border-black/6 shadow-xs">
-                    <CardContent class="p-4 sm:p-5">
-                        <div
-                            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                        >
-                            <div>
-                                <CardTitle
-                                    class="text-sm font-extrabold text-[#1c1c22] sm:text-base"
-                                >
-                                    Produk dari {{ store.name }}
-                                </CardTitle>
-                                <CardDescription
-                                    class="mt-0.5 text-xs text-[#9090a0]"
-                                >
-                                    {{ filteredProducts.length }} produk
-                                    ditemukan
-                                </CardDescription>
-                            </div>
-
-                            <!-- Search within store -->
-                            <div class="relative flex-shrink-0 sm:w-52">
-                                <Search
-                                    class="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[#9090a0]"
-                                />
-                                <input
-                                    v-model="searchQuery"
-                                    type="text"
-                                    placeholder="Cari produk di toko..."
-                                    class="h-9 w-full rounded-xl border border-black/10 bg-[#f5f4f0] pr-3 pl-8 text-xs font-medium text-[#1c1c22] transition-all outline-none placeholder:text-[#9090a0] focus:border-(--brand) focus:ring-1 focus:ring-(--brand)/30"
-                                />
-                            </div>
-                        </div>
-
-                        <!-- Category Pills -->
-                        <Separator class="my-3.5 opacity-50" />
-                        <div class="w-full overflow-x-auto">
-                            <div class="flex w-max gap-1.5 pb-0.5">
-                                <Button
-                                    v-for="cat in categories"
-                                    :key="cat"
-                                    :variant="
-                                        selectedCat === cat
-                                            ? 'amber'
-                                            : 'outline'
-                                    "
-                                    size="sm"
-                                    class="h-7 shrink-0 rounded-full px-3.5 text-[11px] font-semibold transition-all"
-                                    @click="setCategory(cat)"
-                                >
-                                    {{ cat }}
-                                    <span
-                                        v-if="selectedCat === cat"
-                                        class="ml-1 rounded-full bg-white/25 px-1 text-[9px]"
-                                    >
-                                        {{ filteredProducts.length }}
-                                    </span>
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Product Grid -->
-                <div
-                    v-if="displayedProducts.length > 0"
-                    class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
-                >
-                    <ProductCard
-                        v-for="p in displayedProducts"
-                        :key="p.id"
-                        :product="p"
-                        @click="openProductDetail(p)"
-                        @add-to-cart="addToCart"
-                    />
-                </div>
-
-                <!-- ── DESKTOP PAGINATION ── -->
-                <div
-                    v-if="filteredProducts.length > 0 && totalPages > 1"
-                    class="hidden items-center justify-center gap-1.5 py-4 md:flex"
-                >
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        class="h-8 w-8 rounded-lg p-0 text-xs"
-                        :disabled="currentPage === 1"
-                        @click="setPage(currentPage - 1)"
-                    >
-                        <ChevronLeftIcon class="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                        v-for="page in totalPages"
-                        :key="page"
-                        :variant="currentPage === page ? 'amber' : 'outline'"
-                        size="sm"
-                        class="h-8 w-8 rounded-lg p-0 text-xs font-bold"
-                        @click="setPage(page)"
-                    >
-                        {{ page }}
-                    </Button>
-
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        class="h-8 w-8 rounded-lg p-0 text-xs"
-                        :disabled="currentPage === totalPages"
-                        @click="setPage(currentPage + 1)"
-                    >
-                        <ChevronRightIcon class="h-4 w-4" />
-                    </Button>
-                </div>
-
-                <!-- ── MOBILE AUTO-FETCH (INFINITE SCROLL) ── -->
-                <div
-                    v-if="filteredProducts.length > 0"
-                    class="flex flex-col items-center justify-center py-3 md:hidden"
-                >
-                    <div
-                        v-if="isLoadingMore"
-                        class="flex items-center gap-2 py-3 text-xs font-bold text-(--brand)"
-                    >
-                        <Loader2 class="h-4 w-4 animate-spin text-(--brand)" />
-                        <span>Memuat produk lainnya...</span>
-                    </div>
-                    <div
-                        v-else-if="hasMoreMobile"
-                        ref="loadMoreTriggerRef"
-                        class="h-6 w-full"
-                    />
-                    <p v-else class="py-2 text-[11px] text-[#9090a0]">
-                        Semua produk sudah ditampilkan
+                <div class="relative z-10">  
+                    <p class="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest uppercase sm:mb-1.5 sm:text-xs text-brand-accent">
+                        <ShieldCheck class="h-4 w-4 text-brand-secondary" />
+                        {{ storefront?.name ?? 'Toko Resmi' }} · {{ storefront?.badge ?? 'Official Store' }}
                     </p>
+                    <h1 class="text-2xl leading-tight font-black tracking-tight uppercase sm:text-4xl lg:text-5xl">
+                        {{ storefront?.headline || 'Belanja Produk Favoritmu' }}
+                        <span v-if="storefront?.description"
+                            class="mt-1 block text-lg font-bold normal-case sm:text-2xl text-brand-accent">
+                            {{ storefront?.description }}
+                        </span>
+                    </h1>
+                    <p class="mt-2 max-w-xl text-xs text-zinc-300">
+                        {{ storefront?.category ? `Kategori unggulan: ${storefront.category}.` : '' }}
+                        {{ storefront?.hero_config?.about_text || 'Produk berkualitas dengan garansi keaslian dan layanan bebas ongkir.' }}
+                    </p>
+                    <!-- CTA desktop -->
+                    <div v-if="storefront?.highlights && storefront.highlights.length > 0" class="mt-4 hidden gap-2 md:flex">
+                        <Badge 
+                            v-for="(hl, idx) in storefront.highlights"
+                            :key="idx"
+                            variant="outline"
+                            class="border-white/20 bg-white/10 text-white"
+                        >
+                            <Sparkles v-if="idx === 0" class="mr-1.5 h-3.5 w-3.5 text-brand-accent" />
+                            <Flame v-else-if="idx === 1" class="mr-1.5 h-3.5 w-3.5 text-rose-400" />
+                            <Truck v-else class="mr-1.5 h-3.5 w-3.5 text-sky-400" />
+                            {{ hl }}
+                        </Badge>
+                    </div>
                 </div>
 
-                <!-- Empty State -->
-                <Card v-else class="rounded-2xl border-black/6 shadow-xs">
-                    <CardContent
-                        class="flex flex-col items-center gap-3 py-16 text-center"
+                <!-- Mobile filter badges -->
+                <div v-if="storefront?.highlights && storefront.highlights.length > 0" class="relative z-10 flex flex-wrap items-center gap-2 md:hidden">
+                    <Badge 
+                        v-for="(hl, idx) in storefront.highlights"
+                        :key="idx"
+                        variant="outline" 
+                        class="border-black/10 bg-card text-muted-foreground"
                     >
+                        <Sparkles v-if="idx === 0" class="mr-1 h-3 w-3 text-brand-accent" />
+                        <Flame v-else-if="idx === 1" class="mr-1 h-3 w-3 fill-brand-strong text-brand-strong" />
+                        <Truck v-else class="mr-1 h-3 w-3 text-brand" />
+                        {{ hl }}
+                    </Badge>
+                </div>
+
+                <!-- Desktop hero right illustration -->
+                <div class="relative z-10 hidden flex-col items-end gap-3 md:flex">
+                    <div
+                        class="rounded-2xl border border-white/10 bg-white/10 p-4 text-white shadow-md backdrop-blur-md">
+                        <p class="mb-1 text-[10px] font-extrabold tracking-widest text-zinc-300 uppercase">
+                            {{ storefront?.hero_config?.widget_title || 'Belanja Aman' }}
+                        </p>
+                        <div class="flex items-center gap-2 text-sm font-black text-white">
+                            <ShieldCheck class="h-5 w-5 text-brand-accent" />
+                            {{ storefront?.hero_config?.widget_subtitle || 'Escrow & Buyer Protection' }}
+                        </div>
+                        <p class="mt-1 text-[10px] text-zinc-300">
+                            {{ storefront?.hero_config?.widget_description || 'Uang kembali jika barang tidak sesuai' }}
+                        </p>
+                    </div>
+                    <div class="flex gap-2">
                         <div
-                            class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f5f4f0]"
-                        >
-                            <Package class="h-8 w-8 text-[#c8c8d5]" />
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-[#4a4a57]">
-                                Tidak ada produk
+                            class="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-center shadow-xs backdrop-blur-md">
+                            <p class="font-mono text-lg font-black text-brand">
+                                {{ props.stats?.total_products || '0' }}
                             </p>
-                            <p class="mt-1 text-xs text-[#9090a0]">
-                                {{
-                                    searchQuery
-                                        ? `Produk "${searchQuery}" tidak ditemukan`
-                                        : 'Toko ini belum memiliki produk di kategori ini'
-                                }}
+                            <p class="text-[10px] font-bold text-zinc-300">
+                                Produk
                             </p>
                         </div>
-                        <Button
-                            v-if="searchQuery"
-                            variant="outline"
-                            size="sm"
-                            class="text-xs"
-                            @click="searchQuery = ''"
-                        >
-                            Hapus pencarian
-                        </Button>
-                    </CardContent>
-                </Card>
+                        <div
+                            class="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-center shadow-xs backdrop-blur-md">
+                            <p class="font-mono text-lg font-black text-brand-strong">
+                                {{ storefront?.hero_config?.fake_buyer_count || '54rb+' }}
+                            </p>
+                            <p class="text-[10px] font-bold text-zinc-300">
+                                Pembeli
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carousel Navigation Dots -->
+                <div v-if="scrollSnaps.length > 1" class="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-2">
+                    <button
+                        v-for="(_, index) in scrollSnaps"
+                        :key="index"
+                        @click="scrollTo(index)"
+                        class="h-1.5 rounded-full transition-all duration-300"
+                        :class="index === selectedIndex ? 'w-6 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'"
+                    />
+                </div>
             </div>
+        </div>
 
-            <!-- ── About + Testimonials (CMS) ── -->
-            <div
-                v-if="showcase?.about?.text"
-                class="flex flex-col gap-6 bg-[#f5f4f0] px-4 pb-8 sm:px-8"
-            >
-                <Card class="rounded-2xl border-black/6 shadow-xs">
-                    <CardContent class="p-5 sm:p-7">
-                        <p
-                            class="mb-1 text-[10px] font-black tracking-widest uppercase"
-                            :style="{ color: 'var(--brand)' }"
-                        >
-                            Tentang Toko
-                        </p>
-                        <h2
-                            class="text-base font-black text-[#1c1c22] sm:text-lg"
-                        >
-                            {{ showcase.about.title }}
-                        </h2>
-                        <p
-                            class="mt-2 max-w-3xl text-xs leading-relaxed whitespace-pre-line text-[#4a4a57] sm:text-sm"
-                        >
-                            {{ showcase.about.text }}
-                        </p>
-                    </CardContent>
-                </Card>
 
-                <div
-                    v-if="showcase.testimonials?.length"
-                    class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
-                >
+            <!-- ── Main Grid Section ── -->
+            <div class="flex flex-col gap-6 lg:flex-row">
+                <!-- ─ Left Sidebar Filters (Desktop) ─ -->
+                <aside class="hidden w-64 shrink-0 flex-col gap-4 lg:flex">
+                    <!-- Category filter -->
                     <Card
-                        v-for="(t, i) in showcase.testimonials"
-                        :key="i"
-                        class="rounded-2xl border-black/6 shadow-xs"
+                        class="relative overflow-hidden rounded-2xl border-2 border-brand-soft p-4 shadow-md transition-all duration-300 bg-card"
                     >
-                        <CardContent class="flex flex-col gap-2.5 p-4 sm:p-5">
-                            <div class="flex items-center gap-1">
-                                <Star
-                                    v-for="s in Math.min(5, t.rating ?? 5)"
-                                    :key="s"
-                                    class="h-3.5 w-3.5 fill-amber-400 text-amber-400"
-                                />
-                            </div>
-                            <p class="text-xs leading-relaxed text-[#4a4a57]">
-                                “{{ t.text }}”
-                            </p>
-                            <p class="text-[11px] font-bold text-[#1c1c22]">
-                                {{ t.name }}
-                                <span
-                                    v-if="t.role"
-                                    class="font-normal text-[#9090a0]"
-                                >
-                                    — {{ t.role }}</span
-                                >
-                            </p>
-                        </CardContent>
+                        <!-- Sidebar Top Accent -->
+                        <div class="absolute top-0 right-0 left-0 h-1.5 bg-brand" />
+                        <p class="mt-1 mb-3 text-xs font-black tracking-widest uppercase text-brand-strong">
+                            Kategori
+                        </p>
+                        <div class="flex flex-col gap-1.5">
+                            <button v-for="item in categoryMenu" :key="item.cat" @click="setCategory(item.cat!)"
+                                class="group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-black transition-all"
+                                :class="selectedCat === item.cat
+                                    ? 'text-brand-foreground shadow-lg bg-brand'
+                                    : 'text-foreground hover:bg-black/5 hover:text-brand'
+                                    ">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-lg shadow-2xs transition-transform group-hover:scale-110"
+                                        :class="selectedCat === item.cat ? 'bg-white/25 text-white' : 'bg-brand-soft text-brand'">
+                                        <component :is="item.icon" class="h-3.5 w-3.5" />
+                                    </div>
+                                    <span>{{ item.label }}</span>
+                                </div>
+                                <span v-if="selectedCat === item.cat"
+                                    class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black text-white/90">
+                                    {{ filteredProducts.length }}
+                                </span>
+                            </button>
+                        </div>
                     </Card>
+
+                    <!-- Nike Official Advantages Sidebar -->
+                    <Card class="relative overflow-hidden border-black/10 bg-zinc-900 p-4 text-white">
+                        <div class="absolute -top-6 -right-6 h-32 w-32 rounded-full opacity-30 blur-2xl bg-brand" />
+                        <p class="mb-3 text-xs font-black tracking-widest uppercase text-brand-accent">
+                            Jaminan Official
+                        </p>
+                        <div class="relative z-10 flex flex-col gap-3.5 text-xs">
+                            <div class="flex items-start gap-2.5">
+                                <ShieldCheck class="mt-0.5 h-5 w-5 shrink-0 text-brand-accent" />
+                                <div>
+                                    <p class="font-extrabold text-white">
+                                        100% Original
+                                    </p>
+                                    <p class="text-[10px] text-zinc-400">
+                                        Langsung dari {{ storefront?.name ?? 'Indonesia' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <Truck class="mt-0.5 h-5 w-5 shrink-0 text-brand-secondary" />
+                                <div>
+                                    <p class="font-extrabold text-white">
+                                        Bebas Ongkir
+                                    </p>
+                                    <p class="text-[10px] text-zinc-400">
+                                        Pengiriman cepat seluruh Indonesia
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <RotateCcw class="mt-0.5 h-5 w-5 shrink-0 text-brand-strong" />
+                                <div>
+                                    <p class="font-extrabold text-white">
+                                        Retur 30 Hari
+                                    </p>
+                                    <p class="text-[10px] text-zinc-400">
+                                        Tukar ukuran atau garansi pengembalian
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </aside>
+
+                <!-- ─ Right Column: category chips + grid ─ -->
+                <div class="flex min-w-0 flex-1 flex-col gap-4">
+                    <!-- Categories pills — horizontal scroll on mobile, shown as sidebar on desktop -->
+                    <div class="w-full overflow-x-auto lg:hidden">
+                        <div class="flex w-max gap-2 pb-1">
+                            <Button v-for="cat in displayCategories" :key="cat" :variant="selectedCat === cat ? 'default' : 'outline'" size="sm" class="shrink-0 rounded-full text-xs font-semibold" :class="selectedCat === cat ? 'bg-brand text-brand-foreground hover:bg-brand/90' : 'text-muted-foreground'"
+                                @click="setCategory(cat)">
+                                {{ cat }}
+                            </Button>
+                        </div>
+                    </div>
+
+                    <!-- Product Grid header -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-sm font-bold text-foreground sm:text-base">
+                                {{
+                                    selectedCat === 'Semua'
+                                        ? 'Semua Produk'
+                                        : selectedCat
+                                }}
+                                <span class="ml-1.5 text-xs font-normal text-muted-foreground">{{ processedProducts.length }}
+                                    produk</span>
+                            </h2>
+                        </div>
+                        <!-- Sort desktop -->
+                        <div class="hidden items-center gap-1.5 text-xs text-muted-foreground lg:flex">
+                            <span>Urutkan:</span>
+                            <button @click="sortOption = 'popular'"
+                                class="cursor-pointer rounded-lg border px-3 py-1.5 font-bold transition-all" :class="sortOption === 'popular'
+                                    ? 'border-brand bg-brand-soft text-brand-strong'
+                                    : 'border-border bg-card hover:bg-muted'
+                                    ">
+                                Terpopuler
+                            </button>
+                            <button @click="sortOption = 'newest'"
+                                class="cursor-pointer rounded-lg border px-3 py-1.5 font-bold transition-all" :class="sortOption === 'newest'
+                                    ? 'border-brand bg-brand-soft text-brand-strong'
+                                    : 'border-border bg-card hover:bg-muted'
+                                    ">
+                                Terbaru
+                            </button>
+                            <button @click="sortOption = 'price_asc'"
+                                class="cursor-pointer rounded-lg border px-3 py-1.5 font-bold transition-all" :class="sortOption === 'price_asc'
+                                    ? 'border-brand bg-brand-soft text-brand-strong'
+                                    : 'border-border bg-card hover:bg-muted'
+                                    ">
+                                Harga ↑
+                            </button>
+                            <button @click="sortOption = 'price_desc'"
+                                class="cursor-pointer rounded-lg border px-3 py-1.5 font-bold transition-all" :class="sortOption === 'price_desc'
+                                    ? 'border-brand bg-brand-soft text-brand-strong'
+                                    : 'border-border bg-card hover:bg-muted'
+                                    ">
+                                Harga ↓
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Grid -->
+                    <div v-if="displayedProducts.length > 0"
+                        class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                        <ProductCard v-for="p in displayedProducts" :key="p.id" :product="p"
+                            @click="openProductDetail(p)" @add-to-cart="addToCart" />
+                    </div>
+
+                    <!-- ── DESKTOP PAGINATION ── -->
+                    <div v-if="filteredProducts.length > 0 && totalPages > 1"
+                        class="hidden items-center justify-center gap-1.5 py-4 md:flex">
+                        <Button variant="outline" size="sm" class="h-8 w-8 rounded-lg p-0 text-xs"
+                            :disabled="currentPage === 1" @click="setPage(currentPage - 1)">
+                            <ChevronLeftIcon class="h-4 w-4" />
+                        </Button>
+
+                        <Button v-for="page in totalPages" :key="page" :variant="currentPage === page ? 'amber' : 'outline'
+                            " size="sm" class="h-8 w-8 rounded-lg p-0 text-xs font-bold" @click="setPage(page)">
+                            {{ page }}
+                        </Button>
+
+                        <Button variant="outline" size="sm" class="h-8 w-8 rounded-lg p-0 text-xs"
+                            :disabled="currentPage === totalPages" @click="setPage(currentPage + 1)">
+                            <ChevronRightIcon class="h-4 w-4" />
+                        </Button>
+                    </div>
+
+                    <!-- ── MOBILE AUTO-FETCH (INFINITE SCROLL) ── -->
+                    <div v-if="filteredProducts.length > 0"
+                        class="flex flex-col items-center justify-center py-3 md:hidden">
+                        <div v-if="isLoadingMore" class="flex items-center gap-2 py-3 text-xs font-bold text-brand">
+                            <Loader2 class="h-4 w-4 animate-spin text-brand" />
+                            <span>Memuat produk lainnya...</span>
+                        </div>
+                        <div v-else-if="hasMoreMobile" ref="loadMoreTriggerRef" class="h-6 w-full" />
+                        <p v-else class="py-2 text-[11px] text-muted-foreground">
+                            Semua produk sudah ditampilkan
+                        </p>
+                    </div>
+
+                    <div v-else class="rounded-2xl bg-card py-16 text-center shadow-sm">
+                        <Package class="mx-auto mb-2 h-10 w-10 text-muted" />
+                        <p class="text-base font-semibold text-foreground">
+                            Produk tidak ditemukan
+                        </p>
+                        <p class="mt-1 text-xs text-muted-foreground">
+                            Coba kata kunci atau kategori lain
+                        </p>
+                    </div>
+
+                    <!-- Nike Official Special Badges — Mobile -->
+                    <div class="lg:hidden">
+                        <h2 class="mb-3 text-sm font-bold text-foreground">
+                            Layanan {{ storefront?.name ?? 'Toko' }}
+                        </h2>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div
+                                class="flex items-center gap-2 rounded-xl border border-black/10 bg-brand p-3 text-brand-foreground">
+                                <ShieldCheck class="h-4 w-4 shrink-0 text-brand-accent" />
+                                <span class="font-extrabold text-white">100% Original</span>
+                            </div>
+                            <div
+                                class="flex items-center gap-2 rounded-xl border border-black/10 bg-brand p-3 text-brand-foreground">
+                                <Truck class="h-4 w-4 shrink-0 text-brand-secondary" />
+                                <span class="font-extrabold text-white">Bebas Ongkir</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
 
-        <!-- Cart Drawer -->
-        <CartDrawer
-            :isOpen="isCartOpen"
-            :items="cartItems"
-            @close="isCartOpen = false"
-            @update-qty="updateCartQty"
-            @remove-item="removeFromCart"
-            @checkout="goCheckout"
-        />
+        <!-- Floating Quick Cart Bar -->
+        <transition enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-12 opacity-0"
+            enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-200 ease-in"
+            leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-12 opacity-0">
+            <div v-if="totalCartCount > 0"
+                class="fixed bottom-6 right-6 z-40 flex items-center gap-3 rounded-2xl border border-white/20 bg-brand p-3 pr-4 text-white shadow-2xl backdrop-blur-xl transition-all hover:scale-105">
+                <button @click="isCartOpen = true"
+                    class="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-white/20 text-white shadow-md transition-transform active:scale-95">
+                    <ShoppingCart class="h-5 w-5" />
+                    <span
+                        class="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-strong text-[10px] font-black text-white shadow-xs">
+                        {{ totalCartCount }}
+                    </span>
+                </button>
+                <div class="flex flex-col cursor-pointer" @click="openCart()">
+                    <span class="text-[10px] font-bold tracking-wider text-brand-accent uppercase">Keranjang Belanja</span>
+                    <span class="text-xs font-black text-white">{{ totalCartCount }} Item terpilih</span>
+                </div>
+                    <Button
+                        class="ml-2 cursor-pointer gap-1.5 rounded-xl bg-brand px-3.5 text-xs font-black text-brand-foreground shadow-md hover:brightness-110 border-0"
+                        @click="openCart()"
+                    >Lihat Keranjang
+                </Button>
+            </div>
+        </transition>
 
         <!-- Product Detail Modal -->
-        <ProductDetailModal
-            :product="activeProductModal"
-            @close="activeProductModal = null"
-            @add-to-cart="addToCart"
-        />
+        <ProductDetailModal :product="activeProductModal" @close="activeProductModal = null" @add-to-cart="addToCart" />
+
     </StorefrontLayout>
 </template>

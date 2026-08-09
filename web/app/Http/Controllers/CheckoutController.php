@@ -15,12 +15,19 @@ class CheckoutController extends Controller
         protected OrderService $orderService
     ) {}
 
-    public function show(Request $request): Response
+    public function show(string $storeSlug, Request $request): Response
     {
-        return Inertia::render('Checkout');
+        $addresses = [];
+        if ($user = $request->user()) {
+            $addresses = $user->addresses()->orderByDesc('is_default')->get();
+        }
+
+        return Inertia::render('Checkout', [
+            'addresses' => $addresses,
+        ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(string $storeSlug, Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
@@ -41,10 +48,10 @@ class CheckoutController extends Controller
         $dto = CreateOrderDTO::fromRequest($validated);
         $order = $this->orderService->processCheckout($dto);
 
-        return redirect()->route('orders.success', $order->order_number);
+        return redirect()->route('orders.success', ['store_slug' => $storeSlug, 'orderNumber' => $order->order_number]);
     }
 
-    public function success(string $orderNumber): Response
+    public function success(string $storeSlug, string $orderNumber): Response
     {
         $invoice = $this->orderService->getInvoiceData($orderNumber);
 

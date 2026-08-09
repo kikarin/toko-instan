@@ -1,23 +1,14 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
-import { Users, UserX } from 'lucide-vue-next';
-import { Search } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
-import { toast } from 'vue-sonner';
+import { Head } from '@inertiajs/vue3';
+import { Users, UserX, Search, LogIn } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-
-interface AdminUser {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    created_at: string | null;
-}
+import { useAdminUsers } from '@/lib/useAdminUsers';
+import type { AdminUser } from '@/types/admin';
 
 interface Props {
     users?: AdminUser[];
@@ -25,103 +16,19 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const searchQ = ref('');
-
-const filtered = computed(() => {
-    const q = searchQ.value.toLowerCase();
-
-    if (!q) {
-        return props.users ?? [];
-    }
-
-    return (props.users ?? []).filter(
-        (u) =>
-            u.name.toLowerCase().includes(q) ||
-            u.email.toLowerCase().includes(q),
-    );
-});
-
-const roleLabel: Record<string, string> = {
-    buyer: 'Pembeli',
-    seller: 'Seller',
-    admin: 'Admin',
-};
-
-const roleVariant: Record<string, 'teal' | 'amber' | 'violetSolid'> = {
-    buyer: 'teal',
-    seller: 'amber',
-    admin: 'violetSolid',
-};
-
-interface PendingAction {
-    kind: 'delete' | 'role';
-    user: AdminUser;
-    role?: string;
-}
-
-const dialog = ref<PendingAction | null>(null);
-
-const dialogTitle = computed(() => {
-    if (!dialog.value) {
-        return '';
-    }
-
-    return dialog.value.kind === 'delete'
-        ? `Hapus user "${dialog.value.user.name}"?`
-        : `Ubah role ${dialog.value.user.name}?`;
-});
-
-const dialogDescription = computed(() => {
-    if (!dialog.value) {
-        return '';
-    }
-
-    return dialog.value.kind === 'delete'
-        ? 'Aksi ini permanen dan tidak dapat dibatalkan.'
-        : `Role akan diubah menjadi "${roleLabel[dialog.value.role ?? '']}".`;
-});
-
-function confirmRoleChange(user: AdminUser, role: string) {
-    if (role === user.role) {
-        return;
-    }
-
-    dialog.value = { kind: 'role', user, role };
-}
-
-function confirmDelete(user: AdminUser) {
-    dialog.value = { kind: 'delete', user };
-}
-
-function runAction() {
-    if (!dialog.value) {
-        return;
-    }
-
-    const { kind, user, role } = dialog.value;
-
-    if (kind === 'delete') {
-        router.delete(`/admin/users/${user.id}`, {
-            onSuccess: () => toast.success(`${user.name} dihapus.`),
-            onError: (errors) =>
-                toast.error(errors.message || 'Gagal menghapus user.'),
-        });
-    } else if (kind === 'role') {
-        router.patch(
-            `/admin/users/${user.id}/role`,
-            { role },
-            {
-                onSuccess: () =>
-                    toast.success(
-                        `Role ${user.name} diubah ke ${roleLabel[role ?? '']}.`,
-                    ),
-                onError: () => toast.error('Gagal mengubah role.'),
-            },
-        );
-    }
-
-    dialog.value = null;
-}
+const {
+    searchQ,
+    filtered,
+    roleLabel,
+    roleVariant,
+    dialog,
+    dialogTitle,
+    dialogDescription,
+    confirmRoleChange,
+    confirmDelete,
+    impersonate,
+    runAction,
+} = useAdminUsers(props.users);
 </script>
 
 <template>
@@ -188,6 +95,18 @@ function runAction() {
                             >
                                 {{ roleLabel[u.role] ?? u.role }}
                             </Badge>
+
+                            <Button
+                                v-if="u.role !== 'admin'"
+                                variant="outline"
+                                size="sm"
+                                class="h-7 px-2 text-[10px]"
+                                :title="`Login sebagai ${u.name}`"
+                                @click="impersonate(u)"
+                            >
+                                <LogIn class="h-3 w-3" />
+                                Masuk
+                            </Button>
 
                             <!-- Role switcher -->
                             <div

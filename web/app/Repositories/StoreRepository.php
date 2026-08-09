@@ -13,6 +13,32 @@ class StoreRepository
         return Store::first();
     }
 
+    public function getStoreForUser(int $userId): ?Store
+    {
+        return Store::whereHas('tenant', fn ($q) => $q->where('user_id', $userId))->first();
+    }
+
+    public function getActiveStore(?int $userId = null): ?Store
+    {
+        if ($userId) {
+            $user = \App\Models\User::find($userId);
+            if ($user && $user->role === 'buyer' && $user->store_id) {
+                return Store::find($user->store_id);
+            }
+            return $this->getStoreForUser($userId) ?: $this->getPrimaryStoreWithProducts();
+        }
+
+        return $this->getPrimaryStoreWithProducts();
+    }
+
+    private function getPrimaryStoreWithProducts(): ?Store
+    {
+        return Store::withCount(['products' => fn ($q) => $q->where('is_active', true)])
+            ->orderByDesc('products_count')
+            ->orderBy('id')
+            ->first();
+    }
+
     public function findBySlug(string $slug): ?Store
     {
         return Store::where('slug', $slug)->first();

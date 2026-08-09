@@ -1,25 +1,21 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { ArrowLeft, ChevronDown, LogOut, ChevronRight } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { logoutUser } from '@/lib/firebase';
 import { useCart } from '@/lib/useCart';
-
-interface UserInfo {
-    id?: number;
-    name: string;
-    email?: string;
-    role: string;
-    avatar?: string | null;
-}
+import { useStoreName } from '@/lib/useStoreName';
+import type { UserProfile } from '@/types/user';
 
 interface Props {
-    user: UserInfo;
+    user: UserProfile;
 }
 
 defineProps<Props>();
+
+const { storeName } = useStoreName();
 
 const appSettingsOpen = ref(false);
 const aboutAppOpen = ref(false);
@@ -41,9 +37,9 @@ function handleItemClick(title: string) {
 
     <StorefrontLayout
         :cartCount="totalCartCount"
-        @open-cart="router.visit('/marketplace')"
+        @open-cart="router.visit('/' + (usePage().props.store?.slug ?? ''))"
         @search="
-            (q: string) => router.visit('/marketplace', { data: { search: q } })
+            (q: string) => router.visit('/' + (usePage().props.store?.slug ?? ''), { data: { search: q } })
         "
     >
         <main class="mx-auto w-full max-w-[800px] p-3 sm:p-6">
@@ -55,7 +51,7 @@ function handleItemClick(title: string) {
                     class="flex items-center gap-3 border-b border-black/6 px-4 py-4 sm:px-6"
                 >
                     <button
-                        @click="router.visit('/account')"
+                        @click="router.visit(`/${(usePage().props.store as any)?.slug ?? ''}/account`)"
                         class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-black/6 bg-white text-[#1c1c22] transition-colors hover:bg-[#f5f4f0]"
                     >
                         <ArrowLeft class="h-4 w-4" />
@@ -83,7 +79,7 @@ function handleItemClick(title: string) {
 
                     <!-- Daftar Alamat -->
                     <div
-                        @click="handleItemClick('Daftar Alamat Pengiriman')"
+                        @click="router.visit('/' + ((usePage().props.store as any)?.slug ?? '') + '/addresses')"
                         class="flex cursor-pointer items-center justify-between px-4 py-4 transition-colors hover:bg-[#faf9f6] sm:px-6"
                     >
                         <div>
@@ -136,8 +132,7 @@ function handleItemClick(title: string) {
                         <div>
                             <p class="font-bold text-[#1c1c22]">Privasi Akun</p>
                             <p class="mt-0.5 text-xs text-[#9090a0]">
-                                Atur penggunaan data pribadimu di Nike Official
-                                Store
+                                Atur penggunaan data pribadimu di {{ storeName }}
                             </p>
                         </div>
                         <ChevronRight class="h-4 w-4 text-[#9090a0]" />
@@ -195,14 +190,14 @@ function handleItemClick(title: string) {
                     </div>
                 </div>
 
-                <!-- ── Expandable Accordion: Seputar Nike Official Store ── -->
+                <!-- ── Expandable Accordion: Seputar {{ storeName }} ── -->
                 <div class="border-b border-black/5">
                     <button
                         @click="aboutAppOpen = !aboutAppOpen"
                         class="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-[#faf9f6] sm:px-6"
                     >
                         <span class="text-sm font-bold text-[#1c1c22]"
-                            >Seputar Nike Official Store</span
+                            >Seputar {{ storeName }}</span
                         >
                         <ChevronDown
                             class="h-4 w-4 text-[#4a4a57] transition-transform duration-200"

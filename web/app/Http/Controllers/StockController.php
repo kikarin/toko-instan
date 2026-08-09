@@ -20,7 +20,7 @@ class StockController extends Controller
 
     public function index(Request $request): Response
     {
-        $products = $this->productService->listForSeller()
+        $products = $this->productService->listForSeller($request->user()->id)
             ->map(fn (Product $product) => [
                 ...$this->productService->format($product),
                 'low_stock' => $product->stock <= $this->lowStockThreshold(),
@@ -39,7 +39,7 @@ class StockController extends Controller
 
     public function history(Request $request, int $id): Response
     {
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');
@@ -64,7 +64,7 @@ class StockController extends Controller
             'reason' => 'nullable|string|max:255',
         ]);
 
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');
@@ -82,7 +82,7 @@ class StockController extends Controller
             'reason' => 'nullable|string|max:255',
         ]);
 
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');
@@ -104,7 +104,7 @@ class StockController extends Controller
             'reason' => 'nullable|string|max:255',
         ]);
 
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');

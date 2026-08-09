@@ -16,9 +16,12 @@ class UserRepository
         return User::orderByDesc('created_at')->take($limit)->get();
     }
 
-    public function findByEmail(string $email): ?User
+    public function findByEmail(string $email, ?int $storeId = null): ?User
     {
-        return User::where('email', $email)->first();
+        return User::where('email', $email)
+            ->when($storeId !== null, fn ($query) => $query->where('store_id', $storeId))
+            ->when($storeId === null, fn ($query) => $query->whereNull('store_id'))
+            ->first();
     }
 
     /**
@@ -31,6 +34,7 @@ class UserRepository
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => $data['role'] ?? 'seller',
+            'store_id' => $data['store_id'] ?? null,
             'auth_provider' => $data['auth_provider'] ?? 'email',
         ]);
     }

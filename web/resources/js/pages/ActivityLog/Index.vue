@@ -14,21 +14,10 @@ import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface LogItem {
-    id: number;
-    action: string;
-    action_label: string;
-    subject_type: string;
-    subject_id: string | null;
-    properties: Record<string, any> | null;
-    user: string | null;
-    ip: string | null;
-    created_at: string | null;
-}
+import type { ActivityLogItem } from '@/types/activity';
 
 interface Props {
-    logs: LogItem[];
+    logs: ActivityLogItem[];
 }
 
 const props = defineProps<Props>();

@@ -37,6 +37,7 @@ class StorePageController extends Controller
             return [
                 'id' => $product->id,
                 'name' => $product->name,
+                'slug' => $product->slug,
                 'price' => 'Rp '.number_format($product->price, 0, ',', '.'),
                 'priceNum' => (int) $product->price,
                 'sold' => $product->sold,
@@ -86,7 +87,11 @@ class StorePageController extends Controller
                 'avatarHue' => $store->avatar_hue ?: 220,
                 'memberSince' => $store->created_at?->format('M Y'),
                 'gmv' => 'Rp '.number_format($store->gmv, 0, ',', '.'),
-                'bannerUrl' => $store->banner_url,
+                'banner_url' => $store->banner_url,
+                'banner_urls' => $store->banner_urls ?? [],
+                'highlights' => $store->highlights ?? [],
+                'hero_config' => $store->hero_config ?? null,
+                'headline' => $store->headline,
             ],
             'theme' => $this->cmsService->resolve($store),
             'showcase' => $showcase,
@@ -95,6 +100,64 @@ class StorePageController extends Controller
             'categories' => $categories,
             'filters' => [
                 'category' => $category ?: 'Semua',
+            ],
+        ]);
+    }
+
+    public function product(Request $request, string $slug, string $productSlug): Response|HttpResponse
+    {
+        $store = $this->storeRepository->findBySlug($slug);
+
+        if (! $store) {
+            abort(404);
+        }
+
+        $product = $store->products()
+            ->where('slug', $productSlug)
+            ->where('is_active', true)
+            ->with(['variants'])
+            ->first();
+
+        if (! $product) {
+            abort(404);
+        }
+
+        return Inertia::render('ProductDetail', [
+            'store' => [
+                'id' => $store->id,
+                'name' => $store->name,
+                'slug' => $store->slug,
+                'logo' => $store->logo,
+                'badge' => $store->badge,
+                'avatar' => strtoupper(substr($store->name, 0, 2)),
+                'avatarHue' => $store->avatar_hue ?: 220,
+            ],
+            'theme' => $this->cmsService->resolve($store),
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'price' => 'Rp '.number_format($product->price, 0, ',', '.'),
+                'priceNum' => (int) $product->price,
+                'description' => $product->description,
+                'img' => $product->img,
+                'rating' => (float) $product->rating,
+                'sold' => $product->sold,
+                'category' => $product->category,
+                'stock' => $product->stock,
+                'sku' => $product->sku,
+                'brand' => $product->brand,
+                'weightGram' => $product->weight_gram,
+                'variants' => $product->variants->map(function ($variant) {
+                    return [
+                        'id' => $variant->id,
+                        'name' => $variant->name,
+                        'sku' => $variant->sku,
+                        'price' => 'Rp '.number_format($variant->price, 0, ',', '.'),
+                        'priceNum' => (int) $variant->price,
+                        'stock' => $variant->stock,
+                    ];
+                })->toArray(),
             ],
         ]);
     }

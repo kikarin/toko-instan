@@ -8,7 +8,7 @@ use Inertia\Response;
 
 class SettingsController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(string $storeSlug, Request $request): Response
     {
         $user = $request->user();
 

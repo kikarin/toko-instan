@@ -12,9 +12,13 @@ class ProductRepository
     /**
      * @return Collection<int, Product>
      */
-    public function getMarketplaceCatalog(?string $search = null, ?string $category = null): Collection
+    public function getMarketplaceCatalog(?string $search = null, ?string $category = null, ?int $storeId = null): Collection
     {
         $query = Product::with('store')->where('is_active', true);
+
+        if ($storeId) {
+            $query->where('store_id', $storeId);
+        }
 
         if ($search) {
             $searchLower = mb_strtolower(trim($search));

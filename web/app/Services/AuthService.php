@@ -17,34 +17,31 @@ class AuthService
     /**
      * @param  array<string, mixed>  $credentials
      */
-    public function login(array $credentials): bool
+    public function login(array $credentials, ?int $storeId = null): bool
     {
-        if (Auth::attempt($credentials, true)) {
-            request()->session()->regenerate();
+        $buyerCredentials = $credentials;
+        $buyerCredentials['store_id'] = $storeId;
 
+        if (Auth::attempt($buyerCredentials, true)) {
+            request()->session()->regenerate();
             return true;
         }
 
-        // Auto-provision initial testing account if not exists
-        $user = $this->userRepository->findByEmail($credentials['email']);
-        if (! $user) {
-            $name = Str::before($credentials['email'], '@');
-            $user = $this->userRepository->createUser([
-                'name' => ucfirst($name),
-                'email' => $credentials['email'],
-                'password' => $credentials['password'],
-                'role' => 'seller',
-                'auth_provider' => 'email',
-            ]);
+        if ($storeId !== null) {
+            $globalCredentials = $credentials;
+            $globalCredentials['store_id'] = null;
 
-            $slug = Str::slug($name);
-            $this->storeRepository->createTenantAndStore($user->id, ucfirst($name).' Store', $slug);
+            $user = $this->userRepository->findByEmail($credentials['email'], null);
+                
+            if ($user && in_array($user->role, ['seller', 'admin'])) {
+                if (Auth::attempt($globalCredentials, true)) {
+                    request()->session()->regenerate();
+                    return true;
+                }
+            }
         }
 
-        Auth::login($user, true);
-        request()->session()->regenerate();
-
-        return true;
+        return false;
     }
 
     /**
@@ -59,6 +56,7 @@ class AuthService
             'email' => $data['email'],
             'password' => $data['password'],
             'role' => $role,
+            'store_id' => $data['store_id'] ?? null,
             'auth_provider' => 'email',
         ]);
 

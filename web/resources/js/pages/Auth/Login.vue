@@ -1,18 +1,24 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { Lock, Mail, AlertCircle, ArrowRight, Loader2 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/sonner';
+import { toast, Toaster } from '@/components/ui/sonner';
 import { signInWithGooglePopup } from '@/lib/firebase';
+
+const props = defineProps<{
+    store?: any;
+}>();
 
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
 const isGoogleLoading = ref(false);
 const errorMessage = ref<string | null>(null);
+
+const loginUrl = computed(() => props.store ? `/${props.store.slug}/login` : '/login');
 
 async function handleEmailLogin() {
     if (!email.value || !password.value) {
@@ -27,7 +33,7 @@ async function handleEmailLogin() {
 
     // Send to Laravel AuthController
     router.post(
-        '/login',
+        loginUrl.value,
         {
             email: email.value,
             password: password.value,
@@ -62,7 +68,7 @@ async function handleGoogleLogin() {
         errorMessage.value = error;
     } else if (user) {
         // Also authenticate with Laravel backend
-        router.post('/login', {
+        router.post(loginUrl.value, {
             email: user.email,
             password: user.uid,
         });
@@ -95,10 +101,10 @@ async function handleGoogleLogin() {
                 <h1
                     class="text-2xl font-extrabold tracking-tight text-[#1c1c22]"
                 >
-                    Selamat Datang Kembali
+                    {{ props.store ? `Masuk ke ${props.store.name}` : 'Selamat Datang Kembali' }}
                 </h1>
                 <p class="mt-1 text-xs text-[#9090a0]">
-                    Masuk ke dashboard Toko Instan Anda
+                    {{ props.store ? `Silakan masuk untuk belanja di ${props.store.name}` : 'Masuk ke dashboard Toko Instan Anda' }}
                 </p>
             </div>
 
@@ -217,7 +223,7 @@ async function handleGoogleLogin() {
                             class="h-4 w-4 animate-spin"
                         />
                         <template v-else>
-                            <span>Masuk ke Dashboard</span>
+                            <span>{{ props.store ? 'Masuk Sekarang' : 'Masuk ke Dashboard' }}</span>
                             <ArrowRight class="h-4 w-4" />
                         </template>
                     </Button>
@@ -226,15 +232,17 @@ async function handleGoogleLogin() {
 
             <!-- Bottom Link -->
             <div class="text-center text-xs text-[#9090a0]">
-                Belum punya toko?
+                Belum punya akun?
                 <a
-                    href="/register"
-                    @click.prevent="router.visit('/register')"
+                    :href="props.store ? `/${props.store.slug}/register` : '/register'"
+                    @click.prevent="router.visit(props.store ? `/${props.store.slug}/register` : '/register')"
                     class="ml-1 font-bold text-[#e07c28] hover:underline"
                 >
-                    Daftar Toko Gratis
+                    {{ props.store ? 'Daftar Sekarang' : 'Daftar Toko Gratis' }}
                 </a>
             </div>
         </div>
+
+        <Toaster position="top-right" />
     </div>
 </template>

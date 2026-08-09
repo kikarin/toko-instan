@@ -9,6 +9,7 @@ import {
     Banknote,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
+import ImpersonationBanner from '@/components/impersonation/ImpersonationBanner.vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -219,8 +220,11 @@ async function handleLogout() {
                 </header>
 
                 <!-- Page Content -->
-                <div class="flex flex-1 overflow-y-auto">
-                    <slot />
+                <div class="flex flex-1 flex-col overflow-y-auto">
+                    <ImpersonationBanner />
+                    <div class="flex flex-1 overflow-y-auto">
+                        <slot />
+                    </div>
                 </div>
             </SidebarInset>
 

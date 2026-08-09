@@ -10,7 +10,7 @@ use Inertia\Response;
 
 class AddressController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(string $storeSlug, Request $request): Response
     {
         $addresses = $request->user()->addresses()
             ->orderByDesc('is_default')
@@ -24,7 +24,7 @@ class AddressController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(string $storeSlug, Request $request): RedirectResponse
     {
         $validated = $this->validateAddress($request);
         $user = $request->user();
@@ -39,7 +39,7 @@ class AddressController extends Controller
         return back()->with('success', 'Alamat berhasil ditambahkan.');
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(string $storeSlug, Request $request, int $id): RedirectResponse
     {
         $validated = $this->validateAddress($request);
         $address = $this->findAddress($request, $id);
@@ -53,7 +53,7 @@ class AddressController extends Controller
         return back()->with('success', 'Alamat diperbarui.');
     }
 
-    public function destroy(Request $request, int $id): RedirectResponse
+    public function destroy(string $storeSlug, Request $request, int $id): RedirectResponse
     {
         $address = $this->findAddress($request, $id);
         $address->delete();
@@ -61,7 +61,7 @@ class AddressController extends Controller
         return back()->with('success', 'Alamat dihapus.');
     }
 
-    public function makeDefault(Request $request, int $id): RedirectResponse
+    public function makeDefault(string $storeSlug, Request $request, int $id): RedirectResponse
     {
         $request->user()->addresses()->update(['is_default' => false]);
         $this->findAddress($request, $id)->update(['is_default' => true]);
@@ -80,6 +80,7 @@ class AddressController extends Controller
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:255',
             'city' => 'required|string|max:100',
+            'district' => 'required|string|max:100',
             'province' => 'required|string|max:100',
             'postal_code' => 'required|string|max:10',
             'is_default' => 'nullable|boolean',
@@ -103,6 +104,7 @@ class AddressController extends Controller
             'phone' => $address->phone,
             'address' => $address->address,
             'city' => $address->city,
+            'district' => $address->district,
             'province' => $address->province,
             'postal_code' => $address->postal_code,
             'is_default' => (bool) $address->is_default,

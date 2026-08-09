@@ -12,24 +12,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-
-interface Invoice {
-    id: number;
-    order_number: string;
-    customer_name: string;
-    customer_email: string;
-    total_amount: string;
-    total_num: number;
-    status: string;
-    store_name: string;
-    created_at: string;
-}
+import { useStoreName } from '@/lib/useStoreName';
+import type { OrderInvoice } from '@/types/order';
 
 interface Props {
-    invoice: Invoice;
+    invoice: OrderInvoice;
 }
 
 defineProps<Props>();
+
+const { storeName } = useStoreName();
 
 function navigate(url: string) {
     router.visit(url);
@@ -37,7 +29,7 @@ function navigate(url: string) {
 </script>
 
 <template>
-    <Head title="Pesanan Berhasil — Nike Official Store" />
+    <Head :title="`Pesanan Berhasil — ${storeName}`" />
 
     <StorefrontLayout>
         <main
@@ -53,10 +45,10 @@ function navigate(url: string) {
             <h1
                 class="text-center text-2xl font-black tracking-tight text-[#1c1c22]"
             >
-                Pesanan Nike Berhasil Dibuat!
+                Pesanan {{ storeName }} Berhasil Dibuat!
             </h1>
             <p class="mt-1 mb-8 max-w-md text-center text-xs text-[#9090a0]">
-                Terima kasih telah berbelanja di Nike Official Store. Pesanan
+                Terima kasih telah berbelanja di {{ storeName }}. Pesanan
                 Anda sedang diproses dengan garansi 100% keaslian.
             </p>
 
@@ -146,7 +138,7 @@ function navigate(url: string) {
                     <Button
                         variant="amber"
                         class="flex h-11 w-full items-center justify-center gap-2 bg-black text-xs font-bold text-amber-400 shadow-md hover:bg-zinc-800"
-                        @click="navigate('/orders')"
+                        @click="navigate('/' + (usePage().props.store as any)?.slug + '/orders')"
                     >
                         <ShoppingBag class="h-4 w-4" />
                         <span>Lihat Riwayat Pesanan Saya</span>
@@ -154,7 +146,7 @@ function navigate(url: string) {
                     <Button
                         variant="outline"
                         class="flex h-11 w-full items-center justify-center gap-2 border-black/12 text-xs font-bold"
-                        @click="navigate('/')"
+                        @click="navigate('/' + (usePage().props.store as any)?.slug)"
                     >
                         <span>Kembali Belanja</span>
                     </Button>

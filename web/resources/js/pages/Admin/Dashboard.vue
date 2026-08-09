@@ -11,36 +11,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-
-interface RecentOrder {
-    order_number: string;
-    store_name: string;
-    total_amount: string;
-    status: string;
-    created_at: string | null;
-}
-
-interface RecentUser {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-}
-
-interface RecentStore {
-    id: number;
-    name: string;
-    category: string | null;
-}
+import type { AdminStats } from '@/types/admin';
+import type { RecentOrder } from '@/types/admin';
+import type { RecentUser } from '@/types/admin';
+import type { RecentStore } from '@/types/admin';
 
 interface Props {
-    stats?: {
-        users: number;
-        stores: number;
-        products: number;
-        orders: number;
-        revenue: string;
-    };
+    stats?: AdminStats;
     recent_orders?: RecentOrder[];
     recent_users?: RecentUser[];
     recent_stores?: RecentStore[];

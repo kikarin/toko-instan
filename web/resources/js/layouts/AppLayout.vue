@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import {
     LayoutDashboard,
     Package,
@@ -56,6 +56,7 @@ import {
 import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/lib/useActiveUser';
+import { useStoreName } from '@/lib/useStoreName';
 import { useStoreTheme } from '@/lib/useStoreTheme';
 
 interface NavItem {
@@ -79,7 +80,8 @@ interface Props {
         | 'Dompet'
         | 'Voucher'
         | 'Analitik'
-        | 'Tampilan & Konten';
+        | 'Tampilan & Konten'
+        | 'Riwayat Aktivitas';
     period?: 'Hari' | 'Minggu' | 'Bulan';
 }
 
@@ -96,6 +98,8 @@ const activeUser = useActiveUser();
 
 useStoreTheme();
 
+const { storeName } = useStoreName();
+
 const activeNavClass =
     'bg-[var(--brand-soft)] text-[var(--brand)] font-black border border-[var(--brand)]/40 shadow-md shadow-black/10 group-data-[collapsible=icon]:bg-(--brand) group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:border-none';
 
@@ -103,7 +107,7 @@ const userDisplayName = computed(() => {
     return (
         activeUser.value?.displayName ??
         activeUser.value?.email ??
-        'Nike Official Manager'
+        storeName.value
     );
 });
 
@@ -114,7 +118,7 @@ const userInitial = computed(() => {
 });
 
 const userEmail = computed(() => {
-    return activeUser.value?.email ?? 'seller@nike.com';
+    return activeUser.value?.email ?? 'seller@toko.com';
 });
 
 // Nav groups
@@ -190,7 +194,7 @@ function isActive(item: NavItem): boolean {
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
-                            tooltip="Nike Official Store"
+                            :tooltip="storeName"
                             class="cursor-pointer rounded-2xl p-2 transition-all group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 hover:bg-white/5"
                             @click="navigate('/dashboard')"
                         >
@@ -208,7 +212,7 @@ function isActive(item: NavItem): boolean {
                             >
                                 <div class="flex items-center gap-1.5">
                                     <span class="truncate font-black text-white"
-                                        >Nike Official Store</span
+                                        >{{ storeName }}</span
                                     >
                                     <span
                                         class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"
@@ -499,7 +503,7 @@ function isActive(item: NavItem): boolean {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     class="cursor-pointer gap-2 rounded-xl text-xs font-semibold hover:bg-white/10 focus:bg-white/10 focus:text-white"
-                                    @click="navigate('/marketplace')"
+                                    @click="navigate('/' + ((usePage().props.store as any)?.slug ?? ''))"
                                 >
                                     <ExternalLink
                                         class="h-4 w-4 text-indigo-400"
@@ -538,7 +542,7 @@ function isActive(item: NavItem): boolean {
                                 class="grid flex-1 text-left text-xs leading-tight group-data-[collapsible=icon]:hidden"
                             >
                                 <span class="truncate font-black text-white"
-                                    >Nike Official</span
+                                    >{{ storeName }}</span
                                 >
                                 <span class="truncate text-[10px] text-zinc-400"
                                     >Merchant Active</span
@@ -598,6 +602,17 @@ function isActive(item: NavItem): boolean {
                         </button>
                     </div>
 
+                    <!-- Preview Storefront Button -->
+                    <a
+                        :href="'/' + ((usePage().props.store as any)?.slug ?? '')"
+                        target="_blank"
+                        class="hidden shrink-0 items-center gap-1.5 rounded-xl border border-black/8 bg-white px-3 py-1.5 text-xs font-bold text-[#1c1c22] shadow-xs transition-colors hover:bg-[#faf9f6] hover:text-[#e07c28] sm:flex"
+                        title="Lihat Web Toko"
+                    >
+                        <ExternalLink class="h-3.5 w-3.5" />
+                        Lihat Toko
+                    </a>
+
                     <!-- Bell notification -->
                     <Button
                         variant="ghost"
@@ -642,6 +657,6 @@ function isActive(item: NavItem): boolean {
             </div>
         </SidebarInset>
 
-        <Toaster richColors position="top-right" />
+        <Toaster position="top-right" />
     </SidebarProvider>
 </template>

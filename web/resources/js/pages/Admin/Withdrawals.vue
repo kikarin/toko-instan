@@ -8,22 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-
-interface WithdrawalRow {
-    id: number;
-    store_name: string;
-    amount: string;
-    net_amount: string;
-    fee: string;
-    status: string;
-    bank_name: string;
-    account_number: string;
-    account_name: string;
-    created_at: string | null;
-}
+import type { AdminWithdrawal } from '@/types/wallet';
 
 interface Props {
-    withdrawals?: WithdrawalRow[];
+    withdrawals?: AdminWithdrawal[];
 }
 
 defineProps<Props>();
@@ -46,14 +34,14 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
         transferred: 'teal',
     };
 
-function approve(w: WithdrawalRow) {
+function approve(w: AdminWithdrawal) {
     router.patch(`/admin/withdrawals/${w.id}/approve`, undefined, {
         onSuccess: () => toast.success('Penarikan disetujui.'),
         onError: () => toast.error('Gagal menyetujui penarikan.'),
     });
 }
 
-function transferred(w: WithdrawalRow) {
+function transferred(w: AdminWithdrawal) {
     router.patch(`/admin/withdrawals/${w.id}/transferred`, undefined, {
         onSuccess: () => toast.success('Penarikan ditandai ditransfer.'),
         onError: () => toast.error('Gagal menandai penarikan.'),

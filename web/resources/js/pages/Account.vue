@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import {
     Settings,
     HelpCircle,
@@ -18,10 +18,8 @@ import {
     ShoppingBag,
 } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
-import CartDrawer from '@/components/marketplace/CartDrawer.vue';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
 import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue';
-import type { ProductDetail } from '@/components/marketplace/ProductDetailModal.vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,18 +27,13 @@ import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useActiveUser } from '@/lib/useActiveUser';
 import { useCart } from '@/lib/useCart';
-
-interface UserInfo {
-    id?: number;
-    name: string;
-    email?: string;
-    role: string;
-    avatar?: string | null;
-    created_at?: string;
-}
+import { useStoreName } from '@/lib/useStoreName';
+import type { ProductDetail } from '@/types/product';
+import type { UserProfile } from '@/types/user';
+import { useMarketplaceCart } from '@/lib/useMarketplaceCart';
 
 interface Props {
-    user: UserInfo;
+    user: UserProfile;
     orderCounts: {
         bayar: number;
         diproses: number;
@@ -57,6 +50,8 @@ interface Props {
 
 const props = defineProps<Props>();
 const activeUser = useActiveUser();
+
+const { storeName } = useStoreName();
 
 const userName = computed(() => {
     return (
@@ -79,61 +74,29 @@ const userInitial = computed(() => {
 const {
     items: cartItems,
     totalCount: totalCartCount,
-    addItem,
-    updateQty,
-    removeItem,
-} = useCart();
-const isCartOpen = ref(false);
+    isCartOpen,
+    openCart,
+    addToCart,
+    updateCartQty,
+    removeFromCart,
+    goCheckout,
+} = useMarketplaceCart();
 
 // Modal
 const activeProductModal = ref<ProductDetail | null>(null);
 
-function addToCart(product: ProductDetail, addQty = 1) {
-    const rawPrice =
-        product.priceNum ||
-        parseInt(product.price.replace(/[^\d]/g, ''), 10) ||
-        100000;
-
-    addItem(
-        {
-            id: product.id,
-            name: product.name,
-            price: rawPrice,
-            formattedPrice: product.price,
-            img: product.img,
-            store: product.store,
-            qty: addQty,
-        },
-        addQty,
-    );
-
-    isCartOpen.value = true;
-    toast.success(`${product.name} ditambahkan ke keranjang!`);
-}
-
-function updateCartQty(id: number, delta: number) {
-    updateQty(id, delta);
-}
-function removeFromCart(id: number) {
-    removeItem(id);
-}
-function goCheckout() {
-    isCartOpen.value = false;
-    router.visit('/checkout');
-}
 function openProductDetail(product: any) {
     activeProductModal.value = product;
 }
 </script>
 
 <template>
-    <Head title="Akun Saya — Nike Official Store" />
+    <Head :title="`Akun Saya — ${storeName}`" />
 
     <StorefrontLayout
         :cartCount="totalCartCount"
-        @open-cart="isCartOpen = true"
         @search="
-            (q: string) => router.visit('/marketplace', { data: { search: q } })
+            (q: string) => router.visit('/' + (usePage().props.store?.slug ?? ''), { data: { search: q } })
         "
     >
         <main
@@ -165,14 +128,14 @@ function openProductDetail(product: any) {
                                     class="h-6 gap-1 rounded-full bg-black px-2.5 text-[10px] font-black text-amber-400 uppercase shadow-2xs hover:bg-zinc-800"
                                     @click="
                                         toast.info(
-                                            'Akun Anda terverifikasi sebagai Nike Official Member.',
+                                            `Akun Anda terverifikasi sebagai ${storeName} Member.`,
                                         )
                                     "
                                 >
                                     <ShoppingBag
                                         class="h-3 w-3 text-amber-400"
                                     />
-                                    Nike Member VIP
+                                    {{ storeName }} Member VIP
                                 </Button>
                             </div>
                         </div>
@@ -184,7 +147,7 @@ function openProductDetail(product: any) {
                             title="Bantuan & Dukungan"
                             @click="
                                 toast.info(
-                                    'Layanan Pelanggan Nike Official Siap 24/7!',
+                                    `Layanan Pelanggan ${storeName} Siap 24/7!`,
                                 )
                             "
                             class="flex h-9 w-9 items-center justify-center rounded-full border border-black/6 bg-white text-[#4a4a57] shadow-xs transition-colors hover:bg-[#f5f4f0]"
@@ -193,7 +156,7 @@ function openProductDetail(product: any) {
                         </button>
                         <button
                             title="Pengaturan"
-                            @click="router.visit('/settings')"
+                            @click="router.visit('/' + ((usePage().props.store as any)?.slug ?? '') + '/settings')"
                             class="flex h-9 w-9 items-center justify-center rounded-full border border-black/6 bg-white text-[#4a4a57] shadow-xs transition-colors hover:bg-[#f5f4f0]"
                         >
                             <Settings class="h-4 w-4" />
@@ -216,7 +179,7 @@ function openProductDetail(product: any) {
                                     <p
                                         class="text-xs leading-tight font-bold text-amber-400"
                                     >
-                                        Nike Member Rewards
+                                        {{ storeName }} Member Rewards
                                     </p>
                                     <p class="mt-0.5 text-[10px] text-zinc-300">
                                         Dapatkan diskon khusus & rilis sepatu
@@ -267,7 +230,7 @@ function openProductDetail(product: any) {
                                 class="flex cursor-pointer flex-col items-center gap-1 px-1 py-1 hover:opacity-80"
                                 @click="
                                     toast.info(
-                                        'Anda memiliki 5 Voucher Diskon Nike!',
+                                        `Anda memiliki 5 Voucher Diskon ${storeName}!`,
                                     )
                                 "
                             >
@@ -310,12 +273,12 @@ function openProductDetail(product: any) {
                                 >
                             </div>
 
-                            <!-- 3. Nike Points -->
+                            <!-- 3. Store Points -->
                             <div
                                 class="flex cursor-pointer flex-col items-center gap-1 px-1 py-1 hover:opacity-80"
                                 @click="
                                     toast.info(
-                                        'Kumpulkan poin belanja Nike Member!',
+                                        `Kumpulkan poin belanja ${storeName} Member!`,
                                     )
                                 "
                             >
@@ -330,14 +293,14 @@ function openProductDetail(product: any) {
                                 >
                                 <span
                                     class="text-[9px] leading-none font-semibold text-[#9090a0] sm:text-[10px]"
-                                    >Nike Points</span
+                                    >{{ storeName }} Points</span
                                 >
                             </div>
 
-                            <!-- 4. Nike Pass -->
+                            <!-- 4. Store Pass -->
                             <div
                                 class="flex cursor-pointer flex-col items-center gap-1 px-1 py-1 hover:opacity-80"
-                                @click="toast.info('Nike Member Pass')"
+                                @click="toast.info(`${storeName} Member Pass`)"
                             >
                                 <div
                                     class="flex h-7 w-7 items-center justify-center rounded-lg bg-black text-xs font-black text-white"
@@ -349,7 +312,7 @@ function openProductDetail(product: any) {
                                 >
                                 <span
                                     class="text-[9px] leading-none font-semibold text-[#9090a0] sm:text-[10px]"
-                                    >Nike Pass</span
+                                    >{{ storeName }} Pass</span
                                 >
                             </div>
                         </div>
@@ -363,7 +326,7 @@ function openProductDetail(product: any) {
                             Transaksi
                         </h2>
                         <button
-                            @click="router.visit('/orders')"
+                            @click="router.visit('/' + ((usePage().props.store as any)?.slug ?? '') + '/orders')"
                             class="flex items-center gap-0.5 text-xs font-bold text-[#e07c28] hover:underline"
                         >
                             <span>Lihat Riwayat</span>
@@ -377,7 +340,7 @@ function openProductDetail(product: any) {
                         <div class="grid grid-cols-5 text-center">
                             <!-- Bayar -->
                             <button
-                                @click="router.visit('/orders')"
+                                @click="router.visit('/' + ((usePage().props.store as any)?.slug ?? '') + '/orders')"
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
                                 <div
@@ -399,7 +362,7 @@ function openProductDetail(product: any) {
 
                             <!-- Diproses -->
                             <button
-                                @click="router.visit('/orders')"
+                                @click="router.visit('/' + ((usePage().props.store as any)?.slug ?? '') + '/orders')"
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
                                 <div
@@ -421,7 +384,7 @@ function openProductDetail(product: any) {
 
                             <!-- Dikirim -->
                             <button
-                                @click="router.visit('/orders')"
+                                @click="router.visit('/' + ((usePage().props.store as any)?.slug ?? '') + '/orders')"
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
                                 <div
@@ -443,7 +406,7 @@ function openProductDetail(product: any) {
 
                             <!-- Sudah Tiba -->
                             <button
-                                @click="router.visit('/orders')"
+                                @click="router.visit('/' + ((usePage().props.store as any)?.slug ?? '') + '/orders')"
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
                                 <div
@@ -512,10 +475,12 @@ function openProductDetail(product: any) {
                                 >
                             </button>
 
-                            <!-- Nike Club Affiliate -->
+                            <!-- Store Club Affiliate -->
                             <button
                                 @click="
-                                    toast.info('Program Nike Club Affiliate!')
+                                    toast.info(
+                                        `Program ${storeName} Club Affiliate!`,
+                                    )
                                 "
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
@@ -526,13 +491,13 @@ function openProductDetail(product: any) {
                                 </div>
                                 <span
                                     class="text-[11px] font-semibold text-[#4a4a57]"
-                                    >Nike Club</span
+                                    >{{ storeName }} Club</span
                                 >
                             </button>
 
                             <!-- Wishlist -->
                             <button
-                                @click="router.visit('/wishlist')"
+                                @click="router.visit('/' + ((usePage().props.store as any)?.slug ?? '') + '/wishlist')"
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
                                 <div
@@ -550,7 +515,7 @@ function openProductDetail(product: any) {
                             <button
                                 @click="
                                     toast.info(
-                                        'Panduan Ukuran Sepatu & Clothing Nike',
+                                        `Panduan Ukuran Sepatu & Clothing ${storeName}`,
                                     )
                                 "
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
@@ -590,15 +555,6 @@ function openProductDetail(product: any) {
             </div>
         </main>
 
-        <!-- Cart Drawer -->
-        <CartDrawer
-            :isOpen="isCartOpen"
-            :items="cartItems"
-            @close="isCartOpen = false"
-            @update-qty="updateCartQty"
-            @remove-item="removeFromCart"
-            @checkout="goCheckout"
-        />
 
         <!-- Product Detail Modal -->
         <ProductDetailModal

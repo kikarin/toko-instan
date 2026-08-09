@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import {
     Pencil,
     Trash2,
@@ -15,31 +15,21 @@ import {
     Package,
     Palette,
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/sonner';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface NamedItem {
-    id: number;
-    name: string;
-    product_count?: number;
-}
-
-interface LabelItem extends NamedItem {
-    color: string | null;
-}
-
-type ItemKind = 'category' | 'brand' | 'label';
+import { useCatalogManager } from '@/lib/useCatalogManager';
+import type { CatalogItem } from '@/types/catalog';
+import type { CatalogLabelItem } from '@/types/catalog';
 
 interface Props {
-    categories?: NamedItem[];
-    brands?: NamedItem[];
-    labels?: LabelItem[];
+    categories?: CatalogItem[];
+    brands?: CatalogItem[];
+    labels?: CatalogLabelItem[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -48,181 +38,33 @@ const props = withDefaults(defineProps<Props>(), {
     labels: () => [],
 });
 
-const activeTab = ref<'all' | 'category' | 'brand' | 'label'>('all');
-const searchQuery = ref('');
+const itemsRef = computed(() => ({
+    categories: props.categories,
+    brands: props.brands,
+    labels: props.labels,
+}));
 
-// Form states
-const newCategory = ref('');
-const newBrand = ref('');
-const newLabel = ref('');
-const newLabelColor = ref('#e07c28');
-
-const editing = ref<{
-    kind: ItemKind;
-    id: number;
-    name: string;
-    color?: string;
-} | null>(null);
-const deleteTarget = ref<{ kind: ItemKind; item: NamedItem } | null>(null);
-
-// Computed filtered items
-const filteredCategories = computed(() => {
-    if (!searchQuery.value.trim()) {
-        return props.categories ?? [];
-    }
-
-    return (props.categories ?? []).filter((c) =>
-        c.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
-    );
-});
-
-const filteredBrands = computed(() => {
-    if (!searchQuery.value.trim()) {
-        return props.brands ?? [];
-    }
-
-    return (props.brands ?? []).filter((b) =>
-        b.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
-    );
-});
-
-const filteredLabels = computed(() => {
-    if (!searchQuery.value.trim()) {
-        return props.labels ?? [];
-    }
-
-    return (props.labels ?? []).filter((l) =>
-        l.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
-    );
-});
-
-function saveCategory() {
-    if (!newCategory.value.trim()) {
-        return;
-    }
-
-    router.post(
-        '/catalog/categories',
-        { name: newCategory.value },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                newCategory.value = '';
-                toast.success('Kategori baru berhasil ditambahkan!');
-            },
-            onError: () => toast.error('Gagal menambah kategori.'),
-        },
-    );
-}
-
-function saveBrand() {
-    if (!newBrand.value.trim()) {
-        return;
-    }
-
-    router.post(
-        '/catalog/brands',
-        { name: newBrand.value },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                newBrand.value = '';
-                toast.success('Brand baru berhasil ditambahkan!');
-            },
-            onError: () => toast.error('Gagal menambah brand.'),
-        },
-    );
-}
-
-function saveLabel() {
-    if (!newLabel.value.trim()) {
-        return;
-    }
-
-    router.post(
-        '/catalog/labels',
-        { name: newLabel.value, color: newLabelColor.value },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                newLabel.value = '';
-                toast.success('Label & Tag promo berhasil ditambahkan!');
-            },
-            onError: () => toast.error('Gagal menambah label.'),
-        },
-    );
-}
-
-function startEdit(kind: ItemKind, item: LabelItem | NamedItem) {
-    editing.value = {
-        kind,
-        id: item.id,
-        name: item.name,
-        color: 'color' in item ? (item.color ?? '#e07c28') : undefined,
-    };
-}
-
-function base(kind: ItemKind) {
-    return kind === 'category'
-        ? '/catalog/categories'
-        : kind === 'brand'
-          ? '/catalog/brands'
-          : '/catalog/labels';
-}
-
-function commitEdit() {
-    if (!editing.value || !editing.value.name.trim()) {
-        return;
-    }
-
-    router.put(
-        `${base(editing.value.kind)}/${editing.value.id}`,
-        {
-            name: editing.value.name,
-            color: editing.value.color || undefined,
-        },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                editing.value = null;
-                toast.success('Katalog berhasil diperbarui!');
-            },
-            onError: () => toast.error('Gagal memperbarui item.'),
-        },
-    );
-}
-
-function confirmDelete() {
-    if (!deleteTarget.value) {
-        return;
-    }
-
-    const { kind, item } = deleteTarget.value;
-
-    router.delete(`${base(kind)}/${item.id}`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            deleteTarget.value = null;
-            toast.success('Item katalog berhasil dihapus.');
-        },
-        onError: () => toast.error('Gagal menghapus item katalog.'),
-    });
-}
-
-function isEditing(kind: ItemKind, id: number) {
-    return editing.value?.kind === kind && editing.value.id === id;
-}
-
-// Preset vibrant colors for label creation
-const colorPresets = [
-    '#e07c28',
-    '#2563eb',
-    '#059669',
-    '#7c3aed',
-    '#db2777',
-    '#dc2626',
-    '#0284c7',
-];
+const {
+    activeTab,
+    searchQuery,
+    newCategory,
+    newBrand,
+    newLabel,
+    newLabelColor,
+    editing,
+    deleteTarget,
+    filteredCategories,
+    filteredBrands,
+    filteredLabels,
+    colorPresets,
+    saveCategory,
+    saveBrand,
+    saveLabel,
+    startEdit,
+    commitEdit,
+    confirmDelete,
+    isEditing,
+} = useCatalogManager(itemsRef);
 </script>
 
 <template>

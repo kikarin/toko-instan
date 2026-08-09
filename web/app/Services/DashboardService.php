@@ -17,9 +17,9 @@ class DashboardService
     /**
      * @return array<string, mixed>
      */
-    public function getDashboardData(): array
+    public function getDashboardData(int $userId): array
     {
-        $primaryStore = $this->storeRepository->getPrimaryStore();
+        $primaryStore = $this->storeRepository->getStoreForUser($userId);
 
         $completedSum = $this->orderRepository->getCompletedOrdersSum();
         $totalOrders = $this->orderRepository->countTotalOrders();

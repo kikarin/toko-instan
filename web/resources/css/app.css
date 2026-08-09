@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import 'tailwindcss';
+@import 'vue-sonner/style.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -38,10 +39,15 @@
     --color-sidebar-ring: var(--sidebar-ring);
 
     --color-brand: var(--brand, #e07c28);
+    --color-brand-foreground: var(--brand-foreground, #ffffff);
     --color-brand-secondary: var(--brand-secondary, #6d4fc2);
+    --color-brand-secondary-foreground: var(--brand-secondary-foreground, #ffffff);
     --color-brand-accent: var(--brand-accent, #0e9f8a);
+    --color-brand-accent-foreground: var(--brand-accent-foreground, #ffffff);
     --color-brand-strong: var(--brand-strong, #e0405a);
-    --color-brand-soft: var(--brand-soft, rgba(224, 124, 40, 0.15));
+    --color-brand-cta-foreground: var(--brand-cta-foreground, #ffffff);
+    --color-brand-soft: var(--brand-soft, rgba(224, 124, 40, 0.12));
+    --color-brand-surface: var(--brand-surface, rgba(224, 124, 40, 0.06));
 }
 
 :root {
@@ -97,10 +103,15 @@
 
     /* Theme tokens — overridden per store via useStoreTheme */
     --brand: #e07c28;
+    --brand-foreground: #ffffff;
     --brand-secondary: #6d4fc2;
+    --brand-secondary-foreground: #ffffff;
     --brand-accent: #0e9f8a;
+    --brand-accent-foreground: #ffffff;
     --brand-strong: #e0405a;
+    --brand-cta-foreground: #ffffff;
     --brand-soft: rgba(224, 124, 40, 0.12);
+    --brand-surface: rgba(224, 124, 40, 0.06);
 }
 
 body {

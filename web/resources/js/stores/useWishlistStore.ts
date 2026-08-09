@@ -1,21 +1,9 @@
+import { router } from '@inertiajs/vue3';
 import { useStorage } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
-
-export interface WishlistItem {
-    id: number;
-    name: string;
-    price: string;
-    priceNum?: number;
-    sold: number;
-    rating: number;
-    store: string;
-    storeSlug?: string;
-    img: string;
-    tag: string | null;
-    cat: string;
-    discount?: number;
-}
+import { toast } from '@/components/ui/sonner';
+import type { WishlistItem } from '@/types/product';
 
 export const useWishlistStore = defineStore('wishlist', () => {
     const items = useStorage<WishlistItem[]>('toko-instan:wishlist', []);
@@ -31,19 +19,40 @@ export const useWishlistStore = defineStore('wishlist', () => {
     }
 
     function syncToBackend(id: number, added: boolean) {
-        fetch(`/wishlist/${id}`, {
+        const storeSlug = (router.page.props.store as any)?.slug ?? '';
+        const url = storeSlug ? `/${storeSlug}/wishlist/${id}` : `/wishlist/${id}`;
+        
+        fetch(url, {
             method: added ? 'POST' : 'DELETE',
+            credentials: 'same-origin',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-XSRF-TOKEN': decodeURIComponent(
                     document.cookie
                         .split('; ')
                         .find((row) => row.startsWith('XSRF-TOKEN='))
-                        ?.split('=')[1] ?? '',
+                        ?.substring('XSRF-TOKEN='.length) ?? '',
                 ),
             },
-        }).catch(() => {
-            // Sync best-effort; lokal tetap berjalan untuk tamu.
+        }).then((res) => {
+            if (res.status === 401) {
+                // Not authenticated
+                toast.error('Silakan login terlebih dahulu.');
+                // Revert local state
+                if (added) {
+                    items.value = items.value.filter(i => i.id !== id);
+                }
+            } else if (res.status === 403) {
+                toast.error('Akses ditolak.');
+                if (added) items.value = items.value.filter(i => i.id !== id);
+            } else if (!res.ok) {
+                toast.error('Gagal menyimpan wishlist.');
+                if (added) items.value = items.value.filter(i => i.id !== id);
+            }
+        }).catch((err) => {
+            console.error('Wishlist sync error:', err);
+            toast.error('Gagal terhubung ke server.');
+            if (added) items.value = items.value.filter(i => i.id !== id);
         });
     }
 

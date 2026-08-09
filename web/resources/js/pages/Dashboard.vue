@@ -1,12 +1,6 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import {
-    DollarSign,
-    Package,
-    Users,
-    TrendingUp,
-    Receipt,
-    Landmark,
     Sparkles,
     Wallet,
     Plus,
@@ -14,8 +8,10 @@ import {
     Settings,
     ChevronRight,
     Box,
+    Eye,
+    Landmark,
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import KpiCard from '@/components/dashboard/KpiCard.vue';
 import OrderFunnel from '@/components/dashboard/OrderFunnel.vue';
 import RevenueChart from '@/components/dashboard/RevenueChart.vue';
@@ -31,6 +27,8 @@ import {
     CardContent,
 } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { useSellerDashboard } from '@/lib/useSellerDashboard';
+import { useStoreName } from '@/lib/useStoreName';
 
 interface Props {
     kpis?: any[];
@@ -42,196 +40,20 @@ interface Props {
 
 const props = defineProps<Props>();
 
-type Period = 'Hari' | 'Minggu' | 'Bulan';
-const period = ref<Period>('Bulan');
+const { storeName } = useStoreName();
 
-function genRev(n: number, base: number, spread: number) {
-    return Array.from({ length: n }, (_, i) => ({
-        i,
-        v: Math.round(
-            base +
-                (Math.sin(i * 0.9) * 0.4 + Math.cos(i * 1.5) * 0.3 + 0.5) *
-                    spread,
-        ),
-    }));
-}
+const propsRef = computed(() => props);
 
-const revSeries: Record<Period, { i: number; v: number }[]> = {
-    Hari: genRev(30, 1_800_000, 2_400_000),
-    Minggu: genRev(12, 11_000_000, 14_000_000),
-    Bulan: genRev(12, 44_000_000, 28_000_000),
-};
-
-const revLabels: Record<Period, string[]> = {
-    Hari: Array.from({ length: 30 }, (_, i) => `${i + 1}`),
-    Minggu: [
-        'W1',
-        'W2',
-        'W3',
-        'W4',
-        'W5',
-        'W6',
-        'W7',
-        'W8',
-        'W9',
-        'W10',
-        'W11',
-        'W12',
-    ],
-    Bulan: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mei',
-        'Jun',
-        'Jul',
-        'Agu',
-        'Sep',
-        'Okt',
-        'Nov',
-        'Des',
-    ],
-};
-
-const kpiIcons = [DollarSign, Package, Users, TrendingUp, Receipt, Landmark];
-
-const defaultKpis = [
-    {
-        label: 'Gross Revenue',
-        value: 'Rp 214.5Jt',
-        delta: '+18.4%',
-        up: true,
-        sub: 'vs bulan lalu',
-        c: '#e07c28',
-        cs: 'rgba(224,124,40,0.12)',
-    },
-    {
-        label: 'Total Pesanan',
-        value: '8.341',
-        delta: '+11.2%',
-        up: true,
-        sub: 'order terkonfirmasi',
-        c: '#0e9f8a',
-        cs: 'rgba(14,159,138,0.12)',
-    },
-    {
-        label: 'Pengunjung Toko',
-        value: '54.921',
-        delta: '+26.7%',
-        up: true,
-        sub: 'sesi unik storefront',
-        c: '#3b82f6',
-        cs: 'rgba(59,130,246,0.12)',
-    },
-    {
-        label: 'Tingkat Konversi',
-        value: '4.12%',
-        delta: '-0.3%',
-        up: false,
-        sub: 'dari pengunjung',
-        c: '#e0405a',
-        cs: 'rgba(224,64,90,0.12)',
-    },
-    {
-        label: 'Rata-rata Order (AOV)',
-        value: 'Rp 256rb',
-        delta: '+6.8%',
-        up: true,
-        sub: 'per nilai belanja',
-        c: '#6d4fc2',
-        cs: 'rgba(109,79,194,0.12)',
-    },
-    {
-        label: 'Saldo Dompet Live',
-        value: 'Rp 95.4Jt',
-        delta: 'live',
-        up: null,
-        sub: 'siap ditarik',
-        c: '#22a15a',
-        cs: 'rgba(34,161,90,0.12)',
-    },
-];
-
-const displayKpis = computed(() => {
-    if (props.kpis && props.kpis.length > 0) {
-        return props.kpis.map((k, i) => ({
-            ...k,
-            icon: kpiIcons[i % kpiIcons.length],
-        }));
-    }
-
-    return defaultKpis.map((k, i) => ({ ...k, icon: kpiIcons[i] }));
-});
-
-const defaultOrderFlow = [
-    { label: 'Pending', n: 124, c: '#d97706' },
-    { label: 'Diproses', n: 312, c: '#3b82f6' },
-    { label: 'Dikemas', n: 198, c: '#6d4fc2' },
-    { label: 'Dikirim', n: 541, c: '#0e9f8a' },
-    { label: 'Selesai', n: 6821, c: '#22a15a' },
-    { label: 'Dibatalkan', n: 148, c: '#e0405a' },
-];
-
-const displayOrderFlow = computed(() => props.orderFlow || defaultOrderFlow);
-
-const defaultTopSellers = [
-    {
-        name: "Nike Air Force 1 '07 Triple White",
-        gmv: 'Rp 48.4Jt',
-        orders: 312,
-        rating: 4.9,
-        badge: 'top' as const,
-        avatar: 'AF',
-        hue: 220,
-    },
-    {
-        name: 'Nike Dunk Low Retro Panda',
-        gmv: 'Rp 34.1Jt',
-        orders: 218,
-        rating: 4.8,
-        badge: 'pro' as const,
-        avatar: 'DL',
-        hue: 280,
-    },
-    {
-        name: 'Nike Air Max 270 Black White',
-        gmv: 'Rp 21.7Jt',
-        orders: 187,
-        rating: 4.7,
-        badge: null,
-        avatar: 'AM',
-        hue: 190,
-    },
-    {
-        name: 'Nike Zoom Fly 5 Running',
-        gmv: 'Rp 19.2Jt',
-        orders: 134,
-        rating: 4.6,
-        badge: null,
-        avatar: 'ZF',
-        hue: 150,
-    },
-    {
-        name: 'Nike Tech Fleece Hoodie',
-        gmv: 'Rp 17.8Jt',
-        orders: 98,
-        rating: 4.5,
-        badge: null,
-        avatar: 'TF',
-        hue: 30,
-    },
-];
-
-const displayTopSellers = computed(() => props.topSellers || defaultTopSellers);
-
-const totalOrdersThisMonth = computed(() =>
-    displayOrderFlow.value.reduce((s, d) => s + d.n, 0),
-);
-
-function navigate(url: string) {
-    router.visit(url);
-}
+const {
+    period,
+    revSeries,
+    revLabels,
+    displayKpis,
+    displayOrderFlow,
+    displayTopSellers,
+    totalOrdersThisMonth,
+    navigate,
+} = useSellerDashboard(propsRef);
 </script>
 
 <template>
@@ -273,7 +95,7 @@ function navigate(url: string) {
                         <h1
                             class="text-2xl font-black tracking-tight text-white sm:text-3xl"
                         >
-                            Selamat Datang, Nike Official Store 👋
+                            Selamat Datang, {{ storeName }} 👋
                         </h1>
                         <p class="max-w-2xl text-xs text-zinc-400 sm:text-sm">
                             Pantau kesehatan finansial toko Anda, kelola alur
@@ -316,6 +138,14 @@ function navigate(url: string) {
                         >
                             <Landmark class="mr-2 h-4 w-4" /> Tarik Saldo /
                             Dompet
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="lg"
+                            class="w-full cursor-pointer rounded-2xl px-5 text-xs font-extrabold sm:w-auto"
+                            @click="navigate('/' + ((usePage().props.store as any)?.slug ?? ''))"
+                        >
+                            <Eye class="mr-2 h-4 w-4" /> Lihat Marketplace
                         </Button>
                     </div>
                 </div>

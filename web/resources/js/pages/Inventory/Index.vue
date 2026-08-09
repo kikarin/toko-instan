@@ -11,29 +11,17 @@ import {
     Plus,
     AlertTriangle,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
-import { toast } from 'vue-sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface Product {
-    id: number;
-    name: string;
-    img: string | null;
-    price: number;
-    formatted_price: string;
-    stock: number;
-    is_active: boolean;
-    sku: string | null;
-    low_stock: boolean;
-}
+import { useInventoryActions } from '@/lib/useInventoryActions';
+import type { InventoryProduct } from '@/types/inventory';
 
 interface Props {
-    products?: Product[];
+    products?: InventoryProduct[];
     lowStockThreshold?: number;
     totalProducts?: number;
     lowStockCount?: number;
@@ -42,47 +30,15 @@ interface Props {
 
 defineProps<Props>();
 
-type Action = 'in' | 'out' | 'adjust';
-
-const activeAction = ref<{ product: Product; action: Action } | null>(null);
-const qty = ref('1');
-const newStock = ref('0');
-const reason = ref('');
-
-const actionLabels: Record<Action, { title: string; button: string }> = {
-    in: { title: 'Stok Masuk', button: 'Tambah Stok' },
-    out: { title: 'Stok Keluar', button: 'Kurangi Stok' },
-    adjust: { title: 'Sesuaikan Stok', button: 'Simpan Penyesuaian' },
-};
-
-function openAction(product: Product, action: Action) {
-    activeAction.value = { product, action };
-    qty.value = '1';
-    newStock.value = String(product.stock);
-    reason.value = '';
-}
-
-function submit() {
-    if (!activeAction.value) {
-        return;
-    }
-
-    const { product, action } = activeAction.value;
-    const payload =
-        action === 'adjust'
-            ? { new_stock: newStock.value, reason: reason.value || undefined }
-            : { quantity: qty.value, reason: reason.value || undefined };
-
-    const options = {
-        onSuccess: () => {
-            activeAction.value = null;
-            toast.success('Stok berhasil dicatat.');
-        },
-        onError: () => toast.error('Gagal mencatat stok. Periksa kembali.'),
-    };
-
-    router.post(`/inventory/${product.id}/${action}`, payload, options);
-}
+const {
+    activeAction,
+    qty,
+    newStock,
+    reason,
+    actionLabels,
+    openAction,
+    submit,
+} = useInventoryActions();
 </script>
 
 <template>

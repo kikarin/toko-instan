@@ -2,15 +2,17 @@
 
 use App\Models\Product;
 use App\Models\Store;
+use App\Models\Tenant;
 use App\Models\User;
 
 /**
- * Create a primary store (used by the seller context) + a seller user.
+ * Create a store owned by the seller (via tenant) + a seller user.
  */
 function sellerContext(): array
 {
-    $store = Store::factory()->create();
     $seller = User::factory()->state(['role' => 'seller'])->create();
+    $tenant = Tenant::factory()->create(['user_id' => $seller->id]);
+    $store = Store::factory()->create(['tenant_id' => $tenant->id]);
 
     return [$seller, $store];
 }
@@ -122,4 +124,33 @@ test('inactive products are hidden from the marketplace catalog', function () {
         ->get('/marketplace')
         ->assertInertia(fn ($page) => $page->component('Marketplace'))
         ->assertInertia(fn ($page) => $page->has('products', 1));
+});
+
+test('marketplace only shows products from the seller own store', function () {
+    $seller = User::factory()->state(['role' => 'seller'])->create();
+    $sellerTenant = Tenant::factory()->create(['user_id' => $seller->id]);
+    $sellerStore = Store::factory()->create(['tenant_id' => $sellerTenant->id]);
+    $ownedProduct = Product::factory()->create(['store_id' => $sellerStore->id, 'is_active' => true]);
+
+    $otherStore = Store::factory()->create();
+    Product::factory()->create(['store_id' => $otherStore->id, 'is_active' => true]);
+
+    $this->actingAs($seller)
+        ->get('/marketplace')
+        ->assertInertia(fn ($page) => $page->has('products', 1))
+        ->assertInertia(fn ($page) => $page->where('products.0.id', $ownedProduct->id));
+});
+
+test('seller can only manage products from their own store', function () {
+    [$seller, $store] = sellerContext();
+    $otherStore = Store::factory()->create();
+    $foreignProduct = Product::factory()->create(['store_id' => $otherStore->id]);
+
+    $this->actingAs($seller)
+        ->get("/products/{$foreignProduct->id}/edit")
+        ->assertNotFound();
+
+    $this->actingAs($seller)
+        ->delete("/products/{$foreignProduct->id}")
+        ->assertNotFound();
 });

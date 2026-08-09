@@ -19,7 +19,7 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,23 +32,12 @@ import {
 } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/sonner';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface Product {
-    id: number;
-    name: string;
-    category: string;
-    price: number;
-    formatted_price: string;
-    stock: number;
-    sold: number;
-    rating: number;
-    tag: string | null;
-    img: string | null;
-    is_active: boolean;
-    sku?: string;
-}
+import { useProductActions } from '@/lib/useProductActions';
+import { useProductFilters } from '@/lib/useProductFilters';
+import { useProductStats } from '@/lib/useProductStats';
+import { useProductStock } from '@/lib/useProductStock';
+import type { Product } from '@/types/product';
 
 interface Props {
     products?: Product[];
@@ -60,188 +49,43 @@ const props = withDefaults(defineProps<Props>(), {
     categories: () => [],
 });
 
-const searchQ = ref('');
-const selectedCategory = ref<string>('Semua');
-const statusFilter = ref<'all' | 'active' | 'inactive' | 'low_stock'>('all');
-const viewMode = ref<'grid' | 'table'>('grid');
+const productsRef = computed(() => props.products ?? []);
 
-// Pagination state
-const currentPage = ref(1);
-const perPage = ref(6);
+const {
+    searchQ,
+    statusFilter,
+    viewMode,
+    currentPage,
+    perPage,
+    filtered,
+    totalPages,
+    paginatedProducts,
+    paginationStart,
+    paginationEnd,
+    goToPage,
+} = useProductFilters(productsRef);
 
-watch([searchQ, selectedCategory, statusFilter, perPage], () => {
-    currentPage.value = 1;
-});
-
-// Computed Metrics & Stats
-const totalProductsCount = computed(() => (props.products ?? []).length);
-const activeProductsCount = computed(
-    () => (props.products ?? []).filter((p) => p.is_active).length,
-);
-const lowStockCount = computed(
-    () =>
-        (props.products ?? []).filter((p) => p.stock <= 5 && p.is_active)
-            .length,
-);
-const totalInventoryValuation = computed(() => {
-    return (props.products ?? []).reduce(
-        (acc, p) => acc + p.price * p.stock,
-        0,
-    );
-});
-
-function formatRupiah(val: number) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(val);
-}
-
-// Filtered products list
-const filtered = computed(() => {
-    let result = props.products ?? [];
-
-    // Search query
-    if (searchQ.value.trim()) {
-        const q = searchQ.value.toLowerCase();
-        result = result.filter(
-            (p) =>
-                p.name.toLowerCase().includes(q) ||
-                p.category.toLowerCase().includes(q) ||
-                (p.sku && p.sku.toLowerCase().includes(q)),
-        );
-    }
-
-    // Category filter
-    if (selectedCategory.value !== 'Semua') {
-        result = result.filter((p) => p.category === selectedCategory.value);
-    }
-
-    // Status filter
-    if (statusFilter.value === 'active') {
-        result = result.filter((p) => p.is_active);
-    } else if (statusFilter.value === 'inactive') {
-        result = result.filter((p) => !p.is_active);
-    } else if (statusFilter.value === 'low_stock') {
-        result = result.filter((p) => p.stock <= 5 && p.is_active);
-    }
-
-    return result;
-});
-
-const totalPages = computed(
-    () => Math.ceil(filtered.value.length / perPage.value) || 1,
-);
-
-const paginatedProducts = computed(() => {
-    const start = (currentPage.value - 1) * perPage.value;
-
-    return filtered.value.slice(start, start + perPage.value);
-});
-
-const paginationStart = computed(() => {
-    if (filtered.value.length === 0) {
-        return 0;
-    }
-
-    return (currentPage.value - 1) * perPage.value + 1;
-});
-
-const paginationEnd = computed(() => {
-    return Math.min(currentPage.value * perPage.value, filtered.value.length);
-});
-
-function goToPage(page: number) {
-    if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page;
-    }
-}
-
-function goToCreate() {
-    router.visit('/products/create');
-}
-
-function editProduct(id: number) {
-    router.visit(`/products/${id}/edit`);
-}
+const {
+    totalProductsCount,
+    activeProductsCount,
+    lowStockCount,
+    totalInventoryValuation,
+    formatRupiah,
+} = useProductStats(productsRef);
 
 const deleteTarget = ref<Product | null>(null);
 
-const stockTarget = ref<Product | null>(null);
-const stockInput = ref('0');
-const stockLoading = ref(false);
+const { goToCreate, editProduct, toggleActive, deleteProduct, lowStock } =
+    useProductActions(deleteTarget);
 
-function openStockDialog(p: Product) {
-    stockTarget.value = p;
-    stockInput.value = String(p.stock);
-}
-
-function adjustStock(delta: number) {
-    const current = Number(stockInput.value) || 0;
-    const updated = Math.max(0, current + delta);
-    stockInput.value = String(updated);
-}
-
-function saveStock() {
-    if (!stockTarget.value) {
-        return;
-    }
-
-    const id = stockTarget.value.id;
-    const stock = Number(stockInput.value);
-
-    if (Number.isNaN(stock) || stock < 0) {
-        toast.error('Stok harus berupa angka positif.');
-
-        return;
-    }
-
-    stockLoading.value = true;
-    router.patch(
-        `/products/${id}/stock`,
-        { stock },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Jumlah stok produk berhasil diperbarui!');
-                stockTarget.value = null;
-            },
-            onError: () => toast.error('Gagal memperbarui stok.'),
-            onFinish: () => {
-                stockLoading.value = false;
-            },
-        },
-    );
-}
-
-function toggleActive(p: Product) {
-    router.post(
-        `/products/${p.id}/toggle-active`,
-        {},
-        {
-            preserveScroll: true,
-            onSuccess: () =>
-                toast.success(
-                    p.is_active
-                        ? `Produk ${p.name} kini nonaktif.`
-                        : `Produk ${p.name} berhasil diaktifkan kembali.`,
-                ),
-            onError: () => toast.error('Gagal mengubah status produk.'),
-        },
-    );
-}
-
-function deleteProduct(product: Product) {
-    router.delete(`/products/${product.id}`, {
-        preserveScroll: true,
-        onSuccess: () => toast.success('Produk berhasil dihapus.'),
-        onError: () => toast.error('Gagal menghapus produk.'),
-    });
-    deleteTarget.value = null;
-}
-
-const lowStock = (stock: number) => stock <= 5;
+const {
+    stockTarget,
+    stockInput,
+    stockLoading,
+    openStockDialog,
+    adjustStock,
+    saveStock,
+} = useProductStock();
 </script>
 
 <template>

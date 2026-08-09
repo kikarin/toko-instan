@@ -71,36 +71,42 @@ it('seller dapat memperbarui tema dan showcase', function () {
     expect($store->showcase['testimonials'][0]['name'])->toBe('Budi');
 });
 
-it('storefront merender tema dan showcase yang sudah disimpan', function () {
-    cmsSeller();
+it('warna tema yang disimpan muncul kembali di halaman Tampilan & Konten', function () {
+    $seller = cmsSeller();
     $store = cmsStore();
-    $product = Product::factory()->create(['store_id' => $store->id, 'is_active' => true]);
 
-    $store->update([
-        'theme' => 'navy',
-        'theme_colors' => [
-            'primary' => '#384B70',
-            'secondary' => '#507687',
-            'accent' => '#FCFAEE',
-            'strong' => '#B8001F',
-        ],
-        'showcase' => [
-            'hero' => ['title' => 'Judul Hero', 'subtitle' => 'Sub', 'cta_label' => 'Lihat', 'image' => null],
-            'featured_product_ids' => [$product->id],
-            'testimonials' => [['name' => 'Ani', 'role' => 'Pembeli', 'text' => 'Top', 'rating' => 4]],
-            'about' => ['title' => 'Tentang', 'text' => 'Cerita'],
-            'contact' => ['show' => true],
-        ],
-    ]);
+    $palette = [
+        'primary' => '#123456',
+        'secondary' => '#ABCDEF',
+        'accent' => '#FEDCBA',
+        'strong' => '#654321',
+    ];
 
-    actingAs(User::factory()->create(['role' => 'buyer']))
-        ->get('/store/'.$store->slug)
+    actingAs($seller)
+        ->put('/store-cms', [
+            'theme' => 'custom',
+            'theme_colors' => $palette,
+            'showcase' => [
+                'hero' => ['title' => 'Judul Hero Baru'],
+                'about' => ['title' => 'Tentang Kami', 'text' => 'Kami jualan halal.'],
+                'contact' => ['show' => true],
+                'featured_product_ids' => [],
+                'testimonials' => [],
+            ],
+        ])
+        ->assertRedirect();
+
+    $store->refresh();
+    expect($store->theme)->toBe('custom');
+
+    actingAs($seller)
+        ->get('/store-cms')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('StorePage')
-            ->where('theme.key', 'navy')
-            ->where('theme.colors.primary', '#384B70')
-            ->where('showcase.hero.title', 'Judul Hero')
-            ->where('featured.0.id', $product->id)
-            ->where('showcase.testimonials.0.name', 'Ani'));
+            ->component('StoreSettings/Cms')
+            ->where('theme.key', 'custom')
+            ->where('theme.colors.primary', '#123456')
+            ->where('theme.colors.secondary', '#ABCDEF')
+            ->where('theme.colors.accent', '#FEDCBA')
+            ->where('theme.colors.strong', '#654321'));
 });

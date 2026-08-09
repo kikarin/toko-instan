@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { Layers, Pencil, Trash2 } from 'lucide-vue-next';
-import { reactive, ref } from 'vue';
-import { toast } from 'vue-sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
@@ -10,113 +8,26 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface Variant {
-    id: number;
-    name: string;
-    sku: string | null;
-    price: number | null;
-    formatted_price: string | null;
-    stock: number;
-    is_active: boolean;
-}
+import { useProductVariants } from '@/lib/useProductVariants';
+import type { ProductVariant } from '@/types/product';
 
 interface Props {
     product?: { id: number; name: string };
-    variants?: Variant[];
+    variants?: ProductVariant[];
 }
 
 defineProps<Props>();
 
-const form = reactive({
-    name: '',
-    sku: '',
-    price: '',
-    stock: '0',
-});
-
-const editingId = ref<number | null>(null);
-const editingForm = reactive({
-    name: '',
-    sku: '',
-    price: '',
-    stock: '0',
-    is_active: true,
-});
-const deleteTarget = ref<Variant | null>(null);
-
-function saveVariant(productId: number) {
-    router.post(
-        `/products/${productId}/variants`,
-        {
-            name: form.name,
-            sku: form.sku || undefined,
-            price: form.price || undefined,
-            stock: form.stock || 0,
-        },
-        {
-            onSuccess: () => {
-                form.name = '';
-                form.sku = '';
-                form.price = '';
-                form.stock = '0';
-                toast.success('Varian ditambahkan.');
-            },
-            onError: () => toast.error('Gagal menambah varian.'),
-        },
-    );
-}
-
-function startEdit(v: Variant, productId: number) {
-    editingId.value = v.id;
-    editingForm.name = v.name;
-    editingForm.sku = v.sku ?? '';
-    editingForm.price = v.price === null ? '' : String(v.price);
-    editingForm.stock = String(v.stock);
-    editingForm.is_active = v.is_active;
-    productIdForEdit.value = productId;
-}
-
-const productIdForEdit = ref<number | null>(null);
-
-function commitEdit() {
-    if (productIdForEdit.value === null || editingId.value === null) {
-        return;
-    }
-
-    router.put(
-        `/products/${productIdForEdit.value}/variants/${editingId.value}`,
-        {
-            name: editingForm.name,
-            sku: editingForm.sku || undefined,
-            price: editingForm.price || undefined,
-            stock: editingForm.stock || 0,
-            is_active: editingForm.is_active,
-        },
-        {
-            onSuccess: () => {
-                editingId.value = null;
-                productIdForEdit.value = null;
-                toast.success('Varian diperbarui.');
-            },
-            onError: () => toast.error('Gagal memperbarui varian.'),
-        },
-    );
-}
-
-function confirmDelete(productId: number) {
-    if (!deleteTarget.value) {
-        return;
-    }
-
-    router.delete(`/products/${productId}/variants/${deleteTarget.value.id}`, {
-        onSuccess: () => {
-            deleteTarget.value = null;
-            toast.success('Varian dihapus.');
-        },
-        onError: () => toast.error('Gagal menghapus varian.'),
-    });
-}
+const {
+    form,
+    editingId,
+    editingForm,
+    deleteTarget,
+    saveVariant,
+    startEdit,
+    commitEdit,
+    confirmDelete,
+} = useProductVariants();
 </script>
 
 <template>

@@ -19,11 +19,12 @@ test('a logged-in buyer cannot access the seller dashboard or admin areas', func
     $this->actingAs($buyer)->get('/admin')->assertRedirect('/marketplace');
 });
 
-test('a seller cannot access the buyer marketplace or admin areas', function () {
+test('a seller cannot access the buyer-only area or admin areas', function () {
     $seller = roleUser('seller');
 
-    $this->actingAs($seller)->get('/marketplace')->assertRedirect('/dashboard');
+    $this->actingAs($seller)->get('/checkout')->assertRedirect('/dashboard');
     $this->actingAs($seller)->get('/admin')->assertRedirect('/dashboard');
+    $this->actingAs($seller)->get('/admin/users')->assertRedirect('/dashboard');
 });
 
 test('an admin can access the admin dashboard and user management', function () {

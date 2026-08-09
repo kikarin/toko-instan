@@ -9,7 +9,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
@@ -18,7 +17,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoreCmsController;
-use App\Http\Controllers\StorePageController;
 use App\Http\Controllers\StoreSettingsController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\WishlistController;
@@ -32,6 +30,11 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    Route::get('/{store_slug}/login', [AuthController::class, 'showStoreLogin'])->name('store.login');
+    Route::post('/{store_slug}/login', [AuthController::class, 'storeLogin']);
+    Route::get('/{store_slug}/register', [AuthController::class, 'showStoreRegister'])->name('store.register');
+    Route::post('/{store_slug}/register', [AuthController::class, 'storeRegister']);
 });
 
 // Authenticated routes (any role)
@@ -39,15 +42,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
-
-    Route::get('/orders', [OrderController::class, 'index'])
-        ->middleware('role:buyer,seller')
-        ->name('orders.index');
+    Route::post('/admin/impersonate/stop', [AdminController::class, 'stopImpersonation'])->name('admin.impersonate.stop');
 });
 
 // Buyer area
-Route::middleware(['auth', 'role:buyer'])->group(function () {
-    Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
+Route::middleware(['auth', 'role:buyer'])->prefix('{store_slug}')->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
@@ -58,14 +57,18 @@ Route::middleware(['auth', 'role:buyer'])->group(function () {
     Route::put('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
     Route::patch('/addresses/{id}/default', [AddressController::class, 'makeDefault'])->name('addresses.default');
-    Route::get('/store/{slug}', [StorePageController::class, 'show'])->name('store.show');
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout', [CheckoutController::class, 'store']);
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{orderNumber}/success', [CheckoutController::class, 'success'])->name('orders.success');
+    Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
 });
+
 
 // Seller area
 Route::middleware(['auth', 'role:seller'])->group(function () {
+    Route::get('/orders', [OrderController::class, 'index'])->name('seller.orders.index');
+    Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('seller.orders.invoice');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/store-settings', [StoreSettingsController::class, 'edit'])->name('store-settings.edit');
     Route::put('/store-settings', [StoreSettingsController::class, 'update'])->name('store-settings.update');
@@ -111,8 +114,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     Route::patch('/admin/users/{id}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
     Route::delete('/admin/users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
+    Route::post('/admin/users/{id}/impersonate', [AdminController::class, 'impersonate'])->name('admin.users.impersonate');
     Route::get('/admin/withdrawals', [AdminWithdrawalController::class, 'index'])->name('admin.withdrawals.index');
     Route::patch('/admin/withdrawals/{id}/approve', [AdminWithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
     Route::patch('/admin/withdrawals/{id}/reject', [AdminWithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
     Route::patch('/admin/withdrawals/{id}/transferred', [AdminWithdrawalController::class, 'markTransferred'])->name('admin.withdrawals.transferred');
 });
+
+// Public Storefront (Fallback routes)
+Route::get('/{store_slug}', [\App\Http\Controllers\StorePageController::class, 'show'])->name('store.show');
+Route::get('/{store_slug}/p/{product_slug}', [\App\Http\Controllers\StorePageController::class, 'product'])->name('store.product.show');

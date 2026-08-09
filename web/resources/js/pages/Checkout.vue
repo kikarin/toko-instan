@@ -11,8 +11,7 @@ import {
     Loader2,
     CheckCircle2,
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
-import { toast } from 'vue-sonner';
+import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -20,148 +19,97 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useActiveUser } from '@/lib/useActiveUser';
 import { useCart } from '@/lib/useCart';
+import { useCheckout } from '@/lib/useCheckout';
+import { useStoreName } from '@/lib/useStoreName';
+import { Link } from '@inertiajs/vue3';
+import { watch, onMounted } from 'vue';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useIndoRegions } from '@/lib/useIndoRegions';
+
+const props = defineProps<{
+    addresses?: any[];
+}>();
 
 // Cart is shared & persisted via localStorage composable
-const { items: cartItems, clear: clearCart } = useCart();
-const activeUser = useActiveUser();
+const { items: cartItems } = useCart();
 
-const isEmpty = computed(() => cartItems.value.length === 0);
+const { storeName } = useStoreName();
 
-const customerName = ref(
-    (activeUser.value as any)?.displayName ||
-        (activeUser.value as any)?.name ||
-        '',
-);
-const customerEmail = ref(activeUser.value?.email || '');
-const customerPhone = ref((activeUser.value as any)?.phone || '');
-const shippingAddress = ref('');
-const selectedCourier = ref('JNE Reguler (Rp 15.000)');
-const selectedPayment = ref('qris');
-const notes = ref('');
-const isLoading = ref(false);
+const cartItemsRef = computed(() => cartItems.value);
 
-const couriers = [
-    {
-        id: 'jne',
-        name: 'JNE Reguler',
-        price: 15000,
-        priceFmt: 'Rp 15.000',
-        est: '2-3 Hari',
-    },
-    {
-        id: 'jnt',
-        name: 'J&T Express',
-        price: 18000,
-        priceFmt: 'Rp 18.000',
-        est: '1-2 Hari',
-    },
-    {
-        id: 'sicepat',
-        name: 'SiCepat BEST',
-        price: 22000,
-        priceFmt: 'Rp 22.000',
-        est: 'Besok Sampai',
-    },
-];
+const {
+    isEmpty,
+    manualName,
+    manualEmail,
+    manualPhone,
+    manualAddress,
+    manualProvince,
+    manualCity,
+    manualDistrict,
+    manualPostalCode,
+    customerName,
+    customerEmail,
+    customerPhone,
+    shippingAddress,
+    selectedAddressId,
+    availableAddresses,
+    selectedCourier,
+    selectedPayment,
+    isLoading,
+    couriers,
+    paymentMethods,
+    subtotal,
+    currentShippingFee,
+    grandTotal,
+    fmtRp,
+    handleCheckoutSubmit,
+} = useCheckout(cartItemsRef);
 
-const paymentMethods = [
-    {
-        id: 'qris',
-        name: 'QRIS (All Bank & E-Wallet)',
-        desc: 'BCA, Mandiri, GoPay, ShopeePay',
-        icon: '📱',
-    },
-    {
-        id: 'va',
-        name: 'Virtual Account Bank',
-        desc: 'BCA, Mandiri, BNI, BRI Auto Detect',
-        icon: '🏦',
-    },
-    {
-        id: 'cod',
-        name: 'Bayar di Tempat (COD)',
-        desc: 'Bayar tunai ke kurir saat barang sampai',
-        icon: '💵',
-    },
-];
+if (props.addresses && props.addresses.length > 0) {
+    availableAddresses.value = props.addresses;
+    
+    // Default select first address if any
+    const defaultAddress = props.addresses.find(a => a.is_default);
+    selectedAddressId.value = defaultAddress ? defaultAddress.id : props.addresses[0].id;
+}
 
-const subtotal = computed(() =>
-    cartItems.value.reduce((acc, item) => acc + item.price * item.qty, 0),
-);
+const { provinces, cities, districts, loadProvinces, loadCities, loadDistricts } = useIndoRegions();
 
-const currentShippingFee = computed(() => {
-    const found = couriers.find((c) => selectedCourier.value.includes(c.name));
-
-    return found ? found.price : 15000;
+onMounted(() => {
+    loadProvinces();
 });
 
-const grandTotal = computed(() => subtotal.value + currentShippingFee.value);
-
-function fmtRp(val: number) {
-    return 'Rp ' + val.toLocaleString('id-ID');
-}
-
-function handleCheckoutSubmit() {
-    if (isEmpty.value) {
-        toast.error('Keranjang belanja Anda kosong!');
-
-        return;
+watch([() => manualProvince.value, provinces], ([newProvName, provs], [oldProvName]) => {
+    const prov = provs.find(p => p.name === newProvName);
+    if (prov) {
+        loadCities(prov.id);
+    } else {
+        cities.value = [];
     }
-
-    if (
-        !customerName.value ||
-        !customerEmail.value ||
-        !customerPhone.value ||
-        !shippingAddress.value
-    ) {
-        toast.error(
-            'Lengkapi nama, email, nomor HP, dan alamat pengiriman Anda.',
-        );
-
-        return;
+    
+    if (oldProvName !== undefined && oldProvName !== newProvName) {
+        manualCity.value = '';
+        manualDistrict.value = '';
     }
+});
 
-    isLoading.value = true;
-
-    router.post(
-        '/checkout',
-        {
-            customer_name: customerName.value,
-            customer_email: customerEmail.value,
-            customer_phone: customerPhone.value,
-            shipping_address: shippingAddress.value,
-            shipping_courier: selectedCourier.value,
-            payment_method: selectedPayment.value,
-            items: cartItems.value.map((item) => ({
-                id: item.id,
-                name: item.name,
-                price: item.price,
-                qty: item.qty,
-            })),
-            notes: notes.value,
-        },
-        {
-            onSuccess: () => {
-                clearCart();
-                toast.success('Pesanan Nike berhasil dibuat!');
-            },
-            onFinish: () => {
-                isLoading.value = false;
-            },
-            onError: () => {
-                toast.error(
-                    'Gagal membuat pesanan. Silakan periksa kembali data Anda.',
-                );
-            },
-        },
-    );
-}
+watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => {
+    const city = cits.find(c => c.name === newCityName);
+    if (city) {
+        loadDistricts(city.id);
+    } else {
+        districts.value = [];
+    }
+    
+    if (oldCityName !== undefined && oldCityName !== newCityName) {
+        manualDistrict.value = '';
+    }
+});
 </script>
 
 <template>
-    <Head title="Checkout Pemesanan — Nike Official Store" />
+    <Head :title="`Checkout Pemesanan — ${storeName}`" />
 
     <StorefrontLayout :cartCount="cartItems.length">
         <main
@@ -169,31 +117,30 @@ function handleCheckoutSubmit() {
         >
             <div class="mb-6">
                 <p
-                    class="mb-1 text-xs font-extrabold tracking-widest text-[#e07c28] uppercase"
+                    class="mb-1 text-xs font-extrabold tracking-widest text-brand uppercase"
                 >
                     Langkah Terakhir
                 </p>
-                <h1 class="text-2xl font-extrabold text-[#1c1c22]">
+                <h1 class="text-2xl font-extrabold text-foreground">
                     Checkout Pemesanan
                 </h1>
             </div>
 
             <div
                 v-if="isEmpty"
-                class="flex flex-col items-center justify-center rounded-3xl border border-black/5 bg-white py-24 text-center"
+                class="flex flex-col items-center justify-center rounded-3xl border border-border bg-card py-24 text-center"
             >
-                <ShoppingBag class="mb-3 h-12 w-12 stroke-1 text-[#c8c8d5]" />
-                <p class="text-base font-bold text-[#4a4a57]">
+                <ShoppingBag class="mb-3 h-12 w-12 stroke-1 text-border" />
+                <p class="text-base font-bold text-foreground">
                     Keranjang Anda Kosong
                 </p>
-                <p class="mt-1 mb-5 text-xs text-[#9090a0]">
+                <p class="mt-1 mb-5 text-xs text-muted-foreground">
                     Pilih produk di marketplace untuk mulai checkout
                 </p>
                 <Button
-                    variant="amber"
                     size="lg"
-                    class="font-bold"
-                    @click="router.visit('/marketplace')"
+                    class="font-bold bg-brand text-brand-foreground hover:opacity-90 border-0"
+                    @click="router.visit('/' + (usePage().props.store?.slug ?? ''))"
                 >
                     Jelajahi Marketplace
                     <ArrowRight class="ml-2 h-4 w-4" />
@@ -209,91 +156,176 @@ function handleCheckoutSubmit() {
                 <div
                     class="order-2 flex flex-col gap-5 lg:order-1 lg:col-span-7"
                 >
-                    <!-- Customer Information Card -->
+                    <!-- Shipping Address Selection -->
                     <Card class="p-6">
                         <CardHeader class="mb-4 p-0">
-                            <CardTitle
-                                class="flex items-center gap-2 text-base"
-                            >
-                                <User class="h-4 w-4 text-[#e07c28]" />
-                                Informasi Pembeli
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent class="flex flex-col gap-4 p-0">
-                            <div class="flex flex-col gap-1.5">
-                                <Label
-                                    for="c-name"
-                                    class="text-xs font-bold text-[#1c1c22]"
-                                    >Nama Lengkap *</Label
-                                >
-                                <Input
-                                    id="c-name"
-                                    v-model="customerName"
-                                    placeholder="Contoh: Budi Santoso"
-                                    required
-                                />
-                            </div>
-
-                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div class="flex flex-col gap-1.5">
-                                    <Label
-                                        for="c-email"
-                                        class="text-xs font-bold text-[#1c1c22]"
-                                        >Email *</Label
-                                    >
-                                    <Input
-                                        id="c-email"
-                                        v-model="customerEmail"
-                                        type="email"
-                                        placeholder="budi@email.com"
-                                        required
-                                    />
-                                </div>
-                                <div class="flex flex-col gap-1.5">
-                                    <Label
-                                        for="c-phone"
-                                        class="text-xs font-bold text-[#1c1c22]"
-                                        >Nomor WhatsApp / HP *</Label
-                                    >
-                                    <Input
-                                        id="c-phone"
-                                        v-model="customerPhone"
-                                        type="tel"
-                                        placeholder="08123456789"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <!-- Shipping Address Card -->
-                    <Card class="p-6">
-                        <CardHeader class="mb-4 p-0">
-                            <CardTitle
-                                class="flex items-center gap-2 text-base"
-                            >
-                                <MapPin class="h-4 w-4 text-[#e07c28]" />
+                            <CardTitle class="flex items-center gap-2 text-base">
+                                <MapPin class="h-4 w-4 text-brand" />
                                 Alamat Pengiriman
                             </CardTitle>
                         </CardHeader>
                         <CardContent class="flex flex-col gap-4 p-0">
-                            <div class="flex flex-col gap-1.5">
-                                <Label
-                                    for="c-address"
-                                    class="text-xs font-bold text-[#1c1c22]"
-                                >
-                                    Alamat Lengkap (Jalan, No. Rumah, RT/RW,
-                                    Kecamatan, Kota) *
-                                </Label>
-                                <Textarea
-                                    id="c-address"
-                                    v-model="shippingAddress"
-                                    rows="3"
-                                    placeholder="Jl. Sudirman No. 45, RT 02/05, Kec. Kebayoran Baru, Jakarta Selatan, 12190"
-                                    required
-                                    class="resize-none"
-                                />
+                            <template v-if="availableAddresses && availableAddresses.length > 0">
+                                <div class="flex flex-col gap-3">
+                                    <div
+                                        v-for="addr in availableAddresses"
+                                        :key="addr.id"
+                                        @click="selectedAddressId = addr.id"
+                                        class="flex cursor-pointer items-start justify-between rounded-2xl border p-4 transition-all"
+                                        :class="[
+                                            selectedAddressId === addr.id
+                                                ? 'border-brand bg-brand-surface shadow-2xs'
+                                                : 'border-border bg-card hover:border-border/60 hover:bg-muted/30',
+                                        ]"
+                                    >
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <span class="font-bold text-foreground">{{ addr.recipient_name }}</span>
+                                                <Badge v-if="addr.is_default" variant="secondary" class="bg-black/10 text-[10px]">Utama</Badge>
+                                                <Badge variant="outline" class="text-[10px]">{{ addr.label }}</Badge>
+                                            </div>
+                                            <span class="text-xs text-muted-foreground">{{ addr.phone }}</span>
+                                            <span class="mt-1 text-sm text-muted-foreground leading-relaxed">
+                                                {{ addr.address }}, {{ addr.city }}, {{ addr.province }}, {{ addr.postal_code }}
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="mt-1 flex h-5 w-5 items-center justify-center rounded-full border-2"
+                                            :class="
+                                                selectedAddressId === addr.id
+                                                    ? 'border-brand'
+                                                    : 'border-border'
+                                            "
+                                        >
+                                            <div
+                                                v-if="selectedAddressId === addr.id"
+                                                class="h-2.5 w-2.5 rounded-full bg-brand"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Manual Address Option -->
+                                    <div
+                                        @click="selectedAddressId = 'manual'"
+                                        class="flex cursor-pointer items-center justify-between rounded-2xl border p-4 transition-all"
+                                        :class="[
+                                            selectedAddressId === 'manual'
+                                                ? 'border-brand bg-brand-surface shadow-2xs'
+                                                : 'border-border bg-card hover:border-border/60 hover:bg-muted/30',
+                                        ]"
+                                    >
+                                        <span class="font-bold text-foreground">Gunakan Alamat Baru (Manual)</span>
+                                        <div
+                                            class="flex h-5 w-5 items-center justify-center rounded-full border-2"
+                                            :class="
+                                                selectedAddressId === 'manual'
+                                                    ? 'border-brand'
+                                                    : 'border-border'
+                                            "
+                                        >
+                                            <div
+                                                v-if="selectedAddressId === 'manual'"
+                                                class="h-2.5 w-2.5 rounded-full bg-brand"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Manual Form -->
+                            <div v-if="!availableAddresses?.length || selectedAddressId === 'manual'" class="mt-2 flex flex-col gap-4 rounded-2xl border border-border bg-muted/30 p-4">
+                                <div class="flex flex-col gap-1.5">
+                                    <Label for="c-name" class="text-xs font-bold text-foreground">Nama Lengkap Penerima *</Label>
+                                    <Input id="c-name" v-model="manualName" placeholder="Contoh: Budi Santoso" required class="bg-card" />
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div class="flex flex-col gap-1.5">
+                                        <Label for="c-email" class="text-xs font-bold text-foreground">Email *</Label>
+                                        <Input id="c-email" v-model="manualEmail" type="email" placeholder="budi@email.com" required class="bg-card" />
+                                    </div>
+                                    <div class="flex flex-col gap-1.5">
+                                        <Label for="c-phone" class="text-xs font-bold text-foreground">Nomor WhatsApp / HP *</Label>
+                                        <Input id="c-phone" v-model="manualPhone" type="tel" placeholder="08123456789" required class="bg-card" />
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-1.5">
+                                    <Label for="c-province" class="text-xs font-bold text-foreground">Provinsi *</Label>
+                                    <Select v-model="manualProvince" required>
+                                        <SelectTrigger id="c-province" class="bg-card">
+                                            <SelectValue placeholder="Pilih Provinsi" />
+                                        </SelectTrigger>
+                                        <SelectContent class="max-h-60">
+                                            <SelectGroup>
+                                                <SelectItem v-for="prov in provinces" :key="prov.id" :value="prov.name">
+                                                    {{ prov.name }}
+                                                </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div class="flex flex-col gap-1.5">
+                                        <Label for="c-city" class="text-xs font-bold text-foreground">Kota/Kabupaten *</Label>
+                                        <Select v-model="manualCity" required :disabled="!manualProvince">
+                                            <SelectTrigger id="c-city" class="bg-card">
+                                                <SelectValue placeholder="Pilih Kota/Kabupaten" />
+                                            </SelectTrigger>
+                                            <SelectContent class="max-h-60">
+                                                <SelectGroup>
+                                                    <SelectItem v-for="city in cities" :key="city.id" :value="city.name">
+                                                        {{ city.name }}
+                                                    </SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div class="flex flex-col gap-1.5">
+                                        <Label for="c-district" class="text-xs font-bold text-foreground">Kecamatan *</Label>
+                                        <Select v-model="manualDistrict" required :disabled="!manualCity">
+                                            <SelectTrigger id="c-district" class="bg-card">
+                                                <SelectValue placeholder="Pilih Kecamatan" />
+                                            </SelectTrigger>
+                                            <SelectContent class="max-h-60">
+                                                <SelectGroup>
+                                                    <SelectItem v-for="district in districts" :key="district.id" :value="district.name">
+                                                        {{ district.name }}
+                                                    </SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div class="flex flex-col gap-1.5">
+                                        <Label for="c-postal" class="text-xs font-bold text-foreground">Kode Pos *</Label>
+                                        <Input
+                                            id="c-postal"
+                                            v-model="manualPostalCode"
+                                            required
+                                            type="number"
+                                            maxlength="5"
+                                            placeholder="12190"
+                                            class="bg-card"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <Label for="c-address" class="text-xs font-bold text-foreground">Alamat Lengkap *</Label>
+                                    <Textarea
+                                        id="c-address"
+                                        v-model="manualAddress"
+                                        rows="2"
+                                        placeholder="Nama Jalan, Gedung, No. Rumah, RT/RW, Patokan"
+                                        required
+                                        class="resize-none bg-card"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- If a saved address is selected, just show the email input -->
+                            <div v-else class="mt-2 flex flex-col gap-1.5 rounded-2xl border border-border p-4">
+                                <Label for="c-email-only" class="text-xs font-bold text-foreground">Email * <span class="font-normal text-muted-foreground">(Untuk konfirmasi pesanan)</span></Label>
+                                <Input id="c-email-only" v-model="manualEmail" type="email" placeholder="budi@email.com" required />
                             </div>
                         </CardContent>
                     </Card>
@@ -304,7 +336,7 @@ function handleCheckoutSubmit() {
                             <CardTitle
                                 class="flex items-center gap-2 text-base"
                             >
-                                <Truck class="h-4 w-4 text-[#e07c28]" />
+                                <Truck class="h-4 w-4 text-brand" />
                                 Opsi Ekspedisi Pengiriman
                             </CardTitle>
                         </CardHeader>
@@ -312,14 +344,12 @@ function handleCheckoutSubmit() {
                             <div
                                 v-for="c in couriers"
                                 :key="c.id"
-                                @click="
-                                    selectedCourier = `${c.name} (${c.priceFmt})`
-                                "
+                                @click="selectedCourier = `${c.name} (${c.priceFmt})`"
                                 class="flex cursor-pointer items-center justify-between rounded-2xl border p-3.5 transition-all"
                                 :class="[
                                     selectedCourier.includes(c.name)
-                                        ? 'border-[#e07c28] bg-[#e07c280f] shadow-2xs'
-                                        : 'border-black/10 bg-white hover:border-black/20',
+                                        ? 'border-brand bg-brand-surface shadow-2xs'
+                                        : 'border-border bg-card hover:border-border/60',
                                 ]"
                             >
                                 <div class="flex items-center gap-3">
@@ -327,30 +357,28 @@ function handleCheckoutSubmit() {
                                         class="flex h-4 w-4 items-center justify-center rounded-full border-2"
                                         :class="
                                             selectedCourier.includes(c.name)
-                                                ? 'border-[#e07c28]'
-                                                : 'border-black/20'
+                                                ? 'border-brand'
+                                                : 'border-border'
                                         "
                                     >
                                         <div
-                                            v-if="
-                                                selectedCourier.includes(c.name)
-                                            "
-                                            class="h-2 w-2 rounded-full bg-[#e07c28]"
+                                            v-if="selectedCourier.includes(c.name)"
+                                            class="h-2 w-2 rounded-full bg-brand"
                                         />
                                     </div>
                                     <div>
                                         <p
-                                            class="text-xs font-bold text-[#1c1c22]"
+                                            class="text-xs font-bold text-foreground"
                                         >
                                             {{ c.name }}
                                         </p>
-                                        <p class="text-[10px] text-[#9090a0]">
+                                        <p class="text-[10px] text-muted-foreground">
                                             Estimasi {{ c.est }}
                                         </p>
                                     </div>
                                 </div>
                                 <span
-                                    class="font-mono text-xs font-bold text-[#e07c28]"
+                                    class="font-mono text-xs font-bold text-brand"
                                 >
                                     {{
                                         subtotal >= 300000
@@ -368,7 +396,7 @@ function handleCheckoutSubmit() {
                             <CardTitle
                                 class="flex items-center gap-2 text-base"
                             >
-                                <CreditCard class="h-4 w-4 text-[#e07c28]" />
+                                <CreditCard class="h-4 w-4 text-brand" />
                                 Metode Pembayaran
                             </CardTitle>
                         </CardHeader>
@@ -388,18 +416,18 @@ function handleCheckoutSubmit() {
                                     <span class="text-xl">{{ p.icon }}</span>
                                     <div>
                                         <p
-                                            class="text-xs font-bold text-[#1c1c22]"
+                                            class="text-xs font-bold text-foreground"
                                         >
                                             {{ p.name }}
                                         </p>
-                                        <p class="text-[10px] text-[#9090a0]">
+                                        <p class="text-[10px] text-muted-foreground">
                                             {{ p.desc }}
                                         </p>
                                     </div>
                                 </div>
                                 <CheckCircle2
                                     v-if="selectedPayment === p.id"
-                                    class="h-4 w-4 text-[#e07c28]"
+                                    class="h-4 w-4 text-brand"
                                 />
                             </div>
                         </CardContent>
@@ -422,7 +450,7 @@ function handleCheckoutSubmit() {
 
                         <!-- Items list -->
                         <div
-                            class="flex flex-col gap-3 border-b border-black/8 pb-4"
+                            class="flex flex-col gap-3 border-b border-border pb-4"
                         >
                             <div
                                 v-for="item in cartItems"
@@ -432,20 +460,20 @@ function handleCheckoutSubmit() {
                                 <img
                                     :src="item.img"
                                     :alt="item.name"
-                                    class="h-12 w-12 rounded-xl border border-black/5 bg-black/5 object-cover"
+                                    class="h-12 w-12 rounded-xl border border-border bg-muted/40 object-cover"
                                 />
                                 <div class="min-w-0 flex-1">
                                     <p
-                                        class="truncate text-xs font-bold text-[#1c1c22]"
+                                        class="truncate text-xs font-bold text-foreground"
                                     >
                                         {{ item.name }}
                                     </p>
-                                    <p class="text-[10px] text-[#9090a0]">
+                                    <p class="text-[10px] text-muted-foreground">
                                         {{ item.store }} · x{{ item.qty }}
                                     </p>
                                 </div>
                                 <span
-                                    class="font-mono text-xs font-bold text-[#1c1c22]"
+                                    class="font-mono text-xs font-bold text-foreground"
                                 >
                                     {{ fmtRp(item.price * item.qty) }}
                                 </span>
@@ -454,18 +482,18 @@ function handleCheckoutSubmit() {
 
                         <!-- Cost Summary breakdown -->
                         <div
-                            class="flex flex-col gap-2 border-b border-black/8 py-4 text-xs"
+                            class="flex flex-col gap-2 border-b border-border py-4 text-xs"
                         >
-                            <div class="flex justify-between text-[#4a4a57]">
+                            <div class="flex justify-between text-muted-foreground">
                                 <span>Subtotal Produk</span>
                                 <span class="font-mono font-semibold">{{
                                     fmtRp(subtotal)
                                 }}</span>
                             </div>
-                            <div class="flex justify-between text-[#4a4a57]">
+                            <div class="flex justify-between text-muted-foreground">
                                 <span>Biaya Pengiriman</span>
                                 <span
-                                    class="font-mono font-semibold text-[#e07c28]"
+                                    class="font-mono font-semibold text-brand"
                                 >
                                     {{
                                         currentShippingFee === 0
@@ -491,12 +519,12 @@ function handleCheckoutSubmit() {
                         >
                             <div>
                                 <p
-                                    class="text-[10px] font-bold tracking-wider text-[#9090a0] uppercase"
+                                    class="text-[10px] font-bold tracking-wider text-muted-foreground uppercase"
                                 >
                                     Total Tagihan
                                 </p>
                                 <p
-                                    class="mt-0.5 font-mono text-2xl leading-none font-extrabold text-[#e07c28]"
+                                    class="mt-0.5 font-mono text-2xl leading-none font-extrabold text-brand"
                                 >
                                     {{ fmtRp(grandTotal) }}
                                 </p>
@@ -506,9 +534,8 @@ function handleCheckoutSubmit() {
                         <!-- Submit Button -->
                         <Button
                             type="submit"
-                            variant="amber"
                             size="lg"
-                            class="flex h-12 w-full items-center justify-center gap-2 text-sm font-bold shadow-md"
+                            class="flex h-12 w-full items-center justify-center gap-2 text-sm font-bold shadow-md bg-brand text-brand-foreground hover:opacity-90 border-0"
                             :disabled="isLoading"
                         >
                             <Loader2

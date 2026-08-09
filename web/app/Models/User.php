@@ -31,6 +31,7 @@ class User extends Authenticatable
         'firebase_uid',
         'avatar',
         'auth_provider',
+        'store_id',
     ];
 
     protected $hidden = [
@@ -68,6 +69,14 @@ class User extends Authenticatable
     public function store(): HasOneThrough
     {
         return $this->hasOneThrough(Store::class, Tenant::class, 'user_id', 'tenant_id', 'id', 'id');
+    }
+
+    /**
+     * @return BelongsTo<Store, $this>
+     */
+    public function customerStore(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
     }
 
     /**
@@ -115,8 +124,12 @@ class User extends Authenticatable
 
     public function homePath(): string
     {
+        if ($this->role === 'buyer') {
+            $storeSlug = $this->customerStore?->slug ?? '';
+            return '/' . $storeSlug;
+        }
+
         return match ($this->role) {
-            'buyer' => '/marketplace',
             'admin' => '/admin',
             default => '/dashboard',
         };

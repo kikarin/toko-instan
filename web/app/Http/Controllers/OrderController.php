@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Store;
+use App\Repositories\StoreRepository;
 use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,10 +14,11 @@ use Inertia\Response;
 class OrderController extends Controller
 {
     public function __construct(
-        protected OrderService $orderService
+        protected OrderService $orderService,
+        protected StoreRepository $storeRepository
     ) {}
 
-    public function index(Request $request): Response
+    public function index(Request $request, ?string $storeSlug = null): Response
     {
         $user = $request->user();
 
@@ -37,7 +39,7 @@ class OrderController extends Controller
                         'customer_email' => $order->customer_email,
                         'customer_phone' => $order->customer_phone,
                         'shipping_address' => $order->shipping_address,
-                        'store_name' => $order->store->name ?? 'Nike Official Store',
+                        'store_name' => $order->store->name ?? 'Toko Resmi',
                         'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
                         'total_num' => (float) $order->total_amount,
                         'status' => strtolower($order->status),
@@ -66,7 +68,7 @@ class OrderController extends Controller
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
-                    'store_name' => $order->store->name ?? 'Nike Official Store',
+                    'store_name' => $order->store->name ?? 'Toko Resmi',
                     'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
                     'status' => strtolower($order->status),
                     'created_at' => $order->created_at?->format('d M Y, H:i'),
@@ -84,6 +86,35 @@ class OrderController extends Controller
 
         return Inertia::render('Orders/Index', [
             'orders' => $orders,
+            'storeSlug' => $storeSlug,
+        ]);
+    }
+
+    public function invoice(Request $request, string $orderNumberOrStoreSlug, ?string $orderNumber = null): Response
+    {
+        // If $orderNumber is provided, then the route had {store_slug} and {orderNumber}.
+        // If not, then the first parameter is actually the {orderNumber} (from seller route).
+        $actualOrderNumber = $orderNumber ?? $orderNumberOrStoreSlug;
+        
+        $order = \App\Models\Order::with('store.tenant')->where('order_number', $actualOrderNumber)->first();
+
+        if (! $order) {
+            abort(404, 'Pesanan tidak ditemukan');
+        }
+
+        // Validate access
+        $user = $request->user();
+        $isOwner = $user->role === 'seller' && $order->store && $order->store->tenant && $order->store->tenant->user_id === $user->id;
+        $isBuyer = $user->role === 'buyer' && $order->customer_email === $user->email;
+
+        if (! $isOwner && ! $isBuyer) {
+            abort(403, 'Akses ditolak');
+        }
+        
+        $invoice = $this->orderService->getInvoiceData($actualOrderNumber);
+
+        return Inertia::render('Order/Invoice', [
+            'invoice' => $invoice,
         ]);
     }
 

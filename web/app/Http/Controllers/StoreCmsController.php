@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Store;
+use App\Repositories\StoreRepository;
 use App\Services\StoreCmsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,10 @@ use Inertia\Response;
 
 class StoreCmsController extends Controller
 {
-    public function __construct(protected StoreCmsService $cmsService) {}
+    public function __construct(
+        protected StoreCmsService $cmsService,
+        protected StoreRepository $storeRepository
+    ) {}
 
     public function edit(Request $request): Response|RedirectResponse
     {
@@ -85,11 +89,17 @@ class StoreCmsController extends Controller
 
     private function storeForUser(int $userId): ?Store
     {
-        return Store::whereHas('tenant', fn ($q) => $q->where('user_id', $userId))->first();
+        return $this->storeRepository->getStoreForUser($userId);
     }
 
     private function storeOwnerOrFail(int $userId): Store
     {
-        return Store::whereHas('tenant', fn ($q) => $q->where('user_id', $userId))->firstOrFail();
+        $store = $this->storeRepository->getStoreForUser($userId);
+
+        if (! $store) {
+            abort(404, 'Store tidak ditemukan');
+        }
+
+        return $store;
     }
 }

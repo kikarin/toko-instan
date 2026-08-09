@@ -4,17 +4,7 @@ import { ArrowLeft, Boxes, TrendingDown, TrendingUp } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface Movement {
-    id: number;
-    type: 'in' | 'out' | 'adjustment';
-    quantity: number;
-    delta: number;
-    stock_before: number;
-    stock_after: number;
-    reason: string | null;
-    created_at: string;
-}
+import type { StockMovement } from '@/types/inventory';
 
 interface Props {
     product?: {
@@ -24,7 +14,7 @@ interface Props {
         stock: number;
         sku: string | null;
     };
-    movements?: Movement[];
+    movements?: StockMovement[];
 }
 
 defineProps<Props>();

@@ -10,16 +10,22 @@ import {
     Sparkles,
     ShoppingBag,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/sonner';
+import { toast, Toaster } from '@/components/ui/sonner';
 import { signInWithGooglePopup } from '@/lib/firebase';
+
+const props = defineProps<{
+    store?: any;
+}>();
 
 type AccountRole = 'buyer' | 'seller';
 const selectedRole = ref<AccountRole>('buyer');
+
+const registerUrl = computed(() => props.store ? `/${props.store.slug}/register` : '/register');
 
 const name = ref('');
 const storeName = ref('');
@@ -55,7 +61,7 @@ async function handleRegister() {
     isLoading.value = true;
 
     router.post(
-        '/register',
+        registerUrl.value,
         {
             role: selectedRole.value,
             name: name.value,
@@ -99,7 +105,7 @@ async function handleGoogleLogin() {
         errorMessage.value = error;
         toast.error(error);
     } else if (user) {
-        router.post('/register', {
+        router.post(registerUrl.value, {
             role: selectedRole.value,
             name: user.displayName || 'Pengguna',
             store_name:
@@ -139,21 +145,23 @@ async function handleGoogleLogin() {
                     <h1
                         class="text-2xl font-extrabold tracking-tight text-[#1c1c22]"
                     >
-                        Buat Akun Toko Instan
+                        {{ props.store ? `Daftar di ${props.store.name}` : 'Buat Akun Toko Instan' }}
                     </h1>
                     <Badge
+                        v-if="!props.store"
                         variant="amber"
                         class="px-1.5 py-0 text-[9px] uppercase"
                         >GRATIS</Badge
                     >
                 </div>
                 <p class="text-xs text-[#9090a0]">
-                    Pilih peran akun Anda untuk memulai
+                    {{ props.store ? 'Gabung sebagai Member dan nikmati promo' : 'Pilih peran akun Anda untuk memulai' }}
                 </p>
             </div>
 
             <!-- Role Selector Tabs -->
             <div
+                v-if="!props.store"
                 class="flex gap-1 rounded-2xl border border-black/10 bg-white p-1 shadow-2xs"
             >
                 <button
@@ -263,7 +271,7 @@ async function handleGoogleLogin() {
                     </div>
 
                     <div
-                        v-if="selectedRole === 'seller'"
+                        v-if="!props.store && selectedRole === 'seller'"
                         class="flex flex-col gap-1"
                     >
                         <label
@@ -338,13 +346,15 @@ async function handleGoogleLogin() {
             <div class="text-center text-xs text-[#9090a0]">
                 Sudah punya akun?
                 <a
-                    href="/login"
-                    @click.prevent="router.visit('/login')"
+                    :href="props.store ? `/${props.store.slug}/login` : '/login'"
+                    @click.prevent="router.visit(props.store ? `/${props.store.slug}/login` : '/login')"
                     class="ml-1 font-bold text-[#e07c28] hover:underline"
                 >
                     Masuk di sini
                 </a>
             </div>
         </div>
+
+        <Toaster position="top-right" />
     </div>
 </template>

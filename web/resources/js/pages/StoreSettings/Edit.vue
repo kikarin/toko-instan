@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import {
     Store,
     Image as ImageIcon,
     Phone,
-    ExternalLink,
     Save,
     Sparkles,
     ShieldCheck,
@@ -12,43 +11,21 @@ import {
     FileText,
     Building2,
     Power,
+    X,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/sonner';
+import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface StoreData {
-    id: number;
-    name: string;
-    slug: string;
-    category?: string;
-    description?: string;
-    logo?: string;
-    avatar_hue?: number;
-    banner_url?: string;
-    phone?: string;
-    email?: string;
-    address?: string;
-    instagram?: string;
-    tiktok?: string;
-    headline?: string;
-    badge?: string;
-    rating?: number;
-    is_active?: boolean;
-    npwp?: string;
-    nik?: string;
-    is_pkp?: boolean;
-    tax_name?: string;
-    tax_address?: string;
-}
+import { useStoreSettings } from '@/lib/useStoreSettings';
+import { useStoreTheme } from '@/lib/useStoreTheme';
+import type { StoreData } from '@/types/store';
 
 interface Props {
     store: StoreData;
@@ -56,86 +33,23 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const activeTab = ref<'profil' | 'banner' | 'kontak' | 'pajak'>('profil');
+const {
+    activeTab,
+    form,
+    handleBannerFileChange,
+    handleLogoFileChange,
+    submitForm,
+    bannerPreviewUrls,
+    removeBanner,
+    newBannerUrl,
+    addBannerUrl,
+    newHighlight,
+    addHighlight,
+    removeHighlight,
+} = useStoreSettings(props.store);
 
-const form = useForm({
-    name: props.store?.name || 'Nike Official Store',
-    slug: props.store?.slug || 'nike-official',
-    category: props.store?.category || 'Sportswear & Sneakers',
-    description:
-        props.store?.description ||
-        'Toko Resmi Nike Indonesia. Garansi 100% Produk Asli & Original.',
-    logo: props.store?.logo || '',
-    avatar_hue: props.store?.avatar_hue || 220,
-    banner_url:
-        props.store?.banner_url ||
-        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=400&fit=crop&auto=format',
-    phone: props.store?.phone || '+6285264415051',
-    email: props.store?.email || 'support@nike-official.id',
-    address:
-        props.store?.address ||
-        'Jl. Jend. Sudirman Kav. 54-55, Jakarta Selatan 12190',
-    instagram: props.store?.instagram || '@nike_indonesia',
-    tiktok: props.store?.tiktok || '@nike_official',
-    headline:
-        props.store?.headline || 'JUST DO IT. — Koleksi Resmi Nike Indonesia',
-    is_active: props.store?.is_active ?? true,
-    npwp: props.store?.npwp || '01.234.567.8-901.000',
-    nik: props.store?.nik || '3171012345670001',
-    is_pkp: props.store?.is_pkp ?? true,
-    tax_name: props.store?.tax_name || 'PT Nike Indonesia Resmi',
-    tax_address:
-        props.store?.tax_address ||
-        'Gedung Menara Mandiri Lt. 18, Jl. Jend. Sudirman Kav. 54-55, Jakarta Selatan 12190',
-});
-
-const bannerPreviewUrl = ref<string | null>(null);
-const logoPreviewUrl = ref<string | null>(null);
-
-function handleBannerFileChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-
-    if (target.files && target.files[0]) {
-        const file = target.files[0];
-        (form as any).banner_file = file;
-        bannerPreviewUrl.value = URL.createObjectURL(file);
-        form.banner_url = bannerPreviewUrl.value;
-    }
-}
-
-function handleLogoFileChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-
-    if (target.files && target.files[0]) {
-        const file = target.files[0];
-        (form as any).logo_file = file;
-        logoPreviewUrl.value = URL.createObjectURL(file);
-        form.logo = logoPreviewUrl.value;
-    }
-}
-
-function submitForm() {
-    router.post(
-        '/store-settings',
-        {
-            _method: 'put',
-            ...form.data(),
-            banner_file: (form as any).banner_file,
-            logo_file: (form as any).logo_file,
-        },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Pengaturan & Branding Toko berhasil disimpan!');
-            },
-            onError: () => {
-                toast.error(
-                    'Gagal menyimpan pengaturan toko. Periksa kembali form.',
-                );
-            },
-        },
-    );
-}
+// Inject theme colors to :root so the preview can use --brand, --brand-secondary, etc.
+useStoreTheme();
 </script>
 
 <template>
@@ -166,15 +80,6 @@ function submitForm() {
 
                 <div class="flex items-center gap-2">
                     <Button
-                        variant="outline"
-                        size="sm"
-                        class="h-9 gap-1.5 border-black/10 text-xs font-bold"
-                        @click="router.visit('/')"
-                    >
-                        <ExternalLink class="h-4 w-4" />
-                        Lihat Storefront
-                    </Button>
-                    <Button
                         variant="amber"
                         size="sm"
                         class="h-9 gap-1.5 bg-black text-xs font-bold text-amber-400 shadow-md hover:bg-zinc-800"
@@ -193,25 +98,25 @@ function submitForm() {
 
             <!-- ── Live Preview Box ── -->
             <Card
-                class="overflow-hidden rounded-2xl border-black/10 bg-white shadow-md"
+                class="overflow-hidden rounded-2xl border-border bg-card shadow-md"
             >
                 <CardHeader
-                    class="flex flex-row items-center justify-between bg-zinc-900 p-4 text-white"
+                    class="flex flex-row items-center justify-between bg-brand p-4 text-brand-foreground"
                 >
                     <div class="flex items-center gap-2">
-                        <Sparkles class="h-4 w-4 text-amber-400" />
+                        <Sparkles class="h-4 w-4" />
                         <span
-                            class="text-xs font-black tracking-wider text-amber-400 uppercase"
+                            class="text-xs font-black tracking-wider uppercase"
                             >Live Preview Header Webstore</span
                         >
                     </div>
                     <Badge
-                        class="bg-emerald-600 text-[9px] font-black text-white uppercase"
+                        class="bg-brand-accent text-[9px] font-black text-brand-foreground uppercase"
                         >OFFICIAL STORE</Badge
                     >
                 </CardHeader>
                 <CardContent
-                    class="flex flex-col items-center gap-4 bg-gradient-to-r from-zinc-100 to-zinc-50 p-4 sm:flex-row sm:p-6"
+                    class="flex flex-col items-center gap-4 bg-gradient-to-r from-brand-soft to-card p-4 sm:flex-row sm:p-6"
                 >
                     <Avatar
                         :src="form.logo || undefined"
@@ -224,11 +129,11 @@ function submitForm() {
                             class="flex items-center justify-center gap-2 sm:justify-start"
                         >
                             <h3
-                                class="text-lg font-black tracking-wide text-[#1c1c22] uppercase"
+                                class="text-lg font-black tracking-wide text-foreground uppercase"
                             >
                                 {{ form.name }}
                             </h3>
-                            <ShieldCheck class="h-5 w-5 text-emerald-600" />
+                            <ShieldCheck class="h-5 w-5 text-brand" />
                         </div>
                         <p class="mt-0.5 text-xs font-semibold text-zinc-500">
                             {{ form.headline }}
@@ -364,7 +269,7 @@ function submitForm() {
                             <Input
                                 id="name"
                                 v-model="form.name"
-                                placeholder="Contoh: Nike Official Store"
+                                placeholder="Contoh: Toko Sepatu Sport"
                                 class="h-10 text-xs"
                             />
                             <p
@@ -510,7 +415,7 @@ function submitForm() {
                         <Input
                             id="headline"
                             v-model="form.headline"
-                            placeholder="JUST DO IT. — Koleksi Resmi Nike Indonesia"
+                            placeholder="Contoh: Sepatu & Fashion Sportworn Terlengkap"
                             class="h-10 text-xs font-semibold"
                         />
                     </div>
@@ -527,54 +432,187 @@ function submitForm() {
                             <Input
                                 id="banner_file"
                                 type="file"
+                                multiple
                                 accept="image/*"
                                 @change="handleBannerFileChange"
                                 class="h-10 cursor-pointer bg-white text-xs"
                             />
                             <p class="text-[10px] text-zinc-500">
-                                Pilih gambar dari perangkat lokal Anda untuk
-                                dijadikan Hero Banner toko.
+                                Pilih beberapa gambar sekaligus untuk dijadikan Hero Banner Carousel.
                             </p>
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label
                                 for="banner_url"
                                 class="text-xs font-bold text-[#1c1c22]"
-                                >Atau Paste URL Hero Banner</Label
+                                >Atau Tambah URL Hero Banner</Label
                             >
-                            <Input
-                                id="banner_url"
-                                v-model="form.banner_url"
-                                placeholder="https://images.unsplash.com/photo-1542291026-7eec264c27ff"
-                                class="h-10 font-mono text-xs"
-                            />
+                            <div class="flex gap-2">
+                                <Input
+                                    id="banner_url"
+                                    v-model="newBannerUrl"
+                                    placeholder="https://example.com/hero-banner.jpg"
+                                    class="h-10 flex-1 font-mono text-xs"
+                                    @keyup.enter="addBannerUrl"
+                                />
+                                <Button type="button" @click="addBannerUrl" variant="amber" class="h-10">Tambah</Button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Hero Banner Preview -->
-                    <div v-if="form.banner_url" class="flex flex-col gap-2">
+                    <!-- Hero Banner Preview Carousel -->
+                    <div v-if="bannerPreviewUrls.length > 0" class="flex flex-col gap-2">
                         <Label class="text-xs font-bold text-[#9090a0]"
-                            >Preview Hero Banner</Label
+                            >Preview Banner Carousel ({{ bannerPreviewUrls.length }}/5)</Label
                         >
-                        <div
-                            class="relative aspect-3/1 w-full overflow-hidden rounded-2xl border border-black/10 bg-zinc-900"
-                        >
-                            <img
-                                :src="form.banner_url"
-                                class="h-full w-full object-cover opacity-80"
-                            />
+                        <div class="grid grid-cols-2 gap-4 md:grid-cols-3">
                             <div
-                                class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/30 to-transparent p-6 text-white"
+                                v-for="(url, index) in bannerPreviewUrls"
+                                :key="index"
+                                class="group relative aspect-video w-full overflow-hidden rounded-2xl border border-black/10 bg-zinc-900"
                             >
-                                <p
-                                    class="text-sm font-black tracking-widest text-amber-400 uppercase"
+                                <img
+                                    :src="url"
+                                    class="h-full w-full object-cover opacity-80"
+                                />
+                                <div
+                                    class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 text-white"
                                 >
-                                    {{ form.name }}
-                                </p>
-                                <h2 class="text-xl font-black uppercase">
-                                    {{ form.headline }}
-                                </h2>
+                                    <p
+                                        class="text-[10px] font-black tracking-widest text-amber-400 uppercase"
+                                    >
+                                        {{ form.name }}
+                                    </p>
+                                    <h2 class="text-sm font-black uppercase line-clamp-1">
+                                        {{ form.headline }}
+                                    </h2>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="removeBanner(index)"
+                                    class="absolute top-2 right-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                    title="Hapus Banner"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <Separator class="my-2 bg-black/5" />
+
+                    <!-- Promo Highlights -->
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-1.5">
+                            <Label class="text-xs font-bold text-[#1c1c22]">Highlights / Promo Badges (Maks 3)</Label>
+                            <p class="text-[10px] text-zinc-500">
+                                Tambahkan maksimal 3 poin keunggulan toko yang akan ditampilkan di bawah Banner (contoh: "Gratis Ongkir", "Garansi Retur 30 Hari").
+                            </p>
+                            
+                            <div class="flex gap-2">
+                                <Input
+                                    v-model="newHighlight"
+                                    placeholder="Ketik poin promo..."
+                                    class="h-10 flex-1 text-xs"
+                                    @keyup.enter="addHighlight"
+                                    :disabled="form.highlights.length >= 3"
+                                />
+                                <Button 
+                                    type="button" 
+                                    @click="addHighlight" 
+                                    variant="amber" 
+                                    class="h-10"
+                                    :disabled="form.highlights.length >= 3"
+                                >
+                                    Tambah
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div v-if="form.highlights.length > 0" class="flex flex-wrap gap-2">
+                            <Badge 
+                                v-for="(hl, idx) in form.highlights" 
+                                :key="idx" 
+                                variant="outline" 
+                                class="flex items-center gap-1.5 border-black/10 bg-zinc-50 px-2.5 py-1 text-xs text-[#1c1c22]"
+                            >
+                                {{ hl }}
+                                <button 
+                                    type="button" 
+                                    @click="removeHighlight(idx)" 
+                                    class="ml-1 text-zinc-400 hover:text-red-500"
+                                >
+                                    <X class="h-3 w-3" />
+                                </button>
+                            </Badge>
+                        </div>
+                    </div>
+
+                    <Separator class="my-2 bg-black/5" />
+
+                    <!-- Teks Tentang Toko & Widget Garansi -->
+                    <div class="flex flex-col gap-6">
+                        <!-- About Text -->
+                        <div class="flex flex-col gap-1.5">
+                            <Label for="about_text" class="text-xs font-bold text-[#1c1c22]">
+                                Teks Deskripsi (Sub-judul Hero)
+                            </Label>
+                            <Textarea
+                                id="about_text"
+                                v-model="form.hero_config.about_text"
+                                placeholder="Contoh: Produk berkualitas dengan garansi keaslian dan layanan bebas ongkir."
+                                class="min-h-[80px] text-xs"
+                            />
+                        </div>
+
+                        <!-- Widget Settings -->
+                        <div class="flex flex-col gap-3 rounded-xl border border-black/10 bg-zinc-50 p-4">
+                            <Label class="text-sm font-black text-[#1c1c22]">Widget Garansi (Kanan Atas)</Label>
+                            <p class="text-[10px] text-zinc-500">Sesuaikan teks pada kotak garansi di halaman depan.</p>
+                            
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div class="flex flex-col gap-1.5">
+                                    <Label for="widget_title" class="text-[10px] font-bold text-zinc-600">Judul Widget</Label>
+                                    <Input
+                                        id="widget_title"
+                                        v-model="form.hero_config.widget_title"
+                                        placeholder="Contoh: Belanja Aman"
+                                        class="h-9 text-xs bg-white"
+                                    />
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <Label for="widget_subtitle" class="text-[10px] font-bold text-zinc-600">Fitur Utama</Label>
+                                    <Input
+                                        id="widget_subtitle"
+                                        v-model="form.hero_config.widget_subtitle"
+                                        placeholder="Contoh: Escrow & Buyer Protection"
+                                        class="h-9 text-xs bg-white"
+                                    />
+                                </div>
+                                <div class="flex flex-col gap-1.5 md:col-span-2">
+                                    <Label for="widget_description" class="text-[10px] font-bold text-zinc-600">Deskripsi Singkat</Label>
+                                    <Input
+                                        id="widget_description"
+                                        v-model="form.hero_config.widget_description"
+                                        placeholder="Contoh: Uang kembali jika barang tidak sesuai"
+                                        class="h-9 text-xs bg-white"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fake Buyer Stats -->
+                        <div class="flex flex-col gap-1.5 w-full md:w-1/2">
+                            <Label for="fake_buyer_count" class="text-xs font-bold text-[#1c1c22]">
+                                Teks Jumlah Pembeli Fiktif (Opsional)
+                            </Label>
+                            <Input
+                                id="fake_buyer_count"
+                                v-model="form.hero_config.fake_buyer_count"
+                                placeholder="Contoh: 54rb+"
+                                class="h-10 text-xs"
+                            />
+                            <p class="text-[10px] text-zinc-500">Teks ini akan menggantikan angka pesanan asli di statistik hero.</p>
                         </div>
                     </div>
                 </CardContent>
@@ -761,7 +799,7 @@ function submitForm() {
                         <Input
                             id="tax_name"
                             v-model="form.tax_name"
-                            placeholder="PT Nike Indonesia Resmi"
+                            placeholder="PT Contoh Dagang Indonesia"
                             class="h-10 text-xs font-semibold"
                         />
                     </div>

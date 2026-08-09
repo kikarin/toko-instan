@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Repositories\ProductRepository;
+use App\Repositories\StoreRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -11,16 +12,19 @@ use Inertia\Response;
 class AccountController extends Controller
 {
     public function __construct(
-        protected ProductRepository $productRepository
+        protected ProductRepository $productRepository,
+        protected StoreRepository $storeRepository
     ) {}
 
-    public function show(Request $request): Response
+    public function show(string $storeSlug, Request $request): Response
     {
         $user = $request->user();
         $email = $user?->email;
 
+        $activeStore = $this->storeRepository->getActiveStore($user?->id);
+
         // Sample recommended products
-        $recommendedProducts = $this->productRepository->getMarketplaceCatalog(null, null)
+        $recommendedProducts = $this->productRepository->getMarketplaceCatalog(null, null, $activeStore?->id)
             ->take(6)
             ->map(function ($product) {
                 return [

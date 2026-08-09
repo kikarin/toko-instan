@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
 import {
     Star,
     ShoppingCart,
@@ -8,7 +7,6 @@ import {
     ShieldCheck,
     Truck,
     Heart,
-    Store,
     Package,
     BadgeCheck,
     ThumbsUp,
@@ -16,6 +14,7 @@ import {
     Share2,
 } from 'lucide-vue-next';
 import { ref, watch, computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,26 +22,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useIsMobile } from '@/lib/useIsMobile';
-
-export interface ProductDetail {
-    id: number;
-    name: string;
-    price: string;
-    priceNum?: number;
-    sold: number;
-    rating: number;
-    store: string;
-    storeSlug?: string;
-    img: string;
-    tag: string | null;
-    cat: string;
-    discount?: number;
-    originalPrice?: string;
-    description?: string;
-    sku?: string;
-    brand?: string;
-    weightGram?: number;
-}
+import type { ProductDetail } from '@/types/product';
 
 interface Props {
     product: ProductDetail | null;
@@ -53,6 +33,13 @@ const emit = defineEmits<{
     (e: 'close'): void;
     (e: 'add-to-cart', product: ProductDetail, qty: number): void;
 }>();
+
+const page = usePage();
+const storeName = computed(() => {
+    const store = page.props.store as { name?: string } | undefined;
+
+    return store?.name ?? 'Toko';
+});
 
 const qty = ref(1);
 const isLiked = ref(false);
@@ -85,16 +72,6 @@ function handleAddToCart() {
     }
 }
 
-function visitStore() {
-    if (props.product) {
-        const slug =
-            props.product.storeSlug ||
-            props.product.store.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        emit('close');
-        router.visit(`/store/${slug}`);
-    }
-}
-
 function formatSold(n: number): string {
     if (n >= 1_000_000) {
         return `${(n / 1_000_000).toFixed(1)}jt+`;
@@ -107,56 +84,9 @@ function formatSold(n: number): string {
     return String(n);
 }
 
-const mockReviews = [
-    {
-        name: 'Rina S.',
-        avatar: 'RS',
-        hue: 280,
-        rating: 5,
-        date: '2 hari lalu',
-        text: 'Produknya bagus banget, sesuai foto! Pengiriman cepat dan packing rapi. Recommended seller 👍',
-        variant: 'Ukuran M · Warna Hitam',
-        likes: 12,
-    },
-    {
-        name: 'Budi W.',
-        avatar: 'BW',
-        hue: 200,
-        rating: 4,
-        date: '1 minggu lalu',
-        text: 'Kualitas oke, harga terjangkau. Cuma pengiriman agak lama 3 hari tapi masih dalam estimasi.',
-        variant: 'Ukuran L',
-        likes: 7,
-    },
-    {
-        name: 'Sari A.',
-        avatar: 'SA',
-        hue: 30,
-        rating: 5,
-        date: '2 minggu lalu',
-        text: 'Mantap! Sudah order ke-3 kali di toko ini, selalu puas. Produk original dan sesuai deskripsi.',
-        variant: 'Ukuran S · Warna Putih',
-        likes: 23,
-    },
-    {
-        name: 'Doni P.',
-        avatar: 'DP',
-        hue: 150,
-        rating: 4,
-        date: '3 minggu lalu',
-        text: 'Produk bagus, tolong tambah varian warna ya! Overall sudah puas dengan pembelian ini.',
-        variant: 'Ukuran XL',
-        likes: 4,
-    },
-];
+const mockReviews: any[] = [];
 
-const ratingBreakdown = [
-    { stars: 5, count: 214, pct: 78 },
-    { stars: 4, count: 47, pct: 17 },
-    { stars: 3, count: 9, pct: 3 },
-    { stars: 2, count: 3, pct: 1 },
-    { stars: 1, count: 2, pct: 1 },
-];
+const ratingBreakdown: any[] = [];
 </script>
 
 <template>
@@ -172,7 +102,7 @@ const ratingBreakdown = [
             <div class="flex flex-1 flex-col overflow-y-auto">
                 <!-- Image -->
                 <div
-                    class="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-[#f5f4f0]"
+                    class="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted"
                 >
                     <img
                         v-if="product"
@@ -182,7 +112,7 @@ const ratingBreakdown = [
                     />
                     <div
                         v-if="product?.discount"
-                        class="absolute top-0 left-0 rounded-br-xl bg-(--brand-strong) px-2.5 py-1 text-xs font-bold text-white"
+                        class="absolute top-0 left-0 rounded-br-xl bg-brand-strong px-2.5 py-1 text-xs font-bold text-white"
                     >
                         {{ product.discount }}% OFF
                     </div>
@@ -190,23 +120,23 @@ const ratingBreakdown = [
                         v-else-if="product?.tag"
                         class="absolute top-0 left-0 rounded-br-xl px-2.5 py-1 text-xs font-bold text-white"
                         :class="{
-                            'bg-(--brand)': product.tag === 'Bestseller',
-                            'bg-(--brand-strong)': product.tag === 'Hot',
-                            'bg-(--brand-accent)': product.tag === 'Baru',
+                            'bg-brand': product.tag === 'Bestseller',
+                            'bg-brand-strong': product.tag === 'Hot',
+                            'bg-brand-accent': product.tag === 'Baru',
                         }"
                     >
                         {{ product.tag }}
                     </div>
                     <button
                         @click="isLiked = !isLiked"
-                        class="absolute top-2.5 right-2.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm"
+                        class="absolute top-2.5 right-2.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-card/90 shadow-md backdrop-blur-sm"
                     >
                         <Heart
                             class="h-4 w-4 transition-colors"
                             :class="
                                 isLiked
-                                    ? 'fill-(--brand-strong) text-(--brand-strong)'
-                                    : 'text-[#9090a0]'
+                                    ? 'fill-brand-strong text-brand-strong'
+                                    : 'text-muted-foreground'
                             "
                         />
                     </button>
@@ -216,27 +146,27 @@ const ratingBreakdown = [
                     <div class="px-4 pt-3 pb-2">
                         <div class="flex items-baseline gap-2">
                             <span
-                                class="text-2xl font-extrabold text-(--brand-strong)"
+                                class="text-2xl font-extrabold text-brand-strong"
                                 >{{ product.price }}</span
                             >
                             <span
                                 v-if="product.originalPrice"
-                                class="text-sm text-[#9090a0] line-through"
+                                class="text-sm text-muted-foreground line-through"
                                 >{{ product.originalPrice }}</span
                             >
                         </div>
                         <h2
-                            class="mt-1.5 text-sm leading-snug font-semibold text-[#1c1c22]"
+                            class="mt-1.5 text-sm leading-snug font-semibold text-foreground"
                         >
                             {{ product.name }}
                         </h2>
                         <div
-                            class="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#9090a0]"
+                            class="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
                         >
                             <div class="flex items-center gap-1">
                                 <Star
                                     class="h-3.5 w-3.5 fill-amber-400 stroke-amber-400"
-                                /><span class="font-bold text-[#4a4a57]">{{
+                                /><span class="font-bold text-muted-foreground">{{
                                     product.rating
                                 }}</span>
                             </div>
@@ -245,7 +175,7 @@ const ratingBreakdown = [
                             <span>·</span
                             ><button
                                 @click="activeTab = 'ulasan'"
-                                class="text-(--brand)"
+                                class="text-brand"
                             >
                                 {{ mockReviews.length }} ulasan
                             </button>
@@ -253,12 +183,12 @@ const ratingBreakdown = [
                     </div>
                     <Separator />
                     <div
-                        class="flex items-center gap-2 bg-(--brand-soft) px-4 py-2.5"
+                        class="flex items-center gap-2 bg-brand-soft px-4 py-2.5"
                     >
                         <Truck
-                            class="h-4 w-4 shrink-0 text-(--brand-secondary)"
+                            class="h-4 w-4 shrink-0 text-brand-secondary"
                         />
-                        <span class="text-xs font-medium text-[#4a4a57]"
+                        <span class="text-xs font-medium text-muted-foreground"
                             >Gratis Ongkir · Estimasi 2-3 hari</span
                         >
                     </div>
@@ -274,35 +204,28 @@ const ratingBreakdown = [
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1.5">
                                 <span
-                                    class="truncate text-xs font-bold text-[#1c1c22]"
+                                    class="truncate text-xs font-bold text-foreground"
                                     >{{ product.store }}</span
                                 ><BadgeCheck
-                                    class="h-3.5 w-3.5 shrink-0 text-(--brand-accent)"
+                                    class="h-3.5 w-3.5 shrink-0 text-brand-accent"
                                 />
                             </div>
-                            <p class="text-[10px] text-[#9090a0]">
+                            <p class="text-[10px] text-muted-foreground">
                                 Official Store · Respons cepat
                             </p>
                         </div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            class="shrink-0 text-xs"
-                            @click="visitStore"
-                            ><Store class="mr-1 h-3 w-3" />Kunjungi</Button
-                        >
                     </div>
                     <Separator />
-                    <div class="flex border-b border-black/8">
+                    <div class="flex border-b border-border">
                         <button
                             v-for="tab in ['detail', 'ulasan']"
                             :key="tab"
                             @click="activeTab = tab as 'detail' | 'ulasan'"
-                            class="flex-1 py-3 text-xs font-bold capitalize transition-colors"
+                            class="flex-1 py-3 text-xs font-bold capitalize transition-colors cursor-pointer"
                             :class="
                                 activeTab === tab
-                                    ? 'border-b-2 border-(--brand) text-(--brand)'
-                                    : 'text-[#9090a0]'
+                                    ? 'border-b-2 border-brand text-brand'
+                                    : 'text-muted-foreground'
                             "
                         >
                             {{ tab === 'detail' ? 'Deskripsi' : 'Ulasan'
@@ -314,28 +237,28 @@ const ratingBreakdown = [
                         </button>
                     </div>
                     <div v-if="activeTab === 'detail'" class="px-4 py-4">
-                        <p class="mb-3 text-xs leading-relaxed text-[#4a4a57]">
+                        <p class="mb-3 text-xs leading-relaxed text-muted-foreground">
                             Produk berkualitas tinggi dari {{ product.store }}.
                             Dibuat dengan bahan pilihan untuk memastikan
                             kenyamanan dan daya tahan maksimal.
                         </p>
-                        <div class="rounded-xl bg-[#faf9f6] p-3 text-xs">
-                            <p class="mb-2 font-bold text-[#1c1c22]">
+                        <div class="rounded-xl bg-muted p-3 text-xs">
+                            <p class="mb-2 font-bold text-foreground">
                                 Spesifikasi
                             </p>
                             <div class="flex flex-col gap-1.5">
                                 <div class="flex justify-between">
-                                    <span class="text-[#9090a0]">Kategori</span
+                                    <span class="text-muted-foreground">Kategori</span
                                     ><span class="font-medium">{{
                                         product.cat
                                     }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-[#9090a0]">Kondisi</span
+                                    <span class="text-muted-foreground">Kondisi</span
                                     ><span class="font-medium">Baru</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-[#9090a0]">Terjual</span
+                                    <span class="text-muted-foreground">Terjual</span
                                     ><span class="font-medium"
                                         >{{
                                             formatSold(product.sold)
@@ -348,11 +271,11 @@ const ratingBreakdown = [
                     </div>
                     <div v-else class="px-4 py-4">
                         <div
-                            class="mb-4 flex items-center gap-4 rounded-xl bg-[#faf9f6] p-4"
+                            class="mb-4 flex items-center gap-4 rounded-xl bg-muted p-4"
                         >
                             <div class="flex flex-col items-center">
                                 <span
-                                    class="text-4xl font-extrabold text-[#1c1c22]"
+                                    class="text-4xl font-extrabold text-foreground"
                                     >{{ product.rating }}</span
                                 >
                                 <div class="my-1 flex gap-0.5">
@@ -363,11 +286,11 @@ const ratingBreakdown = [
                                         :class="
                                             i <= Math.round(product.rating)
                                                 ? 'fill-amber-400 stroke-amber-400'
-                                                : 'fill-none stroke-black/20'
+                                                : 'fill-none stroke-border'
                                         "
                                     />
                                 </div>
-                                <span class="text-[10px] text-[#9090a0]"
+                                <span class="text-[10px] text-muted-foreground"
                                     >{{ mockReviews.length }} ulasan</span
                                 >
                             </div>
@@ -378,13 +301,13 @@ const ratingBreakdown = [
                                     class="flex items-center gap-2"
                                 >
                                     <span
-                                        class="w-4 text-right text-[10px] text-[#9090a0]"
+                                        class="w-4 text-right text-[10px] text-muted-foreground"
                                         >{{ row.stars }}</span
                                     ><Star
                                         class="h-2.5 w-2.5 fill-amber-400 stroke-amber-400"
                                     />
                                     <div
-                                        class="h-1.5 flex-1 overflow-hidden rounded-full bg-black/10"
+                                        class="h-1.5 flex-1 overflow-hidden rounded-full bg-border"
                                     >
                                         <div
                                             class="h-full rounded-full bg-amber-400"
@@ -392,13 +315,27 @@ const ratingBreakdown = [
                                         />
                                     </div>
                                     <span
-                                        class="w-6 text-[10px] text-[#9090a0]"
+                                        class="w-6 text-[10px] text-muted-foreground"
                                         >{{ row.count }}</span
                                     >
                                 </div>
                             </div>
                         </div>
                         <div class="flex flex-col gap-4">
+                            <div
+                                v-if="!mockReviews.length"
+                                class="flex flex-col items-center gap-2 py-8 text-center"
+                            >
+                                <Star class="h-8 w-8 stroke-border" />
+                                <p
+                                    class="text-xs font-bold text-foreground"
+                                >
+                                    Belum ada ulasan
+                                </p>
+                                <p class="text-[11px] text-muted-foreground">
+                                    Jadi pembeli pertama yang memberi ulasan.
+                                </p>
+                            </div>
                             <div
                                 v-for="(review, idx) in mockReviews"
                                 :key="idx"
@@ -412,7 +349,7 @@ const ratingBreakdown = [
                                     />
                                     <div>
                                         <p
-                                            class="text-xs font-bold text-[#1c1c22]"
+                                            class="text-xs font-bold text-foreground"
                                         >
                                             {{ review.name }}
                                         </p>
@@ -425,27 +362,27 @@ const ratingBreakdown = [
                                                     :class="
                                                         i <= review.rating
                                                             ? 'fill-amber-400 stroke-amber-400'
-                                                            : 'fill-none stroke-black/20'
+                                                            : 'fill-none stroke-border'
                                                     "
                                                 />
                                             </div>
                                             <span
-                                                class="text-[10px] text-[#9090a0]"
+                                                class="text-[10px] text-muted-foreground"
                                                 >{{ review.date }}</span
                                             >
                                         </div>
                                     </div>
                                 </div>
-                                <p class="text-[10px] text-[#9090a0]">
+                                <p class="text-[10px] text-muted-foreground">
                                     Varian: {{ review.variant }}
                                 </p>
                                 <p
-                                    class="text-xs leading-relaxed text-[#4a4a57]"
+                                    class="text-xs leading-relaxed text-muted-foreground"
                                 >
                                     {{ review.text }}
                                 </p>
                                 <div
-                                    class="flex items-center gap-1 text-[10px] text-[#9090a0]"
+                                    class="flex items-center gap-1 text-[10px] text-muted-foreground"
                                 >
                                     <ThumbsUp class="h-3 w-3" /><span
                                         >{{ review.likes }} orang terbantu</span
@@ -462,16 +399,16 @@ const ratingBreakdown = [
             </div>
             <div
                 v-if="product"
-                class="shrink-0 border-t border-black/8 bg-white px-4 pt-3 pb-6"
+                class="shrink-0 border-t border-border bg-card px-4 pt-3 pb-6"
             >
                 <div class="mb-3 flex items-center justify-between">
-                    <span class="text-xs font-bold text-[#1c1c22]">Jumlah</span>
+                    <span class="text-xs font-bold text-foreground">Jumlah</span>
                     <div
-                        class="flex items-center gap-2 rounded-xl border border-black/10 bg-[#f5f4f0] p-1"
+                        class="flex items-center gap-2 rounded-xl border border-border bg-muted p-1"
                     >
                         <button
                             @click="qty = Math.max(1, qty - 1)"
-                            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-white shadow-xs hover:bg-black/5"
+                            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-card shadow-xs hover:bg-muted-foreground/10"
                         >
                             <Minus class="h-3.5 w-3.5" />
                         </button>
@@ -481,7 +418,7 @@ const ratingBreakdown = [
                         >
                         <button
                             @click="qty++"
-                            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-white shadow-xs hover:bg-black/5"
+                            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-card shadow-xs hover:bg-muted-foreground/10"
                         >
                             <Plus class="h-3.5 w-3.5" />
                         </button>
@@ -491,14 +428,13 @@ const ratingBreakdown = [
                     <Button
                         variant="outline"
                         size="lg"
-                        class="flex h-12 flex-1 items-center justify-center gap-1.5 border-(--brand) text-xs font-bold text-(--brand)"
+                        class="flex h-12 flex-1 items-center justify-center gap-1.5 border-brand text-xs font-bold text-brand"
                         @click="handleAddToCart"
                         ><ShoppingCart class="h-4 w-4" />Keranjang</Button
                     >
                     <Button
-                        variant="amber"
                         size="lg"
-                        class="flex h-12 flex-[2] items-center justify-center gap-1.5 text-xs font-bold shadow-md"
+                        class="flex h-12 flex-[2] items-center justify-center gap-1.5 text-xs font-bold shadow-md bg-brand text-brand-foreground border-0 hover:opacity-90"
                         @click="handleAddToCart"
                         ><ArrowRight class="h-4 w-4" />Beli Sekarang</Button
                     >
@@ -513,11 +449,11 @@ const ratingBreakdown = [
     <!-- ─── DESKTOP: Dialog centered 2-column modal ─── -->
     <Dialog v-else :open="isOpen" @update:open="handleOpenChange">
         <DialogContent
-            class="max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-0"
+            class="sm:max-w-4xl md:max-w-5xl h-[85vh] max-h-[750px] w-[94vw] overflow-hidden rounded-3xl p-0 border-0 shadow-2xl"
         >
-            <div class="flex h-full w-full">
+            <div class="flex h-full w-full overflow-hidden">
                 <!-- LEFT: Image column -->
-                <div class="relative flex w-2/5 shrink-0 flex-col bg-[#f5f4f0]">
+                <div class="relative flex w-2/5 shrink-0 flex-col bg-muted border-r border-border overflow-hidden">
                     <div class="relative flex-1 overflow-hidden">
                         <img
                             v-if="product"
@@ -528,7 +464,7 @@ const ratingBreakdown = [
                         <!-- Discount / tag badge -->
                         <div
                             v-if="product?.discount"
-                            class="absolute top-0 left-0 rounded-br-2xl bg-(--brand-strong) px-3 py-1.5 text-sm font-bold text-white"
+                            class="absolute top-0 left-0 rounded-br-2xl bg-brand-strong px-3 py-1.5 text-sm font-bold text-white"
                         >
                             {{ product.discount }}% OFF
                         </div>
@@ -539,7 +475,7 @@ const ratingBreakdown = [
                             <span
                                 v-for="t in product.tag.split(',')"
                                 :key="t"
-                                class="rounded-lg border border-(--brand-accent) bg-(--brand-accent) px-2.5 py-1 text-xs font-black text-black shadow-xs"
+                                class="rounded-lg border border-brand-accent bg-brand-accent px-2.5 py-1 text-xs font-black text-brand-foreground shadow-xs"
                             >
                                 {{ t.trim() }}
                             </span>
@@ -548,21 +484,21 @@ const ratingBreakdown = [
                         <div class="absolute top-3 right-3 flex flex-col gap-2">
                             <button
                                 @click="isLiked = !isLiked"
-                                class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-transform active:scale-90"
+                                class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-card/90 shadow-md backdrop-blur-sm transition-transform active:scale-90"
                             >
                                 <Heart
                                     class="h-4 w-4 transition-colors"
                                     :class="
                                         isLiked
-                                            ? 'fill-(--brand-strong) text-(--brand-strong)'
-                                            : 'text-[#9090a0]'
+                                            ? 'fill-brand-strong text-brand-strong'
+                                            : 'text-muted-foreground'
                                     "
                                 />
                             </button>
                             <button
-                                class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm"
+                                class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-card/90 shadow-md backdrop-blur-sm"
                             >
-                                <Share2 class="h-4 w-4 text-[#9090a0]" />
+                                <Share2 class="h-4 w-4 text-muted-foreground" />
                             </button>
                         </div>
                     </div>
@@ -570,7 +506,7 @@ const ratingBreakdown = [
                     <!-- Store Info block below image -->
                     <div
                         v-if="product"
-                        class="border-t border-black/8 bg-white p-4"
+                        class="border-t border-border bg-card p-4"
                     >
                         <div class="flex items-center gap-3">
                             <Avatar
@@ -583,49 +519,41 @@ const ratingBreakdown = [
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5">
                                     <span
-                                        class="truncate text-sm font-bold text-[#1c1c22]"
+                                        class="truncate text-sm font-bold text-foreground"
                                         >{{ product.store }}</span
                                     >
                                     <BadgeCheck
-                                        class="h-4 w-4 shrink-0 text-(--brand-accent)"
+                                        class="h-4 w-4 shrink-0 text-brand-accent"
                                     />
                                 </div>
-                                <p class="text-[11px] text-[#9090a0]">
+                                <p class="text-[11px] text-muted-foreground">
                                     Official Store · Respons &lt; 1 jam
                                 </p>
                             </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                class="shrink-0 text-xs"
-                                @click="visitStore"
-                            >
-                                <Store class="mr-1 h-3 w-3" /> Kunjungi
-                            </Button>
                         </div>
                         <!-- Trust badges -->
                         <div class="mt-3 flex flex-col gap-1.5">
                             <div
-                                class="flex items-center gap-2 text-xs text-[#4a4a57]"
+                                class="flex items-center gap-2 text-xs text-muted-foreground"
                             >
                                 <ShieldCheck
-                                    class="h-3.5 w-3.5 shrink-0 text-(--brand-strong)"
+                                    class="h-3.5 w-3.5 shrink-0 text-brand-strong"
                                 />
                                 <span>Produk 100% original bergaransi</span>
                             </div>
                             <div
-                                class="flex items-center gap-2 text-xs text-[#4a4a57]"
+                                class="flex items-center gap-2 text-xs text-muted-foreground"
                             >
                                 <Truck
-                                    class="h-3.5 w-3.5 shrink-0 text-(--brand)"
+                                    class="h-3.5 w-3.5 shrink-0 text-brand"
                                 />
                                 <span>Gratis Ongkir · Estimasi 2-3 hari</span>
                             </div>
                             <div
-                                class="flex items-center gap-2 text-xs text-[#4a4a57]"
+                                class="flex items-center gap-2 text-xs text-muted-foreground"
                             >
                                 <Package
-                                    class="h-3.5 w-3.5 shrink-0 text-(--brand-secondary)"
+                                    class="h-3.5 w-3.5 shrink-0 text-brand-secondary"
                                 />
                                 <span>Packing aman bubble wrap + kardus</span>
                             </div>
@@ -634,7 +562,7 @@ const ratingBreakdown = [
                 </div>
 
                 <!-- RIGHT: Detail column -->
-                <div class="flex flex-1 flex-col overflow-hidden">
+                <div class="flex flex-1 flex-col min-w-0 overflow-hidden bg-card">
                     <!-- Scrollable content -->
                     <div class="flex flex-1 flex-col overflow-y-auto">
                         <div v-if="product" class="flex flex-col">
@@ -663,14 +591,14 @@ const ratingBreakdown = [
                                 </div>
 
                                 <h2
-                                    class="text-xl leading-snug font-extrabold text-[#1c1c22]"
+                                    class="text-xl leading-snug font-extrabold text-foreground"
                                 >
                                     {{ product.name }}
                                 </h2>
 
                                 <!-- Rating row -->
                                 <div
-                                    class="mt-2 flex flex-wrap items-center gap-3 text-sm text-[#9090a0]"
+                                    class="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
                                 >
                                     <div class="flex items-center gap-1.5">
                                         <div class="flex gap-0.5">
@@ -682,26 +610,26 @@ const ratingBreakdown = [
                                                     i <=
                                                     Math.round(product.rating)
                                                         ? 'fill-amber-400 stroke-amber-400'
-                                                        : 'fill-none stroke-black/15'
+                                                        : 'fill-none stroke-border'
                                                 "
                                             />
                                         </div>
                                         <span
-                                            class="font-bold text-[#4a4a57]"
+                                            class="font-bold text-muted-foreground"
                                             >{{ product.rating }}</span
                                         >
                                     </div>
-                                    <span class="text-black/20">|</span>
+                                    <span class="text-muted-foreground/30">|</span>
                                     <span
                                         >{{
                                             formatSold(product.sold)
                                         }}
                                         terjual</span
                                     >
-                                    <span class="text-black/20">|</span>
+                                    <span class="text-muted-foreground/30">|</span>
                                     <button
                                         @click="activeTab = 'ulasan'"
-                                        class="text-(--brand) hover:underline"
+                                        class="text-brand hover:underline"
                                     >
                                         {{ mockReviews.length }} ulasan
                                     </button>
@@ -709,26 +637,26 @@ const ratingBreakdown = [
 
                                 <!-- Price block -->
                                 <div
-                                    class="mt-4 rounded-2xl bg-gradient-to-r from-[#fff1e8] to-[#faf9f6] p-4"
+                                    class="mt-4 rounded-2xl bg-gradient-to-r from-brand-soft to-card p-4"
                                 >
                                     <p
-                                        class="mb-0.5 text-[11px] font-medium text-[#9090a0]"
+                                        class="mb-0.5 text-[11px] font-medium text-muted-foreground"
                                     >
                                         Harga
                                     </p>
                                     <div class="flex items-baseline gap-2.5">
                                         <span
-                                            class="font-mono text-3xl font-extrabold text-(--brand-strong)"
+                                            class="font-mono text-3xl font-extrabold text-brand-strong"
                                             >{{ product.price }}</span
                                         >
                                         <span
                                             v-if="product.originalPrice"
-                                            class="text-base text-[#9090a0] line-through"
+                                            class="text-base text-muted-foreground line-through"
                                             >{{ product.originalPrice }}</span
                                         >
                                         <Badge
                                             v-if="product.discount"
-                                            class="bg-(--brand-strong) text-xs font-bold text-white"
+                                            class="bg-brand-strong text-xs font-bold text-white"
                                             >Hemat
                                             {{ product.discount }}%</Badge
                                         >
@@ -739,18 +667,18 @@ const ratingBreakdown = [
                             <Separator />
 
                             <!-- Tabs -->
-                            <div class="flex border-b border-black/8 px-6">
+                            <div class="flex border-b border-border px-6">
                                 <button
                                     v-for="tab in ['detail', 'ulasan']"
                                     :key="tab"
                                     @click="
                                         activeTab = tab as 'detail' | 'ulasan'
                                     "
-                                    class="mr-6 py-3 text-sm font-bold capitalize transition-colors"
+                                    class="mr-6 py-3 text-sm font-bold capitalize transition-colors cursor-pointer"
                                     :class="
                                         activeTab === tab
-                                            ? 'border-b-2 border-(--brand) text-(--brand)'
-                                            : 'text-[#9090a0] hover:text-[#4a4a57]'
+                                            ? 'border-b-2 border-brand text-brand'
+                                            : 'text-muted-foreground hover:text-foreground'
                                     "
                                 >
                                     {{
@@ -766,104 +694,102 @@ const ratingBreakdown = [
                                 </button>
                             </div>
 
-                            <!-- Tab: Detail -->
                             <div
                                 v-if="activeTab === 'detail'"
                                 class="px-6 py-5"
                             >
                                 <p
-                                    class="mb-5 text-sm leading-relaxed text-[#4a4a57]"
+                                    class="mb-5 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap"
                                 >
                                     {{
                                         product.description ||
-                                        'Produk Nike original dengan material premium, daya tahan tinggi, dan kenyamanan maksimal untuk aktivitas sehari-hari.'
+                                        `Produk ${storeName} original dengan material premium, daya tahan tinggi, dan kenyamanan maksimal untuk aktivitas sehari-hari.`
                                     }}
                                 </p>
                                 <div
-                                    class="rounded-2xl border border-black/8 bg-[#faf9f6] p-4"
+                                    class="rounded-2xl border border-border bg-muted p-4"
                                 >
                                     <p
-                                        class="mb-3 text-sm font-bold text-[#1c1c22]"
+                                        class="mb-3 text-sm font-bold text-foreground"
                                     >
                                         Spesifikasi & Identitas Produk
                                     </p>
                                     <div
-                                        class="grid grid-cols-2 gap-x-8 gap-y-2.5 text-sm"
+                                        class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs sm:text-sm"
                                     >
-                                        <div class="flex justify-between">
-                                            <span class="text-[#9090a0]"
+                                        <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
+                                            <span class="text-muted-foreground shrink-0"
                                                 >Merk / Brand</span
                                             ><span
-                                                class="font-bold text-[#1c1c22]"
+                                                class="font-bold text-foreground truncate text-right"
                                                 >{{
-                                                    product.brand || 'Nike'
+                                                    product.brand || storeName
                                                 }}</span
                                             >
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-[#9090a0]"
+                                        <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
+                                            <span class="text-muted-foreground shrink-0"
                                                 >Kode SKU</span
                                             ><span
-                                                class="font-mono font-bold text-[#1c1c22]"
+                                                class="font-mono font-bold text-foreground truncate text-right"
                                                 >{{
                                                     product.sku ||
                                                     'NK-' + product.id
                                                 }}</span
                                             >
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-[#9090a0]"
+                                        <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
+                                            <span class="text-muted-foreground shrink-0"
                                                 >Kategori</span
                                             ><span
-                                                class="font-medium text-[#1c1c22]"
+                                                class="font-medium text-foreground truncate text-right"
                                                 >{{ product.cat }}</span
                                             >
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-[#9090a0]"
+                                        <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
+                                            <span class="text-muted-foreground shrink-0"
                                                 >Kondisi</span
                                             ><span
-                                                class="font-medium text-[#1c1c22]"
+                                                class="font-medium text-foreground text-right"
                                                 >100% Baru & Original</span
                                             >
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-[#9090a0]"
+                                        <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
+                                            <span class="text-muted-foreground shrink-0"
                                                 >Berat Produk</span
                                             ><span
-                                                class="font-medium text-[#1c1c22]"
+                                                class="font-medium text-foreground text-right"
                                                 >{{
                                                     product.weightGram || 500
                                                 }}
                                                 gram</span
                                             >
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-[#9090a0]"
+                                        <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
+                                            <span class="text-muted-foreground shrink-0"
                                                 >Terjual</span
                                             ><span
-                                                class="font-medium text-[#1c1c22]"
+                                                class="font-medium text-foreground text-right"
                                                 >{{
                                                     formatSold(product.sold)
                                                 }}
                                                 unit</span
                                             >
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-[#9090a0]"
+                                        <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
+                                            <span class="text-muted-foreground shrink-0"
                                                 >Rating</span
                                             ><span
-                                                class="font-medium text-[#1c1c22]"
+                                                class="font-medium text-foreground text-right"
                                                 >{{ product.rating }}/5.0</span
                                             >
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-[#9090a0]"
+                                        <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
+                                            <span class="text-muted-foreground shrink-0"
                                                 >Garansi</span
                                             ><span
-                                                class="font-medium text-[#1c1c22]"
-                                                >Garansi Retur 100%
-                                                Original</span
+                                                class="font-medium text-foreground text-right"
+                                                >Garansi Retur Original</span
                                             >
                                         </div>
                                     </div>
@@ -874,11 +800,11 @@ const ratingBreakdown = [
                             <div v-else class="px-6 py-5">
                                 <!-- Rating Summary -->
                                 <div
-                                    class="mb-5 flex items-center gap-6 rounded-2xl border border-black/8 bg-[#faf9f6] p-4"
+                                    class="mb-5 flex items-center gap-6 rounded-2xl border border-border bg-muted p-4"
                                 >
                                     <div class="flex flex-col items-center">
                                         <span
-                                            class="text-5xl font-extrabold text-[#1c1c22]"
+                                            class="text-5xl font-extrabold text-foreground"
                                             >{{ product.rating }}</span
                                         >
                                         <div class="my-1.5 flex gap-0.5">
@@ -890,11 +816,11 @@ const ratingBreakdown = [
                                                     i <=
                                                     Math.round(product.rating)
                                                         ? 'fill-amber-400 stroke-amber-400'
-                                                        : 'fill-none stroke-black/20'
+                                                        : 'fill-none stroke-border'
                                                 "
                                             />
                                         </div>
-                                        <span class="text-xs text-[#9090a0]"
+                                        <span class="text-xs text-muted-foreground"
                                             >dari
                                             {{ mockReviews.length }}
                                             ulasan</span
@@ -907,14 +833,14 @@ const ratingBreakdown = [
                                             class="flex items-center gap-2"
                                         >
                                             <span
-                                                class="w-4 text-right text-xs text-[#9090a0]"
+                                                class="w-4 text-right text-xs text-muted-foreground"
                                                 >{{ row.stars }}</span
                                             >
                                             <Star
                                                 class="h-3 w-3 fill-amber-400 stroke-amber-400"
                                             />
                                             <div
-                                                class="h-2 flex-1 overflow-hidden rounded-full bg-black/10"
+                                                class="h-2 flex-1 overflow-hidden rounded-full bg-border"
                                             >
                                                 <div
                                                     class="h-full rounded-full bg-amber-400 transition-all"
@@ -924,7 +850,7 @@ const ratingBreakdown = [
                                                 />
                                             </div>
                                             <span
-                                                class="w-8 text-xs text-[#9090a0]"
+                                                class="w-8 text-xs text-muted-foreground"
                                                 >{{ row.count }}</span
                                             >
                                         </div>
@@ -933,6 +859,21 @@ const ratingBreakdown = [
 
                                 <!-- Reviews list -->
                                 <div class="flex flex-col gap-5">
+                                    <div
+                                        v-if="!mockReviews.length"
+                                        class="flex flex-col items-center gap-2 py-10 text-center"
+                                    >
+                                        <Star class="h-10 w-10 stroke-border" />
+                                        <p
+                                            class="text-sm font-bold text-foreground"
+                                        >
+                                            Belum ada ulasan
+                                        </p>
+                                        <p class="text-xs text-muted-foreground">
+                                            Jadi pembeli pertama yang memberi
+                                            ulasan.
+                                        </p>
+                                    </div>
                                     <div
                                         v-for="(review, idx) in mockReviews"
                                         :key="idx"
@@ -946,7 +887,7 @@ const ratingBreakdown = [
                                             />
                                             <div>
                                                 <p
-                                                    class="text-sm font-bold text-[#1c1c22]"
+                                                    class="text-sm font-bold text-foreground"
                                                 >
                                                     {{ review.name }}
                                                 </p>
@@ -962,12 +903,12 @@ const ratingBreakdown = [
                                                                 i <=
                                                                 review.rating
                                                                     ? 'fill-amber-400 stroke-amber-400'
-                                                                    : 'fill-none stroke-black/20'
+                                                                    : 'fill-none stroke-border'
                                                             "
                                                         />
                                                     </div>
                                                     <span
-                                                        class="text-xs text-[#9090a0]"
+                                                        class="text-xs text-muted-foreground"
                                                         >{{ review.date }}</span
                                                     >
                                                 </div>
@@ -975,16 +916,16 @@ const ratingBreakdown = [
                                         </div>
                                         <Badge
                                             variant="outline"
-                                            class="w-fit px-2 py-0 text-[10px] text-[#9090a0]"
+                                            class="w-fit px-2 py-0 text-[10px] text-muted-foreground"
                                             >{{ review.variant }}</Badge
                                         >
                                         <p
-                                            class="text-sm leading-relaxed text-[#4a4a57]"
+                                            class="text-sm leading-relaxed text-muted-foreground"
                                         >
                                             {{ review.text }}
                                         </p>
                                         <button
-                                            class="flex w-fit items-center gap-1 rounded-lg border border-black/10 px-2.5 py-1 text-xs text-[#9090a0] transition-colors hover:bg-black/5"
+                                            class="flex w-fit items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted"
                                         >
                                             <ThumbsUp class="h-3 w-3" />
                                             Membantu ({{ review.likes }})
@@ -996,7 +937,7 @@ const ratingBreakdown = [
                                 </div>
 
                                 <button
-                                    class="mt-4 flex w-full items-center justify-center gap-1 py-3 text-sm font-bold text-(--brand) hover:underline"
+                                    class="mt-4 flex w-full items-center justify-center gap-1 py-3 text-sm font-bold text-brand hover:underline"
                                 >
                                     Lihat Semua Ulasan
                                     <ArrowRight class="h-4 w-4" />
@@ -1008,28 +949,28 @@ const ratingBreakdown = [
                     <!-- Sticky bottom action -->
                     <div
                         v-if="product"
-                        class="shrink-0 border-t border-black/8 bg-white px-6 py-4"
+                        class="shrink-0 border-t border-border bg-card px-6 py-4"
                     >
                         <div class="mb-3 flex items-center justify-between">
-                            <span class="text-sm font-bold text-[#1c1c22]"
+                            <span class="text-sm font-bold text-foreground"
                                 >Jumlah Pesanan</span
                             >
                             <div
-                                class="flex items-center gap-2 rounded-xl border border-black/10 bg-[#f5f4f0] p-1"
+                                class="flex items-center gap-2 rounded-xl border border-border bg-muted p-1"
                             >
                                 <button
                                     @click="qty = Math.max(1, qty - 1)"
-                                    class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white shadow-xs hover:bg-black/5"
+                                    class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-card shadow-xs hover:bg-muted-foreground/10"
                                 >
                                     <Minus class="h-4 w-4" />
                                 </button>
                                 <span
-                                    class="min-w-[32px] text-center font-mono text-sm font-bold text-[#1c1c22]"
+                                    class="min-w-[32px] text-center font-mono text-sm font-bold text-foreground"
                                     >{{ qty }}</span
                                 >
                                 <button
                                     @click="qty++"
-                                    class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white shadow-xs hover:bg-black/5"
+                                    class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-card shadow-xs hover:bg-muted-foreground/10"
                                 >
                                     <Plus class="h-4 w-4" />
                                 </button>
@@ -1039,15 +980,14 @@ const ratingBreakdown = [
                             <Button
                                 variant="outline"
                                 size="lg"
-                                class="flex h-12 flex-1 items-center justify-center gap-2 border-(--brand) font-bold text-(--brand) hover:bg-(--brand)/5"
+                                class="flex h-12 flex-1 items-center justify-center gap-2 border-brand font-bold text-brand hover:bg-brand/5"
                                 @click="handleAddToCart"
                             >
                                 <ShoppingCart class="h-5 w-5" /> + Keranjang
                             </Button>
                             <Button
-                                variant="amber"
                                 size="lg"
-                                class="flex h-12 flex-[2] items-center justify-center gap-2 font-bold shadow-lg"
+                                class="flex h-12 flex-[2] items-center justify-center gap-2 font-bold shadow-lg bg-brand text-brand-foreground border-0 hover:opacity-90"
                                 @click="handleAddToCart"
                             >
                                 Beli Sekarang <ArrowRight class="h-5 w-5" />

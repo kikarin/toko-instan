@@ -18,16 +18,7 @@ import {
     SheetDescription,
     SheetFooter,
 } from '@/components/ui/sheet';
-
-export interface CartItem {
-    id: number;
-    name: string;
-    price: number;
-    formattedPrice: string;
-    img: string;
-    store: string;
-    qty: number;
-}
+import type { CartItem } from '@/types/cart';
 
 interface Props {
     isOpen: boolean;
@@ -70,18 +61,18 @@ function handleOpenChange(open: boolean) {
             class="flex w-[85vw] max-w-md flex-col gap-0 p-0 sm:w-full"
         >
             <!-- Sheet Header -->
-            <SheetHeader class="border-b border-black/8 bg-[#faf9f6] px-5 py-4">
+            <SheetHeader class="border-b border-border bg-muted/50 px-5 py-4">
                 <div class="flex items-center gap-2.5">
                     <div
-                        class="flex h-8 w-8 items-center justify-center rounded-xl bg-(--brand-soft) text-(--brand)"
+                        class="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-soft text-brand"
                     >
                         <ShoppingCart class="h-4 w-4" />
                     </div>
                     <div>
-                        <SheetTitle class="text-base font-bold text-[#1c1c22]">
+                        <SheetTitle class="text-base font-bold text-foreground">
                             Keranjang Belanja
                         </SheetTitle>
-                        <SheetDescription class="text-[11px] text-[#9090a0]">
+                        <SheetDescription class="text-[11px] text-muted-foreground">
                             {{ items.length }} item dipilih
                         </SheetDescription>
                     </div>
@@ -94,7 +85,7 @@ function handleOpenChange(open: boolean) {
             >
                 <div class="flex items-center justify-between text-xs">
                     <span
-                        class="flex items-center gap-1.5 font-bold text-(--brand)"
+                        class="flex items-center gap-1.5 font-bold text-brand"
                     >
                         <Truck class="h-4 w-4" />
                         {{
@@ -104,7 +95,7 @@ function handleOpenChange(open: boolean) {
                         }}
                     </span>
                     <span
-                        class="font-mono text-[11px] font-bold text-[#4a4a57]"
+                        class="font-mono text-[11px] font-bold text-muted-foreground"
                     >
                         {{ fmtRp(subtotal) }} /
                         {{ fmtRp(freeShippingThreshold) }}
@@ -126,7 +117,7 @@ function handleOpenChange(open: boolean) {
                     <div
                         v-for="item in items"
                         :key="item.id"
-                        class="flex gap-3 rounded-2xl bg-[#faf9f6] p-3.5 transition-all"
+                        class="flex gap-3 rounded-2xl bg-muted/40 p-3.5 transition-all"
                     >
                         <img
                             :src="item.img"
@@ -142,47 +133,47 @@ function handleOpenChange(open: boolean) {
                                     class="flex items-start justify-between gap-2"
                                 >
                                     <p
-                                        class="line-clamp-2 text-xs leading-snug font-bold text-[#1c1c22]"
+                                        class="line-clamp-2 text-xs leading-snug font-bold text-foreground"
                                     >
                                         {{ item.name }}
                                     </p>
                                     <button
                                         @click="emit('remove-item', item.id)"
-                                        class="shrink-0 cursor-pointer p-1 text-[#9090a0] transition-colors hover:text-red-500"
+                                        class="shrink-0 cursor-pointer p-1 text-muted-foreground transition-colors hover:text-destructive"
                                     >
                                         <Trash2 class="h-3.5 w-3.5" />
                                     </button>
                                 </div>
-                                <p class="mt-0.5 text-[10px] text-[#9090a0]">
+                                <p class="mt-0.5 text-[10px] text-muted-foreground">
                                     {{ item.store }}
                                 </p>
                             </div>
 
                             <div class="mt-2 flex items-end justify-between">
                                 <span
-                                    class="font-mono text-xs font-extrabold text-(--brand)"
+                                    class="font-mono text-xs font-extrabold text-brand"
                                 >
                                     {{ fmtRp(item.price * item.qty) }}
                                 </span>
 
                                 <!-- Qty Selector -->
                                 <div
-                                    class="flex items-center gap-1.5 rounded-xl border border-black/8 bg-white p-1"
+                                    class="flex items-center gap-1.5 rounded-xl border border-border bg-card p-1"
                                 >
                                     <button
                                         @click="emit('update-qty', item.id, -1)"
-                                        class="flex h-5 w-5 cursor-pointer items-center justify-center rounded-lg bg-[#f5f4f0] text-xs font-bold hover:bg-black/8"
+                                        class="flex h-5 w-5 cursor-pointer items-center justify-center rounded-lg bg-muted text-xs font-bold hover:bg-black/10"
                                     >
                                         <Minus class="h-3 w-3" />
                                     </button>
                                     <span
-                                        class="px-1.5 font-mono text-xs font-bold text-[#1c1c22]"
+                                        class="px-1.5 font-mono text-xs font-bold text-foreground"
                                     >
                                         {{ item.qty }}
                                     </span>
                                     <button
                                         @click="emit('update-qty', item.id, 1)"
-                                        class="flex h-5 w-5 cursor-pointer items-center justify-center rounded-lg bg-[#f5f4f0] text-xs font-bold hover:bg-black/8"
+                                        class="flex h-5 w-5 cursor-pointer items-center justify-center rounded-lg bg-muted text-xs font-bold hover:bg-black/10"
                                     >
                                         <Plus class="h-3 w-3" />
                                     </button>
@@ -195,12 +186,12 @@ function handleOpenChange(open: boolean) {
                 <!-- Empty State -->
                 <div
                     v-else
-                    class="flex flex-col items-center justify-center py-20 text-center text-[#9090a0]"
+                    class="flex flex-col items-center justify-center py-20 text-center text-muted-foreground"
                 >
                     <ShoppingCart
-                        class="mb-3 h-12 w-12 stroke-1 text-[#c8c8d5]"
+                        class="mb-3 h-12 w-12 stroke-1 text-border"
                     />
-                    <p class="text-sm font-bold text-[#4a4a57]">
+                    <p class="text-sm font-bold text-foreground">
                         Keranjang Anda Kosong
                     </p>
                     <p class="mt-1 text-xs">
@@ -212,18 +203,18 @@ function handleOpenChange(open: boolean) {
             <!-- Footer -->
             <SheetFooter
                 v-if="items.length > 0"
-                class="flex-col gap-3 border-t border-black/8 bg-[#faf9f6] px-5 py-4"
+                class="flex-col gap-3 border-t border-border bg-muted/50 px-5 py-4"
             >
                 <div class="flex items-center justify-between text-xs">
-                    <span class="text-[#9090a0]">Subtotal Produk</span>
+                    <span class="text-muted-foreground">Subtotal Produk</span>
                     <span
-                        class="font-mono text-base font-extrabold text-[#1c1c22]"
+                        class="font-mono text-base font-extrabold text-foreground"
                     >
                         {{ fmtRp(subtotal) }}
                     </span>
                 </div>
                 <div
-                    class="flex items-center gap-2 text-[10px] font-medium text-(--brand-accent)"
+                    class="flex items-center gap-2 text-[10px] font-medium text-brand-accent"
                 >
                     <ShieldCheck class="h-3.5 w-3.5 shrink-0" />
                     <span
@@ -232,9 +223,8 @@ function handleOpenChange(open: boolean) {
                     >
                 </div>
                 <Button
-                    variant="amber"
                     size="lg"
-                    class="flex w-full items-center justify-center gap-2 text-sm font-bold shadow-md"
+                    class="flex w-full items-center justify-center gap-2 text-sm font-bold shadow-md bg-brand text-brand-foreground hover:opacity-90 border-0"
                     @click="emit('checkout')"
                 >
                     <span>Lanjut ke Checkout</span>

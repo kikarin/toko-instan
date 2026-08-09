@@ -225,7 +225,7 @@
 - [ ] **P1-044** — Order history (buyer)
   - **Deliverable:** Halaman buyer — riwayat pesanan **termasuk line items**
 
-- [ ] **P1-045** — Invoice generation
+- [x] **P1-045** — Invoice generation
   - **Deliverable:** Generate invoice PDF per order
 
 ---

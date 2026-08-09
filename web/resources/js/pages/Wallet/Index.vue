@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import {
     Wallet as WalletIcon,
     ArrowUpRight,
@@ -7,142 +7,33 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-vue-next';
-import { reactive, ref } from 'vue';
-import { toast } from 'vue-sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface WithdrawalRow {
-    id: number;
-    amount: string;
-    net_amount: string;
-    fee: string;
-    status: string;
-    bank_name: string;
-    account_number: string;
-    account_name: string;
-    created_at: string | null;
-}
-
-interface TxRow {
-    id: number;
-    type: string;
-    direction: string;
-    amount: string;
-    balance_after: string;
-    pending_after: string;
-    description: string | null;
-    created_at: string | null;
-}
-
-interface Pagination {
-    current_page: number;
-    last_page: number;
-    total: number;
-    per_page: number;
-}
-
-interface PagedList<T> {
-    data: T[];
-    pagination: Pagination;
-}
+import {
+    TRANSACTION_TYPE_LABEL as typeLabel,
+    useWalletWithdraw,
+    WITHDRAW_STATUS_LABEL as statusLabel,
+    WITHDRAW_STATUS_VARIANT as statusVariant,
+} from '@/lib/useWalletWithdraw';
+import type { WalletSummary } from '@/types/wallet';
+import type { Withdrawal } from '@/types/wallet';
+import type { WalletTransaction } from '@/types/wallet';
+import type { PagedList } from '@/types/wallet';
 
 interface Props {
-    wallet?: { balance: string; pending_balance: string } | null;
-    withdrawals?: PagedList<WithdrawalRow> | null;
-    transactions?: PagedList<TxRow> | null;
+    wallet?: WalletSummary | null;
+    withdrawals?: PagedList<Withdrawal> | null;
+    transactions?: PagedList<WalletTransaction> | null;
 }
 
 defineProps<Props>();
 
-const form = reactive({
-    amount: '',
-    bank_name: '',
-    account_number: '',
-    account_name: '',
-});
-
-const submitting = ref(false);
-
-const statusLabel: Record<string, string> = {
-    pending: 'Pending',
-    approved: 'Disetujui',
-    rejected: 'Ditolak',
-    transferred: 'Ditransfer',
-};
-
-const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
-    {
-        pending: 'amber',
-        approved: 'violetSolid',
-        rejected: 'rose',
-        transferred: 'teal',
-    };
-
-const typeLabel: Record<string, string> = {
-    order_escrow: 'Escrow penjualan',
-    order_release_pending: 'Lepas escrow',
-    order_release_available: 'Dana tersedia',
-    order_refund: 'Refund',
-    withdraw_hold: 'Withdraw di-hold',
-    withdraw_fee: 'Biaya penarikan',
-    withdraw_release: 'Dana dikembalikan',
-    withdraw_paid: 'Withdraw ditransfer',
-    adjustment: 'Penyesuaian',
-};
-
-function submitWithdraw() {
-    submitting.value = true;
-
-    router.post(
-        '/wallet/withdraw',
-        { ...form },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                form.amount = '';
-                form.bank_name = '';
-                form.account_number = '';
-                form.account_name = '';
-                toast.success('Permintaan penarikan diajukan.');
-            },
-            onError: (errors) => {
-                toast.error(errors.amount || 'Gagal mengajukan penarikan.');
-            },
-            onFinish: () => {
-                submitting.value = false;
-            },
-        },
-    );
-}
-
-function goPage(page: number) {
-    if (page < 1) {
-        return;
-    }
-
-    router.get(
-        '/wallet',
-        { page },
-        { preserveState: true, preserveScroll: true, only: ['transactions'] },
-    );
-}
-
-function goWithdrawPage(page: number) {
-    if (page < 1) {
-        return;
-    }
-
-    router.get(
-        '/wallet',
-        { wpage: page },
-        { preserveState: true, preserveScroll: true, only: ['withdrawals'] },
-    );
-}
+const { form, submitting, submitWithdraw, goPage, goWithdrawPage } =
+    useWalletWithdraw();
 </script>
 
 <template>

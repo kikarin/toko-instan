@@ -15,32 +15,32 @@ class ProductController extends Controller
         protected ProductService $productService
     ) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $products = $this->productService->listForSeller()
+        $products = $this->productService->listForSeller($request->user()->id)
             ->map(fn ($product) => $this->productService->format($product))
             ->values()
             ->toArray();
 
         return Inertia::render('Products/Index', [
             'products' => $products,
-            'categories' => $this->productService->categories(),
+            'categories' => $this->productService->categories($request->user()->id),
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
         return Inertia::render('Products/Form', [
-            'categories' => $this->productService->categories(),
-            'labels' => $this->productService->labels(),
-            'brands' => $this->productService->brands(),
+            'categories' => $this->productService->categories($request->user()->id),
+            'labels' => $this->productService->labels($request->user()->id),
+            'brands' => $this->productService->brands($request->user()->id),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validate($request);
-        $this->productService->create(ProductData::fromRequest($validated));
+        $this->productService->create(ProductData::fromRequest($validated), $request->user()->id);
 
         return redirect()->route('products.index')
             ->with('success', 'Produk berhasil ditambahkan.');
@@ -48,7 +48,7 @@ class ProductController extends Controller
 
     public function edit(Request $request, int $id): Response
     {
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');
@@ -56,22 +56,22 @@ class ProductController extends Controller
 
         return Inertia::render('Products/Form', [
             'product' => $this->productService->format($product),
-            'categories' => $this->productService->categories(),
-            'labels' => $this->productService->labels(),
-            'brands' => $this->productService->brands(),
+            'categories' => $this->productService->categories($request->user()->id),
+            'labels' => $this->productService->labels($request->user()->id),
+            'brands' => $this->productService->brands($request->user()->id),
         ]);
     }
 
     public function update(Request $request, int $id): RedirectResponse
     {
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');
         }
 
         $validated = $this->validate($request);
-        $this->productService->update($product, ProductData::fromRequest($validated));
+        $this->productService->update($product, ProductData::fromRequest($validated), $request->user()->id);
 
         return redirect()->route('products.index')
             ->with('success', 'Produk berhasil diperbarui.');
@@ -79,13 +79,13 @@ class ProductController extends Controller
 
     public function destroy(Request $request, int $id): RedirectResponse
     {
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');
         }
 
-        $this->productService->delete($product);
+        $this->productService->delete($product, $request->user()->id);
 
         return redirect()->route('products.index')
             ->with('success', 'Produk berhasil dihapus.');
@@ -93,7 +93,7 @@ class ProductController extends Controller
 
     public function updateStock(Request $request, int $id): RedirectResponse
     {
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');
@@ -103,7 +103,7 @@ class ProductController extends Controller
             'stock' => ['required', 'integer', 'min:0'],
         ]);
 
-        $this->productService->updateStock($product, (int) $validated['stock']);
+        $this->productService->updateStock($product, (int) $validated['stock'], $request->user()->id);
 
         return redirect()->route('products.index')
             ->with('success', "Stok produk diperbarui menjadi {$validated['stock']}.");
@@ -111,13 +111,13 @@ class ProductController extends Controller
 
     public function toggleActive(Request $request, int $id): RedirectResponse
     {
-        $product = $this->productService->findForSeller($id);
+        $product = $this->productService->findForSeller($id, $request->user()->id);
 
         if (! $product) {
             abort(404, 'Produk tidak ditemukan');
         }
 
-        $active = $this->productService->toggleActive($product);
+        $active = $this->productService->toggleActive($product, $request->user()->id);
 
         return redirect()->route('products.index')
             ->with('success', $active

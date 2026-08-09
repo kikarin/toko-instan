@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { ProductDetail } from '@/components/marketplace/ProductDetailModal.vue';
+import type { ProductDetail } from '@/types/product';
 
 export const useUIStore = defineStore('ui', () => {
     const isCartOpen = ref(false);

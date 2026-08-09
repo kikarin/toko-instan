@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { MapPin, Plus, Pencil, Trash2, Check } from 'lucide-vue-next';
-import { reactive, ref } from 'vue';
-import { toast } from 'vue-sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
@@ -10,19 +8,12 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-
-interface Address {
-    id: number;
-    label: string | null;
-    recipient_name: string;
-    phone: string;
-    address: string;
-    city: string;
-    province: string;
-    postal_code: string;
-    is_default: boolean;
-}
+import { useAddresses } from '@/lib/useAddresses';
+import { useIndoRegions } from '@/lib/useIndoRegions';
+import { onMounted, watch } from 'vue';
+import type { Address } from '@/types/address';
 
 interface Props {
     addresses?: Address[];
@@ -30,99 +21,58 @@ interface Props {
 
 defineProps<Props>();
 
-const showForm = ref(false);
-const editingId = ref<number | null>(null);
-const deleteTarget = ref<Address | null>(null);
+const {
+    showForm,
+    editingId,
+    deleteTarget,
+    form,
+    openNew,
+    openEdit,
+    save,
+    makeDefault,
+    confirmDelete,
+} = useAddresses();
 
-const blankForm = {
-    label: '',
-    recipient_name: '',
-    phone: '',
-    address: '',
-    city: '',
-    province: '',
-    postal_code: '',
-    is_default: false,
-};
+const { provinces, cities, districts, loadProvinces, loadCities, loadDistricts } = useIndoRegions();
 
-const form = reactive({ ...blankForm });
+onMounted(() => {
+    loadProvinces();
+});
 
-function openNew() {
-    editingId.value = null;
-    Object.assign(form, blankForm);
-    showForm.value = true;
-}
-
-function openEdit(a: Address) {
-    editingId.value = a.id;
-    Object.assign(form, {
-        label: a.label ?? '',
-        recipient_name: a.recipient_name,
-        phone: a.phone,
-        address: a.address,
-        city: a.city,
-        province: a.province,
-        postal_code: a.postal_code,
-        is_default: a.is_default,
-    });
-    showForm.value = true;
-}
-
-function payload() {
-    return {
-        label: form.label || undefined,
-        recipient_name: form.recipient_name,
-        phone: form.phone,
-        address: form.address,
-        city: form.city,
-        province: form.province,
-        postal_code: form.postal_code,
-        is_default: form.is_default,
-    };
-}
-
-function save() {
-    const options = {
-        onSuccess: () => {
-            showForm.value = false;
-            editingId.value = null;
-            toast.success('Alamat tersimpan.');
-        },
-        onError: () =>
-            toast.error('Gagal menyimpan alamat. Periksa kembali formulir.'),
-    };
-
-    if (editingId.value === null) {
-        router.post('/addresses', payload(), options);
+watch([() => form.province, provinces], ([newProvName, provs], [oldProvName]) => {
+    const prov = provs.find(p => p.name === newProvName);
+    if (prov) {
+        loadCities(prov.id);
     } else {
-        router.put(`/addresses/${editingId.value}`, payload(), options);
+        cities.value = [];
     }
-}
-
-function makeDefault(a: Address) {
-    router.patch(
-        `/addresses/${a.id}/default`,
-        {},
-        { onError: () => toast.error('Gagal mengubah alamat utama.') },
-    );
-}
-
-function confirmDelete() {
-    if (!deleteTarget.value) {
-        return;
+    
+    if (oldProvName !== undefined && oldProvName !== newProvName) {
+        form.city = '';
+        form.district = '';
     }
+});
 
-    router.delete(`/addresses/${deleteTarget.value.id}`, {
-        onSuccess: () => toast.success('Alamat dihapus.'),
-        onError: () => toast.error('Gagal menghapus alamat.'),
-    });
-}
+watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
+    const city = cits.find(c => c.name === newCityName);
+    if (city) {
+        loadDistricts(city.id);
+    } else {
+        districts.value = [];
+    }
+    
+    if (oldCityName !== undefined && oldCityName !== newCityName) {
+        form.district = '';
+    }
+});
 </script>
 
 <template>
     <Head title="Alamat Saya" />
 
-    <StorefrontLayout>
+    <StorefrontLayout
+        @open-cart="router.visit('/' + ((usePage().props.store as any)?.slug ?? ''))"
+    >
         <main class="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 sm:p-6">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -194,22 +144,49 @@ function confirmDelete() {
                         />
                     </div>
                     <div class="flex flex-col gap-1.5">
-                        <Label for="addr-city">Kota/Kabupaten</Label>
-                        <Input
-                            id="addr-city"
-                            v-model="form.city"
-                            required
-                            placeholder="Jakarta Selatan"
-                        />
+                        <Label for="addr-province">Provinsi</Label>
+                        <Select v-model="form.province" required>
+                            <SelectTrigger id="addr-province">
+                                <SelectValue placeholder="Pilih Provinsi" />
+                            </SelectTrigger>
+                            <SelectContent class="max-h-60">
+                                <SelectGroup>
+                                    <SelectItem v-for="prov in provinces" :key="prov.id" :value="prov.name">
+                                        {{ prov.name }}
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div class="flex flex-col gap-1.5">
-                        <Label for="addr-province">Provinsi</Label>
-                        <Input
-                            id="addr-province"
-                            v-model="form.province"
-                            required
-                            placeholder="DKI Jakarta"
-                        />
+                        <Label for="addr-city">Kota/Kabupaten</Label>
+                        <Select v-model="form.city" required :disabled="!form.province">
+                            <SelectTrigger id="addr-city">
+                                <SelectValue placeholder="Pilih Kota/Kabupaten" />
+                            </SelectTrigger>
+                            <SelectContent class="max-h-60">
+                                <SelectGroup>
+                                    <SelectItem v-for="city in cities" :key="city.id" :value="city.name">
+                                        {{ city.name }}
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <Label for="addr-district">Kecamatan</Label>
+                        <Select v-model="form.district" required :disabled="!form.city">
+                            <SelectTrigger id="addr-district">
+                                <SelectValue placeholder="Pilih Kecamatan" />
+                            </SelectTrigger>
+                            <SelectContent class="max-h-60">
+                                <SelectGroup>
+                                    <SelectItem v-for="district in districts" :key="district.id" :value="district.name">
+                                        {{ district.name }}
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <Label for="addr-postal">Kode Pos</Label>
@@ -217,6 +194,8 @@ function confirmDelete() {
                             id="addr-postal"
                             v-model="form.postal_code"
                             required
+                            type="number"
+                            maxlength="5"
                             placeholder="12190"
                         />
                     </div>
@@ -280,7 +259,7 @@ function confirmDelete() {
                                 <p
                                     class="mt-1 text-xs leading-relaxed text-[#4a4a57]"
                                 >
-                                    {{ a.address }}, {{ a.city }},
+                                    {{ a.address }}, {{ a.district ? a.district + ', ' : '' }}{{ a.city }},
                                     {{ a.province }}
                                     {{ a.postal_code }}
                                 </p>

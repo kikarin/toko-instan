@@ -23,12 +23,20 @@ const pb = 28;
 const hoveredIndex = ref<number | null>(null);
 
 const vals = computed(() => props.data.map((d) => d.v));
-const maxVal = computed(() => Math.max(...vals.value) * 1.08);
-const minVal = computed(() => Math.min(...vals.value) * 0.92);
+const maxVal = computed(() =>
+    props.data.length ? Math.max(...vals.value) * 1.08 : 0,
+);
+const minVal = computed(() =>
+    props.data.length ? Math.min(...vals.value) * 0.92 : 0,
+);
 
-const x = (i: number) => pl + (i / (props.data.length - 1)) * (W - pl - pr);
+const x = (i: number) =>
+    pl + (props.data.length > 1 ? i / (props.data.length - 1) : 0) * (W - pl - pr);
 const y = (v: number) =>
-    pt + ((maxVal.value - v) / (maxVal.value - minVal.value)) * (H - pt - pb);
+    pt +
+    (maxVal.value - minVal.value
+        ? ((maxVal.value - v) / (maxVal.value - minVal.value)) * (H - pt - pb)
+        : (H - pt - pb) / 2);
 
 const pointsStr = computed(() =>
     props.data.map((d) => `${x(d.i)},${y(d.v)}`).join(' '),
@@ -49,7 +57,9 @@ const areaD = computed(() => {
     );
 });
 
-const step = computed(() => Math.ceil(props.data.length / 7));
+const step = computed(() =>
+    props.data.length ? Math.ceil(props.data.length / 7) : 1,
+);
 
 function fmtRp(n: number) {
     if (n >= 1_000_000_000) {
@@ -69,7 +79,17 @@ function fmtRp(n: number) {
 </script>
 
 <template>
-    <svg :viewBox="`0 0 ${W} ${H}`" class="h-auto w-full font-mono">
+    <div v-if="!props.data.length" class="flex flex-col items-center gap-2 py-14 text-center">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18" />
+            <path d="M7 15l4-6 4 3 5-7" />
+        </svg>
+        <p class="text-sm font-bold text-zinc-600">Belum ada data omzet</p>
+        <p class="text-xs text-zinc-400">
+            Grafik akan muncul saat toko Anda memiliki penjualan.
+        </p>
+    </div>
+    <svg v-else :viewBox="`0 0 ${W} ${H}`" class="h-auto w-full font-mono">
         <defs>
             <linearGradient id="ra" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#e07c28" stop-opacity="0.18" />

@@ -15,15 +15,21 @@ class WishlistController extends Controller
         protected WishlistService $wishlistService
     ) {}
 
-    public function index(Request $request): Response
+    public function index(string $storeSlug, Request $request): Response
     {
         return Inertia::render('Wishlist', [
             'products' => $this->wishlistService->listFor($request->user()),
         ]);
     }
 
-    public function toggle(Request $request, int $productId): JsonResponse
+    public function toggle(string $storeSlug, Request $request, int $productId): JsonResponse
     {
+        \Log::info('Wishlist Toggle Hit!', [
+            'storeSlug' => $storeSlug,
+            'productId' => $productId,
+            'user' => $request->user()?->email,
+        ]);
+        
         $added = $this->wishlistService->toggle($request->user(), $productId);
 
         return response()->json([
@@ -32,7 +38,7 @@ class WishlistController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, int $productId): RedirectResponse
+    public function destroy(string $storeSlug, Request $request, int $productId): RedirectResponse
     {
         $this->wishlistService->remove($request->user(), $productId);
 

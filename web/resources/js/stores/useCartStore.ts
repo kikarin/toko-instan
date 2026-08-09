@@ -1,10 +1,11 @@
 import { useStorage } from '@vueuse/core';
 import { defineStore } from 'pinia';
-import { computed } from 'vue';
-import type { CartItem } from '@/components/marketplace/CartDrawer.vue';
+import { computed, ref } from 'vue';
+import type { CartItem } from '@/types/cart';
 
 export const useCartStore = defineStore('cart', () => {
     const items = useStorage<CartItem[]>('toko-instan:cart', []);
+    const isOpen = ref(false);
 
     const totalCount = computed(() =>
         items.value.reduce((acc, item) => acc + item.qty, 0),
@@ -50,8 +51,17 @@ export const useCartStore = defineStore('cart', () => {
         items.value = [];
     }
 
+    function openCart() {
+        isOpen.value = true;
+    }
+
+    function closeCart() {
+        isOpen.value = false;
+    }
+
     return {
         items,
+        isOpen,
         totalCount,
         totalAmount,
         formattedTotalAmount,
@@ -59,5 +69,7 @@ export const useCartStore = defineStore('cart', () => {
         updateQty,
         removeItem,
         clearCart,
+        openCart,
+        closeCart,
     };
 });

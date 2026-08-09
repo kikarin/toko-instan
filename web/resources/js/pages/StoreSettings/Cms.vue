@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import {
     Palette,
     Star,
@@ -12,7 +12,6 @@ import {
     BadgeCheck,
     Quote,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -23,216 +22,44 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/sonner';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-interface ThemeColors {
-    primary: string;
-    secondary: string;
-    accent: string;
-    strong: string;
-}
-
-interface ThemeInfo {
-    key: string;
-    label: string;
-    colors: ThemeColors;
-    font: string;
-}
-
-interface ProductOption {
-    id: number;
-    name: string;
-    price: string;
-    img: string | null;
-}
-
-interface Testimonial {
-    name: string;
-    role: string;
-    text: string;
-    rating: number;
-}
-
-interface Showcase {
-    hero: {
-        title: string;
-        subtitle: string;
-        cta_label: string;
-        image: string | null;
-    };
-    about: { title: string; text: string };
-    testimonials: Testimonial[];
-    contact: { show: boolean };
-}
+import {
+    COLOR_TOKENS as colorTokens,
+    useStoreCms,
+} from '@/lib/useStoreCms';
+import type { ProductOption } from '@/types/product';
+import type { ThemeInfo } from '@/types/store';
+import type { StoreShowcase } from '@/types/store';
 
 interface Props {
     store: any;
     theme: ThemeInfo;
-    showcase: Showcase;
+    showcase: StoreShowcase;
     themes: Record<string, ThemeInfo>;
     products: ProductOption[];
 }
 
 const props = defineProps<Props>();
 
-const DEFAULT_COLORS: ThemeColors = {
-    primary: '#3F9AAE',
-    secondary: '#79C9C5',
-    accent: '#FFE2AF',
-    strong: '#F96E5B',
-};
-
-const selectedTheme = ref(props.theme?.key || 'teal');
-const hero = ref({
-    title: props.showcase?.hero?.title ?? '',
-    subtitle: props.showcase?.hero?.subtitle ?? '',
-    cta_label: props.showcase?.hero?.cta_label ?? '',
-    image: props.showcase?.hero?.image ?? '',
-});
-const about = ref({ ...(props.showcase?.about ?? {}) });
-const contactShow = ref(props.showcase?.contact?.show ?? true);
-const featuredIds = ref<number[]>(
-    props.store?.showcase?.featured_product_ids ?? [],
-);
-const testimonials = ref<Testimonial[]>(
-    (props.showcase?.testimonials ?? []).map((t) => ({
-        ...t,
-        rating: t.rating || 5,
-    })),
-);
-
-const previewColors = ref<ThemeColors>(
-    props.theme?.colors ?? { ...DEFAULT_COLORS },
-);
-
-const isCustom = ref(props.theme?.key === 'custom');
-
-const previewStyle = ref({
-    '--brand': previewColors.value.primary,
-    '--brand-secondary': previewColors.value.secondary,
-    '--brand-accent': previewColors.value.accent,
-    '--brand-strong': previewColors.value.strong,
-});
-
-function selectTheme(key: string) {
-    selectedTheme.value = key;
-    isCustom.value = key === 'custom';
-    const cfg = props.themes[key];
-
-    if (cfg) {
-        previewColors.value = { ...cfg.colors };
-        refreshPreviewStyle();
-    }
-}
-
-function onColorInput(token: keyof ThemeColors, e: Event) {
-    const target = e.target as HTMLInputElement;
-
-    if (!isCustom.value) {
-        isCustom.value = true;
-        selectedTheme.value = 'custom';
-    }
-
-    previewColors.value = { ...previewColors.value, [token]: target.value };
-    refreshPreviewStyle();
-}
-
-function refreshPreviewStyle() {
-    previewStyle.value = {
-        '--brand': previewColors.value.primary,
-        '--brand-secondary': previewColors.value.secondary,
-        '--brand-accent': previewColors.value.accent,
-        '--brand-strong': previewColors.value.strong,
-    };
-
-    if (typeof document !== 'undefined') {
-        const root = document.documentElement;
-        root.style.setProperty('--brand', previewColors.value.primary);
-        root.style.setProperty(
-            '--brand-secondary',
-            previewColors.value.secondary,
-        );
-        root.style.setProperty('--brand-accent', previewColors.value.accent);
-        root.style.setProperty('--brand-strong', previewColors.value.strong);
-        root.style.setProperty(
-            '--brand-soft',
-            hexToRgba(previewColors.value.primary, 0.15),
-        );
-
-        root.style.setProperty(
-            '--sidebar-primary',
-            previewColors.value.primary,
-        );
-        root.style.setProperty(
-            '--sidebar-accent',
-            hexToRgba(previewColors.value.primary, 0.15),
-        );
-        root.style.setProperty(
-            '--sidebar-accent-foreground',
-            previewColors.value.primary,
-        );
-        root.style.setProperty('--sidebar-ring', previewColors.value.primary);
-    }
-}
-
-function hexToRgba(hex: string, alpha: number): string {
-    const clean = hex.replace('#', '');
-
-    if (clean.length !== 6) {
-        return 'rgba(224, 124, 40, 0.15)';
-    }
-
-    const n = parseInt(clean, 16);
-
-    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
-}
-
-const colorTokens: { token: keyof ThemeColors; label: string }[] = [
-    { token: 'primary', label: 'Utama' },
-    { token: 'secondary', label: 'Sekunder' },
-    { token: 'accent', label: 'Aksen' },
-    { token: 'strong', label: 'CTA' },
-];
-
-function toggleFeatured(id: number) {
-    featuredIds.value = featuredIds.value.includes(id)
-        ? featuredIds.value.filter((x) => x !== id)
-        : [...featuredIds.value, id];
-}
-
-function addTestimonial() {
-    testimonials.value.push({ name: '', role: '', text: '', rating: 5 });
-}
-
-function removeTestimonial(i: number) {
-    testimonials.value.splice(i, 1);
-}
-
-function submit() {
-    router.put(
-        '/store-cms',
-        {
-            theme: selectedTheme.value,
-            theme_colors: { ...previewColors.value },
-            showcase: {
-                hero: hero.value,
-                about: about.value,
-                contact: { show: contactShow.value },
-                featured_product_ids: featuredIds.value,
-                testimonials: testimonials.value.filter((t) => t.text?.trim()),
-            },
-        },
-        {
-            preserveScroll: true,
-            onSuccess: () => toast.success('Tampilan & konten disimpan!'),
-            onError: () =>
-                toast.error('Gagal menyimpan. Periksa kembali isian Anda.'),
-        },
-    );
-}
+const {
+    selectedTheme,
+    hero,
+    about,
+    contactShow,
+    featuredIds,
+    testimonials,
+    previewColors,
+    isCustom,
+    previewStyle,
+    selectTheme,
+    onColorInput,
+    toggleFeatured,
+    addTestimonial,
+    removeTestimonial,
+    submit,
+} = useStoreCms(props);
 </script>
 
 <template>

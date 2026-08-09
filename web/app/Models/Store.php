@@ -35,6 +35,9 @@ class Store extends Model
         'badge',
         'avatar_hue',
         'banner_url',
+        'banner_urls',
+        'highlights',
+        'hero_config',
         'phone',
         'email',
         'address',
@@ -55,6 +58,9 @@ class Store extends Model
     protected $casts = [
         'theme_colors' => 'array',
         'showcase' => 'array',
+        'banner_urls' => 'array',
+        'highlights' => 'array',
+        'hero_config' => 'array',
     ];
 
     /**

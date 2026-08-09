@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { ArrowLeft, Heart, ShoppingBag, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
-import CartDrawer from '@/components/marketplace/CartDrawer.vue';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
 import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue';
-import type { ProductDetail } from '@/components/marketplace/ProductDetailModal.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/lib/useCart';
 import { useWishlist } from '@/lib/useWishlist';
-import type { WishlistItem } from '@/stores/useWishlistStore';
+import type { ProductDetail } from '@/types/product';
+import type { WishlistItem } from '@/types/product';
 
 interface Props {
     products?: WishlistItem[];
@@ -36,10 +35,8 @@ const {
     items: cartItems,
     totalCount: totalCartCount,
     addItem,
-    updateQty,
-    removeItem: removeCartItem,
+    openCart,
 } = useCart();
-const isCartOpen = ref(false);
 
 // Modal
 const activeProductModal = ref<ProductDetail | null>(null);
@@ -63,20 +60,10 @@ function addToCart(product: any, addQty = 1) {
         addQty,
     );
 
-    isCartOpen.value = true;
+    openCart();
     toast.success(`${product.name} ditambahkan ke keranjang!`);
 }
 
-function updateCartQty(id: number, delta: number) {
-    updateQty(id, delta);
-}
-function removeFromCart(id: number) {
-    removeCartItem(id);
-}
-function goCheckout() {
-    isCartOpen.value = false;
-    router.visit('/checkout');
-}
 function openProductDetail(product: any) {
     activeProductModal.value = product;
 }
@@ -88,9 +75,8 @@ function openProductDetail(product: any) {
     <StorefrontLayout
         :cartCount="totalCartCount"
         :wishlistCount="wishlistCount"
-        @open-cart="isCartOpen = true"
         @search="
-            (q: string) => router.visit('/marketplace', { data: { search: q } })
+            (q: string) => router.visit('/' + (usePage().props.store?.slug ?? ''), { data: { search: q } })
         "
     >
         <main class="mx-auto w-full max-w-[1200px] p-3 sm:p-6 lg:p-8">
@@ -99,7 +85,7 @@ function openProductDetail(product: any) {
                 <div class="flex items-center justify-between pt-2">
                     <div class="flex items-center gap-3">
                         <button
-                            @click="router.visit('/account')"
+                            @click="router.visit(`/${(usePage().props.store as any)?.slug ?? ''}/account`)"
                             class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-black/6 bg-white text-[#1c1c22] shadow-xs transition-colors hover:bg-black/5"
                         >
                             <ArrowLeft class="h-4 w-4" />
@@ -180,7 +166,7 @@ function openProductDetail(product: any) {
                             variant="amber"
                             size="sm"
                             class="mt-2 gap-2 rounded-xl px-6 text-xs font-bold shadow-md"
-                            @click="router.visit('/marketplace')"
+                            @click="router.visit('/' + (usePage().props.store?.slug ?? ''))"
                         >
                             <ShoppingBag class="h-4 w-4" />
                             Mulai Belanja
@@ -189,16 +175,6 @@ function openProductDetail(product: any) {
                 </Card>
             </div>
         </main>
-
-        <!-- Cart Drawer -->
-        <CartDrawer
-            :isOpen="isCartOpen"
-            :items="cartItems"
-            @close="isCartOpen = false"
-            @update-qty="updateCartQty"
-            @remove-item="removeFromCart"
-            @checkout="goCheckout"
-        />
 
         <!-- Product Detail Modal -->
         <ProductDetailModal

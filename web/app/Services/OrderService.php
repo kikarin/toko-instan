@@ -112,24 +112,39 @@ class OrderService
             return null;
         }
 
+        $items = $order->items->map(fn ($item) => [
+            'id' => $item->id,
+            'product_name' => $item->name,
+            'sku' => $item->sku,
+            'qty' => $item->qty,
+            'price' => (float) $item->price,
+            'subtotal' => (float) $item->total,
+            'price_formatted' => 'Rp '.number_format((float) $item->price, 0, ',', '.'),
+            'subtotal_formatted' => 'Rp '.number_format((float) $item->total, 0, ',', '.'),
+        ])->values()->all();
+
+        $total = (float) $order->total_amount;
+        $subtotal = (float) array_sum(array_column($items, 'subtotal'));
+        $shippingFee = max(0.0, $total - $subtotal);
+
         return [
             'id' => $order->id,
             'order_number' => $order->order_number,
             'customer_name' => $order->customer_name,
             'customer_email' => $order->customer_email,
-            'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
-            'total_num' => (float) $order->total_amount,
+            'customer_phone' => $order->customer_phone,
+            'shipping_address' => $order->shipping_address,
+            'notes' => $order->notes,
+            'subtotal' => $subtotal,
+            'subtotal_formatted' => 'Rp '.number_format($subtotal, 0, ',', '.'),
+            'shipping_fee' => $shippingFee,
+            'shipping_fee_formatted' => 'Rp '.number_format($shippingFee, 0, ',', '.'),
+            'total_amount' => 'Rp '.number_format($total, 0, ',', '.'),
+            'total_num' => $total,
             'status' => ucfirst($order->status),
             'store_name' => $order->store ? $order->store->name : 'NovaBatik Studio',
             'created_at' => $order->created_at ? $order->created_at->format('j M Y, H:i') : date('j M Y, H:i'),
-            'items' => $order->items->map(fn ($item) => [
-                'id' => $item->id,
-                'product_name' => $item->name,
-                'sku' => $item->sku,
-                'qty' => $item->qty,
-                'price' => (float) $item->price,
-                'subtotal' => (float) $item->total,
-            ])->values()->all(),
+            'items' => $items,
         ];
     }
 }

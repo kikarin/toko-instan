@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Store;
+use App\Repositories\StoreRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -11,18 +12,11 @@ use Inertia\Response;
 
 class StoreSettingsController extends Controller
 {
+    public function __construct(protected StoreRepository $storeRepository) {}
+
     public function edit(Request $request): Response|RedirectResponse
     {
-        $user = $request->user();
-
-        // Get seller's primary store or first store
-        $store = Store::whereHas('tenant', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })->first();
-
-        if (! $store) {
-            $store = Store::first();
-        }
+        $store = $this->resolve($request->user()->id);
 
         return Inertia::render('StoreSettings/Edit', [
             'store' => $store,
@@ -31,15 +25,7 @@ class StoreSettingsController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $user = $request->user();
-
-        $store = Store::whereHas('tenant', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })->first();
-
-        if (! $store) {
-            $store = Store::first();
-        }
+        $store = $this->resolve($request->user()->id);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -51,7 +37,19 @@ class StoreSettingsController extends Controller
             'avatar_hue' => 'nullable|integer|between:0,360',
             'banner_url' => 'nullable|string|max:500',
             'banner_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
-            'phone' => 'nullable|string|max:50',
+            'banner_files' => 'nullable|array|max:5',
+            'banner_files.*' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+            'existing_banners' => 'nullable|array',
+            'existing_banners.*' => 'string|max:500',
+            'highlights' => 'nullable|array|max:3',
+            'highlights.*' => 'string|max:50',
+            'hero_config' => 'nullable|array',
+            'hero_config.about_text' => 'nullable|string|max:255',
+            'hero_config.widget_title' => 'nullable|string|max:50',
+            'hero_config.widget_subtitle' => 'nullable|string|max:100',
+            'hero_config.widget_description' => 'nullable|string|max:150',
+            'hero_config.fake_buyer_count' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:50', 
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
             'instagram' => 'nullable|string|max:255',
@@ -70,6 +68,16 @@ class StoreSettingsController extends Controller
             $validated['banner_url'] = '/storage/'.$bannerPath;
         }
 
+        $bannerUrls = $request->input('existing_banners', []);
+        
+        if ($request->hasFile('banner_files')) {
+            foreach ($request->file('banner_files') as $file) {
+                $path = $file->store('banners', 'public');
+                $bannerUrls[] = '/storage/'.$path;
+            }
+        }
+        $validated['banner_urls'] = $bannerUrls;
+
         if ($request->hasFile('logo_file')) {
             $logoPath = $request->file('logo_file')->store('logos', 'public');
             $validated['logo'] = '/storage/'.$logoPath;
@@ -84,5 +92,10 @@ class StoreSettingsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Pengaturan Toko berhasil diperbarui!');
+    }
+
+    private function resolve(int $userId): ?Store
+    {
+        return $this->storeRepository->getActiveStore($userId);
     }
 }
