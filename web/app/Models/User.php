@@ -126,7 +126,8 @@ class User extends Authenticatable
     {
         if ($this->role === 'buyer') {
             $storeSlug = $this->customerStore?->slug ?? '';
-            return '/' . $storeSlug;
+
+            return '/'.$storeSlug;
         }
 
         return match ($this->role) {

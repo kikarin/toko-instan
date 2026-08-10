@@ -24,6 +24,7 @@ class AuthService
 
         if (Auth::attempt($buyerCredentials, true)) {
             request()->session()->regenerate();
+
             return true;
         }
 
@@ -32,10 +33,11 @@ class AuthService
             $globalCredentials['store_id'] = null;
 
             $user = $this->userRepository->findByEmail($credentials['email'], null);
-                
+
             if ($user && in_array($user->role, ['seller', 'admin'])) {
                 if (Auth::attempt($globalCredentials, true)) {
                     request()->session()->regenerate();
+
                     return true;
                 }
             }

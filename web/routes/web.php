@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminWithdrawalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoreCmsController;
+use App\Http\Controllers\StorePageController;
 use App\Http\Controllers\StoreSettingsController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\WishlistController;
@@ -64,10 +66,10 @@ Route::middleware(['auth', 'role:buyer'])->prefix('{store_slug}')->group(functio
     Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
 });
 
-
 // Seller area
 Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('seller.orders.index');
+    Route::get('/customers', [CustomerController::class, 'index'])->name('seller.customers.index');
     Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('seller.orders.invoice');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/store-settings', [StoreSettingsController::class, 'edit'])->name('store-settings.edit');
@@ -122,5 +124,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // Public Storefront (Fallback routes)
-Route::get('/{store_slug}', [\App\Http\Controllers\StorePageController::class, 'show'])->name('store.show');
-Route::get('/{store_slug}/p/{product_slug}', [\App\Http\Controllers\StorePageController::class, 'product'])->name('store.product.show');
+Route::get('/{store_slug}', [StorePageController::class, 'show'])->name('store.show');
+Route::get('/{store_slug}/p/{product_slug}', [StorePageController::class, 'product'])->name('store.product.show');

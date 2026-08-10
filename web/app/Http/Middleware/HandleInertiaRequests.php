@@ -61,11 +61,11 @@ class HandleInertiaRequests extends Middleware
     {
         $storeSlug = $request->route('store_slug');
         $store = null;
-        
+
         if ($storeSlug) {
             $store = $this->storeRepository->findBySlug($storeSlug);
         }
-        
+
         if (! $store) {
             $store = $this->storeRepository->getActiveStore($request->user()?->id);
         }
@@ -92,11 +92,11 @@ class HandleInertiaRequests extends Middleware
     {
         $storeSlug = $request->route('store_slug');
         $store = null;
-        
+
         if ($storeSlug) {
             $store = $this->storeRepository->findBySlug($storeSlug);
         }
-        
+
         if (! $store) {
             $store = $this->storeRepository->getActiveStore($request->user()?->id);
         }

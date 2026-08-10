@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Store;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class StoreRepository
@@ -21,10 +22,11 @@ class StoreRepository
     public function getActiveStore(?int $userId = null): ?Store
     {
         if ($userId) {
-            $user = \App\Models\User::find($userId);
+            $user = User::find($userId);
             if ($user && $user->role === 'buyer' && $user->store_id) {
                 return Store::find($user->store_id);
             }
+
             return $this->getStoreForUser($userId) ?: $this->getPrimaryStoreWithProducts();
         }
 

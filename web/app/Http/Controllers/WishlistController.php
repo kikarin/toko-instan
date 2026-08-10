@@ -29,7 +29,7 @@ class WishlistController extends Controller
             'productId' => $productId,
             'user' => $request->user()?->email,
         ]);
-        
+
         $added = $this->wishlistService->toggle($request->user(), $productId);
 
         return response()->json([

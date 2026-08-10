@@ -95,8 +95,8 @@ class OrderController extends Controller
         // If $orderNumber is provided, then the route had {store_slug} and {orderNumber}.
         // If not, then the first parameter is actually the {orderNumber} (from seller route).
         $actualOrderNumber = $orderNumber ?? $orderNumberOrStoreSlug;
-        
-        $order = \App\Models\Order::with('store.tenant')->where('order_number', $actualOrderNumber)->first();
+
+        $order = Order::with('store.tenant')->where('order_number', $actualOrderNumber)->first();
 
         if (! $order) {
             abort(404, 'Pesanan tidak ditemukan');
@@ -110,7 +110,7 @@ class OrderController extends Controller
         if (! $isOwner && ! $isBuyer) {
             abort(403, 'Akses ditolak');
         }
-        
+
         $invoice = $this->orderService->getInvoiceData($actualOrderNumber);
 
         return Inertia::render('Order/Invoice', [

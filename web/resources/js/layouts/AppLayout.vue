@@ -144,7 +144,7 @@ const mainNavItems: NavItem[] = [
     { icon: Settings, label: 'Pengaturan Toko', route: '/store-settings' },
     { icon: Palette, label: 'Tampilan & Konten', route: '/store-cms' },
     { icon: ScrollText, label: 'Riwayat Aktivitas', route: '/activity-log' },
-    { icon: Users, label: 'Pelanggan', route: '#' },
+    { icon: Users, label: 'Pelanggan', route: '/customers' },
 ];
 
 const financeNavItems: NavItem[] = [

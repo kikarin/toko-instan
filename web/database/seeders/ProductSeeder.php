@@ -2,18 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Label;
-use App\Models\Order;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Wallet;
-use App\Models\Withdrawal;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -26,7 +20,9 @@ class ProductSeeder extends Seeder
     private function seedNike(): void
     {
         $seller = User::where('email', 'seller.nike@gmail.com')->first();
-        if (!$seller) return;
+        if (! $seller) {
+            return;
+        }
 
         $tenant = Tenant::firstOrCreate(
             ['slug' => 'nike-indonesia-tenant'],
@@ -80,7 +76,7 @@ class ProductSeeder extends Seeder
                 'price' => 2299000,
                 'stock' => 85,
                 'img' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop&auto=format',
-            ]
+            ],
         ];
 
         foreach ($products as $pData) {
@@ -94,7 +90,9 @@ class ProductSeeder extends Seeder
     private function seedAdidas(): void
     {
         $seller = User::where('email', 'seller.adidas@gmail.com')->first();
-        if (!$seller) return;
+        if (! $seller) {
+            return;
+        }
 
         $tenant = Tenant::firstOrCreate(
             ['slug' => 'adidas-indonesia-tenant'],
@@ -122,7 +120,7 @@ class ProductSeeder extends Seeder
                 'banner_urls' => [
                     'https://images.unsplash.com/photo-1555274175-6cbf6f3b137b?w=1200&h=400&fit=crop&auto=format',
                     'https://images.unsplash.com/photo-1518002171953-a080ee817e1f?w=1200&h=400&fit=crop&auto=format',
-                    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=400&fit=crop&auto=format'
+                    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=400&fit=crop&auto=format',
                 ],
             ]
         );
@@ -140,7 +138,7 @@ class ProductSeeder extends Seeder
 
         $products = [
             [
-                'name' => "Adidas Ultraboost 22",
+                'name' => 'Adidas Ultraboost 22',
                 'slug' => 'adidas-ultraboost-22',
                 'category' => 'Sneakers',
                 'price' => 3300000,
@@ -154,7 +152,7 @@ class ProductSeeder extends Seeder
                 'price' => 2200000,
                 'stock' => 45,
                 'img' => 's',
-            ]
+            ],
         ];
 
         foreach ($products as $pData) {

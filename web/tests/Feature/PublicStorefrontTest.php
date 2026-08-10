@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\Tenant;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,7 +22,7 @@ class PublicStorefrontTest extends TestCase
             'slug' => 'toko-satu',
             'is_active' => true,
         ]);
-        
+
         $this->product = Product::factory()->create([
             'store_id' => $this->store->id,
             'slug' => 'sepatu-lari',

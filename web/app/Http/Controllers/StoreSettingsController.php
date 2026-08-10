@@ -49,7 +49,7 @@ class StoreSettingsController extends Controller
             'hero_config.widget_subtitle' => 'nullable|string|max:100',
             'hero_config.widget_description' => 'nullable|string|max:150',
             'hero_config.fake_buyer_count' => 'nullable|string|max:20',
-            'phone' => 'nullable|string|max:50', 
+            'phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
             'instagram' => 'nullable|string|max:255',
@@ -69,7 +69,7 @@ class StoreSettingsController extends Controller
         }
 
         $bannerUrls = $request->input('existing_banners', []);
-        
+
         if ($request->hasFile('banner_files')) {
             foreach ($request->file('banner_files') as $file) {
                 $path = $file->store('banners', 'public');

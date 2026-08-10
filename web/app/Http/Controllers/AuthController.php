@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Store;
+use App\Repositories\StoreRepository;
 use App\Services\AuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,7 +16,7 @@ class AuthController extends Controller
 {
     public function __construct(
         protected AuthService $authService,
-        protected \App\Repositories\StoreRepository $storeRepository
+        protected StoreRepository $storeRepository
     ) {}
 
     public function showLogin(): Response
@@ -50,7 +53,7 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required', 'string', 'email', 'max:255',
-                \Illuminate\Validation\Rule::unique('users')->whereNull('store_id')
+                Rule::unique('users')->whereNull('store_id'),
             ],
             'password' => ['required', 'string', 'min:6'],
             'role' => ['nullable', 'string', 'in:seller,buyer'],
@@ -70,7 +73,7 @@ class AuthController extends Controller
         $storeSlug = null;
 
         if ($user && $user->store_id) {
-            $store = \App\Models\Store::find($user->store_id);
+            $store = Store::find($user->store_id);
             if ($store) {
                 $storeSlug = $store->slug;
             }
@@ -79,7 +82,7 @@ class AuthController extends Controller
         $this->authService->logout();
 
         if ($storeSlug) {
-            return redirect('/' . $storeSlug);
+            return redirect('/'.$storeSlug);
         }
 
         return redirect('/login');
@@ -88,19 +91,19 @@ class AuthController extends Controller
     public function showStoreLogin(string $storeSlug): Response
     {
         $store = $this->storeRepository->findBySlug($storeSlug);
-        if (!$store) {
+        if (! $store) {
             abort(404);
         }
 
         return Inertia::render('Auth/Login', [
-            'store' => $store
+            'store' => $store,
         ]);
     }
 
     public function storeLogin(Request $request, string $storeSlug): RedirectResponse
     {
         $store = $this->storeRepository->findBySlug($storeSlug);
-        if (!$store) {
+        if (! $store) {
             abort(404);
         }
 
@@ -123,19 +126,19 @@ class AuthController extends Controller
     public function showStoreRegister(string $storeSlug): Response
     {
         $store = $this->storeRepository->findBySlug($storeSlug);
-        if (!$store) {
+        if (! $store) {
             abort(404);
         }
 
         return Inertia::render('Auth/Register', [
-            'store' => $store
+            'store' => $store,
         ]);
     }
 
     public function storeRegister(Request $request, string $storeSlug): RedirectResponse
     {
         $store = $this->storeRepository->findBySlug($storeSlug);
-        if (!$store) {
+        if (! $store) {
             abort(404);
         }
 
@@ -143,7 +146,7 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required', 'string', 'email', 'max:255',
-                \Illuminate\Validation\Rule::unique('users')->where('store_id', $store->id)
+                Rule::unique('users')->where('store_id', $store->id),
             ],
             'password' => ['required', 'string', 'min:6'],
         ]);
