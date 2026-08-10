@@ -7,13 +7,15 @@
 
 ## Overview
 
-Platform ini multi-tenant: setiap seller punya **1 tenant = 1 toko**, diidentifikasi lewat **subdomain**.
+Platform ini multi-tenant: setiap seller punya **1 tenant = 1 toko**.
+
+**MVP (Phase 0–1):** storefront publik diidentifikasi lewat **path slug**:
 
 ```
-tokokeren.platform.com  →  tenant slug = tokokeren
+platform.com/{store_slug}  →  toko tersebut
 ```
 
-Premium nanti bisa custom domain (`tokokeren.com`) — Phase 3. MVP cukup subdomain.
+**Nanti:** subdomain `{slug}.platform.com` dan custom domain Premium (Phase 2–3). Middleware `IdentifyTenant` sudah siap untuk resolusi subdomain opsional.
 
 ---
 
@@ -54,20 +56,22 @@ Keputusan ini bisa dievaluasi ulang di Phase 4 jika scale butuh isolasi lebih ku
 
 ### Sumber identitas
 
-1. **Subdomain** (utama) — `Request::getHost()` → ambil subdomain → cari `tenants.slug`
-2. **Custom domain** (nanti) — match `stores.custom_domain` / tabel domain mapping
-3. **Authenticated context** — dashboard seller: tenant dari user yang login (bukan subdomain storefront)
+1. **Path slug (utama, MVP)** — route `/{store_slug}` / `/{store_slug}/p/{product_slug}` → load `stores` by slug
+2. **Subdomain (opsional / follow-up)** — `Request::getHost()` → ambil subdomain → cari `tenants.slug` via `IdentifyTenant`
+3. **Custom domain** (nanti) — match `stores.custom_domain` / tabel domain mapping
+4. **Authenticated context** — dashboard seller: tenant dari user yang login (bukan host storefront)
 
 
 
-### Domain layout
+### Domain / URL layout
 
 
-| Host                                | Konteks                                     |
-| ----------------------------------- | ------------------------------------------- |
-| `platform.com` / `app.platform.com` | Platform: register, login, seller dashboard |
-| `{slug}.platform.com`               | Storefront publik toko                      |
-| Custom domain (Premium)             | Storefront (Phase 3+)                       |
+| URL / Host                              | Konteks                                     |
+| --------------------------------------- | ------------------------------------------- |
+| `platform.com` / `app.platform.com`     | Platform: register, login, seller dashboard |
+| `platform.com/{store_slug}`             | Storefront publik toko (MVP)                |
+| `{slug}.platform.com`                   | Storefront via subdomain (follow-up)        |
+| Custom domain (Premium)                 | Storefront (Phase 3+)                       |
 
 
 
@@ -77,11 +81,11 @@ Keputusan ini bisa dievaluasi ulang di Phase 4 jika scale butuh isolasi lebih ku
 Contoh:
 
 ```
-toko-instan.test          → dashboard / platform
-demo.toko-instan.test     → storefront tenant "demo"
+http://localhost:8000              → dashboard / platform
+http://localhost:8000/demo-store   → storefront toko slug "demo-store"
 ```
 
-Wildcard DNS / hosts + Nginx/Valet untuk `*.toko-instan.test`.
+Subdomain lokal (`*.toko-instan.test`) tetap didukung middleware jika `PLATFORM_BASE_DOMAIN` di-set; tidak wajib untuk MVP.
 
 ---
 

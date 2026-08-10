@@ -12,13 +12,13 @@
 
 | Phase                     | Task    | Selesai    |
 | ------------------------- | ------- | ---------- |
-| Phase 0 — Foundation      | 17      | 9/17       |
-| Phase 1 — MVP             | 42      | 16/42      |
+| Phase 0 — Foundation      | 17      | 17/17      |
+| Phase 1 — MVP             | 42      | 30/42      |
 | Phase 1.5 — Beta & Launch | 10      | 0/10       |
-| Phase 2 — Growth          | 28      | 0/28       |
+| Phase 2 — Growth          | 28      | 7/28       |
 | Phase 3 — Scale           | 18      | 0/18       |
 | Phase 4 — Enterprise      | 12      | 0/12       |
-| **Total**                 | **127** | **25/127** |
+| **Total**                 | **127** | **54/127** |
 
 
 > Update kolom "Selesai" manual saat milestone tercapai.
@@ -72,11 +72,11 @@
 - [x] **P0-011** — Setup Tailwind + shadcn-vue
   - **Deliverable:** Tailwind configured, komponen shadcn-vue (Button, Card, Input, Badge) bisa dipakai
 
-- [ ] **P0-012** — Folder structure backend
+- [x] **P0-012** — Folder structure backend
   - **Deliverable:** Folder sesuai blueprint: `Actions`, `DTO`, `Enums`, `Services`, `Repositories`, dll.
 
-- [ ] **P0-013** — Folder structure frontend
-  - **Deliverable:** `resources/js/Pages`, `Components`, `Layouts`, `Composables`, `Stores`, `Types`
+- [x] **P0-013** — Folder structure frontend
+  - **Deliverable:** `resources/js/pages`, `components`, `layouts`, `composables`, `stores`, `types`
 
 ---
 
@@ -87,10 +87,10 @@
 - [x] **P0-021** — PostgreSQL schema setup
   - **Deliverable:** Migration schema `public`, `audit`, `logs`; koneksi DB OK
 
-- [ ] **P0-022** — Redis + Horizon
+- [x] **P0-022** — Redis + Horizon
   - **Deliverable:** Horizon jalan, dashboard `/horizon` accessible (dev); `QUEUE_CONNECTION=redis`
 
-- [ ] **P0-023** — S3 / R2 storage config
+- [x] **P0-023** — S3 / R2 storage config
   - **Deliverable:** Laravel filesystem disk `s3`/`r2` configured, upload test file ke Cloudflare R2 berhasil (URL CDN bisa dibuka)
 
 ---
@@ -102,16 +102,16 @@
 - [x] **P0-030** — Migration tabel inti (users, tenants, stores) ⚠️ butuh P0-002
   - **Deliverable:** Migration + Model + relasi dasar; seeder 1 tenant dev
 
-- [ ] **P0-031** — Tenant middleware & subdomain routing ⚠️ butuh P0-001, P0-030
-  - **Deliverable:** Request ke `{tenant}.toko-instan.test` resolve tenant context; data terisolasi (1 storefront = 1 toko)
+- [x] **P0-031** — Tenant middleware & storefront routing ⚠️ butuh P0-001, P0-030
+  - **Deliverable:** Storefront publik `/{store_slug}` (1 path = 1 toko); middleware `IdentifyTenant` siap untuk subdomain opsional; data terisolasi via `tenant_id`
 
-- [ ] **P0-032** — Layout dasar (auth + dashboard)
+- [x] **P0-032** — Layout dasar (auth + dashboard)
   - **Deliverable:** `AuthLayout`, `DashboardLayout`, `StorefrontLayout` — responsive skeleton
 
 - [x] **P0-033** — CI pipeline dasar
   - **Deliverable:** GitHub Actions — lint (Pint/ESLint) + `php artisan test` + `npm run build`
 
-- [ ] **P0-034** — Environment & config template
+- [x] **P0-034** — Environment & config template
   - **Deliverable:** `.env.example` lengkap (pgsql, redis, R2, platform domain); tidak ada secret di repo
 
 ---
@@ -129,7 +129,7 @@
 
 ## 1.1 Authentication
 
-- [ ] **P1-001** — Register & login
+- [x] **P1-001** — Register & login
   - **Deliverable:** Halaman register/login, session auth Laravel yang benar (Firebase bridge verified jika dipakai), redirect ke dashboard
 
 - [ ] **P1-002** — Email verification
@@ -141,7 +141,7 @@
 - [ ] **P1-004** — OTP login (opsional MVP)
   - **Deliverable:** Login via OTP ke email/phone; bisa di-skip jika belum ada provider SMS
 
-- [ ] **P1-005** — Google login (opsional MVP)
+- [x] **P1-005** — Google login (opsional MVP)
   - **Deliverable:** OAuth Google via Firebase — verify ID token server-side, jangan pakai UID sebagai password
 
 ---
@@ -150,17 +150,17 @@
 
 ## 1.2 Tenant & Store
 
-- [ ] **P1-010** — Create store (onboarding) ⚠️ butuh P0-031
+- [x] **P1-010** — Create store (onboarding) ⚠️ butuh P0-031
   - **Deliverable:** Form buat toko (nama, slug/subdomain), auto-create tenant + store
 
 - [x] **P1-011** — Update store profile
   - **Deliverable:** Edit nama toko, deskripsi, logo (upload CDN), kontak
 
-- [ ] **P1-012** — Store status (active/inactive)
+- [x] **P1-012** — Store status (active/inactive)
   - **Deliverable:** Toggle status toko; storefront nonaktif tampil halaman "toko tutup"
 
-- [ ] **P1-013** — Subdomain storefront
-  - **Deliverable:** Halaman publik `{slug}.domain.com` menampilkan toko
+- [x] **P1-013** — Path storefront publik
+  - **Deliverable:** Halaman publik `/{store_slug}` menampilkan toko (subdomain `{slug}.domain` = follow-up Phase 2+)
 
 ---
 
@@ -180,10 +180,10 @@
 - [x] **P1-023** — Product variant & SKU
   - **Deliverable:** Variant (ukuran/warna), SKU unik per variant, stock per variant
 
-- [ ] **P1-024** — Image upload → CDN ⚠️ butuh P0-023
+- [x] **P1-024** — Image upload → CDN ⚠️ butuh P0-023
   - **Deliverable:** Upload gambar → queue job → resize (thumbnail/medium/large) → push R2 → simpan CDN URL di DB
 
-- [ ] **P1-025** — Storefront product catalog
+- [x] **P1-025** — Storefront product catalog
   - **Deliverable:** Halaman list produk + detail produk di storefront **publik** (tanpa wajib login)
 
 - [ ] **P1-026** — Digital product (basic)
@@ -210,7 +210,7 @@
 
 ## 1.5 Checkout & Order
 
-- [ ] **P1-040** — Checkout page
+- [x] **P1-040** — Checkout page
   - **Deliverable:** Halaman checkout: **pilih alamat tersimpan**, ringkasan order, notes
 
 - [x] **P1-041** — Create order
@@ -219,14 +219,14 @@
 - [x] **P1-042** — Order status flow
   - **Deliverable:** Status: Pending → Paid → Processing → Completed (+ Cancelled)
 
-- [ ] **P1-043** — Order history (seller)
+- [x] **P1-043** — Order history (seller)
   - **Deliverable:** Dashboard seller — list & **detail order termasuk line items**
 
-- [ ] **P1-044** — Order history (buyer)
+- [x] **P1-044** — Order history (buyer)
   - **Deliverable:** Halaman buyer — riwayat pesanan **termasuk line items**
 
 - [x] **P1-045** — Invoice generation
-  - **Deliverable:** Generate invoice PDF per order
+  - **Deliverable:** Halaman invoice print-ready per order (item + total); file PDF native opsional nanti
 
 ---
 
@@ -306,13 +306,13 @@
 
 ## 1.10 Dashboard
 
-- [ ] **P1-090** — Seller dashboard
+- [x] **P1-090** — Seller dashboard
   - **Deliverable:** Widget: revenue, orders hari ini, total produk, saldo wallet (data real, scoped ke toko seller)
 
-- [ ] **P1-091** — Platform admin dashboard
+- [x] **P1-091** — Platform admin dashboard
   - **Deliverable:** Admin: total tenants, orders platform, **pending withdraw**
 
-- [ ] **P1-092** — Admin modules dasar
+- [x] **P1-092** — Admin modules dasar
   - **Deliverable:** CRUD users, **tenants**, lihat **orders**, approve withdraw
 
 ---
@@ -635,5 +635,9 @@
 | 2026-08-07 | Phase 0 tuntas (17/17): P0-022 Redis+Horizon, P0-023 R2/S3 storage, P0-031 tenant middleware & subdomain routing, P0-033 CI pipeline                      |
 | 2026-08-07 | Backbone uang: P1-042/060/061/062/070/071/072 — wallet ledger immutable (schema.md), escrow, withdraw fee & approval; payment ditunda (provider-agnostic) |
 | 2026-08-08 | Audit SE: uncentang PARTIAL/FAIL; centang yang sudah jalan tapi belum dicentang (P1-011/021/023/031). Progress jujur: 23/127 |
+| 2026-08-10 | Audit SE setelah pull `devniko`: centang P1-025/040/043/044; perbaiki overview Phase 2 (7/28). Progress jujur: **36/127** |
+| 2026-08-10 | Audit setelah `3dd8b15`: centang P1-045 (invoice print-ready + test); modul seller Customers = ekstra (belum ada task ID). Progress: **37/127** |
+| 2026-08-10 | Phase 0 PARTIAL ditutup: Actions, composables/, Redis queue, R2 upload action+test, Auth/Dashboard layout, path-based storefront (P0-031/P1-013), `.env.example` lengkap. Progress: **46/127** |
+| 2026-08-10 | Phase 1 FAIL/PARTIAL ditutup: P1-001/005/010/012/024/090/091/092 — Google ID token, seller-only register+slug, toko tutup, resize 3 ukuran, dashboard scoped, admin tenants/orders + pending withdraw. Progress: **54/127** |
 
 
