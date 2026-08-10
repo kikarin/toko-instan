@@ -7,7 +7,8 @@ use App\Repositories\StoreRepository;
 use App\Services\AuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use App\DTO\Auth\LoginDTO;
+use App\DTO\Auth\RegisterDTO;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,12 +27,9 @@ class AuthController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $dto = LoginDTO::fromRequest($request);
 
-        if (! $this->authService->login($credentials)) {
+        if (! $this->authService->login($dto)) {
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
@@ -49,18 +47,8 @@ class AuthController extends Controller
 
     public function register(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users')->whereNull('store_id'),
-            ],
-            'password' => ['required', 'string', 'min:6'],
-            'role' => ['nullable', 'string', 'in:seller,buyer'],
-            'store_name' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $this->authService->register($validated);
+        $dto = RegisterDTO::fromRequest($request);
+        $this->authService->register($dto);
 
         $user = $request->user();
 
@@ -107,12 +95,9 @@ class AuthController extends Controller
             abort(404);
         }
 
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $dto = LoginDTO::fromRequest($request);
 
-        if (! $this->authService->login($credentials, $store->id)) {
+        if (! $this->authService->login($dto, $store->id)) {
             throw ValidationException::withMessages([
                 'email' => 'Akun belum terdaftar di toko ini atau kata sandi salah.',
             ]);
@@ -142,20 +127,8 @@ class AuthController extends Controller
             abort(404);
         }
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users')->where('store_id', $store->id),
-            ],
-            'password' => ['required', 'string', 'min:6'],
-        ]);
-
-        // Force role to buyer and inject store_id
-        $validated['role'] = 'buyer';
-        $validated['store_id'] = $store->id;
-
-        $this->authService->register($validated);
+        $dto = RegisterDTO::fromRequest($request, $store->id);
+        $this->authService->register($dto, $store->id);
 
         $user = $request->user();
 

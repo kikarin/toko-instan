@@ -13,6 +13,9 @@ import {
     DollarSign,
     Eye,
     UploadCloud,
+    Plus,
+    X,
+    Layers,
 } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,7 +33,9 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useProductForm } from '@/lib/useProductForm';
-import type { Product } from '@/types/product';
+import type { Product, MarketplaceProduct } from '@/types/product';
+import ProductCard from '@/components/marketplace/ProductCard.vue';
+import { computed } from 'vue';
 
 interface Props {
     product?: Product;
@@ -64,7 +69,53 @@ const {
     uploadImage,
     back,
     submit,
+    variantOptions,
+    variants,
+    generateVariants,
 } = useProductForm(props);
+
+// Create preview product for the Live Preview Card
+const previewProduct = computed<MarketplaceProduct>(() => ({
+    id: 'preview',
+    name: name.value || 'Nama Produk Dagangan Anda...',
+    price: formattedPricePreview.value,
+    rating: 4.8,
+    sold: 3,
+    img: img.value || 'https://placehold.co/600x600?text=Belum+ada+gambar',
+    store: 'Toko Anda',
+    tag: selectedTag.value || undefined,
+    cat: selectedCategory.value || 'Uncategorized',
+    freeShipping: true,
+    sku: sku.value || 'SKU-SAMPLE',
+    stock: stock.value || 0,
+}));
+
+// Add empty option
+function addVariantOption() {
+    if (variantOptions.value.length >= 2) {
+        return; // Max 2 options
+    }
+    variantOptions.value.push({ name: '', values: [] });
+}
+
+function removeVariantOption(index: number) {
+    variantOptions.value.splice(index, 1);
+    generateVariants();
+}
+
+function addOptionValue(index: number) {
+    const val = variantOptions.value[index].inputValue?.trim();
+    if (val && !variantOptions.value[index].values.includes(val)) {
+        variantOptions.value[index].values.push(val);
+        variantOptions.value[index].inputValue = '';
+        generateVariants();
+    }
+}
+
+function removeOptionValue(optionIndex: number, valueIndex: number) {
+    variantOptions.value[optionIndex].values.splice(valueIndex, 1);
+    generateVariants();
+}
 </script>
 
 <template>
@@ -519,6 +570,106 @@ const {
                             />
                         </div>
                     </Card>
+                    <!-- SECTION 5: Varian Produk (Dinamis) -->
+                    <Card
+                        class="rounded-3xl border-border bg-card p-6 shadow-xs"
+                    >
+                        <CardHeader class="mb-5 p-0">
+                            <div
+                                class="flex items-center justify-between"
+                            >
+                                <div class="flex items-center gap-2 text-base font-black text-foreground">
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 font-bold text-primary"
+                                    >
+                                        <Layers class="h-4.5 w-4.5" />
+                                    </div>
+                                    <span>Varian Produk</span>
+                                </div>
+                                <Button
+                                    type="button"
+                                    v-if="variantOptions.length < 2"
+                                    @click="addVariantOption"
+                                    variant="outline"
+                                    size="sm"
+                                    class="h-8 rounded-lg text-xs font-bold"
+                                >
+                                    <Plus class="mr-1 h-3.5 w-3.5" /> Tambah Opsi
+                                </Button>
+                            </div>
+                        </CardHeader>
+
+                        <CardContent class="flex flex-col gap-6 p-0">
+                            <div v-if="variantOptions.length === 0" class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-8 text-center">
+                                <Layers class="mb-2 h-8 w-8 text-muted-foreground/50" />
+                                <p class="text-xs font-bold text-foreground">Tidak ada varian</p>
+                                <p class="mt-1 text-[10px] text-muted-foreground">Tambah opsi jika produk memiliki pilihan warna, ukuran, dsb.</p>
+                            </div>
+
+                            <div v-else class="flex flex-col gap-4">
+                                <div v-for="(option, index) in variantOptions" :key="index" class="relative rounded-2xl border border-border bg-muted/30 p-4">
+                                    <button type="button" @click="removeVariantOption(index)" class="absolute right-3 top-3 rounded-md text-muted-foreground hover:text-destructive">
+                                        <X class="h-4 w-4" />
+                                    </button>
+                                    
+                                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        <div class="flex flex-col gap-1.5">
+                                            <Label class="text-xs font-bold text-foreground">Nama Opsi</Label>
+                                            <Input v-model="option.name" placeholder="Contoh: Warna atau Ukuran" class="h-9 rounded-xl text-xs" @change="generateVariants" />
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <Label class="text-xs font-bold text-foreground">Daftar Pilihan</Label>
+                                            <div v-if="option.values.length > 0" class="flex flex-wrap gap-2 mb-1">
+                                                <Badge v-for="(val, vIdx) in option.values" :key="vIdx" variant="secondary" class="gap-1 px-2 py-1 text-xs font-semibold">
+                                                    {{ val }}
+                                                    <button type="button" @click="removeOptionValue(index, vIdx)" class="text-muted-foreground hover:text-foreground ml-1">
+                                                        <X class="h-3 w-3" />
+                                                    </button>
+                                                </Badge>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <Input v-model="option.inputValue" @keydown.enter.prevent="addOptionValue(index)" placeholder="Ketik pilihan & tekan Enter" class="h-9 rounded-xl text-xs flex-1" />
+                                                <Button type="button" @click="addOptionValue(index)" variant="outline" size="sm" class="h-9 px-3 rounded-xl font-bold">Tambah</Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Varian Table -->
+                            <div v-if="variants.length > 0" class="overflow-x-auto rounded-2xl border border-border">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-muted text-muted-foreground">
+                                        <tr>
+                                            <th class="px-4 py-3 font-bold">Varian</th>
+                                            <th class="px-4 py-3 font-bold">Harga (Rp)</th>
+                                            <th class="px-4 py-3 font-bold">Stok</th>
+                                            <th class="px-4 py-3 font-bold">SKU</th>
+                                            <th class="px-4 py-3 font-bold">URL Foto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border bg-card">
+                                        <tr v-for="(variant, vIndex) in variants" :key="vIndex">
+                                            <td class="px-4 py-3 font-bold text-foreground">{{ variant.name }}</td>
+                                            <td class="px-4 py-3">
+                                                <Input v-model="variant.price" type="number" min="0" placeholder="Harga" class="h-8 w-24 rounded-lg text-xs" />
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <Input v-model="variant.stock" type="number" min="0" placeholder="Stok" class="h-8 w-20 rounded-lg text-xs" />
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <Input v-model="variant.sku" placeholder="SKU" class="h-8 w-24 rounded-lg text-xs" />
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <Input v-model="variant.img" placeholder="https://..." class="h-8 w-full min-w-32 rounded-lg text-xs" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
+
                 </form>
 
                 <!-- ── RIGHT COLUMN: STICKY LIVE STOREFRONT PREVIEW (4 Cols) ── -->
@@ -536,108 +687,14 @@ const {
                     </div>
 
                     <!-- Live Product Card Preview -->
-                    <div
-                        class="overflow-hidden rounded-3xl border border-border bg-card shadow-xl"
-                    >
-                        <!-- Image Container -->
-                        <div
-                            class="relative aspect-4/3 w-full overflow-hidden bg-muted"
-                        >
-                            <img
-                                v-if="img"
-                                :src="img"
-                                :alt="name || 'Pratinjau Produk'"
-                                class="h-full w-full object-cover"
-                            />
-                            <div
-                                v-else
-                                class="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/50"
-                            >
-                                <Package class="h-12 w-12" />
-                                <span
-                                    class="text-[10px] font-bold text-muted-foreground"
-                                    >Belum ada gambar</span
-                                >
-                            </div>
-
-                            <!-- Badges Overlay -->
-                            <div
-                                class="absolute top-3 left-3 flex flex-wrap gap-1.5"
-                            >
-                                <Badge
-                                    v-if="selectedTag"
-                                    variant="default"
-                                    class="px-2.5 py-0.5 text-[9px] font-black uppercase shadow-xs"
-                                >
-                                    {{ selectedTag }}
-                                </Badge>
-                                <Badge
-                                    v-if="!isActive"
-                                    variant="rose"
-                                    class="px-2.5 py-0.5 text-[9px] font-black uppercase shadow-xs"
-                                >
-                                    Nonaktif (Draft)
-                                </Badge>
-                            </div>
-
-                            <!-- Rating Pill -->
-                            <div
-                                class="absolute right-3 bottom-3 flex items-center gap-1 rounded-xl bg-black/60 px-2.5 py-1 text-[11px] font-black text-white backdrop-blur-xs"
-                            >
-                                <Star
-                                    class="h-3.5 w-3.5 fill-primary text-primary"
-                                />
-                                4.9
-                            </div>
-                        </div>
-
-                        <!-- Content Container -->
-                        <div class="flex flex-col gap-3 p-5">
-                            <div class="flex items-center justify-between">
-                                <Badge
-                                    variant="outline"
-                                    class="border-border text-[10px] font-bold text-muted-foreground"
-                                >
-                                    {{ selectedCategory || 'Uncategorized' }}
-                                </Badge>
-                                <span
-                                    class="font-mono text-[10px] font-bold text-muted-foreground/80"
-                                    >SKU: {{ sku || 'SKU-SAMPLE' }}</span
-                                >
-                            </div>
-
-                            <h3
-                                class="line-clamp-2 text-sm leading-snug font-black text-foreground"
-                            >
-                                {{ name || 'Nama Produk Dagangan Anda...' }}
-                            </h3>
-
-                            <div
-                                class="flex items-end justify-between border-t border-border pt-2"
-                            >
-                                <div>
-                                    <span
-                                        class="block text-[10px] font-bold text-muted-foreground/80 uppercase"
-                                        >Harga Jual</span
-                                    >
-                                    <span
-                                        class="font-mono text-base font-black text-primary"
-                                    >
-                                        {{ formattedPricePreview }}
-                                    </span>
-                                </div>
-
-                                <div class="text-right">
-                                    <span
-                                        class="block text-[10px] font-bold text-muted-foreground/80 uppercase"
-                                        >Stok Unit</span
-                                    >
-                                    <span
-                                        class="font-mono text-xs font-black text-foreground"
-                                        >{{ stock || '0' }} pcs</span
-                                    >
-                                </div>
-                            </div>
+                    <div class="relative w-full max-w-sm mx-auto pointer-events-none sm:pointer-events-auto">
+                        <ProductCard :product="previewProduct" />
+                        
+                        <!-- Draft Overlay -->
+                        <div v-if="!isActive" class="absolute inset-0 z-10 flex items-center justify-center bg-card/60 backdrop-blur-[2px] rounded-2xl border-2 border-dashed border-rose-500/50">
+                            <Badge variant="rose" class="px-3 py-1 text-xs font-black uppercase shadow-lg shadow-rose-500/20">
+                                Nonaktif (Draft)
+                            </Badge>
                         </div>
                     </div>
 

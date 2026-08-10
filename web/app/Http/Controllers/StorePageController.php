@@ -47,6 +47,13 @@ class StorePageController extends Controller
                 'img' => $product->img,
                 'tag' => $product->tag,
                 'cat' => $product->category,
+                'description' => $product->description,
+                'sku' => $product->sku,
+                'brand' => $product->brand,
+                'weightGram' => $product->weight_gram,
+                'stock' => $product->stock,
+                'variant_options' => $product->variant_options,
+                'variants' => $product->variants,
             ];
         })->toArray();
 
@@ -148,6 +155,7 @@ class StorePageController extends Controller
                 'sku' => $product->sku,
                 'brand' => $product->brand,
                 'weightGram' => $product->weight_gram,
+                'variant_options' => $product->variant_options,
                 'variants' => $product->variants->map(function ($variant) {
                     return [
                         'id' => $variant->id,
@@ -156,6 +164,7 @@ class StorePageController extends Controller
                         'price' => 'Rp '.number_format($variant->price, 0, ',', '.'),
                         'priceNum' => (int) $variant->price,
                         'stock' => $variant->stock,
+                        'img' => $variant->img,
                     ];
                 })->toArray(),
             ],

@@ -24,6 +24,21 @@ class UserRepository
             ->first();
     }
 
+    public function countAll(): int
+    {
+        return User::count();
+    }
+
+    public function findById(int $id): ?User
+    {
+        return User::find($id);
+    }
+
+    public function findOrFail(int $id): User
+    {
+        return User::findOrFail($id);
+    }
+
     /**
      * @param  array<string, mixed>  $data
      */

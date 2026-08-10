@@ -13,7 +13,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockController;
@@ -103,10 +102,6 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::post('/catalog/labels', [CatalogController::class, 'storeLabel'])->name('catalog.labels.store');
     Route::put('/catalog/labels/{id}', [CatalogController::class, 'updateLabel'])->name('catalog.labels.update');
     Route::delete('/catalog/labels/{id}', [CatalogController::class, 'destroyLabel'])->name('catalog.labels.destroy');
-    Route::get('/products/{id}/variants', [ProductVariantController::class, 'index'])->name('products.variants.index');
-    Route::post('/products/{id}/variants', [ProductVariantController::class, 'store'])->name('products.variants.store');
-    Route::put('/products/{id}/variants/{variant}', [ProductVariantController::class, 'update'])->name('products.variants.update');
-    Route::delete('/products/{id}/variants/{variant}', [ProductVariantController::class, 'destroy'])->name('products.variants.destroy');
     Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store');
 });
 

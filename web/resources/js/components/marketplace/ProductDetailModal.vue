@@ -48,14 +48,51 @@ const activeTab = ref<'detail' | 'ulasan'>('detail');
 // Reactive mobile detection to prevent double-rendering Sheet + Dialog
 const { isMobile } = useIsMobile();
 
+const selectedOptions = ref<Record<string, string>>({});
+
 watch(
     () => props.product,
-    () => {
+    (newProd) => {
         qty.value = 1;
         isLiked.value = false;
         activeTab.value = 'detail';
+        selectedOptions.value = {};
+        
+        if (newProd?.variant_options?.length) {
+            newProd.variant_options.forEach((opt: any) => {
+                if (opt.values?.length) {
+                    selectedOptions.value[opt.name] = opt.values[0];
+                }
+            });
+        }
     },
+    { immediate: true }
 );
+
+const selectedVariant = computed(() => {
+    if (!props.product?.variants?.length || !props.product?.variant_options?.length) return null;
+    
+    const expectedName = props.product.variant_options
+        .map((opt: any) => selectedOptions.value[opt.name] || '')
+        .filter(Boolean)
+        .join(' - ');
+        
+    return props.product.variants.find((v: any) => v.name === expectedName) || null;
+});
+
+const displayImg = computed(() => {
+    if (selectedVariant.value && selectedVariant.value.img) {
+        return selectedVariant.value.img;
+    }
+    return props.product?.img;
+});
+
+const displayPrice = computed(() => {
+    if (selectedVariant.value && selectedVariant.value.price) {
+        return selectedVariant.value.price;
+    }
+    return props.product?.price;
+});
 
 const isOpen = computed(() => !!props.product);
 
@@ -67,7 +104,23 @@ function handleOpenChange(open: boolean) {
 
 function handleAddToCart() {
     if (props.product) {
-        emit('add-to-cart', props.product, qty.value);
+        const rawPrice =
+            selectedVariant.value?.priceNum ||
+            props.product.priceNum ||
+            parseInt(props.product.price.replace(/[^\d]/g, ''), 10) ||
+            100000;
+
+        const productToAdd = {
+            ...props.product,
+            variant_id: selectedVariant.value?.id,
+            name: selectedVariant.value
+                ? `${props.product.name} - ${selectedVariant.value.name}`
+                : props.product.name,
+            price: displayPrice.value,
+            priceNum: rawPrice,
+            img: displayImg.value,
+        };
+        emit('add-to-cart', productToAdd, qty.value);
         emit('close');
     }
 }
@@ -105,8 +158,8 @@ const ratingBreakdown: any[] = [];
                     class="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted"
                 >
                     <img
-                        v-if="product"
-                        :src="product.img"
+                        v-if="displayImg"
+                        :src="displayImg"
                         :alt="product.name"
                         class="h-full w-full object-cover"
                     />
@@ -147,7 +200,7 @@ const ratingBreakdown: any[] = [];
                         <div class="flex items-baseline gap-2">
                             <span
                                 class="text-2xl font-extrabold text-brand-strong"
-                                >{{ product.price }}</span
+                                >{{ displayPrice }}</span
                             >
                             <span
                                 v-if="product.originalPrice"
@@ -179,6 +232,29 @@ const ratingBreakdown: any[] = [];
                             >
                                 {{ mockReviews.length }} ulasan
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Variant Selector -->
+                    <div v-if="product?.variant_options && product.variant_options.length > 0" class="px-4 pb-4 flex flex-col gap-3">
+                        <div v-for="opt in product.variant_options" :key="opt.name">
+                            <p class="mb-2 text-xs font-bold text-foreground">Pilih {{ opt.name }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    v-for="val in opt.values"
+                                    :key="val"
+                                    type="button"
+                                    @click="selectedOptions[opt.name] = val"
+                                    class="px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer"
+                                    :class="
+                                        selectedOptions[opt.name] === val
+                                            ? 'border-brand-strong bg-brand-soft text-brand-strong ring-1 ring-brand-strong'
+                                            : 'border-border bg-card text-foreground hover:border-brand-strong/50 hover:bg-muted'
+                                    "
+                                >
+                                    {{ val }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <Separator />
@@ -237,10 +313,8 @@ const ratingBreakdown: any[] = [];
                         </button>
                     </div>
                     <div v-if="activeTab === 'detail'" class="px-4 py-4">
-                        <p class="mb-3 text-xs leading-relaxed text-muted-foreground">
-                            Produk berkualitas tinggi dari {{ product.store }}.
-                            Dibuat dengan bahan pilihan untuk memastikan
-                            kenyamanan dan daya tahan maksimal.
+                        <p class="mb-3 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                            {{ product.description || 'Tidak ada deskripsi.' }}
                         </p>
                         <div class="rounded-xl bg-muted p-3 text-xs">
                             <p class="mb-2 font-bold text-foreground">
@@ -248,23 +322,28 @@ const ratingBreakdown: any[] = [];
                             </p>
                             <div class="flex flex-col gap-1.5">
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Kategori</span
-                                    ><span class="font-medium">{{
-                                        product.cat
-                                    }}</span>
+                                    <span class="text-muted-foreground">Merk / Brand</span>
+                                    <span class="font-medium">{{ product.brand || '-' }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Kondisi</span
-                                    ><span class="font-medium">Baru</span>
+                                    <span class="text-muted-foreground">Kode SKU</span>
+                                    <span class="font-mono font-medium">{{ product.sku || '-' }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Terjual</span
-                                    ><span class="font-medium"
-                                        >{{
-                                            formatSold(product.sold)
-                                        }}
-                                        unit</span
-                                    >
+                                    <span class="text-muted-foreground">Kategori</span>
+                                    <span class="font-medium">{{ product.category || product.cat || '-' }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted-foreground">Kondisi</span>
+                                    <span class="font-medium">Baru</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted-foreground">Berat Produk</span>
+                                    <span class="font-medium">{{ product.weightGram ? product.weightGram + ' gram' : '-' }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted-foreground">Terjual</span>
+                                    <span class="font-medium">{{ formatSold(product.sold) }} unit</span>
                                 </div>
                             </div>
                         </div>
@@ -456,8 +535,8 @@ const ratingBreakdown: any[] = [];
                 <div class="relative flex w-2/5 shrink-0 flex-col bg-muted border-r border-border overflow-hidden">
                     <div class="relative flex-1 overflow-hidden">
                         <img
-                            v-if="product"
-                            :src="product.img"
+                            v-if="displayImg"
+                            :src="displayImg"
                             :alt="product.name"
                             class="h-full w-full object-cover"
                         />
@@ -647,7 +726,7 @@ const ratingBreakdown: any[] = [];
                                     <div class="flex items-baseline gap-2.5">
                                         <span
                                             class="font-mono text-3xl font-extrabold text-brand-strong"
-                                            >{{ product.price }}</span
+                                            >{{ displayPrice }}</span
                                         >
                                         <span
                                             v-if="product.originalPrice"
@@ -660,6 +739,29 @@ const ratingBreakdown: any[] = [];
                                             >Hemat
                                             {{ product.discount }}%</Badge
                                         >
+                                    </div>
+                                </div>
+
+                                <!-- Desktop Variant Selector -->
+                                <div v-if="product?.variant_options && product.variant_options.length > 0" class="mt-5 flex flex-col gap-3">
+                                    <div v-for="opt in product.variant_options" :key="opt.name">
+                                        <p class="mb-2 text-xs font-bold text-foreground">Pilih {{ opt.name }}</p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <button
+                                                v-for="val in opt.values"
+                                                :key="val"
+                                                type="button"
+                                                @click="selectedOptions[opt.name] = val"
+                                                class="px-3 py-1.5 rounded-lg border text-sm font-semibold transition-all cursor-pointer"
+                                                :class="
+                                                    selectedOptions[opt.name] === val
+                                                        ? 'border-brand-strong bg-brand-soft text-brand-strong ring-1 ring-brand-strong'
+                                                        : 'border-border bg-card text-foreground hover:border-brand-strong/50 hover:bg-muted'
+                                                "
+                                            >
+                                                {{ val }}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -701,10 +803,7 @@ const ratingBreakdown: any[] = [];
                                 <p
                                     class="mb-5 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap"
                                 >
-                                    {{
-                                        product.description ||
-                                        `Produk ${storeName} original dengan material premium, daya tahan tinggi, dan kenyamanan maksimal untuk aktivitas sehari-hari.`
-                                    }}
+                                    {{ product.description || 'Tidak ada deskripsi.' }}
                                 </p>
                                 <div
                                     class="rounded-2xl border border-border bg-muted p-4"
@@ -722,9 +821,7 @@ const ratingBreakdown: any[] = [];
                                                 >Merk / Brand</span
                                             ><span
                                                 class="font-bold text-foreground truncate text-right"
-                                                >{{
-                                                    product.brand || storeName
-                                                }}</span
+                                                >{{ product.brand || '-' }}</span
                                             >
                                         </div>
                                         <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
@@ -732,10 +829,7 @@ const ratingBreakdown: any[] = [];
                                                 >Kode SKU</span
                                             ><span
                                                 class="font-mono font-bold text-foreground truncate text-right"
-                                                >{{
-                                                    product.sku ||
-                                                    'NK-' + product.id
-                                                }}</span
+                                                >{{ product.sku || '-' }}</span
                                             >
                                         </div>
                                         <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
@@ -743,7 +837,7 @@ const ratingBreakdown: any[] = [];
                                                 >Kategori</span
                                             ><span
                                                 class="font-medium text-foreground truncate text-right"
-                                                >{{ product.cat }}</span
+                                                >{{ product.cat || product.category || '-' }}</span
                                             >
                                         </div>
                                         <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
@@ -751,7 +845,7 @@ const ratingBreakdown: any[] = [];
                                                 >Kondisi</span
                                             ><span
                                                 class="font-medium text-foreground text-right"
-                                                >100% Baru & Original</span
+                                                >Baru</span
                                             >
                                         </div>
                                         <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
@@ -759,10 +853,7 @@ const ratingBreakdown: any[] = [];
                                                 >Berat Produk</span
                                             ><span
                                                 class="font-medium text-foreground text-right"
-                                                >{{
-                                                    product.weightGram || 500
-                                                }}
-                                                gram</span
+                                                >{{ product.weightGram ? product.weightGram + ' gram' : '-' }}</span
                                             >
                                         </div>
                                         <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
@@ -945,6 +1036,8 @@ const ratingBreakdown: any[] = [];
                             </div>
                         </div>
                     </div>
+
+
 
                     <!-- Sticky bottom action -->
                     <div

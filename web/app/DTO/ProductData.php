@@ -16,6 +16,8 @@ class ProductData
         public ?string $sku = null,
         public ?string $brand = 'Nike',
         public int $weightGram = 500,
+        public ?array $variantOptions = null,
+        public ?array $variants = null,
     ) {}
 
     /**
@@ -35,6 +37,8 @@ class ProductData
             sku: $validated['sku'] ?? null,
             brand: $validated['brand'] ?? 'Nike',
             weightGram: (int) ($validated['weight_gram'] ?? 500),
+            variantOptions: $validated['variant_options'] ?? null,
+            variants: $validated['variants'] ?? null,
         );
     }
 }

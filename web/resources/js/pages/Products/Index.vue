@@ -437,17 +437,7 @@ const {
                         >
                             <Pencil class="mr-1.5 h-3.5 w-3.5" /> Edit
                         </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            class="h-9 flex-1 rounded-xl text-xs font-bold"
-                            @click="router.visit(`/products/${p.id}/variants`)"
-                        >
-                            <Layers
-                                class="mr-1.5 h-3.5 w-3.5 text-primary"
-                            />
-                            Varian
-                        </Button>
+                        <!-- Varian button removed -->
                         <Button
                             :variant="p.is_active ? 'outline' : 'amber'"
                             size="sm"
@@ -609,21 +599,7 @@ const {
                                                 class="h-3.5 w-3.5 text-muted-foreground"
                                             />
                                         </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            class="h-8 w-8 p-0"
-                                            @click="
-                                                router.visit(
-                                                    `/products/${p.id}/variants`,
-                                                )
-                                            "
-                                            title="Varian SKU"
-                                        >
-                                            <Layers
-                                                class="h-3.5 w-3.5 text-primary"
-                                            />
-                                        </Button>
+                                        <!-- Varian button removed -->
                                         <Button
                                             variant="ghost"
                                             size="sm"

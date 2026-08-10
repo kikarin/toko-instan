@@ -3,6 +3,21 @@ import { computed, ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
 import type { Product } from '@/types/product';
 
+export interface VariantOption {
+    name: string;
+    values: string[];
+    inputValue?: string;
+}
+
+export interface VariantData {
+    id: number | null;
+    name: string;
+    price: string;
+    stock: string;
+    sku: string;
+    img: string;
+}
+
 interface ProductFormProps {
     product?: Product | null;
     categories?: string[];
@@ -77,6 +92,74 @@ export function useProductForm(props: ProductFormProps) {
     const uploading = ref(false);
     const errors = ref<Record<string, string>>({});
     const fileInput = ref<HTMLInputElement | null>(null);
+
+    const variantOptions = ref<VariantOption[]>(
+        props.product?.variant_options?.map(opt => ({
+            ...opt,
+            inputValue: ''
+        })) ?? []
+    );
+
+    const variants = ref<VariantData[]>(
+        props.product?.variants?.map((v: any) => ({
+            id: v.id,
+            name: v.name,
+            price: v.price ? String(v.price) : '',
+            stock: String(v.stock ?? 0),
+            sku: v.sku ?? '',
+            img: v.img ?? '',
+        })) ?? []
+    );
+
+    // Watch variant options to regenerate combinations if they change
+    // But we only want to generate when options are modified explicitly,
+    // so we'll provide a function to do that in the UI.
+    function generateVariants() {
+        if (variantOptions.value.length === 0) {
+            variants.value = [];
+            return;
+        }
+
+        // Sync values array from rawValues string before generating combinations
+        // Not needed anymore since values is directly modified as array.
+
+        const combinations = cartesianProduct(
+            variantOptions.value.map((opt) => opt.values)
+        );
+
+        const newVariants: VariantData[] = [];
+
+        combinations.forEach((combo) => {
+            if (combo.length === 0) return;
+            const name = combo.join(' - ');
+            const existing = variants.value.find((v) => v.name === name);
+
+            if (existing) {
+                newVariants.push(existing);
+            } else {
+                newVariants.push({
+                    id: null,
+                    name,
+                    price: '',
+                    stock: '0',
+                    sku: '',
+                    img: '',
+                });
+            }
+        });
+
+        variants.value = newVariants;
+    }
+
+    function cartesianProduct(arrays: string[][]): string[][] {
+        return arrays.reduce<string[][]>(
+            (a, b) => {
+                if (b.length === 0) return a;
+                return a.flatMap((d) => b.map((e) => [...d, e]));
+            },
+            [[]]
+        );
+    }
 
     // Formatted Price Computed for Live Preview
     const formattedPricePreview = computed(() => {
@@ -165,6 +248,8 @@ export function useProductForm(props: ProductFormProps) {
             sku: sku.value,
             brand: selectedBrand.value || null,
             weight_gram: weightGram.value,
+            variant_options: variantOptions.value,
+            variants: variants.value,
         };
 
         const options = {
@@ -219,5 +304,8 @@ export function useProductForm(props: ProductFormProps) {
         uploadImage,
         back,
         submit,
+        variantOptions,
+        variants,
+        generateVariants,
     };
 }

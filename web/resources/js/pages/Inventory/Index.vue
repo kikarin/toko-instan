@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, Link } from '@inertiajs/vue3';
 import {
     Boxes,
     History,
@@ -10,6 +10,8 @@ import {
     Minus,
     Plus,
     AlertTriangle,
+    ChevronLeft,
+    ChevronRight,
 } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,7 +23,18 @@ import { useInventoryActions } from '@/lib/useInventoryActions';
 import type { InventoryProduct } from '@/types/inventory';
 
 interface Props {
-    products?: InventoryProduct[];
+    products?: {
+        data: InventoryProduct[];
+        links: any[];
+        current_page: number;
+        last_page: number;
+        total: number;
+        from: number;
+        to: number;
+        per_page: number;
+        prev_page_url: string | null;
+        next_page_url: string | null;
+    };
     lowStockThreshold?: number;
     totalProducts?: number;
     lowStockCount?: number;
@@ -107,7 +120,7 @@ const {
             <Card class="overflow-hidden py-0">
                 <div class="flex flex-col">
                     <div
-                        v-for="p in products ?? []"
+                        v-for="p in products?.data ?? []"
                         :key="p.id"
                         class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3.5 last:border-b-0 sm:px-5"
                     >
@@ -210,7 +223,7 @@ const {
                     </div>
 
                     <div
-                        v-if="!(products ?? []).length"
+                        v-if="!(products?.data ?? []).length"
                         class="py-14 text-center"
                     >
                         <div
@@ -227,6 +240,61 @@ const {
                     </div>
                 </div>
             </Card>
+
+            <!-- ── Pagination Bar ── -->
+            <div v-if="(products?.total ?? 0) > 0"
+                class="flex flex-col items-center justify-between gap-4 rounded-3xl border border-border bg-card p-4 shadow-xs sm:flex-row">
+                <div class="flex items-center gap-3 text-xs font-semibold text-muted-foreground">
+                    <span>Menampilkan
+                        <strong class="font-black text-foreground">{{ products?.from ?? 0 }}–{{ products?.to ?? 0 }}</strong>
+                        dari
+                        <strong class="font-black text-foreground">{{ products?.total ?? 0 }}</strong>
+                        produk</span>
+                    <span class="text-muted-foreground/50">|</span>
+                    <div class="flex items-center gap-1.5">
+                        <span>Per Halaman:</span>
+                        <select
+                            class="h-8 cursor-pointer rounded-xl border border-border bg-muted/50 text-foreground px-2 text-xs font-bold"
+                            @change="(e) => router.get('/inventory', { per_page: (e.target as HTMLSelectElement).value }, { preserveState: true })"
+                        >
+                            <option :value="5" :selected="products?.per_page == 5">5</option>
+                            <option :value="10" :selected="products?.per_page == 10">10</option>
+                            <option :value="20" :selected="products?.per_page == 20">20</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <component :is="products?.prev_page_url ? Link : 'button'" :href="products?.prev_page_url ?? ''" 
+                        class="inline-flex items-center justify-center whitespace-nowrap border border-border bg-card hover:bg-secondary hover:text-foreground text-foreground h-9 cursor-pointer rounded-xl px-3 text-xs font-bold transition-all disabled:pointer-events-none disabled:opacity-50"
+                        :disabled="!products?.prev_page_url">
+                        <ChevronLeft class="mr-1 h-4 w-4" /> Prev
+                    </component>
+
+                    <div class="flex items-center gap-1 px-1">
+                        <template v-for="(link, k) in products?.links ?? []" :key="k">
+                            <!-- Skip 'Next' and 'Previous' which are the first and last items in Laravel links -->
+                            <component v-if="k > 0 && k < (products?.links.length ?? 0) - 1"
+                                :is="link.url ? Link : 'span'"
+                                :href="link.url"
+                                v-html="link.label"
+                                class="flex h-9 w-9 items-center justify-center cursor-pointer rounded-xl text-xs font-black transition-all"
+                                :class="link.active
+                                        ? 'bg-primary text-primary-foreground shadow-xs'
+                                        : 'border border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                "
+                            />
+                        </template>
+                    </div>
+
+                    <component :is="products?.next_page_url ? Link : 'button'" :href="products?.next_page_url ?? ''" 
+                        class="inline-flex items-center justify-center whitespace-nowrap border border-border bg-card hover:bg-secondary hover:text-foreground text-foreground h-9 cursor-pointer rounded-xl px-3 text-xs font-bold transition-all disabled:pointer-events-none disabled:opacity-50"
+                        :disabled="!products?.next_page_url">
+                        Next
+                        <ChevronRight class="ml-1 h-4 w-4" />
+                    </component>
+                </div>
+            </div>
 
             <!-- Action Modal -->
             <Teleport to="body">

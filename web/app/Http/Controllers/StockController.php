@@ -20,20 +20,24 @@ class StockController extends Controller
 
     public function index(Request $request): Response
     {
-        $products = $this->productService->listForSeller($request->user()->id)
-            ->map(fn (Product $product) => [
+        $perPage = (int) $request->query('per_page', 5);
+        $paginator = $this->productService->listForSellerPaginated($request->user()->id, $perPage)->withQueryString();
+        
+        $paginator->getCollection()->transform(function (Product $product) {
+            return [
                 ...$this->productService->format($product),
                 'low_stock' => $product->stock <= $this->lowStockThreshold(),
-            ])
-            ->values()
-            ->toArray();
+            ];
+        });
+
+        $stats = $this->productService->getInventoryStats($request->user()->id, $this->lowStockThreshold());
 
         return Inertia::render('Inventory/Index', [
-            'products' => $products,
+            'products' => $paginator,
             'lowStockThreshold' => $this->lowStockThreshold(),
-            'totalProducts' => count($products),
-            'lowStockCount' => collect($products)->where('low_stock', true)->count(),
-            'outOfStockCount' => collect($products)->where('stock', 0)->count(),
+            'totalProducts' => $stats['total'],
+            'lowStockCount' => $stats['low_stock'],
+            'outOfStockCount' => $stats['out_of_stock'],
         ]);
     }
 

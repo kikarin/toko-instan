@@ -30,6 +30,11 @@ class Product extends Model
         'sku',
         'brand',
         'weight_gram',
+        'variant_options',
+    ];
+
+    protected $casts = [
+        'variant_options' => 'array',
     ];
 
     /**

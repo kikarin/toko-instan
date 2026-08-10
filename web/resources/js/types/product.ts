@@ -25,6 +25,7 @@ export interface ProductVariant {
     formatted_price: string | null;
     stock: number;
     is_active: boolean;
+    img?: string | null;
 }
 
 export interface MarketplaceProduct {
@@ -42,6 +43,8 @@ export interface MarketplaceProduct {
     discount?: number;
     originalPrice?: string;
     freeShipping?: boolean;
+    sku?: string;
+    stock?: number;
 }
 
 export interface ProductDetail extends MarketplaceProduct {

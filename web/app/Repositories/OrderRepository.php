@@ -35,6 +35,11 @@ class OrderRepository
         return Order::where('status', $status)->count();
     }
 
+    public function countByCustomerEmailAndStatus(string $email, string $status): int
+    {
+        return Order::where('customer_email', $email)->where('status', $status)->count();
+    }
+
     public function createOrder(CreateOrderDTO $dto, string $orderNumber, float $totalAmount): Order
     {
         return DB::transaction(function () use ($dto, $orderNumber, $totalAmount) {

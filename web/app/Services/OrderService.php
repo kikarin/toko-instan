@@ -21,6 +21,27 @@ class OrderService
         protected WalletService $walletService
     ) {}
 
+    public function getCustomerOrderCounts(?string $email): array
+    {
+        if (! $email) {
+            return [
+                'bayar' => 0,
+                'diproses' => 0,
+                'dikirim' => 0,
+                'sudah_tiba' => 0,
+                'ulasan' => 0,
+            ];
+        }
+
+        return [
+            'bayar' => $this->orderRepository->countByCustomerEmailAndStatus($email, 'pending'),
+            'diproses' => $this->orderRepository->countByCustomerEmailAndStatus($email, 'paid'),
+            'dikirim' => $this->orderRepository->countByCustomerEmailAndStatus($email, 'shipped'),
+            'sudah_tiba' => $this->orderRepository->countByCustomerEmailAndStatus($email, 'completed'),
+            'ulasan' => 0,
+        ];
+    }
+
     public function processCheckout(CreateOrderDTO $dto): Order
     {
         return DB::transaction(function () use ($dto) {

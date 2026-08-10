@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\Admin\UpdateRoleDTO;
 use App\Models\User;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
@@ -55,7 +56,7 @@ class AdminService
 
         return [
             'stats' => [
-                'users' => User::count(),
+                'users' => $this->userRepository->countAll(),
                 'stores' => $this->storeRepository->countActiveStores(),
                 'products' => $this->productRepository->countTotalProducts(),
                 'orders' => $this->orderRepository->countTotalOrders(),
@@ -75,9 +76,19 @@ class AdminService
         return $this->userRepository->getLatest(100);
     }
 
-    public function setRole(User $user, string $role): void
+    public function getUser(int $id): User
     {
-        $user->update(['role' => $role]);
+        return $this->userRepository->findOrFail($id);
+    }
+
+    public function findUser(int $id): ?User
+    {
+        return $this->userRepository->findById($id);
+    }
+
+    public function setRole(User $user, UpdateRoleDTO $dto): void
+    {
+        $user->update(['role' => $dto->role]);
     }
 
     public function deleteUser(User $user): void

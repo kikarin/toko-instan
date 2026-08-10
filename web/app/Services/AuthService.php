@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\DTO\Auth\LoginDTO;
+use App\DTO\Auth\RegisterDTO;
 use App\Repositories\StoreRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
@@ -14,12 +16,9 @@ class AuthService
         protected StoreRepository $storeRepository
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $credentials
-     */
-    public function login(array $credentials, ?int $storeId = null): bool
+    public function login(LoginDTO $dto, ?int $storeId = null): bool
     {
-        $buyerCredentials = $credentials;
+        $buyerCredentials = $dto->toArray();
         $buyerCredentials['store_id'] = $storeId;
 
         if (Auth::attempt($buyerCredentials, true)) {
@@ -29,10 +28,10 @@ class AuthService
         }
 
         if ($storeId !== null) {
-            $globalCredentials = $credentials;
+            $globalCredentials = $dto->toArray();
             $globalCredentials['store_id'] = null;
 
-            $user = $this->userRepository->findByEmail($credentials['email'], null);
+            $user = $this->userRepository->findByEmail($dto->email, null);
 
             if ($user && in_array($user->role, ['seller', 'admin'])) {
                 if (Auth::attempt($globalCredentials, true)) {
@@ -46,25 +45,22 @@ class AuthService
         return false;
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function register(array $data): bool
+    public function register(RegisterDTO $dto, ?int $storeId = null): bool
     {
-        $role = $data['role'] ?? ($data['store_name'] ? 'seller' : 'buyer');
+        $role = $storeId ? 'buyer' : ($dto->role ?? ($dto->storeName ? 'seller' : 'buyer'));
 
         $user = $this->userRepository->createUser([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'password' => $dto->password,
             'role' => $role,
-            'store_id' => $data['store_id'] ?? null,
+            'store_id' => $storeId,
             'auth_provider' => 'email',
         ]);
 
-        if ($role === 'seller' && ! empty($data['store_name'])) {
-            $slug = Str::slug($data['store_name']);
-            $this->storeRepository->createTenantAndStore($user->id, $data['store_name'], $slug);
+        if ($role === 'seller' && ! empty($dto->storeName)) {
+            $slug = Str::slug($dto->storeName);
+            $this->storeRepository->createTenantAndStore($user->id, $dto->storeName, $slug);
         }
 
         Auth::login($user, true);

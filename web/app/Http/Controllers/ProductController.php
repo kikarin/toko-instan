@@ -142,6 +142,16 @@ class ProductController extends Controller
             'sku' => ['nullable', 'string', 'max:100'],
             'brand' => ['nullable', 'string', 'max:100'],
             'weight_gram' => ['nullable', 'integer', 'min:1'],
+            'variant_options' => ['nullable', 'array'],
+            'variant_options.*.name' => ['required', 'string', 'max:255'],
+            'variant_options.*.values' => ['required', 'array'],
+            'variants' => ['nullable', 'array'],
+            'variants.*.id' => ['nullable', 'integer'],
+            'variants.*.name' => ['required_with:variants', 'string', 'max:255'],
+            'variants.*.price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.stock' => ['nullable', 'integer', 'min:0'],
+            'variants.*.sku' => ['nullable', 'string', 'max:100'],
+            'variants.*.img' => ['nullable', 'string', 'url', 'max:2048'],
         ]);
     }
 }
