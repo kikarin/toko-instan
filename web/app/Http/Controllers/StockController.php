@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\Stock\StockAdjustDTO;
+use App\DTO\Stock\StockInDTO;
+use App\DTO\Stock\StockOutDTO;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\StockService;
@@ -63,10 +66,7 @@ class StockController extends Controller
 
     public function storeIn(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'quantity' => 'required|integer|min:1',
-            'reason' => 'nullable|string|max:255',
-        ]);
+        $dto = StockInDTO::fromRequest($request);
 
         $product = $this->productService->findForSeller($id, $request->user()->id);
 
@@ -74,17 +74,14 @@ class StockController extends Controller
             abort(404, 'Produk tidak ditemukan');
         }
 
-        $this->stockService->stockIn($product, $validated['quantity'], $validated['reason'] ?? null, $request->user());
+        $this->stockService->stockIn($product, $dto->quantity, $dto->reason, $request->user());
 
         return back()->with('success', 'Stok masuk dicatat.');
     }
 
     public function storeOut(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'quantity' => 'required|integer|min:1',
-            'reason' => 'nullable|string|max:255',
-        ]);
+        $dto = StockOutDTO::fromRequest($request);
 
         $product = $this->productService->findForSeller($id, $request->user()->id);
 
@@ -93,7 +90,7 @@ class StockController extends Controller
         }
 
         try {
-            $this->stockService->stockOut($product, $validated['quantity'], $validated['reason'] ?? null, $request->user());
+            $this->stockService->stockOut($product, $dto->quantity, $dto->reason, $request->user());
         } catch (RuntimeException $e) {
             return back()->withErrors(['quantity' => $e->getMessage()]);
         }
@@ -103,10 +100,7 @@ class StockController extends Controller
 
     public function adjust(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'new_stock' => 'required|integer|min:0',
-            'reason' => 'nullable|string|max:255',
-        ]);
+        $dto = StockAdjustDTO::fromRequest($request);
 
         $product = $this->productService->findForSeller($id, $request->user()->id);
 
@@ -115,7 +109,7 @@ class StockController extends Controller
         }
 
         try {
-            $this->stockService->adjust($product, $validated['new_stock'], $validated['reason'] ?? null, $request->user());
+            $this->stockService->adjust($product, $dto->newStock, $dto->reason, $request->user());
         } catch (RuntimeException $e) {
             return back()->withErrors(['new_stock' => $e->getMessage()]);
         }

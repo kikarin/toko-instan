@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\Catalog\BrandDTO;
+use App\DTO\Catalog\CategoryDTO;
+use App\DTO\Catalog\LabelDTO;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Label;
+use App\Services\CatalogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -13,26 +17,21 @@ use Inertia\Response;
 
 class CatalogController extends Controller
 {
+    public function __construct(protected CatalogService $catalogService) {}
+
     public function index(Request $request): Response
     {
         $tenantId = $this->tenantId($request);
 
-        $categories = Category::where('tenant_id', $tenantId)
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get()
+        $categories = $this->catalogService->getCategoriesByTenant($tenantId)
             ->map(fn (Category $c) => $this->formatCategory($c))
             ->values();
 
-        $brands = Brand::where('tenant_id', $tenantId)
-            ->orderBy('name')
-            ->get()
+        $brands = $this->catalogService->getBrandsByTenant($tenantId)
             ->map(fn (Brand $b) => $this->formatBrand($b))
             ->values();
 
-        $labels = Label::where('tenant_id', $tenantId)
-            ->orderBy('name')
-            ->get()
+        $labels = $this->catalogService->getLabelsByTenant($tenantId)
             ->map(fn (Label $l) => $this->formatLabel($l))
             ->values();
 
@@ -45,104 +44,69 @@ class CatalogController extends Controller
 
     public function storeCategory(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:120',
-        ]);
-
-        Category::create([
-            'tenant_id' => $this->tenantId($request),
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']).'-'.Str::random(4),
-            'sort_order' => Category::where('tenant_id', $this->tenantId($request))->count(),
-        ]);
+        $dto = CategoryDTO::fromRequest($request);
+        $this->catalogService->createCategory($dto, $this->tenantId($request));
 
         return back()->with('success', 'Kategori berhasil ditambahkan.');
     }
 
     public function updateCategory(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:120',
-        ]);
-
-        $category = $this->findCategory($request, $id);
-        $category->update(['name' => $validated['name']]);
+        $dto = CategoryDTO::fromRequest($request);
+        $this->catalogService->updateCategory($id, $dto);
 
         return back()->with('success', 'Kategori diperbarui.');
     }
 
     public function destroyCategory(Request $request, int $id): RedirectResponse
     {
-        $this->findCategory($request, $id)->delete();
+        $this->catalogService->deleteCategory($id);
 
         return back()->with('success', 'Kategori dihapus.');
     }
 
     public function storeBrand(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:120',
-        ]);
-
-        Brand::create([
-            'tenant_id' => $this->tenantId($request),
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']).'-'.Str::random(4),
-        ]);
+        $dto = BrandDTO::fromRequest($request);
+        $this->catalogService->createBrand($dto, $this->tenantId($request));
 
         return back()->with('success', 'Brand berhasil ditambahkan.');
     }
 
     public function updateBrand(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:120',
-        ]);
-
-        $this->findBrand($request, $id)->update(['name' => $validated['name']]);
+        $dto = BrandDTO::fromRequest($request);
+        $this->catalogService->updateBrand($id, $dto);
 
         return back()->with('success', 'Brand diperbarui.');
     }
 
     public function destroyBrand(Request $request, int $id): RedirectResponse
     {
-        $this->findBrand($request, $id)->delete();
+        $this->catalogService->deleteBrand($id);
 
         return back()->with('success', 'Brand dihapus.');
     }
 
     public function storeLabel(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:120',
-            'color' => 'nullable|string|max:30',
-        ]);
-
-        Label::create([
-            'tenant_id' => $this->tenantId($request),
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']).'-'.Str::random(4),
-            'color' => $validated['color'] ?? null,
-        ]);
+        $dto = LabelDTO::fromRequest($request);
+        $this->catalogService->createLabel($dto, $this->tenantId($request));
 
         return back()->with('success', 'Label berhasil ditambahkan.');
     }
 
     public function updateLabel(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:120',
-            'color' => 'nullable|string|max:30',
-        ]);
-
-        $this->findLabel($request, $id)->update($validated);
+        $dto = LabelDTO::fromRequest($request);
+        $this->catalogService->updateLabel($id, $dto);
 
         return back()->with('success', 'Label diperbarui.');
     }
 
     public function destroyLabel(Request $request, int $id): RedirectResponse
     {
-        $this->findLabel($request, $id)->delete();
+        $this->catalogService->deleteLabel($id);
 
         return back()->with('success', 'Label dihapus.');
     }
@@ -152,20 +116,7 @@ class CatalogController extends Controller
         return $request->user()->primaryTenant?->id;
     }
 
-    private function findCategory(Request $request, int $id): Category
-    {
-        return Category::where('tenant_id', $this->tenantId($request))->findOrFail($id);
-    }
 
-    private function findBrand(Request $request, int $id): Brand
-    {
-        return Brand::where('tenant_id', $this->tenantId($request))->findOrFail($id);
-    }
-
-    private function findLabel(Request $request, int $id): Label
-    {
-        return Label::where('tenant_id', $this->tenantId($request))->findOrFail($id);
-    }
 
     /**
      * @return array<string, mixed>

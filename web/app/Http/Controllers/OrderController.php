@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\Store;
-use App\Repositories\StoreRepository;
+use App\DTO\Order\UpdateOrderStatusDTO;
 use App\Services\OrderService;
+use App\Services\StoreService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,7 +14,7 @@ class OrderController extends Controller
 {
     public function __construct(
         protected OrderService $orderService,
-        protected StoreRepository $storeRepository
+        protected StoreService $storeService
     ) {}
 
     public function index(Request $request, ?string $storeSlug = null): Response
@@ -23,14 +22,9 @@ class OrderController extends Controller
         $user = $request->user();
 
         if ($user->role === 'seller') {
-            $store = Store::whereHas('tenant', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })->first();
+            $store = $this->storeService->getStoreForUser($user->id);
 
-            $sellerOrders = Order::with(['store', 'items'])
-                ->where('store_id', $store?->id ?: 1)
-                ->orderByDesc('created_at')
-                ->get()
+            $sellerOrders = $this->orderService->sellerOrders($store?->id ?: 1)
                 ->map(function ($order) {
                     return [
                         'id' => $order->id,
@@ -96,7 +90,7 @@ class OrderController extends Controller
         // If not, then the first parameter is actually the {orderNumber} (from seller route).
         $actualOrderNumber = $orderNumber ?? $orderNumberOrStoreSlug;
 
-        $order = Order::with('store.tenant')->where('order_number', $actualOrderNumber)->first();
+        $order = $this->orderService->getOrderWithTenant($actualOrderNumber);
 
         if (! $order) {
             abort(404, 'Pesanan tidak ditemukan');
@@ -120,17 +114,10 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'status' => 'required|string|in:pending,paid,processing,shipped,completed,cancelled',
-        ]);
+        $dto = UpdateOrderStatusDTO::fromRequest($request);
+        $order = $this->orderService->getOrder($id);
 
-        $order = Order::findOrFail($id);
-
-        match ($validated['status']) {
-            'paid' => $this->orderService->markOrderPaid($order),
-            'completed' => $this->orderService->markOrderCompleted($order),
-            default => $order->update(['status' => $validated['status']]),
-        };
+        $this->orderService->updateStatus($order, $dto);
 
         return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui!');
     }

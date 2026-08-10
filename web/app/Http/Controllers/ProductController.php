@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ProductData;
+use App\DTO\UpdateStockDTO;
 use App\Services\ProductService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,8 +40,7 @@ class ProductController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validate($request);
-        $this->productService->create(ProductData::fromRequest($validated), $request->user()->id);
+        $this->productService->create(ProductData::fromRequest($request), $request->user()->id);
 
         return redirect()->route('products.index')
             ->with('success', 'Produk berhasil ditambahkan.');
@@ -70,8 +70,7 @@ class ProductController extends Controller
             abort(404, 'Produk tidak ditemukan');
         }
 
-        $validated = $this->validate($request);
-        $this->productService->update($product, ProductData::fromRequest($validated), $request->user()->id);
+        $this->productService->update($product, ProductData::fromRequest($request), $request->user()->id);
 
         return redirect()->route('products.index')
             ->with('success', 'Produk berhasil diperbarui.');
@@ -99,14 +98,12 @@ class ProductController extends Controller
             abort(404, 'Produk tidak ditemukan');
         }
 
-        $validated = $request->validate([
-            'stock' => ['required', 'integer', 'min:0'],
-        ]);
+        $dto = UpdateStockDTO::fromRequest($request);
 
-        $this->productService->updateStock($product, (int) $validated['stock'], $request->user()->id);
+        $this->productService->updateStock($product, $dto->stock, $request->user()->id);
 
         return redirect()->route('products.index')
-            ->with('success', "Stok produk diperbarui menjadi {$validated['stock']}.");
+            ->with('success', "Stok produk diperbarui menjadi {$dto->stock}.");
     }
 
     public function toggleActive(Request $request, int $id): RedirectResponse
@@ -123,35 +120,5 @@ class ProductController extends Controller
             ->with('success', $active
                 ? 'Produk diaktifkan kembali.'
                 : 'Produk dinonaktifkan.');
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function validate(Request $request): array
-    {
-        return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:100'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'stock' => ['required', 'integer', 'min:0'],
-            'is_active' => ['nullable', 'boolean'],
-            'tag' => ['nullable', 'string', 'max:50'],
-            'img' => ['nullable', 'string', 'url', 'max:2048'],
-            'description' => ['nullable', 'string'],
-            'sku' => ['nullable', 'string', 'max:100'],
-            'brand' => ['nullable', 'string', 'max:100'],
-            'weight_gram' => ['nullable', 'integer', 'min:1'],
-            'variant_options' => ['nullable', 'array'],
-            'variant_options.*.name' => ['required', 'string', 'max:255'],
-            'variant_options.*.values' => ['required', 'array'],
-            'variants' => ['nullable', 'array'],
-            'variants.*.id' => ['nullable', 'integer'],
-            'variants.*.name' => ['required_with:variants', 'string', 'max:255'],
-            'variants.*.price' => ['nullable', 'numeric', 'min:0'],
-            'variants.*.stock' => ['nullable', 'integer', 'min:0'],
-            'variants.*.sku' => ['nullable', 'string', 'max:100'],
-            'variants.*.img' => ['nullable', 'string', 'url', 'max:2048'],
-        ]);
     }
 }

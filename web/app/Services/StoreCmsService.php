@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\DTO\Store\StoreCmsDTO;
 use App\Models\Store;
+use App\Repositories\StoreRepository;
 
 class StoreCmsService
 {
+    public function __construct(protected StoreRepository $storeRepository) {}
     /**
      * Available themes with their color tokens and fonts.
      *
@@ -118,5 +121,21 @@ class StoreCmsService
             'colors' => $colors,
             'font' => $config['font'],
         ];
+    }
+
+    public function updateCms(Store $store, StoreCmsDTO $dto): void
+    {
+        $showcase = $this->normalize($store->showcase);
+        $rawShowcase = $dto->showcase;
+
+        foreach ($rawShowcase as $section => $values) {
+            $showcase[$section] = array_replace($showcase[$section] ?? [], $values);
+        }
+
+        $this->storeRepository->update($store, [
+            'theme' => $dto->theme,
+            'theme_colors' => $dto->themeColors,
+            'showcase' => $showcase,
+        ]);
     }
 }

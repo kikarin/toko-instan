@@ -57,6 +57,13 @@ class WalletService
         );
     }
 
+    public function getTransactionsPaginated(int $walletId, int $perPage, int $page)
+    {
+        return WalletTransaction::where('wallet_id', $walletId)
+            ->orderByDesc('created_at')
+            ->paginate($perPage, ['*'], 'page', $page);
+    }
+
     /**
      * Order completed -> pending turun, balance naik. Idempotent per order.
      */

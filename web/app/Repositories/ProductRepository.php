@@ -73,6 +73,50 @@ class ProductRepository
             ->get();
     }
 
+    public function getActiveProductsForStore(int $storeId): Collection
+    {
+        return Product::where('store_id', $storeId)
+            ->where('is_active', true)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function getActiveStoreProducts(int $storeId, ?string $category = null): Collection
+    {
+        $query = Product::where('store_id', $storeId)->where('is_active', true);
+        
+        if ($category && $category !== 'Semua') {
+            $query->where('category', $category);
+        }
+
+        return $query->get();
+    }
+
+    public function getActiveStoreCategories(int $storeId): array
+    {
+        return Product::where('store_id', $storeId)
+            ->where('is_active', true)
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->values()
+            ->toArray();
+    }
+
+    public function countActiveStoreProducts(int $storeId): int
+    {
+        return Product::where('store_id', $storeId)->where('is_active', true)->count();
+    }
+
+    public function findActiveProductBySlug(int $storeId, string $slug): ?Product
+    {
+        return Product::where('store_id', $storeId)
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->with(['variants'])
+            ->first();
+    }
+
     public function getForStorePaginated(int $storeId, int $perPage = 10)
     {
         return Product::where('store_id', $storeId)

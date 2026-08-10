@@ -137,4 +137,41 @@ class OrderRepository
             ->orderByDesc('created_at')
             ->get();
     }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getSellerOrders(int $storeId)
+    {
+        return Order::with(['store', 'items'])
+            ->where('store_id', $storeId)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getCustomersByStore(int $storeId)
+    {
+        return Order::where('store_id', $storeId)
+            ->select('customer_name', 'customer_email', 'customer_phone')
+            ->selectRaw('COUNT(*) as total_orders')
+            ->selectRaw('SUM(total_amount) as total_spent')
+            ->selectRaw('MIN(created_at) as first_order_at')
+            ->selectRaw('MAX(created_at) as last_order_at')
+            ->groupBy('customer_email', 'customer_name', 'customer_phone')
+            ->orderByDesc('last_order_at')
+            ->get();
+    }
+
+    public function findByOrderNumberWithTenant(string $orderNumber): ?Order
+    {
+        return Order::with('store.tenant')->where('order_number', $orderNumber)->first();
+    }
+
+    public function findOrFail(int $id): Order
+    {
+        return Order::findOrFail($id);
+    }
 }

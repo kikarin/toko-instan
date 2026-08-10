@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\UploadFileDTO;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -10,11 +11,9 @@ class UploadController extends Controller
 {
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'file' => 'required|image|mimes:jpeg,png,webp|max:2048',
-        ]);
+        $dto = UploadFileDTO::fromRequest($request);
 
-        $path = $request->file('file')->store(
+        $path = $dto->file->store(
             'products/'.date('Y/m'),
             'r2'
         );

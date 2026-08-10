@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Store;
 use App\Repositories\StoreRepository;
 use App\Services\AuthService;
 use Illuminate\Http\RedirectResponse;
@@ -61,7 +60,7 @@ class AuthController extends Controller
         $storeSlug = null;
 
         if ($user && $user->store_id) {
-            $store = Store::find($user->store_id);
+            $store = $this->storeRepository->findById($user->store_id);
             if ($store) {
                 $storeSlug = $store->slug;
             }

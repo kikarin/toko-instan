@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\CreateOrderDTO;
+use App\DTO\Order\UpdateOrderStatusDTO;
 use App\Models\Order;
 use App\Models\User;
 use App\Repositories\OrderRepository;
@@ -118,9 +119,33 @@ class OrderService
     /**
      * @return Collection<int, Order>
      */
-    public function buyerOrders(User $user)
+    public function buyerOrders($user)
     {
-        return $this->orderRepository->getByBuyerEmail($user->email);
+        return collect($this->orderRepository->getByBuyerEmail($user->email));
+    }
+
+    public function sellerOrders(int $storeId)
+    {
+        return collect($this->orderRepository->getSellerOrders($storeId));
+    }
+
+    public function getOrderWithTenant(string $orderNumber): ?Order
+    {
+        return $this->orderRepository->findByOrderNumberWithTenant($orderNumber);
+    }
+
+    public function getOrder(int $id): Order
+    {
+        return $this->orderRepository->findOrFail($id);
+    }
+
+    public function updateStatus(Order $order, UpdateOrderStatusDTO $dto): void
+    {
+        match ($dto->status) {
+            'paid' => $this->markOrderPaid($order),
+            'completed' => $this->markOrderCompleted($order),
+            default => $order->update(['status' => $dto->status]),
+        };
     }
 
     /**

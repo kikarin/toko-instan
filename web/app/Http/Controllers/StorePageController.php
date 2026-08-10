@@ -28,12 +28,8 @@ class StorePageController extends Controller
 
         $category = $request->query('category');
 
-        $productsQuery = $store->products()->where('is_active', true);
-        if ($category && $category !== 'Semua') {
-            $productsQuery->where('category', $category);
-        }
-
-        $products = $productsQuery->get()->map(function ($product) use ($store) {
+        $products = $this->productRepository->getActiveStoreProducts($store->id, $category)
+            ->map(function ($product) use ($store) {
             return [
                 'id' => $product->id,
                 'name' => $product->name,
@@ -58,13 +54,7 @@ class StorePageController extends Controller
         })->toArray();
 
         // Get distinct categories from this store's products
-        $categories = ['Semua', ...$store->products()
-            ->where('is_active', true)
-            ->distinct()
-            ->pluck('category')
-            ->filter()
-            ->values()
-            ->toArray()];
+        $categories = ['Semua', ...$this->productRepository->getActiveStoreCategories($store->id)];
 
         $showcase = $this->cmsService->normalize($store->showcase);
 
@@ -88,7 +78,7 @@ class StorePageController extends Controller
                 'category' => $store->category,
                 'rating' => (float) $store->rating,
                 'totalOrders' => $store->total_orders,
-                'totalProducts' => $store->products()->where('is_active', true)->count(),
+                'totalProducts' => $this->productRepository->countActiveStoreProducts($store->id),
                 'badge' => $store->badge,
                 'avatar' => strtoupper(substr($store->name, 0, 2)),
                 'avatarHue' => $store->avatar_hue ?: 220,
@@ -119,11 +109,7 @@ class StorePageController extends Controller
             abort(404);
         }
 
-        $product = $store->products()
-            ->where('slug', $productSlug)
-            ->where('is_active', true)
-            ->with(['variants'])
-            ->first();
+        $product = $this->productRepository->findActiveProductBySlug($store->id, $productSlug);
 
         if (! $product) {
             abort(404);

@@ -53,4 +53,9 @@ class UserRepository
             'auth_provider' => $data['auth_provider'] ?? 'email',
         ]);
     }
+
+    public function updateUser(User $user, array $data): bool
+    {
+        return $user->update($data);
+    }
 }

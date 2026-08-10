@@ -2,30 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ActivityLog;
-use App\Models\Store;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ActivityLogController extends Controller
 {
+    public function __construct(protected ActivityLogService $logService) {}
+
     public function index(Request $request): Response
     {
-        $store = Store::whereHas(
-            'tenant',
-            fn ($q) => $q->where('user_id', $request->user()->id)
-        )->first();
-
-        $logs = $store
-            ? ActivityLog::with('user')
-                ->where('tenant_id', $store->tenant_id)
-                ->latest('created_at')
-                ->paginate(20)
-            : collect();
+        $logs = $this->logService->getLogsForUser($request->user()->id, 20);
 
         return Inertia::render('ActivityLog/Index', [
-            'logs' => $logs->map(fn (ActivityLog $log) => [
+            'logs' => collect($logs->items())->map(fn ($log) => [
                 'id' => $log->id,
                 'action' => $log->action,
                 'action_label' => $this->actionLabel($log->action),
