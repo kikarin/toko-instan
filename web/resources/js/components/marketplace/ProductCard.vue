@@ -117,7 +117,7 @@ function formatSold(n: number): string {
             <!-- Rating + Sold -->
             <div class="mt-auto flex items-center gap-1.5 border-t border-brand/15 pt-2">
                 <div class="flex items-center gap-0.5">
-                    <Star class="h-3.5 w-3.5 fill-amber-400 stroke-amber-400" />
+                    <Star class="h-3.5 w-3.5 fill-accent stroke-accent" />
                     <span class="text-[10px] font-extrabold text-muted-foreground">{{
                         product.rating
                         }}</span>

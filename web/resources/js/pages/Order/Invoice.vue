@@ -56,7 +56,7 @@ function goBack() {
                         <ArrowLeft class="h-4 w-4" /> Kembali
                     </Button>
                     <div
-                        class="flex h-8 items-center gap-2 rounded-xl bg-black px-3 text-amber-400"
+                        class="flex h-8 items-center gap-2 rounded-xl bg-foreground px-3 text-accent"
                     >
                         <ReceiptText class="h-4 w-4" />
                         <span class="text-[11px] font-black tracking-wider uppercase"
@@ -65,7 +65,7 @@ function goBack() {
                     </div>
                 </div>
                 <Button
-                    class="gap-2 rounded-xl bg-zinc-900 text-xs font-bold text-amber-400 hover:bg-black"
+                    class="gap-2 rounded-xl bg-card text-xs font-bold text-accent hover:bg-foreground"
                     @click="window.print()"
                 >
                     <Printer class="h-4 w-4" /> Cetak / Simpan PDF
@@ -85,7 +85,7 @@ function goBack() {
                     >
                         <div class="flex items-center gap-3">
                             <div
-                                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-900 text-amber-400"
+                                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-card text-accent"
                             >
                                 <Store class="h-5 w-5" />
                             </div>
@@ -114,7 +114,7 @@ function goBack() {
                                 {{ invoice.order_number }}
                             </p>
                             <p
-                                class="mt-1 inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 uppercase"
+                                class="mt-1 inline-flex rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 uppercase"
                             >
                                 {{ invoice.status }}
                             </p>
@@ -207,7 +207,7 @@ function goBack() {
                                 }}</td>
                             </tr>
                             <tr v-if="!(invoice.items ?? []).length">
-                                <td colspan="4" class="py-4 text-center text-zinc-400 italic">
+                                <td colspan="4" class="py-4 text-center text-muted-foreground italic">
                                     Tidak ada rincian item untuk pesanan ini.
                                 </td>
                             </tr>
@@ -246,10 +246,10 @@ function goBack() {
                             }}</span>
                         </div>
                         <div
-                            class="mt-2 flex items-center justify-between rounded-xl bg-zinc-900 p-3.5 text-white"
+                            class="mt-2 flex items-center justify-between rounded-xl bg-card p-3.5 text-card-foreground"
                         >
                             <span class="text-xs font-black">Total</span>
-                            <span class="font-mono text-base font-black text-amber-400">{{
+                            <span class="font-mono text-base font-black text-accent">{{
                                 invoice.total_amount
                             }}</span>
                         </div>

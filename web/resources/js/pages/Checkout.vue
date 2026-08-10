@@ -443,7 +443,7 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                             class="mb-4 flex items-center justify-between text-base"
                         >
                             <span>Ringkasan Pesanan</span>
-                            <Badge variant="amber" class="text-[10px]"
+                            <Badge variant="default" class="text-[10px]"
                                 >{{ cartItems.length }} produk</Badge
                             >
                         </CardTitle>

@@ -97,13 +97,13 @@ const {
         >
             <!-- ── Header Banner Dashboard Hub ── -->
             <div
-                class="relative overflow-hidden rounded-3xl bg-zinc-900 p-6 text-white shadow-xl sm:p-8"
+                class="relative overflow-hidden rounded-3xl bg-primary p-6 text-primary-foreground shadow-xl sm:p-8"
             >
                 <div
-                    class="absolute -top-10 -right-10 h-64 w-64 rounded-full bg-gradient-to-br from-[#e07c28]/40 via-amber-500/20 to-transparent blur-3xl"
+                    class="absolute -top-10 -right-10 h-64 w-64 rounded-full bg-gradient-to-br from-accent/40 via-accent/20 to-transparent blur-3xl"
                 />
                 <div
-                    class="absolute -bottom-10 -left-10 h-64 w-64 rounded-full bg-gradient-to-br from-emerald-600/30 via-teal-500/10 to-transparent blur-3xl"
+                    class="absolute -bottom-10 -left-10 h-64 w-64 rounded-full bg-gradient-to-br from-secondary/30 via-secondary/10 to-transparent blur-3xl"
                 />
 
                 <div
@@ -112,18 +112,18 @@ const {
                     <div class="flex flex-col gap-2">
                         <div class="flex items-center gap-2">
                             <span
-                                class="inline-flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-400"
+                                class="inline-flex items-center gap-1 rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-black text-accent"
                             >
                                 <Sparkles class="h-3.5 w-3.5" /> SMART INVENTORY
                                 CONTROL
                             </span>
                         </div>
                         <h1
-                            class="text-2xl font-black tracking-tight text-white sm:text-3xl"
+                            class="text-2xl font-black tracking-tight text-primary-foreground sm:text-3xl"
                         >
                             Katalog & Manajemen Produk Toko
                         </h1>
-                        <p class="max-w-2xl text-xs text-zinc-400 sm:text-sm">
+                        <p class="max-w-2xl text-xs text-muted-foreground sm:text-sm">
                             Kelola stok persediaan barang, varian SKU, harga
                             penawaran, dan status publikasi produk secara
                             terpusat.
@@ -134,9 +134,9 @@ const {
                         class="flex w-full shrink-0 items-center gap-3 sm:w-auto"
                     >
                         <Button
-                            variant="amber"
+                            variant="default"
                             size="lg"
-                            class="w-full cursor-pointer rounded-2xl px-6 text-xs font-extrabold shadow-lg shadow-amber-500/25 sm:w-auto"
+                            class="w-full cursor-pointer rounded-2xl px-6 text-xs font-extrabold shadow-lg shadow-primary/25 sm:w-auto"
                             @click="goToCreate"
                         >
                             <Plus class="mr-2 h-4 w-4" /> Tambah Produk Baru
@@ -149,43 +149,43 @@ const {
                     class="relative z-10 mt-6 grid grid-cols-2 gap-2.5 border-t border-white/10 pt-6 sm:gap-3 lg:grid-cols-4"
                 >
                     <div
-                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:p-3"
+                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:p-3"
                     >
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]"
+                            class="truncate text-[9px] font-extrabold tracking-wider text-muted-foreground uppercase sm:text-[10px]"
                             >Total Produk</span
                         >
                         <span
-                            class="truncate text-sm font-black text-white sm:text-2xl"
+                            class="truncate text-sm font-black text-primary-foreground sm:text-2xl"
                             >{{ totalProductsCount }} Items</span
                         >
                     </div>
 
                     <div
-                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:p-3"
+                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:p-3"
                     >
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]"
+                            class="truncate text-[9px] font-extrabold tracking-wider text-muted-foreground uppercase sm:text-[10px]"
                             >Produk Aktif</span
                         >
                         <span
-                            class="truncate text-sm font-black text-emerald-400 sm:text-2xl"
+                            class="truncate text-sm font-black text-emerald-500 sm:text-2xl"
                             >{{ activeProductsCount }} Live</span
                         >
                     </div>
 
                     <div
-                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:p-3"
+                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:p-3"
                     >
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]"
+                            class="truncate text-[9px] font-extrabold tracking-wider text-muted-foreground uppercase sm:text-[10px]"
                             >Stok Menipis</span
                         >
                         <span
-                            class="flex items-center gap-1 truncate text-xs font-black text-amber-400 sm:text-2xl"
+                            class="flex items-center gap-1 truncate text-xs font-black text-accent sm:text-2xl"
                         >
                             <AlertTriangle
-                                class="h-4 w-4 shrink-0 text-amber-400"
+                                class="h-4 w-4 shrink-0 text-accent"
                                 v-if="lowStockCount > 0"
                             />
                             <span class="truncate"
@@ -195,14 +195,14 @@ const {
                     </div>
 
                     <div
-                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:p-3"
+                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:p-3"
                     >
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]"
+                            class="truncate text-[9px] font-extrabold tracking-wider text-muted-foreground uppercase sm:text-[10px]"
                             >Estimasi Inventaris</span
                         >
                         <span
-                            class="truncate font-mono text-xs font-black text-amber-300 sm:text-xl"
+                            class="truncate font-mono text-xs font-black text-accent sm:text-xl"
                             :title="formatRupiah(totalInventoryValuation)"
                             >{{ formatRupiah(totalInventoryValuation) }}</span
                         >
@@ -220,26 +220,26 @@ const {
                 >
                     <div class="relative w-full sm:w-80">
                         <Search
-                            class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-zinc-400"
+                            class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                         />
                         <Input
                             v-model="searchQ"
                             placeholder="Cari nama produk, SKU, atau kategori..."
-                            class="h-10 rounded-2xl border-black/10 bg-white pl-10 text-xs"
+                            class="h-10 rounded-2xl border-border bg-background pl-10 text-xs"
                         />
                     </div>
 
                     <!-- Filter Status Buttons -->
                     <div
-                        class="flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-black/8 bg-[#faf9f6] p-1 sm:w-auto"
+                        class="flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-muted p-1 sm:w-auto"
                     >
                         <button
                             @click="statusFilter = 'all'"
                             class="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all"
                             :class="
                                 statusFilter === 'all'
-                                    ? 'border border-black/8 bg-white text-[#1c1c22] shadow-xs'
-                                    : 'text-[#9090a0] hover:text-[#1c1c22]'
+                                    ? 'border border-border bg-background text-foreground shadow-xs'
+                                    : 'text-muted-foreground hover:text-foreground'
                             "
                         >
                             Semua ({{ totalProductsCount }})
@@ -249,8 +249,8 @@ const {
                             class="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all"
                             :class="
                                 statusFilter === 'active'
-                                    ? 'border border-black/8 bg-white text-[#1c1c22] shadow-xs'
-                                    : 'text-[#9090a0] hover:text-[#1c1c22]'
+                                    ? 'border border-border bg-background text-foreground shadow-xs'
+                                    : 'text-muted-foreground hover:text-foreground'
                             "
                         >
                             Aktif ({{ activeProductsCount }})
@@ -260,8 +260,8 @@ const {
                             class="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all"
                             :class="
                                 statusFilter === 'low_stock'
-                                    ? 'border border-black/8 bg-white text-amber-600 shadow-xs'
-                                    : 'text-[#9090a0] hover:text-[#1c1c22]'
+                                    ? 'border border-border bg-background text-accent shadow-xs'
+                                    : 'text-muted-foreground hover:text-foreground'
                             "
                         >
                             Restock ({{ lowStockCount }})
@@ -274,15 +274,15 @@ const {
                     class="flex shrink-0 items-center justify-between gap-3 sm:justify-end"
                 >
                     <div
-                        class="flex items-center gap-1 rounded-2xl border border-black/8 bg-[#faf9f6] p-1"
+                        class="flex items-center gap-1 rounded-2xl border border-border bg-muted p-1"
                     >
                         <button
                             @click="viewMode = 'grid'"
                             class="cursor-pointer rounded-xl p-2 text-xs font-bold transition-all"
                             :class="
                                 viewMode === 'grid'
-                                    ? 'bg-white text-black shadow-xs'
-                                    : 'text-zinc-400 hover:text-black'
+                                    ? 'bg-background text-foreground shadow-xs'
+                                    : 'text-muted-foreground hover:text-foreground'
                             "
                             title="Tampilan Kartu Grid"
                         >
@@ -293,8 +293,8 @@ const {
                             class="cursor-pointer rounded-xl p-2 text-xs font-bold transition-all"
                             :class="
                                 viewMode === 'table'
-                                    ? 'bg-white text-black shadow-xs'
-                                    : 'text-zinc-400 hover:text-black'
+                                    ? 'bg-background text-foreground shadow-xs'
+                                    : 'text-muted-foreground hover:text-foreground'
                             "
                             title="Tampilan Tabel Rinci"
                         >
@@ -312,13 +312,13 @@ const {
                 <Card
                     v-for="p in paginatedProducts"
                     :key="p.id"
-                    class="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-black/8 bg-white transition-all duration-300 hover:border-amber-500/30 hover:shadow-xl"
+                    class="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border bg-background transition-all duration-300 hover:border-primary/50 hover:shadow-xl"
                     :class="{ 'opacity-65 grayscale-20': !p.is_active }"
                 >
                     <div>
                         <!-- Product Image Banner -->
                         <div
-                            class="relative aspect-4/3 w-full overflow-hidden bg-[#faf9f6]"
+                            class="relative aspect-4/3 w-full overflow-hidden bg-muted"
                         >
                             <img
                                 v-if="p.img"
@@ -328,7 +328,7 @@ const {
                             />
                             <div
                                 v-else
-                                class="flex h-full w-full items-center justify-center text-[#c8c8d5]"
+                                class="flex h-full w-full items-center justify-center text-muted-foreground"
                             >
                                 <Package class="h-12 w-12" />
                             </div>
@@ -339,7 +339,7 @@ const {
                             >
                                 <Badge
                                     v-if="p.tag"
-                                    variant="amber"
+                                    variant="default"
                                     class="px-2.5 py-0.5 text-[10px] font-black uppercase shadow-xs"
                                 >
                                     {{ p.tag }}
@@ -359,10 +359,10 @@ const {
                                 class="absolute top-3 right-3 flex cursor-pointer items-center gap-1.5 rounded-2xl px-3 py-1 text-[11px] font-extrabold shadow-md backdrop-blur-md transition-all hover:scale-105"
                                 :class="
                                     !p.is_active
-                                        ? 'bg-white/90 text-zinc-600'
+                                        ? 'bg-background/90 text-muted-foreground'
                                         : lowStock(p.stock)
-                                          ? 'animate-pulse bg-rose-500 text-white'
-                                          : 'bg-emerald-600 text-white'
+                                          ? 'animate-pulse bg-destructive text-primary-foreground'
+                                          : 'bg-emerald-600 text-primary-foreground'
                                 "
                                 :title="
                                     'Klik untuk ubah stok persediaan ' + p.name
@@ -374,25 +374,25 @@ const {
 
                             <!-- Bottom Image Gradient Overlay for Price -->
                             <div
-                                class="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 text-white"
+                                class="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 text-primary-foreground"
                             >
                                 <div>
                                     <p
-                                        class="font-mono text-[10px] font-bold text-amber-300"
+                                        class="font-mono text-[10px] font-bold text-accent"
                                     >
                                         SKU: {{ p.sku || 'NK-00' + p.id }}
                                     </p>
                                     <p
-                                        class="font-mono text-lg font-black text-white"
+                                        class="font-mono text-lg font-black text-primary-foreground"
                                     >
                                         {{ p.formatted_price }}
                                     </p>
                                 </div>
                                 <div
-                                    class="flex items-center gap-1 rounded-xl bg-black/40 px-2 py-1 text-xs font-black text-amber-400 backdrop-blur-xs"
+                                    class="flex items-center gap-1 rounded-xl bg-background/40 px-2 py-1 text-xs font-black text-accent backdrop-blur-xs"
                                 >
                                     <Star
-                                        class="h-3.5 w-3.5 fill-amber-400 text-amber-400"
+                                        class="h-3.5 w-3.5 fill-accent text-accent"
                                     />
                                     {{ p.rating ? p.rating.toFixed(1) : '4.8' }}
                                 </div>
@@ -406,19 +406,19 @@ const {
                             >
                                 <Badge
                                     variant="outline"
-                                    class="border-black/10 px-2.5 py-0.5 text-[10px] font-bold text-zinc-600"
+                                    class="border-border px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground"
                                 >
                                     {{ p.category }}
                                 </Badge>
                                 <span
-                                    class="text-[11px] font-extrabold text-zinc-400"
+                                    class="text-[11px] font-extrabold text-muted-foreground"
                                 >
                                     {{ p.sold }} Terjual
                                 </span>
                             </div>
 
                             <h3
-                                class="line-clamp-2 text-sm leading-snug font-extrabold text-[#1c1c22] transition-colors group-hover:text-amber-600"
+                                class="line-clamp-2 text-sm leading-snug font-extrabold text-foreground transition-colors group-hover:text-accent"
                             >
                                 {{ p.name }}
                             </h3>
@@ -444,7 +444,7 @@ const {
                             @click="router.visit(`/products/${p.id}/variants`)"
                         >
                             <Layers
-                                class="mr-1.5 h-3.5 w-3.5 text-indigo-500"
+                                class="mr-1.5 h-3.5 w-3.5 text-primary"
                             />
                             Varian
                         </Button>
@@ -461,14 +461,14 @@ const {
                         >
                             <PackageX
                                 v-if="p.is_active"
-                                class="h-3.5 w-3.5 text-rose-500"
+                                class="h-3.5 w-3.5 text-destructive"
                             />
                             <PackagePlus v-else class="h-3.5 w-3.5" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="sm"
-                            class="h-9 w-9 rounded-xl p-0 text-zinc-400 hover:bg-rose-50 hover:text-rose-600"
+                            class="h-9 w-9 rounded-xl p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                             @click="deleteTarget = p"
                         >
                             <Trash2 class="h-4 w-4" />
@@ -480,13 +480,13 @@ const {
             <!-- ── VIEW MODE 2: TABLE VIEW ── -->
             <Card
                 v-else-if="filtered.length > 0 && viewMode === 'table'"
-                class="overflow-hidden rounded-3xl border-black/8 bg-white shadow-xs"
+                class="overflow-hidden rounded-3xl border-border bg-background shadow-xs"
             >
                 <div class="overflow-x-auto">
                     <table class="w-full border-collapse text-left">
                         <thead>
                             <tr
-                                class="border-b border-black/8 bg-[#faf9f6] text-[11px] font-black tracking-wider text-zinc-500 uppercase"
+                                class="border-b border-border bg-muted text-[11px] font-black tracking-wider text-muted-foreground uppercase"
                             >
                                 <th class="p-4 pl-6">Produk & Visual</th>
                                 <th class="p-4">Kategori & SKU</th>
@@ -501,13 +501,13 @@ const {
                             <tr
                                 v-for="p in paginatedProducts"
                                 :key="p.id"
-                                class="transition-colors hover:bg-amber-50/30"
+                                class="transition-colors hover:bg-muted/50"
                                 :class="{ 'opacity-60': !p.is_active }"
                             >
                                 <td class="p-4 pl-6">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-black/10 bg-zinc-100"
+                                            class="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-border bg-muted"
                                         >
                                             <img
                                                 v-if="p.img"
@@ -516,14 +516,14 @@ const {
                                             />
                                             <div
                                                 v-else
-                                                class="flex h-full w-full items-center justify-center text-zinc-300"
+                                                class="flex h-full w-full items-center justify-center text-muted-foreground"
                                             >
                                                 <Package class="h-5 w-5" />
                                             </div>
                                         </div>
                                         <div>
                                             <p
-                                                class="line-clamp-1 max-w-xs font-extrabold text-[#1c1c22]"
+                                                class="line-clamp-1 max-w-xs font-extrabold text-foreground"
                                             >
                                                 {{ p.name }}
                                             </p>
@@ -532,15 +532,15 @@ const {
                                             >
                                                 <Badge
                                                     v-if="p.tag"
-                                                    variant="amber"
+                                                    variant="default"
                                                     class="px-1.5 py-0 text-[9px] font-extrabold"
                                                     >{{ p.tag }}</Badge
                                                 >
                                                 <span
-                                                    class="flex items-center gap-0.5 text-[10px] font-bold text-amber-600"
+                                                    class="flex items-center gap-0.5 text-[10px] font-bold text-accent"
                                                 >
                                                     <Star
-                                                        class="h-3 w-3 fill-amber-400"
+                                                        class="h-3 w-3 fill-accent"
                                                     />
                                                     {{
                                                         p.rating
@@ -556,17 +556,17 @@ const {
                                 </td>
                                 <td class="p-4">
                                     <span
-                                        class="block font-extrabold text-zinc-700"
+                                        class="block font-extrabold text-foreground"
                                         >{{ p.category }}</span
                                     >
                                     <span
-                                        class="font-mono text-[10px] text-zinc-400"
+                                        class="font-mono text-[10px] text-muted-foreground"
                                         >SKU:
                                         {{ p.sku || 'NK-00' + p.id }}</span
                                     >
                                 </td>
                                 <td
-                                    class="p-4 font-mono text-sm font-extrabold text-amber-600"
+                                    class="p-4 font-mono text-sm font-extrabold text-accent"
                                 >
                                     {{ p.formatted_price }}
                                 </td>
@@ -576,14 +576,14 @@ const {
                                         class="cursor-pointer rounded-xl border px-2.5 py-1 text-xs font-extrabold transition-transform hover:scale-105"
                                         :class="
                                             lowStock(p.stock)
-                                                ? 'border-rose-200 bg-rose-50 text-rose-600'
-                                                : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                                ? 'border-destructive/20 bg-destructive/10 text-destructive'
+                                                : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
                                         "
                                     >
                                         {{ p.stock }} pcs
                                     </button>
                                 </td>
-                                <td class="p-4 font-bold text-zinc-600">
+                                <td class="p-4 font-bold text-muted-foreground">
                                     {{ p.sold }} unit
                                 </td>
                                 <td class="p-4">
@@ -606,7 +606,7 @@ const {
                                             title="Edit Produk"
                                         >
                                             <Pencil
-                                                class="h-3.5 w-3.5 text-zinc-600"
+                                                class="h-3.5 w-3.5 text-muted-foreground"
                                             />
                                         </Button>
                                         <Button
@@ -621,13 +621,13 @@ const {
                                             title="Varian SKU"
                                         >
                                             <Layers
-                                                class="h-3.5 w-3.5 text-indigo-600"
+                                                class="h-3.5 w-3.5 text-primary"
                                             />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            class="h-8 w-8 p-0 text-rose-500 hover:bg-rose-50"
+                                            class="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
                                             @click="deleteTarget = p"
                                             title="Hapus Produk"
                                         >
@@ -644,30 +644,30 @@ const {
             <!-- ── Pagination Controls Bar ── -->
             <div
                 v-if="filtered.length > 0"
-                class="flex flex-col items-center justify-between gap-4 border-t border-black/8 pt-4 sm:flex-row"
+                class="flex flex-col items-center justify-between gap-4 border-t border-border pt-4 sm:flex-row"
             >
                 <!-- Status text & per page select -->
                 <div
-                    class="flex items-center gap-3 text-xs font-semibold text-zinc-500"
+                    class="flex items-center gap-3 text-xs font-semibold text-muted-foreground"
                 >
                     <span
                         >Menampilkan
-                        <strong class="font-black text-[#1c1c22]"
+                        <strong class="font-black text-foreground"
                             >{{ paginationStart }} - {{ paginationEnd }}</strong
                         >
                         dari
-                        <strong class="font-black text-[#1c1c22]">{{
+                        <strong class="font-black text-foreground">{{
                             filtered.length
                         }}</strong>
                         produk</span
                     >
                     <div
-                        class="flex items-center gap-1.5 rounded-xl border border-black/10 bg-white px-2.5 py-1"
+                        class="flex items-center gap-1.5 rounded-xl border border-border bg-background px-2.5 py-1"
                     >
                         <span>Per Halaman:</span>
                         <select
                             v-model.number="perPage"
-                            class="cursor-pointer border-none bg-transparent text-xs font-bold text-[#1c1c22] focus:outline-none"
+                            class="cursor-pointer border-none bg-transparent text-xs font-bold text-foreground focus:outline-none"
                         >
                             <option :value="6">6</option>
                             <option :value="12">12</option>
@@ -697,8 +697,8 @@ const {
                             class="h-9 w-9 cursor-pointer rounded-xl text-xs font-black transition-all"
                             :class="
                                 currentPage === p
-                                    ? 'bg-amber-500 text-white shadow-xs'
-                                    : 'border border-black/8 bg-white text-zinc-600 hover:bg-zinc-100'
+                                    ? 'bg-primary text-primary-foreground shadow-xs'
+                                    : 'border border-border bg-background text-muted-foreground hover:bg-muted'
                             "
                         >
                             {{ p }}
@@ -720,25 +720,25 @@ const {
             <!-- ── EMPTY STATE ── -->
             <Card
                 v-else
-                class="rounded-3xl border-black/8 bg-white py-16 text-center shadow-xs"
+                class="rounded-3xl border-border bg-background py-16 text-center shadow-xs"
             >
                 <CardContent class="flex flex-col items-center gap-3">
                     <div
-                        class="flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-500"
+                        class="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary"
                     >
                         <Package class="h-8 w-8" />
                     </div>
                     <div>
-                        <h3 class="text-base font-extrabold text-[#1c1c22]">
+                        <h3 class="text-base font-extrabold text-foreground">
                             Tidak Ada Produk Ditemukan
                         </h3>
-                        <p class="mt-1 max-w-sm text-xs text-zinc-400">
+                        <p class="mt-1 max-w-sm text-xs text-muted-foreground">
                             Tidak ada produk yang sesuai dengan kriteria
                             pencarian atau filter Anda.
                         </p>
                     </div>
                     <Button
-                        variant="amber"
+                        variant="default"
                         size="sm"
                         class="mt-2 rounded-xl px-5 text-xs font-bold"
                         @click="goToCreate"
@@ -769,24 +769,24 @@ const {
                 >
                     <div class="absolute inset-0" @click="stockTarget = null" />
                     <Card
-                        class="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border-black/10 bg-white shadow-2xl"
+                        class="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border-border bg-background shadow-2xl"
                     >
                         <CardHeader
-                            class="border-b border-black/5 bg-[#faf9f6] p-6 pb-4"
+                            class="border-b border-black/5 bg-muted p-6 pb-4"
                         >
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500 font-bold text-white shadow-xs"
+                                    class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary font-bold text-primary-foreground shadow-xs"
                                 >
                                     <BoxIcon class="h-5 w-5" />
                                 </div>
                                 <div>
                                     <CardTitle
-                                        class="text-base font-black text-[#1c1c22]"
+                                        class="text-base font-black text-foreground"
                                         >Atur Stok Persediaan</CardTitle
                                     >
                                     <CardDescription
-                                        class="truncate text-xs font-semibold text-zinc-500"
+                                        class="truncate text-xs font-semibold text-muted-foreground"
                                     >
                                         {{ stockTarget?.name }}
                                     </CardDescription>
@@ -797,11 +797,11 @@ const {
                         <CardContent class="flex flex-col gap-4 p-6">
                             <div class="flex flex-col gap-2">
                                 <label
-                                    class="flex items-center justify-between text-xs font-bold text-[#1c1c22]"
+                                    class="flex items-center justify-between text-xs font-bold text-foreground"
                                 >
                                     <span>Jumlah Unit Stok Tersedia</span>
                                     <span
-                                        class="font-mono text-[10px] text-zinc-400"
+                                        class="font-mono text-[10px] text-muted-foreground"
                                         >SKU:
                                         {{
                                             stockTarget?.sku || 'NK-DEFAULT'
@@ -813,14 +813,14 @@ const {
                                     <button
                                         type="button"
                                         @click="adjustStock(-10)"
-                                        class="h-10 cursor-pointer rounded-xl border border-black/10 bg-zinc-100 px-3 text-xs font-black hover:bg-zinc-200"
+                                        class="h-10 cursor-pointer rounded-xl border border-border bg-muted px-3 text-xs font-black hover:bg-muted/80"
                                     >
                                         -10
                                     </button>
                                     <button
                                         type="button"
                                         @click="adjustStock(-1)"
-                                        class="h-10 cursor-pointer rounded-xl border border-black/10 bg-zinc-100 px-3 text-xs font-black hover:bg-zinc-200"
+                                        class="h-10 cursor-pointer rounded-xl border border-border bg-muted px-3 text-xs font-black hover:bg-muted/80"
                                     >
                                         -1
                                     </button>
@@ -833,14 +833,14 @@ const {
                                     <button
                                         type="button"
                                         @click="adjustStock(1)"
-                                        class="h-10 cursor-pointer rounded-xl border border-black/10 bg-zinc-100 px-3 text-xs font-black hover:bg-zinc-200"
+                                        class="h-10 cursor-pointer rounded-xl border border-border bg-muted px-3 text-xs font-black hover:bg-muted/80"
                                     >
                                         +1
                                     </button>
                                     <button
                                         type="button"
                                         @click="adjustStock(10)"
-                                        class="h-10 cursor-pointer rounded-xl border border-black/10 bg-zinc-100 px-3 text-xs font-black hover:bg-zinc-200"
+                                        class="h-10 cursor-pointer rounded-xl border border-border bg-muted px-3 text-xs font-black hover:bg-muted/80"
                                     >
                                         +10
                                     </button>
@@ -848,10 +848,10 @@ const {
                             </div>
 
                             <div
-                                class="flex items-center gap-2 rounded-2xl border border-amber-200/60 bg-amber-50 p-3 text-xs font-medium text-amber-800"
+                                class="flex items-center gap-2 rounded-2xl border border-accent/20 bg-accent/10 p-3 text-xs font-medium text-accent"
                             >
                                 <Sparkles
-                                    class="h-4 w-4 shrink-0 text-amber-600"
+                                    class="h-4 w-4 shrink-0 text-accent"
                                 />
                                 <span
                                     >Perubahan stok akan langsung terhubung
@@ -871,7 +871,7 @@ const {
                                 Batal
                             </Button>
                             <Button
-                                variant="amber"
+                                variant="default"
                                 size="sm"
                                 class="h-10 rounded-xl px-5 text-xs font-extrabold"
                                 :disabled="stockLoading"

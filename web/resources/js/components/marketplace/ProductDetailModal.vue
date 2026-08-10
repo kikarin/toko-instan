@@ -165,7 +165,7 @@ const ratingBreakdown: any[] = [];
                         >
                             <div class="flex items-center gap-1">
                                 <Star
-                                    class="h-3.5 w-3.5 fill-amber-400 stroke-amber-400"
+                                    class="h-3.5 w-3.5 fill-accent stroke-accent"
                                 /><span class="font-bold text-muted-foreground">{{
                                     product.rating
                                 }}</span>
@@ -285,7 +285,7 @@ const ratingBreakdown: any[] = [];
                                         class="h-3 w-3"
                                         :class="
                                             i <= Math.round(product.rating)
-                                                ? 'fill-amber-400 stroke-amber-400'
+                                                ? 'fill-accent stroke-accent'
                                                 : 'fill-none stroke-border'
                                         "
                                     />
@@ -304,13 +304,13 @@ const ratingBreakdown: any[] = [];
                                         class="w-4 text-right text-[10px] text-muted-foreground"
                                         >{{ row.stars }}</span
                                     ><Star
-                                        class="h-2.5 w-2.5 fill-amber-400 stroke-amber-400"
+                                        class="h-2.5 w-2.5 fill-accent stroke-accent"
                                     />
                                     <div
                                         class="h-1.5 flex-1 overflow-hidden rounded-full bg-border"
                                     >
                                         <div
-                                            class="h-full rounded-full bg-amber-400"
+                                            class="h-full rounded-full bg-accent"
                                             :style="{ width: `${row.pct}%` }"
                                         />
                                     </div>
@@ -361,7 +361,7 @@ const ratingBreakdown: any[] = [];
                                                     class="h-2.5 w-2.5"
                                                     :class="
                                                         i <= review.rating
-                                                            ? 'fill-amber-400 stroke-amber-400'
+                                                            ? 'fill-accent stroke-accent'
                                                             : 'fill-none stroke-border'
                                                     "
                                                 />
@@ -583,7 +583,7 @@ const ratingBreakdown: any[] = [];
                                         <Badge
                                             v-for="t in product.tag.split(',')"
                                             :key="t"
-                                            variant="amber"
+                                            variant="default"
                                             class="px-2 py-0.5 text-[10px] font-extrabold"
                                             >{{ t.trim() }}</Badge
                                         >
@@ -609,7 +609,7 @@ const ratingBreakdown: any[] = [];
                                                 :class="
                                                     i <=
                                                     Math.round(product.rating)
-                                                        ? 'fill-amber-400 stroke-amber-400'
+                                                        ? 'fill-accent stroke-accent'
                                                         : 'fill-none stroke-border'
                                                 "
                                             />
@@ -815,7 +815,7 @@ const ratingBreakdown: any[] = [];
                                                 :class="
                                                     i <=
                                                     Math.round(product.rating)
-                                                        ? 'fill-amber-400 stroke-amber-400'
+                                                        ? 'fill-accent stroke-accent'
                                                         : 'fill-none stroke-border'
                                                 "
                                             />
@@ -837,13 +837,13 @@ const ratingBreakdown: any[] = [];
                                                 >{{ row.stars }}</span
                                             >
                                             <Star
-                                                class="h-3 w-3 fill-amber-400 stroke-amber-400"
+                                                class="h-3 w-3 fill-accent stroke-accent"
                                             />
                                             <div
                                                 class="h-2 flex-1 overflow-hidden rounded-full bg-border"
                                             >
                                                 <div
-                                                    class="h-full rounded-full bg-amber-400 transition-all"
+                                                    class="h-full rounded-full bg-accent transition-all"
                                                     :style="{
                                                         width: `${row.pct}%`,
                                                     }"
@@ -902,7 +902,7 @@ const ratingBreakdown: any[] = [];
                                                             :class="
                                                                 i <=
                                                                 review.rating
-                                                                    ? 'fill-amber-400 stroke-amber-400'
+                                                                    ? 'fill-accent stroke-accent'
                                                                     : 'fill-none stroke-border'
                                                             "
                                                         />

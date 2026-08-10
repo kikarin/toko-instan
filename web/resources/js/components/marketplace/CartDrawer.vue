@@ -61,18 +61,18 @@ function handleOpenChange(open: boolean) {
             class="flex w-[85vw] max-w-md flex-col gap-0 p-0 sm:w-full"
         >
             <!-- Sheet Header -->
-            <SheetHeader class="border-b border-border bg-muted/50 px-5 py-4">
+            <SheetHeader class="border-b border-border bg-card px-5 py-4">
                 <div class="flex items-center gap-2.5">
                     <div
-                        class="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-soft text-brand"
+                        class="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary"
                     >
                         <ShoppingCart class="h-4 w-4" />
                     </div>
                     <div>
-                        <SheetTitle class="text-base font-bold text-foreground">
+                        <SheetTitle class="text-base font-black text-foreground">
                             Keranjang Belanja
                         </SheetTitle>
-                        <SheetDescription class="text-[11px] text-muted-foreground">
+                        <SheetDescription class="text-[11px] font-bold text-muted-foreground">
                             {{ items.length }} item dipilih
                         </SheetDescription>
                     </div>
@@ -81,11 +81,11 @@ function handleOpenChange(open: boolean) {
 
             <!-- Free Shipping Progress -->
             <div
-                class="flex flex-col gap-2 border-b border-(--brand)/15 bg-(--brand)/5 px-4 py-3"
+                class="flex flex-col gap-2 border-b border-border bg-secondary/10 px-4 py-3"
             >
                 <div class="flex items-center justify-between text-xs">
                     <span
-                        class="flex items-center gap-1.5 font-bold text-brand"
+                        class="flex items-center gap-1.5 font-bold text-secondary"
                     >
                         <Truck class="h-4 w-4" />
                         {{
@@ -105,7 +105,7 @@ function handleOpenChange(open: boolean) {
                     class="h-1.5 w-full overflow-hidden rounded-full bg-black/10"
                 >
                     <div
-                        class="h-full rounded-full bg-(--brand) transition-all duration-300"
+                        class="h-full rounded-full bg-secondary transition-all duration-300"
                         :style="{ width: `${shippingProgress}%` }"
                     />
                 </div>
@@ -133,13 +133,13 @@ function handleOpenChange(open: boolean) {
                                     class="flex items-start justify-between gap-2"
                                 >
                                     <p
-                                        class="line-clamp-2 text-xs leading-snug font-bold text-foreground"
+                                        class="line-clamp-2 text-xs leading-snug font-bold text-primary"
                                     >
                                         {{ item.name }}
                                     </p>
                                     <button
                                         @click="emit('remove-item', item.id)"
-                                        class="shrink-0 cursor-pointer p-1 text-muted-foreground transition-colors hover:text-destructive"
+                                        class="shrink-0 cursor-pointer p-1 text-accent transition-colors hover:text-destructive"
                                     >
                                         <Trash2 class="h-3.5 w-3.5" />
                                     </button>
@@ -151,7 +151,7 @@ function handleOpenChange(open: boolean) {
 
                             <div class="mt-2 flex items-end justify-between">
                                 <span
-                                    class="font-mono text-xs font-extrabold text-brand"
+                                    class="font-mono text-xs font-extrabold text-primary"
                                 >
                                     {{ fmtRp(item.price * item.qty) }}
                                 </span>
@@ -188,13 +188,15 @@ function handleOpenChange(open: boolean) {
                     v-else
                     class="flex flex-col items-center justify-center py-20 text-center text-muted-foreground"
                 >
-                    <ShoppingCart
-                        class="mb-3 h-12 w-12 stroke-1 text-border"
-                    />
-                    <p class="text-sm font-bold text-foreground">
+                    <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 shadow-inner">
+                        <ShoppingCart
+                            class="h-10 w-10 text-accent"
+                        />
+                    </div>
+                    <p class="text-sm font-black text-foreground">
                         Keranjang Anda Kosong
                     </p>
-                    <p class="mt-1 text-xs">
+                    <p class="mt-1 text-xs text-muted-foreground">
                         Pilih produk menarik di marketplace untuk mulai belanja
                     </p>
                 </div>
@@ -203,18 +205,18 @@ function handleOpenChange(open: boolean) {
             <!-- Footer -->
             <SheetFooter
                 v-if="items.length > 0"
-                class="flex-col gap-3 border-t border-border bg-muted/50 px-5 py-4"
+                class="flex-col gap-3 border-t border-black/10 bg-card px-5 py-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)]"
             >
                 <div class="flex items-center justify-between text-xs">
-                    <span class="text-muted-foreground">Subtotal Produk</span>
+                    <span class="text-muted-foreground font-bold">Subtotal Produk</span>
                     <span
-                        class="font-mono text-base font-extrabold text-foreground"
+                        class="font-mono text-lg font-black text-foreground"
                     >
                         {{ fmtRp(subtotal) }}
                     </span>
                 </div>
                 <div
-                    class="flex items-center gap-2 text-[10px] font-medium text-brand-accent"
+                    class="flex items-center gap-2 text-[10px] font-bold text-accent-foreground bg-accent/10 px-2 py-1.5 rounded-lg border border-accent/20"
                 >
                     <ShieldCheck class="h-3.5 w-3.5 shrink-0" />
                     <span
@@ -224,7 +226,7 @@ function handleOpenChange(open: boolean) {
                 </div>
                 <Button
                     size="lg"
-                    class="flex w-full items-center justify-center gap-2 text-sm font-bold shadow-md bg-brand text-brand-foreground hover:opacity-90 border-0"
+                    class="flex w-full items-center justify-center gap-2 text-sm font-bold shadow-md bg-destructive text-destructive-foreground hover:brightness-110 border-0 transition-transform active:scale-95"
                     @click="emit('checkout')"
                 >
                     <span>Lanjut ke Checkout</span>

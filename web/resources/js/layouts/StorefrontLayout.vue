@@ -156,11 +156,11 @@ const bottomNavItems = computed(() => [
 
 <template>
     <div
-        class="relative flex min-h-screen flex-col overflow-x-clip font-sans bg-gradient-to-b from-brand-soft to-background"
+        class="relative flex min-h-screen flex-col overflow-x-clip font-sans bg-background"
     >
         <!-- ── Top Buyer Header Bar ── -->
         <header
-            class="sticky top-0 z-50 border-b border-border bg-card/95 shadow-xs backdrop-blur-md select-none"
+            class="sticky top-0 z-50 border-b border-border bg-[var(--header)] text-[var(--header-foreground)] shadow-md select-none"
         >
             <div
                 class="mx-auto flex max-w-[1600px] items-center gap-3 px-3 py-2.5 sm:gap-4 sm:px-6 sm:py-3"
@@ -171,7 +171,7 @@ const bottomNavItems = computed(() => [
                     @click="navigate(`/${storeData?.slug ?? ''}`)"
                 >
                     <div
-                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-lg font-black text-brand-foreground shadow-md shadow-black/20 sm:h-10 sm:w-10 sm:text-xl bg-brand"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-lg font-black shadow-md shadow-black/20 sm:h-10 sm:w-10 sm:text-xl bg-[var(--header-foreground)] text-[var(--header)]"
                     >
                         {{ storeData?.name ? storeData.name.charAt(0).toUpperCase() : 'S' }}
                     </div>
@@ -179,28 +179,28 @@ const bottomNavItems = computed(() => [
                     <div class="hidden sm:block">
                         <div class="flex items-center gap-1.5">
                             <span
-                                class="text-base leading-none font-black tracking-wider text-foreground uppercase sm:text-lg"
+                                class="text-base leading-none font-black tracking-wider uppercase sm:text-lg"
                             >
                                 {{ storeData?.name ?? 'Store' }}
                             </span>
                             <Badge
-                                class="border-none px-1.5 py-0 text-[9px] font-black text-white uppercase shadow-xs bg-brand-strong hover:bg-brand-strong/90"
+                                class="border-none px-1.5 py-0 text-[9px] font-black uppercase shadow-xs bg-accent text-accent-foreground"
                             >
                                 OFFICIAL STORE
                             </Badge>
                         </div>
-                        <p class="mt-0.5 text-[10px] font-bold text-muted-foreground">
+                        <p class="mt-0.5 text-[10px] font-bold opacity-80">
                             100% Original Guaranteed
                         </p>
                     </div>
                     <!-- Short name on mobile -->
                     <div class="flex items-center gap-1 sm:hidden">
                         <span
-                            class="text-base font-black tracking-wider text-foreground uppercase"
+                            class="text-base font-black tracking-wider uppercase"
                             >{{ storeData?.name ?? 'Store' }}</span
                         >
                         <Badge
-                            class="px-1 py-0 text-[8px] font-black text-white bg-brand-strong hover:bg-brand-strong/90"
+                            class="px-1 py-0 text-[8px] font-black bg-accent text-accent-foreground"
                             >OFFICIAL</Badge
                         >
                     </div>
@@ -209,26 +209,26 @@ const bottomNavItems = computed(() => [
                 <!-- Search Bar — Desktop (center) -->
                 <form
                     @submit.prevent="handleSearch"
-                    class="hidden max-w-xl flex-1 items-center gap-2 rounded-2xl border border-border bg-background px-4 py-2 shadow-2xs transition-all focus-within:border-brand focus-within:bg-card focus-within:ring-2 focus-within:ring-brand/20 md:flex"
+                    class="hidden max-w-xl flex-1 items-center gap-2 rounded-2xl border border-transparent bg-[var(--header-foreground)]/10 px-4 py-2 shadow-inner transition-all focus-within:bg-[var(--header-foreground)]/20 focus-within:ring-2 focus-within:ring-[var(--header-foreground)]/20 md:flex"
                 >
-                    <Search class="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <Search class="h-4 w-4 shrink-0 opacity-70" />
                     <Input
                         v-model="searchInput"
                         placeholder="Cari produk pilihan, baju, elektronik, makanan..."
-                        class="flex-1 border-none bg-transparent text-xs shadow-none outline-none placeholder:text-muted-foreground focus-visible:ring-0"
+                        class="flex-1 border-none bg-transparent text-xs shadow-none outline-none placeholder:opacity-70 focus-visible:ring-0 text-inherit"
                     />
                     <button
                         v-if="searchInput"
                         type="button"
                         @click="clearSearch"
-                        class="cursor-pointer text-xs text-muted-foreground hover:text-foreground"
+                        class="cursor-pointer text-xs opacity-70 hover:opacity-100"
                     >
                         <X class="h-3.5 w-3.5" />
                     </button>
                     <Button
                         type="submit"
                         size="sm"
-                        class="h-7 rounded-xl px-3 text-[11px] font-bold text-brand-foreground shadow-xs bg-brand hover:bg-brand/90 border-0"
+                        class="h-7 rounded-xl px-3 text-[11px] font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-xs border-0"
                     >
                         Cari
                     </Button>
@@ -240,7 +240,7 @@ const bottomNavItems = computed(() => [
                     <button
                         title="Cari produk"
                         @click="mobileSearchOpen = !mobileSearchOpen"
-                        class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-black/8 bg-[#f5f4f0] text-[#4a4a57] transition-all hover:bg-black/5 md:hidden"
+                        class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-[var(--header-foreground)]/10 transition-all hover:bg-[var(--header-foreground)]/20 md:hidden"
                     >
                         <Search class="h-4 w-4" />
                     </button>
@@ -249,11 +249,11 @@ const bottomNavItems = computed(() => [
                     <Button
                         variant="ghost"
                         size="sm"
-                        class="hidden items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground lg:flex"
+                        class="hidden items-center gap-1.5 text-xs font-semibold hover:bg-[var(--header-foreground)]/10 hover:text-[var(--header-foreground)] opacity-90 hover:opacity-100 lg:flex"
                         @click="navigate(`/${storeData?.slug ?? ''}/orders`)"
                     >
                         <ReceiptText
-                            class="h-4 w-4 text-brand"
+                            class="h-4 w-4"
                         />
                         <span>Pesanan Saya</span>
                     </Button>
@@ -262,19 +262,19 @@ const bottomNavItems = computed(() => [
                     <button
                         title="Wishlist Saya"
                         @click="navigate(`/${storeData?.slug ?? ''}/wishlist`)"
-                        class="relative hidden h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-border bg-muted text-muted-foreground transition-all hover:bg-black/5 sm:flex"
+                        class="relative hidden h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-[var(--header-foreground)]/10 transition-all hover:bg-[var(--header-foreground)]/20 sm:flex"
                     >
                         <Heart
                             class="h-4 w-4"
                             :class="
                                 effectiveWishlistCount > 0
-                                    ? 'fill-brand-strong text-brand-strong'
+                                    ? 'fill-accent text-accent'
                                     : ''
                             "
                         />
                         <span
                             v-if="effectiveWishlistCount > 0"
-                            class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white text-[9px] font-black text-white shadow-xs bg-brand-strong"
+                            class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-[var(--header)] text-[9px] font-black shadow-xs bg-accent text-accent-foreground"
                         >
                             {{ effectiveWishlistCount }}
                         </span>
@@ -284,12 +284,12 @@ const bottomNavItems = computed(() => [
                     <button
                         title="Keranjang Belanja"
                         @click="openCart()"
-                        class="relative flex min-h-[44px] cursor-pointer touch-manipulation items-center gap-1.5 rounded-xl border border-brand/30 bg-brand-soft px-2.5 py-2 text-xs font-bold text-brand shadow-2xs transition-all hover:bg-brand/20 active:scale-95 sm:gap-2 sm:px-3"
+                        class="relative flex min-h-[44px] cursor-pointer touch-manipulation items-center gap-1.5 rounded-xl bg-[var(--header-foreground)] px-2.5 py-2 text-xs font-bold text-[var(--header)] shadow-sm transition-all hover:brightness-95 active:scale-95 sm:gap-2 sm:px-3"
                     >
                         <ShoppingCart class="h-4 w-4" />
                         <span class="hidden sm:inline">Keranjang</span>
                         <span
-                            class="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black text-brand-foreground shadow-xs bg-brand"
+                            class="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black bg-destructive text-destructive-foreground shadow-xs"
                         >
                             {{ effectiveCartCount }}
                         </span>
@@ -307,7 +307,7 @@ const bottomNavItems = computed(() => [
                                     :fallback="userInitial"
                                     :hue="220"
                                     size="sm"
-                                    class="cursor-pointer transition-all hover:ring-2 hover:ring-(--brand)"
+                                    class="cursor-pointer transition-all ring-2 ring-transparent hover:ring-[var(--header-foreground)]/50"
                                 />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent class="w-52" align="end">
@@ -354,7 +354,7 @@ const bottomNavItems = computed(() => [
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                     @click="handleLogout"
-                                    class="text-red-600 focus:text-red-600"
+                                    class="text-destructive focus:text-destructive"
                                 >
                                     <LogOut class="mr-2 h-3.5 w-3.5" />
                                     <span>Keluar</span>
@@ -362,11 +362,11 @@ const bottomNavItems = computed(() => [
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
-                    <div v-else class="border-l border-border pl-2 sm:pl-3">
+                    <div v-else class="border-l border-[var(--header-foreground)]/20 pl-2 sm:pl-3">
                         <Button
                             variant="outline"
                             size="sm"
-                            class="h-8 text-xs font-bold border-brand text-brand hover:bg-brand hover:text-brand-foreground"
+                            class="h-8 text-xs font-bold border-none bg-[var(--header-foreground)] text-[var(--header)] hover:brightness-95 hover:bg-[var(--header-foreground)]"
                             @click="navigate(`/${storeData?.slug ?? ''}/login`)"
                         >
                             <LogIn class="mr-1 h-3.5 w-3.5" /> Masuk
@@ -390,7 +390,7 @@ const bottomNavItems = computed(() => [
                 >
                     <form
                         @submit.prevent="handleSearch"
-                        class="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 focus-within:border-brand focus-within:bg-card"
+                        class="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 focus-within:border-primary focus-within:bg-card"
                     >
                         <Search class="h-4 w-4 shrink-0 text-muted-foreground" />
                         <Input
@@ -410,7 +410,7 @@ const bottomNavItems = computed(() => [
                         <Button
                             type="submit"
                             size="sm"
-                            class="h-7 px-3 text-xs font-bold bg-brand hover:opacity-90 border-0 text-brand-foreground"
+                            class="h-7 px-3 text-xs font-bold bg-primary hover:bg-primary/90 border-0 text-primary-foreground"
                         >
                             Cari
                         </Button>
@@ -426,33 +426,33 @@ const bottomNavItems = computed(() => [
 
         <!-- ── Standard Buyer Footer ── -->
         <footer
-            class="border-t border-border bg-card py-6 text-xs text-muted-foreground"
+            class="bg-[var(--footer)] py-8 text-xs text-[var(--footer-foreground)]/70 shadow-inner"
         >
             <div
                 class="mx-auto flex max-w-[1600px] flex-col items-center justify-between gap-3 px-4 sm:flex-row sm:px-6"
             >
                 <div class="flex items-center gap-2">
-                    <span class="font-extrabold text-foreground"
+                    <span class="font-extrabold text-[var(--footer-foreground)]"
                         >{{ storeData?.name ?? 'Official Store' }}</span
                     >
                     <span>· 100% Original Guaranteed</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <a href="#" class="hover:underline">Tentang Kami</a>
-                    <a href="#" class="hover:underline">Syarat & Ketentuan</a>
-                    <a href="#" class="hover:underline">Bantuan Pembeli</a>
+                    <a href="#" class="hover:text-[var(--footer-foreground)] transition-colors">Tentang Kami</a>
+                    <a href="#" class="hover:text-[var(--footer-foreground)] transition-colors">Syarat & Ketentuan</a>
+                    <a href="#" class="hover:text-[var(--footer-foreground)] transition-colors">Bantuan Pembeli</a>
                 </div>
             </div>
         </footer>
 
         <!-- ── Dynamic 4-Hex Theme Mobile Bottom Navigation ── -->
         <nav
-            class="fixed right-0 bottom-0 left-0 z-50 border-t border-brand/20 bg-card/95 backdrop-blur-md md:hidden"
+            class="fixed right-0 bottom-0 left-0 z-50 border-t border-border bg-card/95 backdrop-blur-md md:hidden"
             style="padding-bottom: env(safe-area-inset-bottom, 0px)"
         >
             <!-- Accent line top of mobile bottom nav -->
             <div
-                class="h-0.5 w-full bg-brand"
+                class="h-0.5 w-full bg-primary"
             />
             <div class="flex items-stretch">
                 <button
@@ -464,14 +464,14 @@ const bottomNavItems = computed(() => [
                             : navigate(item.href!)
                     "
                     class="group relative flex flex-1 touch-manipulation flex-col items-center justify-center gap-1 py-2.5 transition-all active:scale-95"
-                    :class="(item.match !== '__cart' && currentPath === item.match) || (item.match === '__store' && currentPath.startsWith('/store/')) ? 'text-brand' : 'text-muted-foreground'"
+                    :class="(item.match !== '__cart' && currentPath === item.match) || (item.match === '__store' && currentPath.startsWith('/store/')) ? 'text-primary' : 'text-muted-foreground'"
                 >
                     <!-- Cart badge -->
                     <div v-if="item.match === '__cart'" class="relative">
                         <component :is="item.icon" class="h-5 w-5" />
                         <span
                             v-if="effectiveCartCount > 0"
-                            class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-brand-foreground shadow-sm bg-brand-strong"
+                            class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-destructive-foreground shadow-sm bg-destructive"
                         >{{
                                 effectiveCartCount > 9
                                     ? '9+'
@@ -499,7 +499,7 @@ const bottomNavItems = computed(() => [
                             (item.match === '__store' &&
                                 currentPath.startsWith('/store/'))
                         "
-                        class="absolute bottom-0 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full shadow-xs bg-brand"
+                        class="absolute bottom-0 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full shadow-xs bg-primary"
                     />
                 </button>
             </div>

@@ -160,7 +160,7 @@ const ratingBreakdown: any[] = [];
                                 {{ store.badge }} · Respons &lt; 1 jam
                             </p>
                         </div>
-                        <ChevronLeft class="w-5 h-5 rotate-180 text-zinc-300" />
+                        <ChevronLeft class="w-5 h-5 rotate-180 text-muted-foreground" />
                     </div>
                     <!-- Trust badges -->
                     <div class="mt-4 flex flex-col gap-2">
@@ -208,7 +208,7 @@ const ratingBreakdown: any[] = [];
                                     class="h-4 w-4"
                                     :class="
                                         i <= Math.round(product.rating || 0)
-                                            ? 'fill-amber-400 stroke-amber-400'
+                                            ? 'fill-accent stroke-accent'
                                             : 'fill-none stroke-border'
                                     "
                                 />
@@ -250,12 +250,12 @@ const ratingBreakdown: any[] = [];
                             <span class="min-w-[32px] text-center font-mono text-sm font-black">{{ qty }}</span>
                             <button
                                 @click="qty++"
-                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-zinc-50 shadow-xs hover:bg-zinc-100 transition"
+                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-muted shadow-xs hover:bg-muted/80 transition"
                             >
                                 <Plus class="h-4 w-4" />
                             </button>
                         </div>
-                        <span class="text-xs font-medium text-zinc-400">Sisa stok: {{ product.stock }}</span>
+                        <span class="text-xs font-medium text-muted-foreground">Sisa stok: {{ product.stock }}</span>
                     </div>
                     <div class="flex gap-2">
                         <Button
@@ -282,7 +282,7 @@ const ratingBreakdown: any[] = [];
                         "
                     >
                         {{ tab === 'detail' ? 'Deskripsi' : 'Ulasan' }}
-                        <span v-if="tab === 'ulasan'" class="ml-1 text-sm font-bold text-zinc-400">({{ mockReviews.length }})</span>
+                        <span v-if="tab === 'ulasan'" class="ml-1 text-sm font-bold text-muted-foreground">({{ mockReviews.length }})</span>
                     </button>
                 </div>
 

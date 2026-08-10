@@ -169,7 +169,7 @@ const {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    class="text-red-500 hover:bg-red-50"
+                                    class="text-destructive hover:bg-destructive/10 hover:text-destructive"
                                     @click="deleteTarget = v"
                                 >
                                     <Trash2 class="h-3.5 w-3.5" />

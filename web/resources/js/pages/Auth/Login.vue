@@ -110,12 +110,12 @@ async function handleGoogleLogin() {
 
             <!-- Login Card -->
             <Card
-                class="flex flex-col gap-4 border-black/10 p-6 shadow-md md:p-8"
+                class="flex flex-col gap-4 border-border p-6 shadow-md md:p-8"
             >
                 <!-- Error Alert -->
                 <div
                     v-if="errorMessage"
-                    class="flex items-start gap-2.5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs font-medium text-red-600"
+                    class="flex items-start gap-2.5 rounded-xl border border-destructive/20 bg-destructive/100/10 p-3 text-xs font-medium text-destructive"
                 >
                     <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
                     <span>{{ errorMessage }}</span>
@@ -159,7 +159,7 @@ async function handleGoogleLogin() {
                 <!-- Divider -->
                 <div class="relative my-2 flex items-center justify-center">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-black/10" />
+                        <div class="w-full border-t border-border" />
                     </div>
                     <span
                         class="relative bg-white px-3 text-[11px] font-medium tracking-wider text-[#9090a0] uppercase"
@@ -214,7 +214,7 @@ async function handleGoogleLogin() {
 
                     <Button
                         type="submit"
-                        variant="amber"
+                        variant="default"
                         class="mt-1 flex h-11 w-full items-center justify-center gap-2 text-xs font-bold shadow-md"
                         :disabled="isLoading || isGoogleLoading"
                     >

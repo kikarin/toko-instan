@@ -46,11 +46,11 @@ function getSparkPaths(data: number[]) {
 
 <template>
     <Card
-        class="group relative flex flex-col justify-between gap-2.5 overflow-hidden rounded-2xl border border-black/8 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/20 hover:shadow-xl"
+        class="group relative flex flex-col justify-between gap-2.5 overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
     >
         <div class="flex items-center justify-between">
             <span
-                class="text-xs font-bold text-zinc-500 transition-colors group-hover:text-black"
+                class="text-xs font-bold text-muted-foreground transition-colors group-hover:text-foreground"
                 >{{ label }}</span
             >
             <div
@@ -66,7 +66,7 @@ function getSparkPaths(data: number[]) {
         </div>
 
         <p
-            class="font-mono text-2xl leading-none font-black tracking-tight text-[#1c1c22]"
+            class="font-mono text-2xl leading-none font-black tracking-tight text-foreground"
         >
             {{ value }}
         </p>
@@ -76,10 +76,10 @@ function getSparkPaths(data: number[]) {
                 class="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-mono text-[11px] font-extrabold"
                 :class="[
                     up === null
-                        ? 'bg-emerald-50 text-emerald-600'
+                        ? 'bg-emerald-500/10 text-emerald-600'
                         : up
-                          ? 'bg-emerald-50 text-emerald-600'
-                          : 'bg-rose-50 text-rose-600',
+                          ? 'bg-emerald-500/10 text-emerald-600'
+                          : 'bg-destructive/10 text-destructive',
                 ]"
             >
                 <ArrowUpRight v-if="up === true" class="h-3.5 w-3.5" />
@@ -126,7 +126,7 @@ function getSparkPaths(data: number[]) {
         </div>
 
         <p
-            class="border-t border-black/5 pt-1.5 text-[10px] font-medium text-zinc-400"
+            class="border-t border-border/50 pt-1.5 text-[10px] font-medium text-muted-foreground/80"
         >
             {{ sub }}
         </p>
