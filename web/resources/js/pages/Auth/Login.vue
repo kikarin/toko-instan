@@ -5,12 +5,16 @@ import { ref, computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { toast, Toaster } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/sonner';
+import AuthLayout from '@/layouts/AuthLayout.vue';
 import { signInWithGooglePopup } from '@/lib/firebase';
 
 const props = defineProps<{
     store?: any;
+    intent?: 'platform' | 'storefront';
 }>();
+
+const isStorefront = computed(() => props.intent === 'storefront');
 
 const email = ref('');
 const password = ref('');
@@ -18,7 +22,9 @@ const isLoading = ref(false);
 const isGoogleLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 
-const loginUrl = computed(() => props.store ? `/${props.store.slug}/login` : '/login');
+const loginUrl = computed(() =>
+    isStorefront.value && props.store ? `/${props.store.slug}/login` : '/login',
+);
 
 async function handleEmailLogin() {
     if (!email.value || !password.value) {
@@ -61,36 +67,47 @@ async function handleGoogleLogin() {
     errorMessage.value = null;
     isGoogleLoading.value = true;
 
-    const { user, error } = await signInWithGooglePopup();
-    isGoogleLoading.value = false;
+    const { idToken, error } = await signInWithGooglePopup();
 
-    if (error) {
-        errorMessage.value = error;
-    } else if (user) {
-        // Also authenticate with Laravel backend
-        router.post(loginUrl.value, {
-            email: user.email,
-            password: user.uid,
-        });
+    if (error || !idToken) {
+        isGoogleLoading.value = false;
+        errorMessage.value = error ?? 'Gagal login Google.';
+        toast.error(errorMessage.value);
+
+        return;
     }
+
+    router.post(
+        '/auth/google',
+        {
+            id_token: idToken,
+            intent: 'login',
+            store_slug_context: isStorefront.value ? (props.store?.slug ?? null) : null,
+        },
+        {
+            onSuccess: () => {
+                toast.success('Berhasil masuk!');
+            },
+            onFinish: () => {
+                isGoogleLoading.value = false;
+            },
+            onError: (errors) => {
+                const msg =
+                    errors.id_token ||
+                    Object.values(errors)[0] ||
+                    'Gagal masuk dengan Google.';
+                errorMessage.value = String(msg);
+                toast.error(String(msg));
+            },
+        },
+    );
 }
 </script>
 
 <template>
     <Head title="Masuk - Toko Instan" />
 
-    <div
-        class="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f5f4f0] p-4 font-sans select-none"
-    >
-        <!-- Background Ambient Glow -->
-        <div
-            class="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-[#e07c28]/10 blur-3xl"
-        />
-        <div
-            class="pointer-events-none absolute -right-24 -bottom-24 h-96 w-96 rounded-full bg-[#6d4fc2]/10 blur-3xl"
-        />
-
-        <div class="relative z-10 flex w-full max-w-md flex-col gap-6">
+    <AuthLayout>
             <!-- Header Brand -->
             <div class="flex flex-col items-center text-center">
                 <div
@@ -101,10 +118,10 @@ async function handleGoogleLogin() {
                 <h1
                     class="text-2xl font-extrabold tracking-tight text-[#1c1c22]"
                 >
-                    {{ props.store ? `Masuk ke ${props.store.name}` : 'Selamat Datang Kembali' }}
+                    {{ isStorefront && props.store ? `Masuk ke ${props.store.name}` : 'Selamat Datang Kembali' }}
                 </h1>
                 <p class="mt-1 text-xs text-[#9090a0]">
-                    {{ props.store ? `Silakan masuk untuk belanja di ${props.store.name}` : 'Masuk ke dashboard Toko Instan Anda' }}
+                    {{ isStorefront && props.store ? `Silakan masuk untuk belanja di ${props.store.name}` : 'Masuk ke dashboard Toko Instan Anda' }}
                 </p>
             </div>
 
@@ -223,7 +240,7 @@ async function handleGoogleLogin() {
                             class="h-4 w-4 animate-spin"
                         />
                         <template v-else>
-                            <span>{{ props.store ? 'Masuk Sekarang' : 'Masuk ke Dashboard' }}</span>
+                            <span>{{ isStorefront ? 'Masuk Sekarang' : 'Masuk ke Dashboard' }}</span>
                             <ArrowRight class="h-4 w-4" />
                         </template>
                     </Button>
@@ -234,15 +251,12 @@ async function handleGoogleLogin() {
             <div class="text-center text-xs text-[#9090a0]">
                 Belum punya akun?
                 <a
-                    :href="props.store ? `/${props.store.slug}/register` : '/register'"
-                    @click.prevent="router.visit(props.store ? `/${props.store.slug}/register` : '/register')"
+                    :href="isStorefront && props.store ? `/${props.store.slug}/register` : '/register'"
+                    @click.prevent="router.visit(isStorefront && props.store ? `/${props.store.slug}/register` : '/register')"
                     class="ml-1 font-bold text-[#e07c28] hover:underline"
                 >
-                    {{ props.store ? 'Daftar Sekarang' : 'Daftar Toko Gratis' }}
+                    {{ isStorefront ? 'Daftar Sekarang' : 'Daftar Toko Gratis' }}
                 </a>
             </div>
-        </div>
-
-        <Toaster position="top-right" />
-    </div>
+    </AuthLayout>
 </template>

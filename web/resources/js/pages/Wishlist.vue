@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useCart } from '@/lib/useCart';
-import { useWishlist } from '@/lib/useWishlist';
+import { useCart } from '@/composables/useCart';
+import { useWishlist } from '@/composables/useWishlist';
 import type { ProductDetail } from '@/types/product';
 import type { WishlistItem } from '@/types/product';
 

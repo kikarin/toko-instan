@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useSellerOrders } from '@/lib/useSellerOrders';
+import { useSellerOrders } from '@/composables/useSellerOrders';
 import type { SellerOrder } from '@/types/order';
 
 interface Props {

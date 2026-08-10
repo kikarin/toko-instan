@@ -33,10 +33,10 @@ import {
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useProductActions } from '@/lib/useProductActions';
-import { useProductFilters } from '@/lib/useProductFilters';
-import { useProductStats } from '@/lib/useProductStats';
-import { useProductStock } from '@/lib/useProductStock';
+import { useProductActions } from '@/composables/useProductActions';
+import { useProductFilters } from '@/composables/useProductFilters';
+import { useProductStats } from '@/composables/useProductStats';
+import { useProductStock } from '@/composables/useProductStock';
 import type { Product } from '@/types/product';
 
 interface Props {

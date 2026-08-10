@@ -4,7 +4,7 @@ import { ReceiptText, Package, Inbox } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useStoreName } from '@/lib/useStoreName';
+import { useStoreName } from '@/composables/useStoreName';
 import type { BuyerOrder } from '@/types/order';
 
 interface Props {

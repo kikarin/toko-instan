@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useStoreName } from '@/lib/useStoreName';
+import { useStoreName } from '@/composables/useStoreName';
 import type { OrderInvoice } from '@/types/order';
 
 interface Props {

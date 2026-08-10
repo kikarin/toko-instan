@@ -8,7 +8,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useProductVariants } from '@/lib/useProductVariants';
+import { useProductVariants } from '@/composables/useProductVariants';
 import type { ProductVariant } from '@/types/product';
 
 interface Props {

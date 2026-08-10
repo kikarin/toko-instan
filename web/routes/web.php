@@ -32,6 +32,7 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/auth/google', [AuthController::class, 'google'])->name('auth.google');
 
     Route::get('/{store_slug}/login', [AuthController::class, 'showStoreLogin'])->name('store.login');
     Route::post('/{store_slug}/login', [AuthController::class, 'storeLogin']);
@@ -114,6 +115,8 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::get('/admin/tenants', [AdminController::class, 'tenants'])->name('admin.tenants');
+    Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
     Route::patch('/admin/users/{id}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
     Route::delete('/admin/users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
     Route::post('/admin/users/{id}/impersonate', [AdminController::class, 'impersonate'])->name('admin.users.impersonate');

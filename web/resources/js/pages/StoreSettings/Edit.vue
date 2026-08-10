@@ -23,8 +23,8 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useStoreSettings } from '@/lib/useStoreSettings';
-import { useStoreTheme } from '@/lib/useStoreTheme';
+import { useStoreSettings } from '@/composables/useStoreSettings';
+import { useStoreTheme } from '@/composables/useStoreTheme';
 import type { StoreData } from '@/types/store';
 
 interface Props {

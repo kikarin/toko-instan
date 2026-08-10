@@ -26,6 +26,10 @@ class StorePageController extends Controller
             abort(404);
         }
 
+        if (! $store->is_active) {
+            return $this->closedStoreResponse($store);
+        }
+
         $category = $request->query('category');
 
         $productsQuery = $store->products()->where('is_active', true);
@@ -112,6 +116,10 @@ class StorePageController extends Controller
             abort(404);
         }
 
+        if (! $store->is_active) {
+            return $this->closedStoreResponse($store);
+        }
+
         $product = $store->products()
             ->where('slug', $productSlug)
             ->where('is_active', true)
@@ -158,6 +166,18 @@ class StorePageController extends Controller
                         'stock' => $variant->stock,
                     ];
                 })->toArray(),
+            ],
+        ]);
+    }
+
+    protected function closedStoreResponse($store): Response
+    {
+        return Inertia::render('StoreClosed', [
+            'store' => [
+                'id' => $store->id,
+                'name' => $store->name,
+                'slug' => $store->slug,
+                'logo' => $store->logo,
             ],
         ]);
     }

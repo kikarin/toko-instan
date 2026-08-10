@@ -1,7 +1,7 @@
 import { useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
-import { useActiveUser } from '@/lib/useActiveUser';
+import { useActiveUser } from '@/composables/useActiveUser';
 import type { UserProfile } from '@/types/user';
 
 export function useProfileEdit(user: UserProfile) {

@@ -130,6 +130,31 @@ const statusVariant: Record<string, 'amber' | 'rose' | 'teal' | 'violetSolid'> =
                 </div>
             </Card>
 
+            <!-- Pending withdrawals -->
+            <Card class="flex flex-wrap items-center justify-between gap-3 p-5">
+                <div>
+                    <p
+                        class="text-[11px] font-bold tracking-widest text-[#9090a0] uppercase"
+                    >
+                        Pending withdraw
+                    </p>
+                    <p class="mt-1 font-mono text-2xl font-extrabold text-[#1c1c22]">
+                        {{ stats?.pending_withdrawals_sum ?? 'Rp 0' }}
+                    </p>
+                    <p class="mt-1 text-xs text-[#9090a0]">
+                        {{ stats?.pending_withdrawals ?? 0 }} permintaan menunggu
+                        review
+                    </p>
+                </div>
+                <a
+                    href="/admin/withdrawals"
+                    class="inline-flex items-center gap-1 text-xs font-bold text-[#e07c28] hover:underline"
+                >
+                    Kelola penarikan
+                    <ArrowRight class="h-3.5 w-3.5" />
+                </a>
+            </Card>
+
             <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <!-- Recent Orders -->
                 <Card class="p-5">

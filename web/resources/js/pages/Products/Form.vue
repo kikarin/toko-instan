@@ -29,7 +29,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useProductForm } from '@/lib/useProductForm';
+import { useProductForm } from '@/composables/useProductForm';
 import type { Product } from '@/types/product';
 
 interface Props {

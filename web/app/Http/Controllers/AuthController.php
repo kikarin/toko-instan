@@ -21,7 +21,9 @@ class AuthController extends Controller
 
     public function showLogin(): Response
     {
-        return Inertia::render('Auth/Login');
+        return Inertia::render('Auth/Login', [
+            'intent' => 'platform',
+        ]);
     }
 
     public function login(Request $request): RedirectResponse
@@ -44,7 +46,9 @@ class AuthController extends Controller
 
     public function showRegister(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'intent' => 'platform',
+        ]);
     }
 
     public function register(Request $request): RedirectResponse
@@ -56,15 +60,54 @@ class AuthController extends Controller
                 Rule::unique('users')->whereNull('store_id'),
             ],
             'password' => ['required', 'string', 'min:6'],
-            'role' => ['nullable', 'string', 'in:seller,buyer'],
-            'store_name' => ['nullable', 'string', 'max:255'],
+            'store_name' => ['required', 'string', 'max:255'],
+            'store_slug' => ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('stores', 'slug')],
         ]);
+
+        $validated['role'] = 'seller';
 
         $this->authService->register($validated);
 
         $user = $request->user();
 
         return redirect()->intended($user?->homePath() ?? '/');
+    }
+
+    public function google(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'id_token' => ['required', 'string'],
+            'intent' => ['nullable', 'string', 'in:login,register'],
+            'store_name' => ['nullable', 'string', 'max:255'],
+            'store_slug' => ['nullable', 'string', 'max:255', 'alpha_dash'],
+            'store_slug_context' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $storeId = null;
+        if (! empty($validated['store_slug_context'])) {
+            $store = $this->storeRepository->findBySlug($validated['store_slug_context']);
+            if (! $store) {
+                abort(404);
+            }
+            $storeId = $store->id;
+        }
+
+        if (($validated['intent'] ?? 'login') === 'register' && $storeId === null) {
+            $request->validate([
+                'store_name' => ['required', 'string', 'max:255'],
+                'store_slug' => ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('stores', 'slug')],
+            ]);
+        }
+
+        $user = $this->authService->loginWithGoogle([
+            'id_token' => $validated['id_token'],
+            'intent' => $validated['intent'] ?? 'login',
+            'store_name' => $validated['store_name'] ?? null,
+            'store_slug' => $validated['store_slug'] ?? null,
+            'store_id' => $storeId,
+        ]);
+
+        return redirect()->intended($user->homePath() ?? '/');
     }
 
     public function logout(Request $request): RedirectResponse
@@ -96,6 +139,7 @@ class AuthController extends Controller
         }
 
         return Inertia::render('Auth/Login', [
+            'intent' => 'storefront',
             'store' => $store,
         ]);
     }
@@ -131,6 +175,7 @@ class AuthController extends Controller
         }
 
         return Inertia::render('Auth/Register', [
+            'intent' => 'storefront',
             'store' => $store,
         ]);
     }
@@ -151,7 +196,6 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:6'],
         ]);
 
-        // Force role to buyer and inject store_id
         $validated['role'] = 'buyer';
         $validated['store_id'] = $store->id;
 

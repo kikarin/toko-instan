@@ -5,8 +5,8 @@ import { ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { logoutUser } from '@/lib/firebase';
-import { useCart } from '@/lib/useCart';
-import { useStoreName } from '@/lib/useStoreName';
+import { useCart } from '@/composables/useCart';
+import { useStoreName } from '@/composables/useStoreName';
 import type { UserProfile } from '@/types/user';
 
 interface Props {

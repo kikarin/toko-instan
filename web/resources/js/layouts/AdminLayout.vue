@@ -7,6 +7,8 @@ import {
     LogOut,
     LogIn,
     Banknote,
+    Building2,
+    ShoppingCart,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import ImpersonationBanner from '@/components/impersonation/ImpersonationBanner.vue';
@@ -32,11 +34,11 @@ import {
 } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
-import { useActiveUser } from '@/lib/useActiveUser';
-import { useStoreTheme } from '@/lib/useStoreTheme';
+import { useActiveUser } from '@/composables/useActiveUser';
+import { useStoreTheme } from '@/composables/useStoreTheme';
 
 interface Props {
-    activePage?: 'Admin' | 'Users' | 'Penarikan';
+    activePage?: 'Admin' | 'Users' | 'Tenants' | 'Orders' | 'Penarikan';
 }
 
 withDefaults(defineProps<Props>(), {
@@ -60,6 +62,8 @@ const userInitial = computed(() => {
 const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', route: '/admin' },
     { icon: Users, label: 'Users', route: '/admin/users' },
+    { icon: Building2, label: 'Tenants', route: '/admin/tenants' },
+    { icon: ShoppingCart, label: 'Orders', route: '/admin/orders' },
     { icon: Banknote, label: 'Penarikan', route: '/admin/withdrawals' },
 ];
 

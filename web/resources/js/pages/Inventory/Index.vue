@@ -17,7 +17,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useInventoryActions } from '@/lib/useInventoryActions';
+import { useInventoryActions } from '@/composables/useInventoryActions';
 import type { InventoryProduct } from '@/types/inventory';
 
 interface Props {

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Controllers\AdminController;
+use App\Models\Store;
 use App\Repositories\StoreRepository;
 use App\Services\StoreCmsService;
 use Illuminate\Http\Request;
@@ -59,16 +60,7 @@ class HandleInertiaRequests extends Middleware
      */
     private function activeTheme(Request $request): ?array
     {
-        $storeSlug = $request->route('store_slug');
-        $store = null;
-
-        if ($storeSlug) {
-            $store = $this->storeRepository->findBySlug($storeSlug);
-        }
-
-        if (! $store) {
-            $store = $this->storeRepository->getActiveStore($request->user()?->id);
-        }
+        $store = $this->resolveSharedStore($request);
 
         if (! $store) {
             return null;
@@ -83,23 +75,17 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Resolve the public storefront data from the primary store so the
-     * marketplace (header, hero, footer) follows the seller's store settings.
+     * Resolve the public storefront data for shared Inertia props.
+     *
+     * Only from route `{store_slug}` or the authenticated user's own store.
+     * Do NOT fall back to a "primary" seeded store for guests — that wrongly
+     * turns platform `/login` and `/register` into Nike storefront auth.
      *
      * @return array<string, mixed>|null
      */
     private function activeStore(Request $request): ?array
     {
-        $storeSlug = $request->route('store_slug');
-        $store = null;
-
-        if ($storeSlug) {
-            $store = $this->storeRepository->findBySlug($storeSlug);
-        }
-
-        if (! $store) {
-            $store = $this->storeRepository->getActiveStore($request->user()?->id);
-        }
+        $store = $this->resolveSharedStore($request);
 
         if (! $store) {
             return null;
@@ -123,5 +109,26 @@ class HandleInertiaRequests extends Middleware
             'instagram' => $store->instagram,
             'tiktok' => $store->tiktok,
         ];
+    }
+
+    private function resolveSharedStore(Request $request): ?Store
+    {
+        $storeSlug = $request->route('store_slug');
+
+        if (is_string($storeSlug) && $storeSlug !== '') {
+            return $this->storeRepository->findBySlug($storeSlug);
+        }
+
+        $user = $request->user();
+
+        if (! $user) {
+            return null;
+        }
+
+        if ($user->role === 'buyer' && $user->store_id) {
+            return Store::query()->find($user->store_id);
+        }
+
+        return $this->storeRepository->getStoreForUser($user->id);
     }
 }

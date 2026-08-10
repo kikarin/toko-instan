@@ -61,6 +61,8 @@ class Store extends Model
         'banner_urls' => 'array',
         'highlights' => 'array',
         'hero_config' => 'array',
+        'is_active' => 'boolean',
+        'is_pkp' => 'boolean',
     ];
 
     /**

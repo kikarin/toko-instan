@@ -18,7 +18,7 @@ import {
     useWalletWithdraw,
     WITHDRAW_STATUS_LABEL as statusLabel,
     WITHDRAW_STATUS_VARIANT as statusVariant,
-} from '@/lib/useWalletWithdraw';
+} from '@/composables/useWalletWithdraw';
 import type { WalletSummary } from '@/types/wallet';
 import type { Withdrawal } from '@/types/wallet';
 import type { WalletTransaction } from '@/types/wallet';

@@ -55,9 +55,9 @@ import {
 } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
-import { useActiveUser } from '@/lib/useActiveUser';
-import { useStoreName } from '@/lib/useStoreName';
-import { useStoreTheme } from '@/lib/useStoreTheme';
+import { useActiveUser } from '@/composables/useActiveUser';
+import { useStoreName } from '@/composables/useStoreName';
+import { useStoreTheme } from '@/composables/useStoreTheme';
 
 interface NavItem {
     icon: any;

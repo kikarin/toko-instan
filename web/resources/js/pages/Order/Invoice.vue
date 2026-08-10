@@ -3,7 +3,7 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import { ArrowLeft, Printer, Store, ReceiptText } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
-import { useStoreName } from '@/lib/useStoreName';
+import { useStoreName } from '@/composables/useStoreName';
 import type { OrderInvoice } from '@/types/order';
 
 interface Props {

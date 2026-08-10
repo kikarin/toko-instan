@@ -9,9 +9,12 @@ export interface AdminUser {
 export interface AdminStats {
     users: number;
     stores: number;
+    tenants?: number;
     products: number;
     orders: number;
     revenue: string;
+    pending_withdrawals?: number;
+    pending_withdrawals_sum?: string;
 }
 
 export interface RecentOrder {

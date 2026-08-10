@@ -31,10 +31,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Toaster } from '@/components/ui/sonner';
 import { logoutUser } from '@/lib/firebase';
-import { useActiveUser } from '@/lib/useActiveUser';
-import { useCart } from '@/lib/useCart';
-import { useStoreTheme } from '@/lib/useStoreTheme';
-import { useWishlist } from '@/lib/useWishlist';
+import { useActiveUser } from '@/composables/useActiveUser';
+import { useCart } from '@/composables/useCart';
+import { useStoreTheme } from '@/composables/useStoreTheme';
+import { useWishlist } from '@/composables/useWishlist';
 
 interface Props {
     cartCount?: number;

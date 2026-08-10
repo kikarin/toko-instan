@@ -2,8 +2,8 @@ import { router, usePage } from '@inertiajs/vue3';
 import { computed, ref  } from 'vue';
 import type {ComputedRef} from 'vue';
 import { toast } from '@/components/ui/sonner';
-import { useActiveUser } from '@/lib/useActiveUser';
-import { useCart } from '@/lib/useCart';
+import { useActiveUser } from '@/composables/useActiveUser';
+import { useCart } from '@/composables/useCart';
 import type { CartItem } from '@/types/cart';
 
 export const COURIERS = [

@@ -15,8 +15,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/sonner';
 import { Textarea } from '@/components/ui/textarea';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useCart } from '@/lib/useCart';
-import { useProfileEdit } from '@/lib/useProfileEdit';
+import { useCart } from '@/composables/useCart';
+import { useProfileEdit } from '@/composables/useProfileEdit';
 import type { UserProfile } from '@/types/user';
 
 interface Props {

@@ -2,30 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\UploadProductImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class UploadController extends Controller
 {
+    public function __construct(
+        protected UploadProductImage $uploadProductImage
+    ) {}
+
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $request->validate([
             'file' => 'required|image|mimes:jpeg,png,webp|max:2048',
         ]);
 
-        $path = $request->file('file')->store(
-            'products/'.date('Y/m'),
-            'r2'
-        );
-
-        if ($path === false) {
-            return response()->json(['message' => 'Upload gagal.'], 500);
+        try {
+            $uploaded = ($this->uploadProductImage)($request->file('file'));
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
 
         return response()->json([
-            'url' => Storage::disk('r2')->url($path),
-            'path' => $path,
+            'url' => $uploaded['url'],
+            'path' => $uploaded['path'],
+            'urls' => $uploaded['urls'],
         ]);
     }
 }

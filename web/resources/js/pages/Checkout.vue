@@ -19,13 +19,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useCart } from '@/lib/useCart';
-import { useCheckout } from '@/lib/useCheckout';
-import { useStoreName } from '@/lib/useStoreName';
+import { useCart } from '@/composables/useCart';
+import { useCheckout } from '@/composables/useCheckout';
+import { useStoreName } from '@/composables/useStoreName';
 import { Link } from '@inertiajs/vue3';
 import { watch, onMounted } from 'vue';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useIndoRegions } from '@/lib/useIndoRegions';
+import { useIndoRegions } from '@/composables/useIndoRegions';
 
 const props = defineProps<{
     addresses?: any[];

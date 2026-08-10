@@ -20,9 +20,9 @@ import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useCart } from '@/lib/useCart';
+import { useCart } from '@/composables/useCart';
 import { toast } from '@/components/ui/sonner';
-import { useActiveUser } from '@/lib/useActiveUser';
+import { useActiveUser } from '@/composables/useActiveUser';
 
 interface Props {
     store: any;

@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import { useIsMobile } from '@/lib/useIsMobile';
+import { useIsMobile } from '@/composables/useIsMobile';
 import type { ProductDetail } from '@/types/product';
 
 interface Props {

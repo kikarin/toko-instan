@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useAddresses } from '@/lib/useAddresses';
-import { useIndoRegions } from '@/lib/useIndoRegions';
+import { useAddresses } from '@/composables/useAddresses';
+import { useIndoRegions } from '@/composables/useIndoRegions';
 import { onMounted, watch } from 'vue';
 import type { Address } from '@/types/address';
 

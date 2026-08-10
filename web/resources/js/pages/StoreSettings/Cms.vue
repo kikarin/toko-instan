@@ -28,7 +28,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import {
     COLOR_TOKENS as colorTokens,
     useStoreCms,
-} from '@/lib/useStoreCms';
+} from '@/composables/useStoreCms';
 import type { ProductOption } from '@/types/product';
 import type { ThemeInfo } from '@/types/store';
 import type { StoreShowcase } from '@/types/store';

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\UploadProductImage;
 use App\Models\Store;
 use App\Repositories\StoreRepository;
 use Illuminate\Http\RedirectResponse;
@@ -12,7 +13,10 @@ use Inertia\Response;
 
 class StoreSettingsController extends Controller
 {
-    public function __construct(protected StoreRepository $storeRepository) {}
+    public function __construct(
+        protected StoreRepository $storeRepository,
+        protected UploadProductImage $uploadProductImage
+    ) {}
 
     public function edit(Request $request): Response|RedirectResponse
     {
@@ -64,23 +68,23 @@ class StoreSettingsController extends Controller
         ]);
 
         if ($request->hasFile('banner_file')) {
-            $bannerPath = $request->file('banner_file')->store('banners', 'public');
-            $validated['banner_url'] = '/storage/'.$bannerPath;
+            $uploaded = ($this->uploadProductImage)($request->file('banner_file'), 'stores/banners');
+            $validated['banner_url'] = $uploaded['url'];
         }
 
         $bannerUrls = $request->input('existing_banners', []);
 
         if ($request->hasFile('banner_files')) {
             foreach ($request->file('banner_files') as $file) {
-                $path = $file->store('banners', 'public');
-                $bannerUrls[] = '/storage/'.$path;
+                $uploaded = ($this->uploadProductImage)($file, 'stores/banners');
+                $bannerUrls[] = $uploaded['url'];
             }
         }
         $validated['banner_urls'] = $bannerUrls;
 
         if ($request->hasFile('logo_file')) {
-            $logoPath = $request->file('logo_file')->store('logos', 'public');
-            $validated['logo'] = '/storage/'.$logoPath;
+            $uploaded = ($this->uploadProductImage)($request->file('logo_file'), 'stores/logos');
+            $validated['logo'] = $uploaded['url'];
         }
 
         if ($store) {

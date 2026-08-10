@@ -1,8 +1,8 @@
 import { router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
-import { useCart } from '@/lib/useCart';
-import { useActiveUser } from '@/lib/useActiveUser';
+import { useCart } from '@/composables/useCart';
+import { useActiveUser } from '@/composables/useActiveUser';
 import type { ProductDetail } from '@/types/product';
 
 export function useMarketplaceCart() {

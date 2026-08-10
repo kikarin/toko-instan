@@ -26,9 +26,9 @@ import {
     CardDescription,
     CardContent,
 } from '@/components/ui/card';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { useSellerDashboard } from '@/lib/useSellerDashboard';
-import { useStoreName } from '@/lib/useStoreName';
+import DashboardLayout from '@/layouts/DashboardLayout.vue';
+import { useSellerDashboard } from '@/composables/useSellerDashboard';
+import { useStoreName } from '@/composables/useStoreName';
 
 interface Props {
     kpis?: any[];
@@ -59,7 +59,7 @@ const {
 <template>
     <Head title="Dashboard Seller Hub — Toko Instan" />
 
-    <AppLayout activePage="Dashboard" v-model:period="period">
+    <DashboardLayout activePage="Dashboard" v-model:period="period">
         <main
             class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8"
         >
@@ -370,5 +370,5 @@ const {
                 </div>
             </div>
         </main>
-    </AppLayout>
+    </DashboardLayout>
 </template>

@@ -32,10 +32,22 @@ class UserRepository
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => isset($data['password'])
+                ? Hash::make($data['password'])
+                : Hash::make(str()->random(32)),
             'role' => $data['role'] ?? 'seller',
             'store_id' => $data['store_id'] ?? null,
             'auth_provider' => $data['auth_provider'] ?? 'email',
+            'firebase_uid' => $data['firebase_uid'] ?? null,
+            'avatar' => $data['avatar'] ?? null,
         ]);
+    }
+
+    public function findByFirebaseUid(string $uid, ?int $storeId = null): ?User
+    {
+        return User::where('firebase_uid', $uid)
+            ->when($storeId !== null, fn ($query) => $query->where('store_id', $storeId))
+            ->when($storeId === null, fn ($query) => $query->whereNull('store_id'))
+            ->first();
     }
 }

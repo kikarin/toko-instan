@@ -43,8 +43,9 @@ onAuthStateChanged(auth, (user) => {
 export async function signInWithGooglePopup() {
     try {
         const result = await signInWithPopup(auth, googleProvider);
+        const idToken = await result.user.getIdToken();
 
-        return { user: result.user, error: null };
+        return { user: result.user, idToken, error: null };
     } catch (error: any) {
         console.error('Google Sign-In Error:', error);
         let msg = 'Gagal login menggunakan Google.';
@@ -59,7 +60,7 @@ export async function signInWithGooglePopup() {
                 'Domain ini belum diizinkan di Firebase Console -> Authentication -> Settings -> Authorized domains.';
         }
 
-        return { user: null, error: msg };
+        return { user: null, idToken: null, error: msg };
     }
 }
 

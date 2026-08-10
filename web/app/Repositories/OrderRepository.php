@@ -13,26 +13,40 @@ use Illuminate\Support\Facades\DB;
 
 class OrderRepository
 {
-    public function getCompletedOrdersSum(): float
+    public function getCompletedOrdersSum(?int $storeId = null): float
     {
-        return (float) Order::where('status', 'completed')->sum('total_amount');
+        return (float) Order::query()
+            ->where('status', 'completed')
+            ->when($storeId !== null, fn ($q) => $q->where('store_id', $storeId))
+            ->sum('total_amount');
     }
 
-    public function countTotalOrders(): int
+    public function countTotalOrders(?int $storeId = null): int
     {
-        return Order::count();
+        return (int) Order::query()
+            ->when($storeId !== null, fn ($q) => $q->where('store_id', $storeId))
+            ->count();
     }
 
-    public function getAverageOrderValue(): float
+    public function getAverageOrderValue(?int $storeId = null): float
     {
-        $count = $this->countTotalOrders();
+        $count = $this->countTotalOrders($storeId);
 
-        return $count > 0 ? (float) Order::avg('total_amount') : 0;
+        if ($count === 0) {
+            return 0.0;
+        }
+
+        return (float) Order::query()
+            ->when($storeId !== null, fn ($q) => $q->where('store_id', $storeId))
+            ->avg('total_amount');
     }
 
-    public function countByStatus(string $status): int
+    public function countByStatus(string $status, ?int $storeId = null): int
     {
-        return Order::where('status', $status)->count();
+        return (int) Order::query()
+            ->where('status', $status)
+            ->when($storeId !== null, fn ($q) => $q->where('store_id', $storeId))
+            ->count();
     }
 
     public function createOrder(CreateOrderDTO $dto, string $orderNumber, float $totalAmount): Order

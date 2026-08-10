@@ -22,7 +22,7 @@ import { Card } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useCatalogManager } from '@/lib/useCatalogManager';
+import { useCatalogManager } from '@/composables/useCatalogManager';
 import type { CatalogItem } from '@/types/catalog';
 import type { CatalogLabelItem } from '@/types/catalog';
 

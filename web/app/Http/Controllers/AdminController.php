@@ -42,6 +42,20 @@ class AdminController extends Controller
         ]);
     }
 
+    public function tenants(): Response
+    {
+        return Inertia::render('Admin/Tenants', [
+            'tenants' => $this->adminService->listTenants()->values()->toArray(),
+        ]);
+    }
+
+    public function orders(): Response
+    {
+        return Inertia::render('Admin/Orders', [
+            'orders' => $this->adminService->listOrders()->values()->toArray(),
+        ]);
+    }
+
     public function impersonate(Request $request, int $id): RedirectResponse
     {
         $user = User::findOrFail($id);

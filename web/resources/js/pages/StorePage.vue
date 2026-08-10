@@ -26,10 +26,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useMarketplaceCart } from '@/lib/useMarketplaceCart';
-import { useMarketplaceCatalog } from '@/lib/useMarketplaceCatalog';
-import { useMarketplaceFilters } from '@/lib/useMarketplaceFilters';
-import { useProductPagination } from '@/lib/useProductPagination';
+import { useMarketplaceCart } from '@/composables/useMarketplaceCart';
+import { useMarketplaceCatalog } from '@/composables/useMarketplaceCatalog';
+import { useMarketplaceFilters } from '@/composables/useMarketplaceFilters';
+import { useProductPagination } from '@/composables/useProductPagination';
 import type { ProductDetail } from '@/types/product';
 import type { StorefrontInfo } from '@/types/store';
 

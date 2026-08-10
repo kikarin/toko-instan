@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Heart, Star, ShoppingCart } from 'lucide-vue-next';
 import { toast } from '@/components/ui/sonner';
-import { useWishlist } from '@/lib/useWishlist';
+import { useWishlist } from '@/composables/useWishlist';
 import type { MarketplaceProduct } from '@/types/product';
 
 interface Props {

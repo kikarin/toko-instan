@@ -25,12 +25,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useActiveUser } from '@/lib/useActiveUser';
-import { useCart } from '@/lib/useCart';
-import { useStoreName } from '@/lib/useStoreName';
+import { useActiveUser } from '@/composables/useActiveUser';
+import { useCart } from '@/composables/useCart';
+import { useStoreName } from '@/composables/useStoreName';
 import type { ProductDetail } from '@/types/product';
 import type { UserProfile } from '@/types/user';
-import { useMarketplaceCart } from '@/lib/useMarketplaceCart';
+import { useMarketplaceCart } from '@/composables/useMarketplaceCart';
 
 interface Props {
     user: UserProfile;
