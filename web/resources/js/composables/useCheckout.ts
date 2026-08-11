@@ -181,8 +181,6 @@ export function useCheckout(cartItems: ComputedRef<CartItem[]>) {
                 payment_method: selectedPayment.value,
                 items: cartItems.value.map((item) => ({
                     id: item.id,
-                    name: item.name,
-                    price: item.price,
                     qty: item.qty,
                 })),
                 notes: notes.value,

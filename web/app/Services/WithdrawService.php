@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\WithdrawalStatus;
 use App\Models\Wallet;
 use App\Models\Withdrawal;
+use App\Repositories\WithdrawalRepository;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -13,7 +14,8 @@ class WithdrawService
     public const FREE_PLAN_FEE = 5000;
 
     public function __construct(
-        protected WalletService $walletService
+        protected WalletService $walletService,
+        protected WithdrawalRepository $withdrawalRepository
     ) {}
 
     public function feeFor(Wallet $wallet): float
@@ -21,6 +23,16 @@ class WithdrawService
         $plan = $wallet->tenant?->plan;
 
         return $plan === null || $plan === 'free' ? self::FREE_PLAN_FEE : 0;
+    }
+
+    public function getAllWithdrawals(?string $status = null)
+    {
+        return $this->withdrawalRepository->getAllWithdrawals($status);
+    }
+
+    public function getWithdrawal(int $id): Withdrawal
+    {
+        return $this->withdrawalRepository->findOrFail($id);
     }
 
     /**

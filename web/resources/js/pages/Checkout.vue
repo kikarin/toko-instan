@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import {
     User,
     MapPin,
@@ -443,7 +443,7 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                             class="mb-4 flex items-center justify-between text-base"
                         >
                             <span>Ringkasan Pesanan</span>
-                            <Badge variant="amber" class="text-[10px]"
+                            <Badge variant="default" class="text-[10px]"
                                 >{{ cartItems.length }} produk</Badge
                             >
                         </CardTitle>

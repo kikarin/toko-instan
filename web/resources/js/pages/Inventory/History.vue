@@ -73,8 +73,8 @@ function typeLabel(type: string) {
                             class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                             :class="
                                 m.type === 'out'
-                                    ? 'bg-red-50 text-red-500'
-                                    : 'bg-green-50 text-green-600'
+                                    ? 'bg-destructive/10 text-destructive'
+                                    : 'bg-emerald-500/10 text-emerald-600'
                             "
                         >
                             <TrendingUp v-if="m.delta > 0" class="h-4 w-4" />
@@ -94,7 +94,7 @@ function typeLabel(type: string) {
                         <p
                             class="font-mono text-sm font-extrabold"
                             :class="
-                                m.delta > 0 ? 'text-green-600' : 'text-red-500'
+                                m.delta > 0 ? 'text-emerald-600' : 'text-destructive'
                             "
                         >
                             {{ m.delta > 0 ? '+' : '' }}{{ m.delta }}

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Actions\CreateTenantAndStore;
-use App\Exceptions\InvalidGoogleTokenException;
+use App\DTO\Auth\LoginDTO;
+use App\DTO\Auth\RegisterDTO;
 use App\Models\User;
 use App\Repositories\StoreRepository;
 use App\Repositories\UserRepository;
@@ -20,12 +20,9 @@ class AuthService
         protected StoreRepository $storeRepository
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $credentials
-     */
-    public function login(array $credentials, ?int $storeId = null): bool
+    public function login(LoginDTO $dto, ?int $storeId = null): bool
     {
-        $buyerCredentials = $credentials;
+        $buyerCredentials = $dto->toArray();
         $buyerCredentials['store_id'] = $storeId;
 
         if (Auth::attempt($buyerCredentials, true)) {
@@ -35,10 +32,10 @@ class AuthService
         }
 
         if ($storeId !== null) {
-            $globalCredentials = $credentials;
+            $globalCredentials = $dto->toArray();
             $globalCredentials['store_id'] = null;
 
-            $user = $this->userRepository->findByEmail($credentials['email'], null);
+            $user = $this->userRepository->findByEmail($dto->email, null);
 
             if ($user && in_array($user->role, ['seller', 'admin'])) {
                 if (Auth::attempt($globalCredentials, true)) {
@@ -52,25 +49,22 @@ class AuthService
         return false;
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function register(array $data): bool
+    public function register(RegisterDTO $dto, ?int $storeId = null): bool
     {
-        $role = $data['role'] ?? ($data['store_name'] ? 'seller' : 'buyer');
+        $role = $storeId ? 'buyer' : ($dto->role ?? ($dto->storeName ? 'seller' : 'buyer'));
 
         $user = $this->userRepository->createUser([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'password' => $dto->password,
             'role' => $role,
-            'store_id' => $data['store_id'] ?? null,
+            'store_id' => $storeId,
             'auth_provider' => 'email',
         ]);
 
-        if ($role === 'seller' && ! empty($data['store_name'])) {
-            $slug = $this->resolveStoreSlug($data);
-            ($this->createTenantAndStore)($user->id, $data['store_name'], $slug);
+        if ($role === 'seller' && ! empty($dto->storeName)) {
+            $slug = Str::slug($dto->storeName);
+            $this->storeRepository->createTenantAndStore($user->id, $dto->storeName, $slug);
         }
 
         Auth::login($user, true);
@@ -159,23 +153,34 @@ class AuthService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * Login or create a user from verified Google claims.
+     *
+     * @param  array{uid: string, email: string|null, name: string|null}  $googleUser
      */
-    protected function resolveStoreSlug(array $data): string
+    public function loginWithGoogle(array $googleUser): User
     {
-        $slug = Str::slug((string) ($data['store_slug'] ?? $data['store_name'] ?? ''));
+        $user = $this->userRepository->findByFirebaseUid($googleUser['uid'])
+            ?? $this->userRepository->findByEmail((string) $googleUser['email']);
 
-        if ($slug === '') {
-            $slug = 'toko-'.Str::lower(Str::random(6));
+        if (! $user) {
+            $user = $this->userRepository->createUser([
+                'name' => $googleUser['name'] ?: 'Pengguna Google',
+                'email' => $googleUser['email'],
+                'password' => Str::random(40),
+                'role' => 'buyer',
+                'store_id' => null,
+                'auth_provider' => 'google',
+                'firebase_uid' => $googleUser['uid'],
+            ]);
         }
 
-        $base = $slug;
-        $i = 1;
-        while ($this->storeRepository->findBySlug($slug)) {
-            $slug = $base.'-'.$i;
-            $i++;
+        if ($user->firebase_uid !== $googleUser['uid']) {
+            $user->update(['firebase_uid' => $googleUser['uid']]);
         }
 
-        return $slug;
+        Auth::login($user, true);
+        request()->session()->regenerate();
+
+        return $user;
     }
 }

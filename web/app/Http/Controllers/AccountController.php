@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Repositories\ProductRepository;
-use App\Repositories\StoreRepository;
+use App\Services\OrderService;
+use App\Services\ProductService;
+use App\Services\StoreService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -12,8 +12,9 @@ use Inertia\Response;
 class AccountController extends Controller
 {
     public function __construct(
-        protected ProductRepository $productRepository,
-        protected StoreRepository $storeRepository
+        protected ProductService $productService,
+        protected StoreService $storeService,
+        protected OrderService $orderService
     ) {}
 
     public function show(string $storeSlug, Request $request): Response
@@ -21,36 +22,13 @@ class AccountController extends Controller
         $user = $request->user();
         $email = $user?->email;
 
-        $activeStore = $this->storeRepository->getActiveStore($user?->id);
+        $activeStore = $this->storeService->getActiveStore($user?->id);
 
         // Sample recommended products
-        $recommendedProducts = $this->productRepository->getMarketplaceCatalog(null, null, $activeStore?->id)
-            ->take(6)
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => 'Rp '.number_format($product->price, 0, ',', '.'),
-                    'priceNum' => (int) $product->price,
-                    'sold' => $product->sold,
-                    'rating' => (float) $product->rating,
-                    'store' => $product->store ? $product->store->name : 'Official Store',
-                    'storeSlug' => $product->store?->slug,
-                    'img' => $product->img,
-                    'tag' => $product->tag,
-                    'cat' => $product->category,
-                    'discount' => rand(10, 30),
-                ];
-            })->toArray();
+        $recommendedProducts = $this->productService->getRecommendedProducts($activeStore?->id, 6);
 
         // Transaction stats counts
-        $orderCounts = [
-            'bayar' => $email ? Order::where('customer_email', $email)->where('status', 'pending')->count() : 0,
-            'diproses' => $email ? Order::where('customer_email', $email)->where('status', 'paid')->count() : 0,
-            'dikirim' => $email ? Order::where('customer_email', $email)->where('status', 'shipped')->count() : 0,
-            'sudah_tiba' => $email ? Order::where('customer_email', $email)->where('status', 'completed')->count() : 0,
-            'ulasan' => 0,
-        ];
+        $orderCounts = $this->orderService->getCustomerOrderCounts($email);
 
         return Inertia::render('Account', [
             'user' => [

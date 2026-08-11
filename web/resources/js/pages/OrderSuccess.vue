@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import {
     CheckCircle2,
     Store,
@@ -72,8 +72,8 @@ function navigate(url: string) {
                         </p>
                     </div>
                     <Badge
-                        variant="amber"
-                        class="border-none bg-black px-2.5 py-1 text-xs font-bold text-amber-400 uppercase"
+                        variant="default"
+                        class="border-none bg-black px-2.5 py-1 text-xs font-bold text-accent uppercase"
                     >
                         {{ invoice.status }}
                     </Badge>
@@ -123,12 +123,12 @@ function navigate(url: string) {
 
                 <!-- Total Amount Banner -->
                 <div
-                    class="mt-2 flex items-center justify-between rounded-2xl border border-black/10 bg-zinc-900 p-4 text-white"
+                    class="mt-2 flex items-center justify-between rounded-2xl border border-border bg-card p-4 text-card-foreground"
                 >
-                    <span class="text-xs font-bold text-zinc-300"
+                    <span class="text-xs font-bold text-muted-foreground"
                         >Total Pembayaran</span
                     >
-                    <span class="font-mono text-xl font-black text-amber-400">
+                    <span class="font-mono text-xl font-black text-accent">
                         {{ invoice.total_amount }}
                     </span>
                 </div>
@@ -136,8 +136,8 @@ function navigate(url: string) {
                 <!-- Buttons -->
                 <div class="mt-2 flex flex-col items-center gap-3 sm:flex-row">
                     <Button
-                        variant="amber"
-                        class="flex h-11 w-full items-center justify-center gap-2 bg-black text-xs font-bold text-amber-400 shadow-md hover:bg-zinc-800"
+                        variant="default"
+                        class="flex h-11 w-full items-center justify-center gap-2 bg-foreground text-xs font-bold text-accent shadow-md hover:bg-foreground/90"
                         @click="navigate('/' + (usePage().props.store as any)?.slug + '/orders')"
                     >
                         <ShoppingBag class="h-4 w-4" />

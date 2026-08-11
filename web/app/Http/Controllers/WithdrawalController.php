@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\Wallet\WithdrawalRequestDTO;
+use App\Repositories\WithdrawalRepository;
+use App\Services\WalletService;
 use App\Services\WithdrawService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\RedirectResponse;
@@ -12,7 +15,9 @@ use Inertia\Response;
 class WithdrawalController extends Controller
 {
     public function __construct(
-        protected WithdrawService $withdrawService
+        protected WithdrawService $withdrawService,
+        protected WithdrawalRepository $withdrawalRepository,
+        protected WalletService $walletService
     ) {}
 
     public function index(Request $request): Response
@@ -23,13 +28,11 @@ class WithdrawalController extends Controller
         $wallet = $tenant?->wallet;
 
         $withdrawals = $tenant
-            ? $tenant->withdrawals()->orderByDesc('created_at')
-                ->paginate(5, ['*'], 'wpage', $request->integer('wpage', 1))
+            ? $this->withdrawalRepository->getWithdrawalsByTenantPaginated($tenant->id, 5, $request->integer('wpage', 1))
             : null;
 
         $transactions = $wallet
-            ? $wallet->transactions()->orderByDesc('created_at')
-                ->paginate(10, ['*'], 'page', $request->integer('page', 1))
+            ? $this->walletService->getTransactionsPaginated($wallet->id, 10, $request->integer('page', 1))
             : null;
 
         return Inertia::render('Wallet/Index', [
@@ -69,12 +72,7 @@ class WithdrawalController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'amount' => 'required|numeric|min:6000',
-            'bank_name' => 'required|string|max:100',
-            'account_number' => 'required|string|max:50',
-            'account_name' => 'required|string|max:100',
-        ]);
+        $dto = WithdrawalRequestDTO::fromRequest($request);
 
         $user = $request->user();
         $wallet = $user->primaryTenant?->wallet;
@@ -88,8 +86,8 @@ class WithdrawalController extends Controller
         try {
             $this->withdrawService->request(
                 $wallet,
-                (float) $validated['amount'],
-                $validated,
+                $dto->amount,
+                $dto->toArray(),
                 $storeId
             );
         } catch (\InvalidArgumentException $e) {

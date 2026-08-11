@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\Store;
-use App\Repositories\StoreRepository;
+use App\DTO\Order\UpdateOrderStatusDTO;
 use App\Services\OrderService;
+use App\Services\StoreService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,7 +14,7 @@ class OrderController extends Controller
 {
     public function __construct(
         protected OrderService $orderService,
-        protected StoreRepository $storeRepository
+        protected StoreService $storeService
     ) {}
 
     public function index(Request $request, ?string $storeSlug = null): Response
@@ -23,40 +22,37 @@ class OrderController extends Controller
         $user = $request->user();
 
         if ($user->role === 'seller') {
-            $store = Store::whereHas('tenant', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })->first();
+            $store = $this->storeService->getStoreForUser($user->id);
 
-            $sellerOrders = Order::with(['store', 'items'])
-                ->where('store_id', $store?->id ?: 1)
-                ->orderByDesc('created_at')
-                ->get()
-                ->map(function ($order) {
-                    return [
-                        'id' => $order->id,
-                        'order_number' => $order->order_number,
-                        'customer_name' => $order->customer_name,
-                        'customer_email' => $order->customer_email,
-                        'customer_phone' => $order->customer_phone,
-                        'shipping_address' => $order->shipping_address,
-                        'store_name' => $order->store->name ?? 'Toko Resmi',
-                        'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
-                        'total_num' => (float) $order->total_amount,
-                        'status' => strtolower($order->status),
-                        'created_at' => $order->created_at?->format('d M Y, H:i'),
-                        'notes' => $order->notes,
-                        'items' => $order->items->map(fn ($item) => [
-                            'id' => $item->id,
-                            'product_name' => $item->name,
-                            'sku' => $item->sku,
-                            'quantity' => $item->qty,
-                            'price' => (float) $item->price,
-                            'subtotal' => (float) $item->total,
-                        ])->values()->all(),
-                    ];
-                })
-                ->values()
-                ->toArray();
+            $sellerOrders = $store
+                ? $this->orderService->sellerOrders($store->id)
+                    ->map(function ($order) {
+                        return [
+                            'id' => $order->id,
+                            'order_number' => $order->order_number,
+                            'customer_name' => $order->customer_name,
+                            'customer_email' => $order->customer_email,
+                            'customer_phone' => $order->customer_phone,
+                            'shipping_address' => $order->shipping_address,
+                            'store_name' => $order->store->name ?? 'Toko Resmi',
+                            'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
+                            'total_num' => (float) $order->total_amount,
+                            'status' => strtolower($order->status),
+                            'created_at' => $order->created_at?->format('d M Y, H:i'),
+                            'notes' => $order->notes,
+                            'items' => $order->items->map(fn ($item) => [
+                                'id' => $item->id,
+                                'product_name' => $item->name,
+                                'sku' => $item->sku,
+                                'quantity' => $item->qty,
+                                'price' => (float) $item->price,
+                                'subtotal' => (float) $item->total,
+                            ])->values()->all(),
+                        ];
+                    })
+                    ->values()
+                    ->toArray()
+                : [];
 
             return Inertia::render('SellerOrders/Index', [
                 'orders' => $sellerOrders,
@@ -96,7 +92,7 @@ class OrderController extends Controller
         // If not, then the first parameter is actually the {orderNumber} (from seller route).
         $actualOrderNumber = $orderNumber ?? $orderNumberOrStoreSlug;
 
-        $order = Order::with('store.tenant')->where('order_number', $actualOrderNumber)->first();
+        $order = $this->orderService->getOrderWithTenant($actualOrderNumber);
 
         if (! $order) {
             abort(404, 'Pesanan tidak ditemukan');
@@ -120,17 +116,20 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'status' => 'required|string|in:pending,paid,processing,shipped,completed,cancelled',
-        ]);
+        $dto = UpdateOrderStatusDTO::fromRequest($request);
+        $order = $this->orderService->getOrder($id);
 
-        $order = Order::findOrFail($id);
+        $user = $request->user();
 
-        match ($validated['status']) {
-            'paid' => $this->orderService->markOrderPaid($order),
-            'completed' => $this->orderService->markOrderCompleted($order),
-            default => $order->update(['status' => $validated['status']]),
-        };
+        if (! $user->isAdmin()) {
+            $store = $this->storeService->getStoreForUser($user->id);
+
+            if (! $store || $order->store_id !== $store->id) {
+                abort(403, 'Akses ditolak');
+            }
+        }
+
+        $this->orderService->updateStatus($order, $dto);
 
         return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui!');
     }

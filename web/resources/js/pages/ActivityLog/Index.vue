@@ -55,7 +55,7 @@ const entries = computed(() => props.logs ?? []);
         <main class="mx-auto flex w-full max-w-3xl flex-col gap-5 p-4 sm:p-6">
             <div class="flex items-center gap-3">
                 <div
-                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-amber-400"
+                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-accent"
                 >
                     <ScrollText class="h-5 w-5" />
                 </div>
@@ -81,11 +81,11 @@ const entries = computed(() => props.logs ?? []);
                 <div
                     v-for="log in entries"
                     :key="log.id"
-                    class="flex items-start justify-between gap-3 rounded-2xl border border-black/5 bg-white px-4 py-3 shadow-sm"
+                    class="flex items-start justify-between gap-3 rounded-2xl border border-border bg-white px-4 py-3 shadow-sm"
                 >
                     <div class="flex items-start gap-3">
                         <div
-                            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600"
+                            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"
                         >
                             <component :is="actionIcon(log.action)" class="h-4 w-4" />
                         </div>
@@ -99,7 +99,7 @@ const entries = computed(() => props.logs ?? []);
                                     #{{ log.subject_id }}
                                 </span>
                                 <Badge
-                                    class="bg-zinc-100 text-[9px] font-black text-zinc-600 uppercase"
+                                    class="bg-muted text-[9px] font-black text-muted-foreground uppercase"
                                 >
                                     {{ log.action_label }}
                                 </Badge>

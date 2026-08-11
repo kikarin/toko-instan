@@ -24,6 +24,26 @@ class UserRepository
             ->first();
     }
 
+    public function countAll(): int
+    {
+        return User::count();
+    }
+
+    public function findById(int $id): ?User
+    {
+        return User::find($id);
+    }
+
+    public function findByFirebaseUid(string $uid): ?User
+    {
+        return User::where('firebase_uid', $uid)->first();
+    }
+
+    public function findOrFail(int $id): User
+    {
+        return User::findOrFail($id);
+    }
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -39,15 +59,11 @@ class UserRepository
             'store_id' => $data['store_id'] ?? null,
             'auth_provider' => $data['auth_provider'] ?? 'email',
             'firebase_uid' => $data['firebase_uid'] ?? null,
-            'avatar' => $data['avatar'] ?? null,
         ]);
     }
 
-    public function findByFirebaseUid(string $uid, ?int $storeId = null): ?User
+    public function updateUser(User $user, array $data): bool
     {
-        return User::where('firebase_uid', $uid)
-            ->when($storeId !== null, fn ($query) => $query->where('store_id', $storeId))
-            ->when($storeId === null, fn ($query) => $query->whereNull('store_id'))
-            ->first();
+        return $user->update($data);
     }
 }

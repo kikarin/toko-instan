@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\Admin\UpdateRoleDTO;
 use App\Models\User;
 use App\Services\AdminService;
 use Illuminate\Http\RedirectResponse;
@@ -58,7 +59,7 @@ class AdminController extends Controller
 
     public function impersonate(Request $request, int $id): RedirectResponse
     {
-        $user = User::findOrFail($id);
+        $user = $this->adminService->getUser($id);
 
         if ($user->isAdmin()) {
             return redirect()->route('admin.users')
@@ -87,7 +88,7 @@ class AdminController extends Controller
         $original = $request->session()->pull(self::SESSION_IMPERSONATED_ADMIN);
 
         if ($original) {
-            $owner = User::find($original['id']);
+            $owner = $this->adminService->findUser($original['id']);
 
             if ($owner) {
                 Auth::login($owner, true);
@@ -105,13 +106,11 @@ class AdminController extends Controller
 
     public function updateRole(Request $request, int $id): RedirectResponse
     {
-        $user = User::findOrFail($id);
+        $user = $this->adminService->getUser($id);
 
-        $validated = $request->validate([
-            'role' => ['required', 'string', 'in:buyer,seller,admin'],
-        ]);
+        $dto = UpdateRoleDTO::fromRequest($request);
 
-        $this->adminService->setRole($user, $validated['role']);
+        $this->adminService->setRole($user, $dto);
 
         return redirect()->route('admin.users')
             ->with('success', "Role {$user->name} diperbarui.");
@@ -124,7 +123,7 @@ class AdminController extends Controller
                 ->with('error', 'Tidak dapat menghapus akun Anda sendiri.');
         }
 
-        $user = User::findOrFail($id);
+        $user = $this->adminService->getUser($id);
         $this->adminService->deleteUser($user);
 
         return redirect()->route('admin.users')

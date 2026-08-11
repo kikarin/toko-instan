@@ -96,4 +96,9 @@ class StoreRepository
             $store->increment('total_orders', 1);
         }
     }
+
+    public function update(Store $store, array $data): bool
+    {
+        return $store->update($data);
+    }
 }

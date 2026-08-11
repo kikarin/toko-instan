@@ -80,14 +80,14 @@ async function handleLogout() {
 <template>
     <SidebarProvider>
         <div
-            class="flex h-screen w-full overflow-hidden bg-[#f5f4f0] font-sans"
+            class="flex h-screen w-full overflow-hidden bg-background font-sans"
         >
             <!-- ── Sidebar ── -->
             <Sidebar collapsible="icon">
                 <SidebarHeader class="items-center justify-center py-3">
                     <div
                         @click="navigate('/admin')"
-                        class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-br from-(--brand) to-(--brand-secondary) text-base font-extrabold text-white shadow-md select-none"
+                        class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-primary text-base font-extrabold text-primary-foreground shadow-md select-none"
                     >
                         S
                     </div>
@@ -96,7 +96,7 @@ async function handleLogout() {
                 <SidebarContent>
                     <SidebarGroup>
                         <SidebarGroupLabel
-                            class="text-[10px] tracking-wider text-white/30 uppercase select-none"
+                            class="text-[10px] tracking-wider text-muted-foreground uppercase select-none"
                         >
                             Admin
                         </SidebarGroupLabel>
@@ -128,13 +128,13 @@ async function handleLogout() {
                 <SidebarRail />
 
                 <SidebarFooter>
-                    <SidebarSeparator class="bg-white/10" />
+                    <SidebarSeparator class="bg-border" />
                     <div class="flex flex-col items-center gap-2 py-2">
                         <template v-if="activeUser">
                             <button
                                 title="Keluar"
                                 @click="handleLogout"
-                                class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-white/40 transition-colors hover:bg-white/5 hover:text-red-400"
+                                class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
                             >
                                 <LogOut class="h-4 w-4" />
                             </button>
@@ -143,14 +143,14 @@ async function handleLogout() {
                                 :fallback="userInitial"
                                 :hue="270"
                                 size="md"
-                                class="cursor-pointer hover:ring-2 hover:ring-(--brand)"
+                                class="cursor-pointer hover:ring-2 hover:ring-primary"
                             />
                         </template>
                         <template v-else>
                             <button
                                 title="Masuk"
                                 @click="navigate('/login')"
-                                class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                                class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                             >
                                 <LogIn class="h-4 w-4" />
                             </button>
@@ -162,16 +162,16 @@ async function handleLogout() {
             <!-- ── Main Area ── -->
             <SidebarInset>
                 <header
-                    class="bg-opacity-95 sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b border-black/7 bg-[#faf9f6] px-4 backdrop-blur-md transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12!"
+                    class="bg-opacity-95 sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b border-border bg-card px-4 backdrop-blur-md transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12!"
                 >
                     <div class="flex items-center gap-2">
                         <SidebarTrigger />
                         <div
-                            class="flex items-center gap-1.5 rounded-xl bg-[#00000008] p-1"
+                            class="flex items-center gap-1.5 rounded-xl bg-muted p-1"
                         >
                             <Button
                                 :variant="
-                                    activePage === 'Admin' ? 'amber' : 'ghost'
+                                    activePage === 'Admin' ? 'default' : 'ghost'
                                 "
                                 size="sm"
                                 class="rounded-lg text-xs"
@@ -182,7 +182,7 @@ async function handleLogout() {
                             </Button>
                             <Button
                                 :variant="
-                                    activePage === 'Users' ? 'amber' : 'ghost'
+                                    activePage === 'Users' ? 'default' : 'ghost'
                                 "
                                 size="sm"
                                 class="rounded-lg text-xs"
@@ -195,18 +195,18 @@ async function handleLogout() {
 
                     <div v-if="activeUser" class="flex items-center gap-2.5">
                         <div
-                            class="flex items-center gap-2 rounded-xl border border-black/7 bg-[#f5f4f0] px-3 py-1.5 text-xs font-medium text-[#4a4a57]"
+                            class="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground"
                         >
                             <span
-                                class="inline-block h-2 w-2 animate-pulse rounded-full bg-(--brand)"
+                                class="inline-block h-2 w-2 animate-pulse rounded-full bg-primary"
                             />
                             <span
-                                class="max-w-32 truncate font-bold text-[#1c1c22]"
+                                class="max-w-32 truncate font-bold text-foreground"
                             >
                                 {{ userDisplayName }}
                             </span>
                             <Badge
-                                variant="violetSolid"
+                                variant="default"
                                 class="px-1.5 py-0 text-[9px] font-bold uppercase"
                             >
                                 <ShieldCheck class="mr-1 h-2.5 w-2.5" /> Admin
@@ -215,7 +215,7 @@ async function handleLogout() {
                         <Button
                             variant="ghost"
                             size="sm"
-                            class="text-xs text-red-500 hover:bg-red-50 hover:text-red-600"
+                            class="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
                             @click="handleLogout"
                         >
                             Keluar

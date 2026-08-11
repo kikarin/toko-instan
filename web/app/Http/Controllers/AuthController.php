@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Store;
+use App\DTO\Auth\LoginDTO;
+use App\DTO\Auth\RegisterDTO;
 use App\Repositories\StoreRepository;
 use App\Services\AuthService;
+use App\Services\FirebaseAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,8 +17,28 @@ class AuthController extends Controller
 {
     public function __construct(
         protected AuthService $authService,
+        protected FirebaseAuthService $firebaseAuthService,
         protected StoreRepository $storeRepository
     ) {}
+
+    public function googleLogin(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'id_token' => ['required', 'string'],
+        ]);
+
+        try {
+            $googleUser = $this->firebaseAuthService->verifyIdToken($request->string('id_token')->toString());
+        } catch (\RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'email' => $e->getMessage(),
+            ]);
+        }
+
+        $user = $this->authService->loginWithGoogle($googleUser);
+
+        return redirect()->intended($user?->homePath() ?? '/');
+    }
 
     public function showLogin(): Response
     {
@@ -28,12 +49,9 @@ class AuthController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $dto = LoginDTO::fromRequest($request);
 
-        if (! $this->authService->login($credentials)) {
+        if (! $this->authService->login($dto)) {
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
@@ -53,20 +71,8 @@ class AuthController extends Controller
 
     public function register(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users')->whereNull('store_id'),
-            ],
-            'password' => ['required', 'string', 'min:6'],
-            'store_name' => ['required', 'string', 'max:255'],
-            'store_slug' => ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('stores', 'slug')],
-        ]);
-
-        $validated['role'] = 'seller';
-
-        $this->authService->register($validated);
+        $dto = RegisterDTO::fromRequest($request);
+        $this->authService->register($dto);
 
         $user = $request->user();
 
@@ -113,10 +119,27 @@ class AuthController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         $user = $request->user();
-        $storeSlug = null;
+        $storeSlug = $request->input('store_slug');
 
-        if ($user && $user->store_id) {
-            $store = Store::find($user->store_id);
+        if (! $storeSlug) {
+            $referer = $request->header('referer');
+            if ($referer) {
+                $path = parse_url($referer, PHP_URL_PATH);
+                if ($path) {
+                    $parts = explode('/', trim($path, '/'));
+                    if (count($parts) > 0 && ! in_array($parts[0], ['login', 'register', 'dashboard', 'admin', 'logout'])) {
+                        $possibleSlug = $parts[0];
+                        $store = $this->storeRepository->findBySlug($possibleSlug);
+                        if ($store) {
+                            $storeSlug = $possibleSlug;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (! $storeSlug && $user && $user->store_id) {
+            $store = $this->storeRepository->findById($user->store_id);
             if ($store) {
                 $storeSlug = $store->slug;
             }
@@ -151,12 +174,9 @@ class AuthController extends Controller
             abort(404);
         }
 
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $dto = LoginDTO::fromRequest($request);
 
-        if (! $this->authService->login($credentials, $store->id)) {
+        if (! $this->authService->login($dto, $store->id)) {
             throw ValidationException::withMessages([
                 'email' => 'Akun belum terdaftar di toko ini atau kata sandi salah.',
             ]);
@@ -187,19 +207,8 @@ class AuthController extends Controller
             abort(404);
         }
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users')->where('store_id', $store->id),
-            ],
-            'password' => ['required', 'string', 'min:6'],
-        ]);
-
-        $validated['role'] = 'buyer';
-        $validated['store_id'] = $store->id;
-
-        $this->authService->register($validated);
+        $dto = RegisterDTO::fromRequest($request, $store->id);
+        $this->authService->register($dto, $store->id);
 
         $user = $request->user();
 

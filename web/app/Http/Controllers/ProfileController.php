@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\User\ProfileUpdateDTO;
+use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -9,6 +11,10 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected UserService $userService
+    ) {}
+
     public function edit(Request $request): Response
     {
         $user = $request->user();
@@ -34,27 +40,9 @@ class ProfileController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $user = $request->user();
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['nullable', 'string', 'max:50'],
-            'bio' => ['nullable', 'string', 'max:200'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'gender' => ['nullable', 'string', 'max:20'],
-            'birth_date' => ['nullable', 'string', 'max:50'],
-            'avatar' => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        $user->update([
-            'name' => $validated['name'],
-            'username' => $validated['username'] ?? $user->username,
-            'bio' => $validated['bio'] ?? $user->bio,
-            'phone' => $validated['phone'] ?? $user->phone,
-            'gender' => $validated['gender'] ?? $user->gender,
-            'birth_date' => $validated['birth_date'] ?? $user->birth_date,
-            'avatar' => $validated['avatar'] ?? $user->avatar,
-        ]);
+        $dto = ProfileUpdateDTO::fromRequest($request);
+        
+        $this->userService->updateProfile($request->user(), $dto);
 
         return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
     }

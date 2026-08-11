@@ -80,24 +80,24 @@ function fmtRp(n: number) {
 
 <template>
     <div v-if="!props.data.length" class="flex flex-col items-center gap-2 py-14 text-center">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground/30">
             <path d="M3 3v18h18" />
             <path d="M7 15l4-6 4 3 5-7" />
         </svg>
-        <p class="text-sm font-bold text-zinc-600">Belum ada data omzet</p>
-        <p class="text-xs text-zinc-400">
+        <p class="text-sm font-bold text-muted-foreground">Belum ada data omzet</p>
+        <p class="text-xs text-muted-foreground/80">
             Grafik akan muncul saat toko Anda memiliki penjualan.
         </p>
     </div>
     <svg v-else :viewBox="`0 0 ${W} ${H}`" class="h-auto w-full font-mono">
         <defs>
             <linearGradient id="ra" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#e07c28" stop-opacity="0.18" />
-                <stop offset="100%" stop-color="#e07c28" stop-opacity="0" />
+                <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.18" />
+                <stop offset="100%" stop-color="var(--primary)" stop-opacity="0" />
             </linearGradient>
             <linearGradient id="rl" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#f59e0b" />
-                <stop offset="100%" stop-color="#e07c28" />
+                <stop offset="0%" stop-color="var(--accent)" />
+                <stop offset="100%" stop-color="var(--primary)" />
             </linearGradient>
         </defs>
 
@@ -110,7 +110,7 @@ function fmtRp(n: number) {
                 :x2="W - pr"
                 :y1="y(minVal + (maxVal - minVal) * f)"
                 :y2="y(minVal + (maxVal - minVal) * f)"
-                stroke="rgba(0,0,0,0.07)"
+                stroke="var(--border)"
                 stroke-width="1"
             />
         </g>
@@ -148,7 +148,7 @@ function fmtRp(n: number) {
                     :x2="x(i)"
                     :y1="pt"
                     :y2="H - pb"
-                    stroke="#e07c28"
+                    stroke="var(--primary)"
                     stroke-width="1.5"
                     stroke-dasharray="3 3"
                     opacity="0.6"
@@ -157,8 +157,8 @@ function fmtRp(n: number) {
                     :cx="x(i)"
                     :cy="y(d.v)"
                     r="4.5"
-                    fill="#e07c28"
-                    stroke="#ffffff"
+                    fill="var(--primary)"
+                    stroke="var(--background)"
                     stroke-width="2.5"
                 />
                 <rect
@@ -167,8 +167,8 @@ function fmtRp(n: number) {
                     width="88"
                     height="32"
                     rx="8"
-                    fill="#ffffff"
-                    stroke="rgba(0,0,0,0.1)"
+                    fill="var(--popover)"
+                    stroke="var(--border)"
                     stroke-width="1"
                     style="filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08))"
                 />
@@ -177,7 +177,7 @@ function fmtRp(n: number) {
                     :y="y(d.v) - 25"
                     text-anchor="middle"
                     font-size="9"
-                    fill="#9090a0"
+                    fill="var(--muted-foreground)"
                 >
                     {{ labels[i] }}
                 </text>
@@ -186,7 +186,7 @@ function fmtRp(n: number) {
                     :y="y(d.v) - 12"
                     text-anchor="middle"
                     font-size="10"
-                    fill="#e07c28"
+                    fill="var(--primary)"
                     font-weight="700"
                 >
                     {{ fmtRp(d.v) }}
@@ -202,7 +202,7 @@ function fmtRp(n: number) {
                 :y="H - 8"
                 text-anchor="middle"
                 font-size="9"
-                fill="#c8c8d5"
+                fill="var(--muted-foreground)"
                 class="select-none"
             >
                 {{ l }}

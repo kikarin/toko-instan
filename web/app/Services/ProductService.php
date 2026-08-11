@@ -34,6 +34,55 @@ class ProductService
         return $this->productRepository->getForStore($store->id);
     }
 
+    public function listForSellerPaginated(int $userId, int $perPage = 10)
+    {
+        $store = $this->storeRepository->getStoreForUser($userId);
+
+        if (! $store) {
+            // Return an empty paginator manually if needed, but for now we can just return a LengthAwarePaginator
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
+        }
+
+        return $this->productRepository->getForStorePaginated($store->id, $perPage);
+    }
+
+    public function getInventoryStats(int $userId, int $lowStockThreshold): array
+    {
+        $store = $this->storeRepository->getStoreForUser($userId);
+
+        if (! $store) {
+            return [
+                'total' => 0,
+                'low_stock' => 0,
+                'out_of_stock' => 0,
+            ];
+        }
+
+        return $this->productRepository->getInventoryStats($store->id, $lowStockThreshold);
+    }
+
+    public function getRecommendedProducts(?int $storeId = null, int $limit = 6): array
+    {
+        return $this->productRepository->getMarketplaceCatalog(null, null, $storeId)
+            ->take($limit)
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => 'Rp '.number_format($product->price, 0, ',', '.'),
+                    'priceNum' => (int) $product->price,
+                    'sold' => $product->sold,
+                    'rating' => (float) $product->rating,
+                    'store' => $product->store ? $product->store->name : 'Official Store',
+                    'storeSlug' => $product->store?->slug,
+                    'img' => $product->img,
+                    'tag' => $product->tag,
+                    'cat' => $product->category,
+                    'discount' => rand(10, 30),
+                ];
+            })->toArray();
+    }
+
     public function create(ProductData $data, int $userId): Product
     {
         return $this->productRepository->createForStore($this->requireStore($userId)->id, $data);
@@ -165,6 +214,8 @@ class ProductService
             'sku' => $product->sku ?: ('NK-'.strtoupper(substr(md5((string) $product->id), 0, 6))),
             'brand' => $product->brand ?: 'Nike',
             'weight_gram' => $product->weight_gram ?: 500,
+            'variant_options' => $product->variant_options,
+            'variants' => $product->variants,
         ];
     }
 

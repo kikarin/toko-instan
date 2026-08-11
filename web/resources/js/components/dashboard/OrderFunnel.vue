@@ -32,24 +32,24 @@ function getPercent(n: number) {
         <div
             v-for="(item, i) in orderFlow"
             :key="i"
-            class="group flex cursor-pointer items-center gap-3 rounded-2xl p-2 transition-all duration-200 hover:bg-zinc-50"
+            class="group flex cursor-pointer items-center gap-3 rounded-2xl p-2 transition-all duration-200 hover:bg-accent/10"
             @mouseenter="hoveredIndex = i"
             @mouseleave="hoveredIndex = null"
         >
             <div class="w-24 shrink-0 text-left">
                 <span
                     class="block text-xs font-extrabold transition-colors"
-                    :style="{ color: hoveredIndex === i ? item.c : '#1c1c22' }"
+                    :style="{ color: hoveredIndex === i ? item.c : 'var(--foreground)' }"
                 >
                     {{ item.label }}
                 </span>
-                <span class="font-mono text-[10px] font-bold text-zinc-400">{{
+                <span class="font-mono text-[10px] font-bold text-muted-foreground">{{
                     getPercent(item.n)
                 }}</span>
             </div>
 
             <div
-                class="h-6 flex-1 overflow-hidden rounded-xl border border-black/5 bg-zinc-100 p-0.5"
+                class="h-6 flex-1 overflow-hidden rounded-xl border border-border bg-muted p-0.5"
             >
                 <div
                     class="flex h-full items-center justify-end rounded-lg pr-2 shadow-xs transition-all duration-500 ease-out"
@@ -62,7 +62,7 @@ function getPercent(n: number) {
 
             <span
                 class="w-14 shrink-0 text-right font-mono text-xs font-black transition-colors"
-                :style="{ color: hoveredIndex === i ? item.c : '#1c1c22' }"
+                :style="{ color: hoveredIndex === i ? item.c : 'var(--foreground)' }"
             >
                 {{ item.n.toLocaleString('id') }}
             </span>

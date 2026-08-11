@@ -15,6 +15,8 @@ export interface Product {
     brand?: string | null;
     weight_gram?: number;
     low_stock?: boolean;
+    variant_options?: Array<{ name: string; values: string[] }>;
+    variants?: ProductVariant[];
 }
 
 export interface ProductVariant {
@@ -23,8 +25,10 @@ export interface ProductVariant {
     sku: string | null;
     price: number | null;
     formatted_price: string | null;
+    priceNum?: number;
     stock: number;
     is_active: boolean;
+    img?: string | null;
 }
 
 export interface MarketplaceProduct {
@@ -42,6 +46,8 @@ export interface MarketplaceProduct {
     discount?: number;
     originalPrice?: string;
     freeShipping?: boolean;
+    sku?: string;
+    stock?: number;
 }
 
 export interface ProductDetail extends MarketplaceProduct {
@@ -49,6 +55,10 @@ export interface ProductDetail extends MarketplaceProduct {
     sku?: string;
     brand?: string;
     weightGram?: number;
+    category?: string;
+    variant_id?: number;
+    variant_options?: Array<{ name: string; values: string[] }>;
+    variants?: ProductVariant[];
 }
 
 export interface WishlistItem {

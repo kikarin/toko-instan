@@ -6,6 +6,7 @@ export interface ThemeColors {
 }
 
 export interface HeroConfig {
+    [key: string]: string | undefined;
     about_text?: string;
     widget_title?: string;
     widget_subtitle?: string;

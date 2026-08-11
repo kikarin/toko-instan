@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Order;
-use App\Models\Tenant;
+use App\DTO\Admin\UpdateRoleDTO;
 use App\Models\User;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
@@ -60,7 +59,7 @@ class AdminService
 
         return [
             'stats' => [
-                'users' => User::count(),
+                'users' => $this->userRepository->countAll(),
                 'stores' => $this->storeRepository->countActiveStores(),
                 'tenants' => Tenant::count(),
                 'products' => $this->productRepository->countTotalProducts(),
@@ -83,60 +82,19 @@ class AdminService
         return $this->userRepository->getLatest(100);
     }
 
-    /**
-     * @return SupportCollection<int, array<string, mixed>>
-     */
-    public function listTenants(): SupportCollection
+    public function getUser(int $id): User
     {
-        return Tenant::query()
-            ->with(['user:id,name,email', 'stores:id,tenant_id,name,slug,is_active'])
-            ->orderByDesc('created_at')
-            ->take(100)
-            ->get()
-            ->map(function (Tenant $tenant) {
-                $store = $tenant->stores->first();
-
-                return [
-                    'id' => $tenant->id,
-                    'name' => $tenant->name,
-                    'slug' => $tenant->slug,
-                    'plan' => $tenant->plan,
-                    'status' => $tenant->status,
-                    'owner' => $tenant->user?->name,
-                    'owner_email' => $tenant->user?->email,
-                    'store_name' => $store?->name,
-                    'store_slug' => $store?->slug,
-                    'store_active' => (bool) ($store?->is_active ?? false),
-                    'created_at' => $tenant->created_at?->format('d M Y'),
-                ];
-            });
+        return $this->userRepository->findOrFail($id);
     }
 
-    /**
-     * @return SupportCollection<int, array<string, mixed>>
-     */
-    public function listOrders(): SupportCollection
+    public function findUser(int $id): ?User
     {
-        return Order::query()
-            ->with('store:id,name,slug')
-            ->orderByDesc('created_at')
-            ->take(100)
-            ->get()
-            ->map(fn (Order $order) => [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'store_name' => $order->store?->name ?? '—',
-                'customer_name' => $order->customer_name,
-                'customer_email' => $order->customer_email,
-                'total_amount' => 'Rp '.number_format((float) $order->total_amount, 0, ',', '.'),
-                'status' => $order->status,
-                'created_at' => $order->created_at?->format('d M Y H:i'),
-            ]);
+        return $this->userRepository->findById($id);
     }
 
-    public function setRole(User $user, string $role): void
+    public function setRole(User $user, UpdateRoleDTO $dto): void
     {
-        $user->update(['role' => $role]);
+        $user->update(['role' => $dto->role]);
     }
 
     public function deleteUser(User $user): void

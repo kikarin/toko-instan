@@ -24,7 +24,7 @@ const { totalCount: totalCartCount } = useCart();
 
 async function handleLogout() {
     await logoutUser();
-    router.post('/logout');
+    router.post('/logout', { store_slug: usePage().props.store?.slug });
 }
 
 function handleItemClick(title: string) {
@@ -140,10 +140,10 @@ function handleItemClick(title: string) {
                 </div>
 
                 <!-- Grey Divider Bar -->
-                <div class="h-2.5 border-y border-black/5 bg-[#f5f4f0]" />
+                <div class="h-2.5 border-y border-border bg-[#f5f4f0]" />
 
                 <!-- ── Expandable Accordion: Pengaturan Aplikasi ── -->
-                <div class="border-b border-black/5">
+                <div class="border-b border-border">
                     <button
                         @click="appSettingsOpen = !appSettingsOpen"
                         class="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-[#faf9f6] sm:px-6"
@@ -158,7 +158,7 @@ function handleItemClick(title: string) {
                     </button>
                     <div
                         v-if="appSettingsOpen"
-                        class="flex flex-col gap-3 border-t border-black/5 bg-[#faf9f6] px-6 py-3 text-xs text-[#4a4a57]"
+                        class="flex flex-col gap-3 border-t border-border bg-[#faf9f6] px-6 py-3 text-xs text-[#4a4a57]"
                     >
                         <div
                             class="flex cursor-pointer items-center justify-between py-1"
@@ -191,7 +191,7 @@ function handleItemClick(title: string) {
                 </div>
 
                 <!-- ── Expandable Accordion: Seputar {{ storeName }} ── -->
-                <div class="border-b border-black/5">
+                <div class="border-b border-border">
                     <button
                         @click="aboutAppOpen = !aboutAppOpen"
                         class="flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-[#faf9f6] sm:px-6"
@@ -206,7 +206,7 @@ function handleItemClick(title: string) {
                     </button>
                     <div
                         v-if="aboutAppOpen"
-                        class="flex flex-col gap-3 border-t border-black/5 bg-[#faf9f6] px-6 py-3 text-xs text-[#4a4a57]"
+                        class="flex flex-col gap-3 border-t border-border bg-[#faf9f6] px-6 py-3 text-xs text-[#4a4a57]"
                     >
                         <div
                             class="flex cursor-pointer items-center justify-between py-1"
@@ -233,12 +233,12 @@ function handleItemClick(title: string) {
                 </div>
 
                 <!-- Grey Divider Bar -->
-                <div class="h-2.5 border-y border-black/5 bg-[#f5f4f0]" />
+                <div class="h-2.5 border-y border-border bg-[#f5f4f0]" />
 
                 <!-- ── Keluar Akun Button ── -->
                 <button
                     @click="handleLogout"
-                    class="flex items-center gap-4 border-b border-black/5 px-4 py-4 text-left text-rose-600 transition-colors hover:bg-rose-50 sm:px-6"
+                    class="flex items-center gap-4 border-b border-border px-4 py-4 text-left text-destructive transition-colors hover:bg-destructive/10 sm:px-6"
                 >
                     <LogOut class="h-5 w-5 shrink-0" />
                     <span class="text-sm font-bold">Keluar Akun</span>
