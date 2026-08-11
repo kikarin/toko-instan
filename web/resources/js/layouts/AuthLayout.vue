@@ -2,7 +2,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { CheckCircle2, Lock, ShieldCheck } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { useStoreTheme } from '@/lib/useStoreTheme';
+import { useStoreTheme } from '@/composables/useStoreTheme';
 
 withDefaults(
     defineProps<{

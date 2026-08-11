@@ -13,36 +13,50 @@ class RegisterDTO
         public string $email,
         public string $password,
         public ?string $role = null,
-        public ?string $storeName = null
+        public ?string $storeName = null,
+        public ?string $storeSlug = null,
     ) {}
 
     public static function fromRequest(Request $request, ?int $storeId = null): self
     {
         $emailRule = ['required', 'string', 'email', 'max:255'];
-        
+
         if ($storeId) {
             $emailRule[] = Rule::unique('users')->where('store_id', $storeId);
         } else {
             $emailRule[] = Rule::unique('users')->whereNull('store_id');
         }
 
-        $validated = Validator::make($request->all(), [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => $emailRule,
             'password' => ['required', 'string', 'min:6'],
             'role' => ['nullable', 'string', 'in:seller,buyer'],
             'store_name' => ['nullable', 'string', 'max:255'],
-        ])->validate();
+            'store_slug' => ['nullable', 'string', 'max:255', 'alpha_dash'],
+        ];
+
+        if ($storeId === null) {
+            $rules['store_name'] = ['required', 'string', 'max:255'];
+            $rules['store_slug'] = ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('stores', 'slug')];
+            $rules['role'] = ['nullable', 'string', 'in:seller'];
+        }
+
+        $validated = Validator::make($request->all(), $rules)->validate();
 
         return new self(
             name: $validated['name'],
             email: $validated['email'],
             password: $validated['password'],
-            role: $validated['role'] ?? null,
-            storeName: $validated['store_name'] ?? null
+            role: $storeId ? 'buyer' : 'seller',
+            storeName: $validated['store_name'] ?? null,
+            storeSlug: $validated['store_slug'] ?? null,
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -51,6 +65,7 @@ class RegisterDTO
             'password' => $this->password,
             'role' => $this->role,
             'store_name' => $this->storeName,
+            'store_slug' => $this->storeSlug,
         ];
     }
 }

@@ -7,12 +7,11 @@ import {
     Loader2,
     Lock,
     Mail,
-    ShoppingBag,
     Sparkles,
     Store,
     User,
 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { toast, Toaster } from '@/components/ui/sonner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { signInWithGooglePopup } from '@/lib/firebase';
@@ -22,8 +21,9 @@ const props = defineProps<{
     intent?: 'platform' | 'storefront';
 }>();
 
-type AccountRole = 'buyer' | 'seller';
-const selectedRole = ref<AccountRole>('buyer');
+const isBuyerStorefront = computed(
+    () => props.intent === 'storefront' || Boolean(props.store),
+);
 
 const registerUrl = computed(() =>
     props.store ? `/${props.store.slug}/register` : '/register',
@@ -201,7 +201,7 @@ async function handleGoogleLogin() {
                     {{
                         props.store
                             ? `Daftar di ${props.store.name}`
-                            : 'Buat Akun Toko Instan'
+                            : 'Buat Toko di Toko Instan'
                     }}
                 </h1>
                 <span
@@ -213,43 +213,10 @@ async function handleGoogleLogin() {
             <p class="mt-2 text-sm text-muted-foreground">
                 {{
                     props.store
-                        ? 'Gabung sebagai Member dan nikmati promo'
-                        : 'Pilih peran akun Anda untuk memulai'
+                        ? 'Gabung sebagai member dan nikmati promo'
+                        : 'Daftar sebagai pemilik toko dan mulai jualan'
                 }}
             </p>
-        </div>
-
-        <!-- Role Selector -->
-        <div
-            v-if="!props.store"
-            class="mb-6 grid grid-cols-2 gap-1.5 rounded-2xl border border-border bg-card p-1.5 shadow-sm"
-        >
-            <button
-                type="button"
-                @click="selectedRole = 'seller'"
-                class="flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition-all"
-                :class="[
-                    selectedRole === 'seller'
-                        ? 'bg-brand text-brand-foreground shadow-sm'
-                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
-                ]"
-            >
-                <Store class="h-4 w-4" />
-                <span>Pemilik Toko</span>
-            </button>
-            <button
-                type="button"
-                @click="selectedRole = 'buyer'"
-                class="flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition-all"
-                :class="[
-                    selectedRole === 'buyer'
-                        ? 'bg-brand text-brand-foreground shadow-sm'
-                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
-                ]"
-            >
-                <ShoppingBag class="h-4 w-4" />
-                <span>Pembeli</span>
-            </button>
         </div>
 
         <!-- Panel -->
@@ -333,25 +300,55 @@ async function handleGoogleLogin() {
                     </div>
                 </div>
 
-                <div v-if="!props.store && selectedRole === 'seller'">
-                    <label
-                        class="mb-1.5 block text-xs font-bold text-foreground"
-                    >
-                        Nama Toko Online *
-                    </label>
-                    <div class="relative">
-                        <Store
-                            class="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                        />
-                        <input
-                            v-model="storeName"
-                            type="text"
-                            placeholder="Contoh: NovaBatik Studio"
-                            required
-                            class="auth-field"
-                        />
+                <template v-if="!isBuyerStorefront">
+                    <div>
+                        <label
+                            class="mb-1.5 block text-xs font-bold text-foreground"
+                        >
+                            Nama Toko Online *
+                        </label>
+                        <div class="relative">
+                            <Store
+                                class="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                            />
+                            <input
+                                v-model="storeName"
+                                type="text"
+                                placeholder="Contoh: NovaBatik Studio"
+                                required
+                                class="auth-field"
+                            />
+                        </div>
                     </div>
-                </div>
+
+                    <div>
+                        <label
+                            class="mb-1.5 block text-xs font-bold text-foreground"
+                        >
+                            Slug Toko *
+                        </label>
+                        <div class="relative">
+                            <span
+                                class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+                                >/</span
+                            >
+                            <input
+                                v-model="storeSlug"
+                                type="text"
+                                placeholder="nova-batik"
+                                required
+                                class="auth-field pl-8"
+                                @input="slugTouched = true"
+                            />
+                        </div>
+                        <p class="mt-1.5 text-[11px] text-muted-foreground">
+                            URL toko:
+                            <span class="font-semibold text-foreground"
+                                >/{{ storeSlug || 'slug-toko' }}</span
+                            >
+                        </p>
+                    </div>
+                </template>
 
                 <div>
                     <label
@@ -415,9 +412,9 @@ async function handleGoogleLogin() {
                     <template v-else>
                         <Sparkles class="h-4 w-4" />
                         <span>{{
-                            selectedRole === 'seller'
-                                ? 'Buat Toko Sekarang'
-                                : 'Daftar Pembeli Sekarang'
+                            isBuyerStorefront
+                                ? 'Daftar Pembeli Sekarang'
+                                : 'Buat Toko Sekarang'
                         }}</span>
                     </template>
                 </button>

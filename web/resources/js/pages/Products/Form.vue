@@ -32,7 +32,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useProductForm } from '@/lib/useProductForm';
+import { useProductForm } from '@/composables/useProductForm';
 import type { Product, MarketplaceProduct } from '@/types/product';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
 import { computed } from 'vue';

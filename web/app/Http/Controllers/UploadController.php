@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\UploadProductImage;
 use App\DTO\UploadFileDTO;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,13 +18,10 @@ class UploadController extends Controller
     {
         $dto = UploadFileDTO::fromRequest($request);
 
-        $path = $dto->file->store(
-            'products/'.date('Y/m'),
-            'r2'
-        );
-
-        if ($path === false) {
-            return response()->json(['message' => 'Upload gagal.'], 500);
+        try {
+            $uploaded = ($this->uploadProductImage)($dto->file);
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
 
         return response()->json([

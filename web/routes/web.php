@@ -31,7 +31,7 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth');
-    Route::post('/auth/google', [AuthController::class, 'googleLogin'])->middleware('throttle:auth');
+    Route::post('/auth/google', [AuthController::class, 'google'])->middleware('throttle:auth');
 
     Route::get('/{store_slug}/login', [AuthController::class, 'showStoreLogin'])->name('store.login');
     Route::post('/{store_slug}/login', [AuthController::class, 'storeLogin'])->middleware('throttle:auth');
@@ -55,7 +55,24 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/impersonate/stop', [AdminController::class, 'stopImpersonation'])->name('admin.impersonate.stop');
 });
 
-Route::middleware(['auth', 'role:buyer'])->prefix('{store_slug}')->group(function () {
+// Admin area — must be registered before `/{store_slug}/…` or admin paths are captured as store slugs.
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
+    Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::get('/tenants', [AdminController::class, 'tenants'])->name('admin.tenants');
+    Route::get('/orders', [AdminController::class, 'orders'])->name('admin.orders');
+    Route::patch('/users/{id}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
+    Route::delete('/users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
+    Route::post('/users/{id}/impersonate', [AdminController::class, 'impersonate'])->name('admin.users.impersonate');
+    Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('admin.withdrawals.index');
+    Route::patch('/withdrawals/{id}/approve', [AdminWithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
+    Route::patch('/withdrawals/{id}/reject', [AdminWithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
+    Route::patch('/withdrawals/{id}/transferred', [AdminWithdrawalController::class, 'markTransferred'])->name('admin.withdrawals.transferred');
+});
+
+$reservedStoreSlugs = 'admin|login|register|dashboard|horizon|uploads|products|inventory|wallet|catalog|customers|profile|forgot-password|reset-password|auth|up';
+
+Route::middleware(['auth', 'role:buyer'])->prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$).+"])->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
@@ -112,21 +129,10 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store');
 });
 
-// Admin area
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
-    Route::get('/admin/tenants', [AdminController::class, 'tenants'])->name('admin.tenants');
-    Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
-    Route::patch('/admin/users/{id}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
-    Route::delete('/admin/users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
-    Route::post('/admin/users/{id}/impersonate', [AdminController::class, 'impersonate'])->name('admin.users.impersonate');
-    Route::get('/admin/withdrawals', [AdminWithdrawalController::class, 'index'])->name('admin.withdrawals.index');
-    Route::patch('/admin/withdrawals/{id}/approve', [AdminWithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
-    Route::patch('/admin/withdrawals/{id}/reject', [AdminWithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
-    Route::patch('/admin/withdrawals/{id}/transferred', [AdminWithdrawalController::class, 'markTransferred'])->name('admin.withdrawals.transferred');
-});
-
 // Public Storefront (Fallback routes)
-Route::get('/{store_slug}', [StorePageController::class, 'show'])->name('store.show');
-Route::get('/{store_slug}/p/{product_slug}', [StorePageController::class, 'product'])->name('store.product.show');
+Route::get('/{store_slug}', [StorePageController::class, 'show'])
+    ->where('store_slug', "^(?!($reservedStoreSlugs)$).+")
+    ->name('store.show');
+Route::get('/{store_slug}/p/{product_slug}', [StorePageController::class, 'product'])
+    ->where('store_slug', "^(?!($reservedStoreSlugs)$).+")
+    ->name('store.product.show');

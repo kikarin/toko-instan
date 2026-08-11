@@ -6,9 +6,9 @@ use App\DTO\Auth\LoginDTO;
 use App\DTO\Auth\RegisterDTO;
 use App\Repositories\StoreRepository;
 use App\Services\AuthService;
-use App\Services\FirebaseAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,28 +17,8 @@ class AuthController extends Controller
 {
     public function __construct(
         protected AuthService $authService,
-        protected FirebaseAuthService $firebaseAuthService,
         protected StoreRepository $storeRepository
     ) {}
-
-    public function googleLogin(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'id_token' => ['required', 'string'],
-        ]);
-
-        try {
-            $googleUser = $this->firebaseAuthService->verifyIdToken($request->string('id_token')->toString());
-        } catch (\RuntimeException $e) {
-            throw ValidationException::withMessages([
-                'email' => $e->getMessage(),
-            ]);
-        }
-
-        $user = $this->authService->loginWithGoogle($googleUser);
-
-        return redirect()->intended($user?->homePath() ?? '/');
-    }
 
     public function showLogin(): Response
     {

@@ -78,31 +78,14 @@ async function handleGoogleLogin() {
     errorMessage.value = null;
     isGoogleLoading.value = true;
 
-    const { user, error } = await signInWithGooglePopup();
+    const { idToken, error } = await signInWithGooglePopup();
 
-    if (error) {
+    if (error || !idToken) {
         isGoogleLoading.value = false;
-        errorMessage.value = error;
-    } else if (user) {
-        const idToken = await user.getIdToken();
+        errorMessage.value = error ?? 'Gagal masuk menggunakan Google.';
+        toast.error(errorMessage.value);
 
-        router.post(
-            '/auth/google',
-            {
-                id_token: idToken,
-            },
-            {
-                onFinish: () => {
-                    isGoogleLoading.value = false;
-                },
-                onError: (errors) => {
-                    const msg =
-                        errors.email || 'Gagal masuk menggunakan Google.';
-                    errorMessage.value = msg;
-                    toast.error(msg);
-                },
-            },
-        );
+        return;
     }
 
     router.post(
@@ -110,7 +93,9 @@ async function handleGoogleLogin() {
         {
             id_token: idToken,
             intent: 'login',
-            store_slug_context: isStorefront.value ? (props.store?.slug ?? null) : null,
+            store_slug_context: isStorefront.value
+                ? (props.store?.slug ?? null)
+                : null,
         },
         {
             onSuccess: () => {

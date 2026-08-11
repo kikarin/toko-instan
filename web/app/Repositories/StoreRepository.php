@@ -46,6 +46,11 @@ class StoreRepository
         return Store::where('slug', $slug)->first();
     }
 
+    public function findById(int $id): ?Store
+    {
+        return Store::find($id);
+    }
+
     /**
      * @return Collection<int, Store>
      */
