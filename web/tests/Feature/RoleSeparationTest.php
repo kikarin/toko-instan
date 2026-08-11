@@ -40,9 +40,11 @@ test('an admin can access the admin dashboard and user management', function () 
 
 test('an admin can access every role area', function () {
     $admin = roleUser('admin');
+    $store = Store::factory()->create();
 
-    $this->actingAs($admin)->get('/marketplace')->assertOk();
+    $this->actingAs($admin)->get('/admin')->assertOk();
     $this->actingAs($admin)->get('/products')->assertOk();
+    $this->actingAs($admin)->get("/{$store->slug}")->assertOk();
 });
 
 test('a seller cannot shop on the buyer checkout', function () {

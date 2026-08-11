@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\Admin\UpdateRoleDTO;
+use App\Models\User;
 use App\Services\AdminService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

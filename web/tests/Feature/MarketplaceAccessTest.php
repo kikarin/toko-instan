@@ -32,5 +32,5 @@ test('an admin can impersonate a buyer without the buyer retaining admin access'
     $this->actingAs($admin)->post("/admin/users/{$buyer->id}/impersonate");
 
     $this->assertAuthenticatedAs($buyer);
-    $this->get('/admin')->assertRedirect('/marketplace');
+    $this->get('/admin')->assertRedirect('/');
 });

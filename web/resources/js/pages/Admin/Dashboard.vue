@@ -130,33 +130,6 @@ const statusVariant: Record<string, 'default' | 'destructive' | 'secondary' | 'o
                 </div>
             </Card>
 
-<<<<<<< Updated upstream
-=======
-            <!-- Pending withdrawals -->
-            <Card class="flex flex-wrap items-center justify-between gap-3 p-5">
-                <div>
-                    <p
-                        class="text-[11px] font-bold tracking-widest text-muted-foreground uppercase"
-                    >
-                        Pending withdraw
-                    </p>
-                    <p class="mt-1 font-mono text-2xl font-extrabold text-foreground">
-                        {{ stats?.pending_withdrawals_sum ?? 'Rp 0' }}
-                    </p>
-                    <p class="mt-1 text-xs text-muted-foreground">
-                        {{ stats?.pending_withdrawals ?? 0 }} permintaan menunggu
-                        review
-                    </p>
-                </div>
-                <a
-                    class="inline-flex items-center gap-1 text-xs font-bold text-accent hover:underline"
-                >
-                    Kelola penarikan
-                    <ArrowRight class="h-3.5 w-3.5" />
-                </a>
-            </Card>
-
->>>>>>> Stashed changes
             <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <!-- Recent Orders -->
                 <Card class="p-5">

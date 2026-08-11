@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Models\Store;
 use App\Models\User;
 
 function adminUser(): User
@@ -15,7 +16,7 @@ test('an admin can impersonate a buyer user', function () {
     $response = $this->actingAs($admin)
         ->post("/admin/users/{$buyer->id}/impersonate");
 
-    $response->assertRedirect('/marketplace');
+    $response->assertRedirect('/');
     $this->assertAuthenticatedAs($buyer);
     $this->assertEquals($admin->id, session()->get(AdminController::SESSION_IMPERSONATED_ADMIN)['id']);
 });
@@ -26,7 +27,7 @@ test('an impersonated buyer cannot access admin areas', function () {
 
     $this->actingAs($admin)->post("/admin/users/{$buyer->id}/impersonate");
 
-    $this->actingAs($buyer)->get('/admin')->assertRedirect('/marketplace');
+    $this->actingAs($buyer)->get('/admin')->assertRedirect('/');
 });
 
 test('an admin can stop impersonating and return to admin', function () {
@@ -67,11 +68,13 @@ test('a non-admin user cannot impersonate a buyer', function () {
 test('impersonation info is shared to the frontend', function () {
     $admin = adminUser();
     $buyer = User::factory()->state(['role' => 'buyer'])->create();
+    $store = Store::factory()->create();
+    $buyer->update(['store_id' => $store->id]);
 
     $this->actingAs($admin)->post("/admin/users/{$buyer->id}/impersonate");
 
-    $this->get('/marketplace')
+    $this->get("/{$store->slug}")
         ->assertInertia(fn ($page) => $page
-            ->component('Marketplace')
+            ->component('StorePage')
             ->where('auth.impersonating.id', $admin->id));
 });
