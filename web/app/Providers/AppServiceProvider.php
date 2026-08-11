@@ -14,8 +14,10 @@ use App\Observers\StoreObserver;
 use App\Observers\WithdrawalObserver;
 use App\Services\TenantContext;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -35,6 +37,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        RateLimiter::for('auth', function ($request) {
+            return Limit::perMinute(5)->by(
+                strtolower((string) $request->input('email', '')).'|'.$request->ip(),
+            );
+        });
 
         Product::observe(ProductObserver::class);
         StockMovement::observe(StockMovementObserver::class);

@@ -32,7 +32,12 @@ class CheckoutController extends Controller
     public function store(string $storeSlug, Request $request): RedirectResponse
     {
         $dto = CreateOrderDTO::fromRequest($request);
-        $order = $this->orderService->processCheckout($dto);
+
+        try {
+            $order = $this->orderService->processCheckout($dto);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['items' => $e->getMessage()]);
+        }
 
         return redirect()->route('orders.success', ['store_slug' => $storeSlug, 'orderNumber' => $order->order_number]);
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\Auth\LoginDTO;
 use App\DTO\Auth\RegisterDTO;
+use App\Models\User;
 use App\Repositories\StoreRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
@@ -74,5 +75,37 @@ class AuthService
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
+    }
+
+    /**
+     * Login or create a user from verified Google claims.
+     *
+     * @param  array{uid: string, email: string|null, name: string|null}  $googleUser
+     */
+    public function loginWithGoogle(array $googleUser): User
+    {
+        $user = $this->userRepository->findByFirebaseUid($googleUser['uid'])
+            ?? $this->userRepository->findByEmail((string) $googleUser['email']);
+
+        if (! $user) {
+            $user = $this->userRepository->createUser([
+                'name' => $googleUser['name'] ?: 'Pengguna Google',
+                'email' => $googleUser['email'],
+                'password' => Str::random(40),
+                'role' => 'buyer',
+                'store_id' => null,
+                'auth_provider' => 'google',
+                'firebase_uid' => $googleUser['uid'],
+            ]);
+        }
+
+        if ($user->firebase_uid !== $googleUser['uid']) {
+            $user->update(['firebase_uid' => $googleUser['uid']]);
+        }
+
+        Auth::login($user, true);
+        request()->session()->regenerate();
+
+        return $user;
     }
 }

@@ -67,28 +67,37 @@ class OrderRepository
     }
 
     /**
-     * @param  array{id?: int, variant_id?: int, name: string, price: float|int, qty: int}  $item
+     * @param  array{id?: int, variant_id?: int, name?: string, price?: float|int, qty: int}  $item
      */
     protected function createOrderItem(Order $order, ?int $tenantId, array $item): OrderItem
     {
         $product = isset($item['id']) ? Product::query()->find($item['id']) : null;
+
+        if (! $product) {
+            throw new \RuntimeException('Produk tidak ditemukan.');
+        }
+
         $variant = isset($item['variant_id'])
-            ? ProductVariant::query()->find($item['variant_id'])
+            ? ProductVariant::query()->where('product_id', $product->id)->find($item['variant_id'])
             : null;
 
-        $price = (float) ($item['price'] ?? $variant?->price ?? $product?->price ?? 0);
+        if (isset($item['variant_id']) && $variant === null) {
+            throw new \RuntimeException('Varian produk tidak valid.');
+        }
+
+        $price = (float) ($variant?->price ?? $product->price ?? 0);
         $qty = max(1, (int) ($item['qty'] ?? 1));
-        $name = (string) ($item['name'] ?? $variant?->name ?? $product?->name ?? 'Produk');
-        $sku = $variant?->sku ?? $product?->sku;
+        $name = (string) ($variant?->name ?? $product->name ?? 'Produk');
+        $sku = $variant?->sku ?? $product->sku;
 
         if ($variant !== null && filled($variant->name) && ! str_contains($name, $variant->name)) {
-            $name = trim($name.' — '.$variant->name);
+            $name = trim($product->name.' — '.$variant->name);
         }
 
         return OrderItem::create([
             'tenant_id' => $tenantId,
             'order_id' => $order->id,
-            'product_id' => $product?->id,
+            'product_id' => $product->id,
             'product_variant_id' => $variant?->id,
             'name' => $name,
             'sku' => $sku,
@@ -100,18 +109,26 @@ class OrderRepository
 
     protected function resolveStoreId(CreateOrderDTO $dto): int
     {
+        $storeIds = [];
+
         foreach ($dto->items as $item) {
             if (! isset($item['id'])) {
                 continue;
             }
 
             $storeId = Product::query()->whereKey($item['id'])->value('store_id');
-            if ($storeId !== null) {
-                return (int) $storeId;
+            if ($storeId === null) {
+                throw new \RuntimeException('Produk tidak ditemukan.');
             }
+
+            $storeIds[] = (int) $storeId;
         }
 
-        return $dto->storeId;
+        if (count(array_unique($storeIds)) > 1) {
+            throw new \RuntimeException('Item pesanan berasal dari toko yang berbeda.');
+        }
+
+        return $storeIds[0] ?? throw new \RuntimeException('Pesanan tidak memiliki produk.');
     }
 
     /**

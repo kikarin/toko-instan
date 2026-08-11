@@ -76,18 +76,18 @@ const {
 
 // Create preview product for the Live Preview Card
 const previewProduct = computed<MarketplaceProduct>(() => ({
-    id: 'preview',
+    id: 0,
     name: name.value || 'Nama Produk Dagangan Anda...',
     price: formattedPricePreview.value,
     rating: 4.8,
     sold: 3,
     img: img.value || 'https://placehold.co/600x600?text=Belum+ada+gambar',
     store: 'Toko Anda',
-    tag: selectedTag.value || undefined,
+    tag: selectedTag.value || null,
     cat: selectedCategory.value || 'Uncategorized',
     freeShipping: true,
     sku: sku.value || 'SKU-SAMPLE',
-    stock: stock.value || 0,
+    stock: Number(stock.value) || 0,
 }));
 
 // Add empty option

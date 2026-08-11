@@ -24,7 +24,7 @@ const { totalCount: totalCartCount } = useCart();
 
 async function handleLogout() {
     await logoutUser();
-    router.post('/logout');
+    router.post('/logout', { store_slug: usePage().props.store?.slug });
 }
 
 function handleItemClick(title: string) {

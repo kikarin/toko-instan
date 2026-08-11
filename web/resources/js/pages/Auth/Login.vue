@@ -62,16 +62,32 @@ async function handleGoogleLogin() {
     isGoogleLoading.value = true;
 
     const { user, error } = await signInWithGooglePopup();
-    isGoogleLoading.value = false;
 
     if (error) {
+        isGoogleLoading.value = false;
         errorMessage.value = error;
     } else if (user) {
-        // Also authenticate with Laravel backend
-        router.post(loginUrl.value, {
-            email: user.email,
-            password: user.uid,
-        });
+        // Verify the Firebase ID token on the Laravel backend
+        const idToken = await user.getIdToken();
+
+        router.post(
+            '/auth/google',
+            {
+                id_token: idToken,
+            },
+            {
+                onFinish: () => {
+                    isGoogleLoading.value = false;
+                },
+                onError: (errors) => {
+                    const msg =
+                        errors.email ||
+                        'Gagal masuk menggunakan Google.';
+                    errorMessage.value = msg;
+                    toast.error(msg);
+                },
+            },
+        );
     }
 }
 </script>

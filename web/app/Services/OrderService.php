@@ -5,7 +5,6 @@ namespace App\Services;
 use App\DTO\CreateOrderDTO;
 use App\DTO\Order\UpdateOrderStatusDTO;
 use App\Models\Order;
-use App\Models\User;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\StoreRepository;
@@ -47,14 +46,38 @@ class OrderService
     {
         return DB::transaction(function () use ($dto) {
             $subtotal = 0;
-            foreach ($dto->items as $item) {
-                $price = (float) $item['price'];
-                $qty = (int) $item['qty'];
-                $subtotal += ($price * $qty);
 
-                if (isset($item['id'])) {
-                    $this->productRepository->decrementStock($item['id'], $qty);
+            foreach ($dto->items as $item) {
+                $product = $this->productRepository->find((int) $item['id']);
+
+                if (! $product) {
+                    throw new \RuntimeException('Produk tidak ditemukan.');
                 }
+
+                if (! $product->is_active) {
+                    throw new \RuntimeException("Produk '{$product->name}' sedang tidak aktif.");
+                }
+
+                $qty = (int) $item['qty'];
+                $price = (float) $product->price;
+
+                if (isset($item['variant_id'])) {
+                    $variant = $product->variants()->whereKey($item['variant_id'])->first();
+
+                    if (! $variant) {
+                        throw new \RuntimeException('Varian produk tidak valid.');
+                    }
+
+                    $price = (float) $variant->price;
+                }
+
+                if ((int) $product->stock < $qty) {
+                    throw new \RuntimeException("Stok '{$product->name}' tidak mencukupi.");
+                }
+
+                $subtotal += $price * $qty;
+
+                $this->productRepository->decrementStock($product->id, $qty);
             }
 
             $shippingFee = $subtotal >= 300000 ? 0 : 15000;

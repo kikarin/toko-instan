@@ -72,8 +72,8 @@ const userInitial = computed(() => {
 
 // Cart
 const {
-    items: cartItems,
-    totalCount: totalCartCount,
+    cartItems,
+    totalCartCount,
     isCartOpen,
     openCart,
     addToCart,

@@ -110,15 +110,15 @@ function handleAddToCart() {
             parseInt(props.product.price.replace(/[^\d]/g, ''), 10) ||
             100000;
 
-        const productToAdd = {
+        const productToAdd: ProductDetail = {
             ...props.product,
             variant_id: selectedVariant.value?.id,
             name: selectedVariant.value
                 ? `${props.product.name} - ${selectedVariant.value.name}`
                 : props.product.name,
-            price: displayPrice.value,
+            price: String(displayPrice.value ?? props.product.price),
             priceNum: rawPrice,
-            img: displayImg.value,
+            img: displayImg.value ?? props.product.img,
         };
         emit('add-to-cart', productToAdd, qty.value);
         emit('close');
@@ -160,7 +160,7 @@ const ratingBreakdown: any[] = [];
                     <img
                         v-if="displayImg"
                         :src="displayImg"
-                        :alt="product.name"
+                        :alt="product?.name"
                         class="h-full w-full object-cover"
                     />
                     <div
@@ -537,7 +537,7 @@ const ratingBreakdown: any[] = [];
                         <img
                             v-if="displayImg"
                             :src="displayImg"
-                            :alt="product.name"
+                            :alt="product?.name"
                             class="h-full w-full object-cover"
                         />
                         <!-- Discount / tag badge -->

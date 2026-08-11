@@ -15,7 +15,7 @@ import {
     Share2,
     ChevronLeft
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -90,7 +90,7 @@ watch(
     () => props.product,
     (newProd) => {
         qty.value = 1;
-        activeTab.value = 'deskripsi';
+        activeTab.value = 'detail';
         selectedOptions.value = {};
         
         if (newProd?.variant_options?.length) {

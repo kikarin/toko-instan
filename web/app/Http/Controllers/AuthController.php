@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\StoreRepository;
-use App\Services\AuthService;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use App\DTO\Auth\LoginDTO;
 use App\DTO\Auth\RegisterDTO;
+use App\Repositories\StoreRepository;
+use App\Services\AuthService;
+use App\Services\FirebaseAuthService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,8 +17,28 @@ class AuthController extends Controller
 {
     public function __construct(
         protected AuthService $authService,
+        protected FirebaseAuthService $firebaseAuthService,
         protected StoreRepository $storeRepository
     ) {}
+
+    public function googleLogin(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'id_token' => ['required', 'string'],
+        ]);
+
+        try {
+            $googleUser = $this->firebaseAuthService->verifyIdToken($request->string('id_token')->toString());
+        } catch (\RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'email' => $e->getMessage(),
+            ]);
+        }
+
+        $user = $this->authService->loginWithGoogle($googleUser);
+
+        return redirect()->intended($user?->homePath() ?? '/');
+    }
 
     public function showLogin(): Response
     {
@@ -57,9 +78,26 @@ class AuthController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         $user = $request->user();
-        $storeSlug = null;
+        $storeSlug = $request->input('store_slug');
 
-        if ($user && $user->store_id) {
+        if (! $storeSlug) {
+            $referer = $request->header('referer');
+            if ($referer) {
+                $path = parse_url($referer, PHP_URL_PATH);
+                if ($path) {
+                    $parts = explode('/', trim($path, '/'));
+                    if (count($parts) > 0 && ! in_array($parts[0], ['login', 'register', 'dashboard', 'admin', 'logout'])) {
+                        $possibleSlug = $parts[0];
+                        $store = $this->storeRepository->findBySlug($possibleSlug);
+                        if ($store) {
+                            $storeSlug = $possibleSlug;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (! $storeSlug && $user && $user->store_id) {
             $store = $this->storeRepository->findById($user->store_id);
             if ($store) {
                 $storeSlug = $store->slug;

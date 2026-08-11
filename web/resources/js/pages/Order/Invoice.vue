@@ -33,6 +33,10 @@ function formatMoney(value?: number | string): string {
 function goBack() {
     router.visit(backUrl.value);
 }
+
+function printInvoice() {
+    window.print();
+}
 </script>
 
 <template>
@@ -66,7 +70,7 @@ function goBack() {
                 </div>
                 <Button
                     class="gap-2 rounded-xl bg-card text-xs font-bold text-accent hover:bg-foreground"
-                    @click="window.print()"
+                    @click="printInvoice"
                 >
                     <Printer class="h-4 w-4" /> Cetak / Simpan PDF
                 </Button>

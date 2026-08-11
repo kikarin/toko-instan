@@ -24,21 +24,20 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
-// Guest (public) routes
 Route::middleware(['guest'])->group(function () {
     Route::get('/', [PageController::class, 'home'])->name('home');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth');
+    Route::post('/auth/google', [AuthController::class, 'googleLogin'])->middleware('throttle:auth');
 
     Route::get('/{store_slug}/login', [AuthController::class, 'showStoreLogin'])->name('store.login');
-    Route::post('/{store_slug}/login', [AuthController::class, 'storeLogin']);
+    Route::post('/{store_slug}/login', [AuthController::class, 'storeLogin'])->middleware('throttle:auth');
     Route::get('/{store_slug}/register', [AuthController::class, 'showStoreRegister'])->name('store.register');
-    Route::post('/{store_slug}/register', [AuthController::class, 'storeRegister']);
+    Route::post('/{store_slug}/register', [AuthController::class, 'storeRegister'])->middleware('throttle:auth');
 });
 
-// Authenticated routes (any role)
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -46,7 +45,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/impersonate/stop', [AdminController::class, 'stopImpersonation'])->name('admin.impersonate.stop');
 });
 
-// Buyer area
 Route::middleware(['auth', 'role:buyer'])->prefix('{store_slug}')->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
@@ -65,7 +63,6 @@ Route::middleware(['auth', 'role:buyer'])->prefix('{store_slug}')->group(functio
     Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
 });
 
-// Seller area
 Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('seller.orders.index');
     Route::get('/customers', [CustomerController::class, 'index'])->name('seller.customers.index');

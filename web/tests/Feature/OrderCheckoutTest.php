@@ -40,7 +40,7 @@ function checkoutBuyerContext(): array
 test('checkout creates order header and order_items snapshots', function () {
     ['buyer' => $buyer, 'store' => $store, 'tenant' => $tenant, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
 
-    $response = $this->actingAs($buyer)->post('/checkout', [
+    $response = $this->actingAs($buyer)->post("/{$store->slug}/checkout", [
         'customer_name' => 'Budi Buyer',
         'customer_email' => $buyer->email,
         'customer_phone' => '08123456789',
@@ -62,7 +62,7 @@ test('checkout creates order header and order_items snapshots', function () {
         // subtotal 275000 < 300000 → +15000 shipping = 290000
         ->and((float) $order->total_amount)->toBe(290000.0);
 
-    $response->assertRedirect(route('orders.success', $order->order_number));
+    $response->assertRedirect(route('orders.success', ['store_slug' => $store->slug, 'orderNumber' => $order->order_number]));
 
     expect(OrderItem::where('order_id', $order->id)->count())->toBe(2);
 
@@ -92,9 +92,9 @@ test('checkout creates order header and order_items snapshots', function () {
 });
 
 test('seller orders page includes line items after checkout', function () {
-    ['seller' => $seller, 'buyer' => $buyer, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
+    ['seller' => $seller, 'buyer' => $buyer, 'store' => $store, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
 
-    $this->actingAs($buyer)->post('/checkout', [
+    $this->actingAs($buyer)->post("/{$store->slug}/checkout", [
         'customer_name' => 'Budi Buyer',
         'customer_email' => $buyer->email,
         'customer_phone' => '08123456789',
@@ -122,9 +122,9 @@ test('seller orders page includes line items after checkout', function () {
 });
 
 test('buyer orders page includes line items after checkout', function () {
-    ['buyer' => $buyer, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
+    ['buyer' => $buyer, 'store' => $store, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
 
-    $this->actingAs($buyer)->post('/checkout', [
+    $this->actingAs($buyer)->post("/{$store->slug}/checkout", [
         'customer_name' => 'Budi Buyer',
         'customer_email' => $buyer->email,
         'customer_phone' => '08123456789',
@@ -136,7 +136,7 @@ test('buyer orders page includes line items after checkout', function () {
     ])->assertRedirect();
 
     $this->actingAs($buyer)
-        ->get('/orders')
+        ->get("/{$store->slug}/orders")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Orders/Index')

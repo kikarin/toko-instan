@@ -123,7 +123,7 @@ const userRole = computed(() => {
 
 async function handleLogout() {
     await logoutUser();
-    router.post('/logout');
+    router.post('/logout', { store_slug: storeData.value?.slug });
 }
 
 // Bottom nav active route detection

@@ -34,6 +34,11 @@ class UserRepository
         return User::find($id);
     }
 
+    public function findByFirebaseUid(string $uid): ?User
+    {
+        return User::where('firebase_uid', $uid)->first();
+    }
+
     public function findOrFail(int $id): User
     {
         return User::findOrFail($id);
@@ -51,6 +56,7 @@ class UserRepository
             'role' => $data['role'] ?? 'seller',
             'store_id' => $data['store_id'] ?? null,
             'auth_provider' => $data['auth_provider'] ?? 'email',
+            'firebase_uid' => $data['firebase_uid'] ?? null,
         ]);
     }
 

@@ -20,7 +20,7 @@ export function useMarketplaceCart() {
     function addToCart(product: ProductDetail, addQty = 1) {
         if (!activeUser.value) {
             toast.error('Silakan login untuk menambahkan ke keranjang');
-            const store = usePage().props.store as any;
+            const store = usePage().props.store;
             router.visit(store?.slug ? `/${store.slug}/login` : '/login');
             return;
         }
@@ -58,7 +58,7 @@ export function useMarketplaceCart() {
     function goCheckout() {
         isCartOpen.value = false;
         const page = usePage();
-        const storeSlug = (page.props.store as any)?.slug ?? '';
+        const storeSlug = page.props.store?.slug ?? '';
         router.visit(`/${storeSlug}/checkout`);
     }
 

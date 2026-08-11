@@ -72,7 +72,7 @@
 - [x] **P0-011** — Setup Tailwind + shadcn-vue
   - **Deliverable:** Tailwind configured, komponen shadcn-vue (Button, Card, Input, Badge) bisa dipakai
 
-- [ ] **P0-012** — Folder structure backend
+- [x] **P0-012** — Folder structure backend
   - **Deliverable:** Folder sesuai blueprint: `Actions`, `DTO`, `Enums`, `Services`, `Repositories`, dll.
 
 - [ ] **P0-013** — Folder structure frontend
@@ -129,7 +129,7 @@
 
 ## 1.1 Authentication
 
-- [ ] **P1-001** — Register & login
+- [x] **P1-001** — Register & login
   - **Deliverable:** Halaman register/login, session auth Laravel yang benar (Firebase bridge verified jika dipakai), redirect ke dashboard
 
 - [ ] **P1-002** — Email verification
@@ -183,7 +183,7 @@
 - [ ] **P1-024** — Image upload → CDN ⚠️ butuh P0-023
   - **Deliverable:** Upload gambar → queue job → resize (thumbnail/medium/large) → push R2 → simpan CDN URL di DB
 
-- [ ] **P1-025** — Storefront product catalog
+- [x] **P1-025** — Storefront product catalog
   - **Deliverable:** Halaman list produk + detail produk di storefront **publik** (tanpa wajib login)
 
 - [ ] **P1-026** — Digital product (basic)
@@ -210,7 +210,7 @@
 
 ## 1.5 Checkout & Order
 
-- [ ] **P1-040** — Checkout page
+- [x] **P1-040** — Checkout page
   - **Deliverable:** Halaman checkout: **pilih alamat tersimpan**, ringkasan order, notes
 
 - [x] **P1-041** — Create order

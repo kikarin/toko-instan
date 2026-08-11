@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import { useStorage } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
@@ -19,7 +19,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
     }
 
     function syncToBackend(id: number, added: boolean) {
-        const storeSlug = (router.page.props.store as any)?.slug ?? '';
+        const storeSlug = usePage().props.store?.slug ?? '';
         const url = storeSlug ? `/${storeSlug}/wishlist/${id}` : `/wishlist/${id}`;
         
         fetch(url, {
