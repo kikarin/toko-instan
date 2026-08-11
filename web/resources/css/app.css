@@ -41,13 +41,40 @@
     --color-brand: var(--brand, #e07c28);
     --color-brand-foreground: var(--brand-foreground, #ffffff);
     --color-brand-secondary: var(--brand-secondary, #6d4fc2);
-    --color-brand-secondary-foreground: var(--brand-secondary-foreground, #ffffff);
+    --color-brand-secondary-foreground: var(
+        --brand-secondary-foreground,
+        #ffffff
+    );
     --color-brand-accent: var(--brand-accent, #0e9f8a);
     --color-brand-accent-foreground: var(--brand-accent-foreground, #ffffff);
     --color-brand-strong: var(--brand-strong, #e0405a);
     --color-brand-cta-foreground: var(--brand-cta-foreground, #ffffff);
     --color-brand-soft: var(--brand-soft, rgba(224, 124, 40, 0.12));
     --color-brand-surface: var(--brand-surface, rgba(224, 124, 40, 0.06));
+
+    --animate-rise: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-rise {
+        animation: none;
+    }
+}
+
+/* Shared auth form field */
+.auth-field {
+    @apply h-11 w-full rounded-xl border border-border bg-background/50 pr-3.5 pl-10 text-sm text-foreground shadow-xs transition-all outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15;
 }
 
 :root {
@@ -78,7 +105,7 @@
     --header-foreground: #1c1c22;
     --footer: #ffffff;
     --footer-foreground: #1c1c22;
-    
+
     --sidebar: #18181c;
     --sidebar-foreground: #ffffff;
     --sidebar-primary: #f59e0b;

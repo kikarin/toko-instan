@@ -12,6 +12,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
@@ -36,6 +37,15 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/{store_slug}/login', [AuthController::class, 'storeLogin'])->middleware('throttle:auth');
     Route::get('/{store_slug}/register', [AuthController::class, 'showStoreRegister'])->name('store.register');
     Route::post('/{store_slug}/register', [AuthController::class, 'storeRegister'])->middleware('throttle:auth');
+
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:auth')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:auth')->name('password.store');
+    Route::get('/{store_slug}/forgot-password', [PasswordResetController::class, 'showForgotPassword'])->name('store.password.request');
+    Route::post('/{store_slug}/forgot-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:auth')->name('store.password.email');
+    Route::get('/{store_slug}/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])->name('store.password.reset');
+    Route::post('/{store_slug}/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:auth')->name('store.password.store');
 });
 
 Route::middleware(['auth'])->group(function () {
