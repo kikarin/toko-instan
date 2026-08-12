@@ -12,13 +12,13 @@
 
 | Phase                     | Task    | Selesai    |
 | ------------------------- | ------- | ---------- |
-| Phase 0 — Foundation      | 17      | 17/17      |
-| Phase 1 — MVP             | 42      | 30/42      |
+| Phase 0 — Foundation      | 16      | 16/16      |
+| Phase 1 — MVP             | 42      | 31/42      |
 | Phase 1.5 — Beta & Launch | 10      | 0/10       |
 | Phase 2 — Growth          | 28      | 7/28       |
 | Phase 3 — Scale           | 18      | 0/18       |
 | Phase 4 — Enterprise      | 12      | 0/12       |
-| **Total**                 | **127** | **54/127** |
+| **Total**                 | **126** | **54/126** |
 
 
 > Update kolom "Selesai" manual saat milestone tercapai.
@@ -88,10 +88,10 @@
   - **Deliverable:** Migration schema `public`, `audit`, `logs`; koneksi DB OK
 
 - [x] **P0-022** — Redis + Horizon
-  - **Deliverable:** Horizon jalan, dashboard `/horizon` accessible (dev); `QUEUE_CONNECTION=redis`
+  - **Deliverable:** Horizon jalan (`horizon:status` active), dashboard `/horizon` accessible (dev); `QUEUE_CONNECTION=redis`
 
 - [x] **P0-023** — S3 / R2 storage config
-  - **Deliverable:** Laravel filesystem disk `s3`/`r2` configured, upload test file ke Cloudflare R2 berhasil (URL CDN bisa dibuka)
+  - **Deliverable:** Laravel filesystem disk `s3`/`r2` configured; endpoint upload berhasil (URL CDN bisa dibuka); wiring controller → action/job tidak 500
 
 ---
 
@@ -130,19 +130,19 @@
 ## 1.1 Authentication
 
 - [x] **P1-001** — Register & login
-  - **Deliverable:** Halaman register/login, session auth Laravel yang benar (Firebase bridge verified jika dipakai), redirect ke dashboard
+  - **Deliverable:** Platform `/register` = **seller only**; buyer hanya di `/{store_slug}/register`; session auth Laravel OK; redirect benar
 
 - [ ] **P1-002** — Email verification
   - **Deliverable:** Email verifikasi saat register, halaman "verify email", middleware `verified`
 
-- [ ] **P1-003** — Forgot & reset password
-  - **Deliverable:** Flow lupa password via email, halaman reset password
+- [x] **P1-003** — Forgot & reset password
+  - **Deliverable:** Flow lupa password via email, halaman reset password (platform + storefront)
 
 - [ ] **P1-004** — OTP login (opsional MVP)
   - **Deliverable:** Login via OTP ke email/phone; bisa di-skip jika belum ada provider SMS
 
 - [x] **P1-005** — Google login (opsional MVP)
-  - **Deliverable:** OAuth Google via Firebase — verify ID token server-side, jangan pakai UID sebagai password
+  - **Deliverable:** OAuth Google via Firebase — verify ID token server-side, jangan pakai UID sebagai password; **tidak ada fatal PHP** (method duplikat / wiring bersih)
 
 ---
 
@@ -151,7 +151,7 @@
 ## 1.2 Tenant & Store
 
 - [x] **P1-010** — Create store (onboarding) ⚠️ butuh P0-031
-  - **Deliverable:** Form buat toko (nama, slug/subdomain), auto-create tenant + store
+  - **Deliverable:** Form buat toko (**nama + slug**), auto-create tenant + store; slug tersimpan sesuai input user
 
 - [x] **P1-011** — Update store profile
   - **Deliverable:** Edit nama toko, deskripsi, logo (upload CDN), kontak
@@ -181,7 +181,7 @@
   - **Deliverable:** Variant (ukuran/warna), SKU unik per variant, stock per variant
 
 - [x] **P1-024** — Image upload → CDN ⚠️ butuh P0-023
-  - **Deliverable:** Upload gambar → queue job → resize (thumbnail/medium/large) → push R2 → simpan CDN URL di DB
+  - **Deliverable:** Upload gambar → queue/action resize (thumbnail/medium/large) → push R2 → simpan CDN URL; **endpoint upload tidak 500**
 
 - [x] **P1-025** — Storefront product catalog
   - **Deliverable:** Halaman list produk + detail produk di storefront **publik** (tanpa wajib login)
@@ -307,13 +307,13 @@
 ## 1.10 Dashboard
 
 - [x] **P1-090** — Seller dashboard
-  - **Deliverable:** Widget: revenue, orders hari ini, total produk, saldo wallet (data real, scoped ke toko seller)
+  - **Deliverable:** Widget: revenue, orders hari ini, total produk, saldo wallet (data real, scoped ke toko seller); **tidak crash**
 
 - [x] **P1-091** — Platform admin dashboard
-  - **Deliverable:** Admin: total tenants, orders platform, **pending withdraw**
+  - **Deliverable:** Admin: total tenants, orders platform, **pending withdraw**; method/repo lengkap (tidak missing)
 
 - [x] **P1-092** — Admin modules dasar
-  - **Deliverable:** CRUD users, **tenants**, lihat **orders**, approve withdraw
+  - **Deliverable:** CRUD users, **tenants**, lihat **orders**, approve withdraw — service methods (`listTenants`/`listOrders`) ada & jalan
 
 ---
 
@@ -639,5 +639,7 @@
 | 2026-08-10 | Audit setelah `3dd8b15`: centang P1-045 (invoice print-ready + test); modul seller Customers = ekstra (belum ada task ID). Progress: **37/127** |
 | 2026-08-10 | Phase 0 PARTIAL ditutup: Actions, composables/, Redis queue, R2 upload action+test, Auth/Dashboard layout, path-based storefront (P0-031/P1-013), `.env.example` lengkap. Progress: **46/127** |
 | 2026-08-10 | Phase 1 FAIL/PARTIAL ditutup: P1-001/005/010/012/024/090/091/092 — Google ID token, seller-only register+slug, toko tutup, resize 3 ukuran, dashboard scoped, admin tenants/orders + pending withdraw. Progress: **54/127** |
+| 2026-08-12 | Audit SE setelah pull (merge `65f9388`): **rollback centang** yang broken — AuthService fatal, AdminService missing methods, UploadController 500, Register merge-broken. Centang P1-003 password reset. Progress jujur: **45/126** (P0 14/16) |
+| 2026-08-12 | SE fix merge breakage: AuthService/Register/Upload/Admin/Withdrawal + Horizon gate+snapshot + admin route order. Re-centang P0-022/023, P1-001/005/010/024/090/091/092. Progress: **54/126** (P0 16/16 · P1 31/42) |
 
 
