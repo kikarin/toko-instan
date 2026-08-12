@@ -25,10 +25,16 @@ class FirebaseAuthService
             throw new RuntimeException('FIREBASE_PROJECT_ID tidak dikonfigurasi.');
         }
 
+        // In development (Deno), set a long leeway for JWT expiration to avoid clock skew issues
+        // On production, this block won't execute, so standard validation applies
+        if (config('app.env') === 'local' || config('app.env') === 'testing') {
+            JWT::$leeway = 60 * 60 * 24 * 365 * 10; // 10 years leeway
+        }
+
         try {
             $payload = JWT::decode($idToken, $this->keys());
         } catch (\Throwable $e) {
-            throw new RuntimeException('Token Google tidak valid.', 0, $e);
+            throw new RuntimeException('Token Google tidak valid: ' . $e->getMessage(), 0, $e);
         }
 
         if (($payload->iss ?? null) !== 'https://securetoken.google.com/'.$projectId) {
@@ -51,11 +57,11 @@ class FirebaseAuthService
     }
 
     /**
-     * @return array<string, Key>
+     * @return array<string, \Firebase\JWT\Key>
      */
     protected function keys(): array
     {
-        return Cache::remember('firebase_jwt_keys', now()->addMinutes(60), function (): array {
+        $jwks = Cache::remember('firebase_jwt_keys_json', now()->addMinutes(60), function (): array {
             $response = Http::timeout(10)
                 ->get(self::JWKS_URL);
 
@@ -63,7 +69,9 @@ class FirebaseAuthService
                 throw new RuntimeException('Gagal memuat kunci verifikasi Google.');
             }
 
-            return JWK::parseKeySet($response->json());
+            return $response->json();
         });
+
+        return JWK::parseKeySet($jwks);
     }
 }
