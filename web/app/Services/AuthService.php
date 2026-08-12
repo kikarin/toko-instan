@@ -121,7 +121,7 @@ class AuthService
                 'store_id' => $storeId,
                 'auth_provider' => 'google',
                 'firebase_uid' => $identity['uid'],
-                'avatar' => $identity['picture'],
+                // 'avatar' => $identity['picture'],
             ]);
 
             if ($role === 'seller') {
