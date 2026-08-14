@@ -69,6 +69,28 @@ const {
 function openInvoice(orderNumber: string) {
     router.get(`/orders/${orderNumber}/invoice`);
 }
+
+function shipOrder(order: SellerOrder) {
+    const trackingNumber = window.prompt(
+        'Masukkan nomor resi pengiriman (mis. J&T / JNE / SiCepat):',
+        order.tracking_number ?? '',
+    );
+
+    if (trackingNumber === null) {
+        return;
+    }
+
+    const trackingCourier = window.prompt(
+        'Nama kurir (J&T Express / JNE / SiCepat BEST):',
+        order.tracking_courier ?? 'J&T Express',
+    );
+
+    if (trackingCourier === null) {
+        return;
+    }
+
+    updateOrderStatus(order.id, 'shipped', trackingNumber, trackingCourier);
+}
 </script>
 
 <template>
@@ -321,6 +343,17 @@ function openInvoice(orderNumber: string) {
                                         order.shipping_address }}</span>
                                 </div>
                             </div>
+
+                            <div v-if="order.tracking_number" class="flex items-start gap-2.5 rounded-2xl border border-border bg-muted/30 p-3">
+                                <Truck class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                                <div class="flex min-w-0 flex-col">
+                                    <span class="text-[10px] font-bold text-muted-foreground uppercase">Nomor Resi</span>
+                                    <span class="truncate font-mono font-black text-foreground">{{ order.tracking_number
+                                        }}</span>
+                                    <span class="truncate text-[10px] text-muted-foreground">{{ order.tracking_courier
+                                        }}</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Dynamic Action Buttons (State Controlled) -->
@@ -342,7 +375,7 @@ function openInvoice(orderNumber: string) {
                                 order.status.toLowerCase() === 'processing'
                             " size="sm"
                                 class="h-10 cursor-pointer gap-2 rounded-xl bg-secondary px-5 text-xs font-black text-secondary-foreground shadow-md hover:bg-secondary/80"
-                                @click="updateOrderStatus(order.id, 'shipped')">
+                                @click="shipOrder(order)">
                                 <Truck class="h-4 w-4" />
                                 Kirim Pesanan
                             </Button>

@@ -40,6 +40,8 @@ class OrderController extends Controller
                             'status' => strtolower($order->status),
                             'created_at' => $order->created_at?->format('d M Y, H:i'),
                             'notes' => $order->notes,
+                            'tracking_number' => $order->tracking_number,
+                            'tracking_courier' => $order->tracking_courier,
                             'items' => $order->items->map(fn ($item) => [
                                 'id' => $item->id,
                                 'product_name' => $item->name,
@@ -68,6 +70,9 @@ class OrderController extends Controller
                     'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
                     'status' => strtolower($order->status),
                     'created_at' => $order->created_at?->format('d M Y, H:i'),
+                    'tracking_number' => $order->tracking_number,
+                    'tracking_courier' => $order->tracking_courier,
+                    'tracking_url' => $this->orderService->trackingUrlFor($order),
                     'items' => $order->items->map(fn ($item) => [
                         'product_name' => $item->name,
                         'sku' => $item->sku,

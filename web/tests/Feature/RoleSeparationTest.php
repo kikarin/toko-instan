@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Store;
+use App\Models\Tenant;
 use App\Models\User;
 
 function roleUser(string $role): User
@@ -26,7 +27,6 @@ test('a seller cannot access the buyer-only area or admin areas', function () {
     $seller = roleUser('seller');
     $store = Store::factory()->create();
 
-    $this->actingAs($seller)->get("/{$store->slug}/checkout")->assertRedirect('/dashboard');
     $this->actingAs($seller)->get('/admin')->assertRedirect('/dashboard');
     $this->actingAs($seller)->get('/admin/users')->assertRedirect('/dashboard');
 });
@@ -47,11 +47,20 @@ test('an admin can access every role area', function () {
     $this->actingAs($admin)->get("/{$store->slug}")->assertOk();
 });
 
-test('a seller cannot shop on the buyer checkout', function () {
+test('a seller is redirected to dashboard when visiting another store', function () {
     $seller = roleUser('seller');
     $store = Store::factory()->create();
 
+    $this->actingAs($seller)->get("/{$store->slug}")->assertRedirect('/dashboard');
     $this->actingAs($seller)->get("/{$store->slug}/checkout")->assertRedirect('/dashboard');
+});
+
+test('a seller can preview their own storefront', function () {
+    $seller = roleUser('seller');
+    $tenant = Tenant::factory()->create(['user_id' => $seller->id]);
+    $store = Store::factory()->create(['tenant_id' => $tenant->id]);
+
+    $this->actingAs($seller)->get("/{$store->slug}")->assertOk();
 });
 
 test('an authenticated user is sent to their home path from the landing page', function () {

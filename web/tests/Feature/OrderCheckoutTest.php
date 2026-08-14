@@ -16,6 +16,7 @@ function checkoutBuyerContext(): array
         'role' => 'buyer',
         'email' => 'buyer-order@example.com',
         'name' => 'Budi Buyer',
+        'store_id' => $store->id,
     ]);
 
     $productA = Product::factory()->create([
@@ -62,7 +63,7 @@ test('checkout creates order header and order_items snapshots', function () {
         // subtotal 275000 < 300000 → +15000 shipping = 290000
         ->and((float) $order->total_amount)->toBe(290000.0);
 
-    $response->assertRedirect(route('orders.success', ['store_slug' => $store->slug, 'orderNumber' => $order->order_number]));
+    $response->assertRedirect(route('payment.simulate', ['orderNumber' => $order->order_number]));
 
     expect(OrderItem::where('order_id', $order->id)->count())->toBe(2);
 

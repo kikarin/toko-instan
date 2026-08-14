@@ -8,6 +8,7 @@ import {
     Mail,
     ShoppingBag,
 } from 'lucide-vue-next';
+import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,6 +23,9 @@ interface Props {
 defineProps<Props>();
 
 const { storeName } = useStoreName();
+
+const page = usePage();
+const isGuest = computed(() => !(page.props.auth as any)?.user);
 
 function navigate(url: string) {
     router.visit(url);
@@ -133,9 +137,44 @@ function navigate(url: string) {
                     </span>
                 </div>
 
+                <!-- Tracking Info -->
+                <div
+                    v-if="invoice.tracking_number"
+                    class="mt-2 flex flex-col gap-2 rounded-2xl border border-border bg-card p-4"
+                >
+                    <p class="text-xs font-bold text-muted-foreground">
+                        Nomor Resi Pengiriman
+                    </p>
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="font-mono text-base font-black text-foreground">
+                                {{ invoice.tracking_number }}
+                            </p>
+                            <p class="text-[10px] text-muted-foreground">
+                                {{ invoice.tracking_courier }} · Dikirim pada
+                                {{ invoice.shipped_at }}
+                            </p>
+                        </div>
+                        <a
+                            v-if="invoice.tracking_url"
+                            :href="invoice.tracking_url"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            <Button
+                                variant="outline"
+                                class="h-10 border-black/12 text-xs font-bold"
+                            >
+                                Lacak Paket
+                            </Button>
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Buttons -->
                 <div class="mt-2 flex flex-col items-center gap-3 sm:flex-row">
                     <Button
+                        v-if="!isGuest"
                         variant="default"
                         class="flex h-11 w-full items-center justify-center gap-2 bg-foreground text-xs font-bold text-accent shadow-md hover:bg-foreground/90"
                         @click="navigate('/' + (usePage().props.store as any)?.slug + '/orders')"

@@ -12,6 +12,8 @@ use App\Observers\ProductObserver;
 use App\Observers\StockMovementObserver;
 use App\Observers\StoreObserver;
 use App\Observers\WithdrawalObserver;
+use App\Services\Payments\Contracts\PaymentGateway;
+use App\Services\Payments\SimulatedPaymentGateway;
 use App\Services\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -29,6 +31,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(TenantContext::class, fn (): TenantContext => new TenantContext);
+
+        $this->app->singleton(PaymentGateway::class, function ($app) {
+            $gateway = config('payment.gateways.'.config('payment.default').'.driver', SimulatedPaymentGateway::class);
+
+            return $app->make($gateway);
+        });
     }
 
     /**

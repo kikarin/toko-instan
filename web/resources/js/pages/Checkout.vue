@@ -11,7 +11,7 @@ import {
     Loader2,
     CheckCircle2,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -72,6 +72,17 @@ if (props.addresses && props.addresses.length > 0) {
     // Default select first address if any
     const defaultAddress = props.addresses.find(a => a.is_default);
     selectedAddressId.value = defaultAddress ? defaultAddress.id : props.addresses[0].id;
+}
+
+// Guest mode: buyers without an account choose between ordering as a
+// guest or logging in first.
+const page = usePage();
+const storeSlug = computed(() => (page.props.store as any)?.slug ?? '');
+const isGuest = computed(() => !(page.props.auth as any)?.user);
+const guestMode = ref(false);
+
+function goLogin() {
+    router.visit(`/${storeSlug.value}/login`);
 }
 
 const { provinces, cities, districts, loadProvinces, loadCities, loadDistricts } = useIndoRegions();
@@ -147,11 +158,45 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                 </Button>
             </div>
 
-            <form
-                v-else
-                @submit.prevent="handleCheckoutSubmit"
-                class="flex flex-col gap-5 lg:grid lg:grid-cols-12 lg:gap-6"
-            >
+            <template v-else>
+                <!-- Guest gate: 2 choices before showing the form -->
+                <div
+                    v-if="isGuest && !guestMode"
+                    class="flex flex-col items-center justify-center rounded-3xl border border-border bg-card py-16 text-center"
+                >
+                    <ShoppingBag class="mb-3 h-12 w-12 stroke-1 text-border" />
+                    <p class="text-base font-bold text-foreground">
+                        Belanja Tanpa Login
+                    </p>
+                    <p class="mt-1 mb-6 max-w-sm text-xs text-muted-foreground">
+                        Kamu bisa langsung pesan tanpa membuat akun, atau login
+                        untuk menyimpan data & melacak pesanan di akunmu.
+                    </p>
+                    <div class="flex w-full max-w-xs flex-col gap-3 sm:flex-row sm:max-w-md">
+                        <Button
+                            size="lg"
+                            class="flex-1 bg-brand font-bold text-brand-foreground hover:opacity-90 border-0"
+                            @click="guestMode = true"
+                        >
+                            Langsung Pesan
+                            <ArrowRight class="ml-2 h-4 w-4" />
+                        </Button>
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            class="flex-1 font-bold"
+                            @click="goLogin"
+                        >
+                            Login Dulu
+                        </Button>
+                    </div>
+                </div>
+
+                <form
+                    v-else
+                    @submit.prevent="handleCheckoutSubmit"
+                    class="flex flex-col gap-5 lg:grid lg:grid-cols-12 lg:gap-6"
+                >
                 <!-- Left Form Column — appears second on mobile -->
                 <div
                     class="order-2 flex flex-col gap-5 lg:order-1 lg:col-span-7"
@@ -550,6 +595,7 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                     </Card>
                 </div>
             </form>
+        </template>
         </main>
     </StorefrontLayout>
 </template>

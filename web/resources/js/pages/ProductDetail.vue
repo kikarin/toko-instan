@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/composables/useCart';
 import { toast } from '@/components/ui/sonner';
-import { useActiveUser } from '@/composables/useActiveUser';
 
 interface Props {
     store: any;
@@ -31,8 +30,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
-const activeUser = useActiveUser();
 
 const qty = ref(1);
 const isLiked = ref(false);
@@ -52,13 +49,6 @@ function formatSold(n: number): string {
 }
 
 function handleAddToCart() {
-    if (!activeUser.value) {
-        toast.error('Silakan login untuk menambahkan ke keranjang');
-        const store = usePage().props.store as any;
-        router.visit(store?.slug ? `/${store.slug}/login` : '/login');
-        return;
-    }
-
     const rawPrice =
         selectedVariant.value?.priceNum ||
         props.product.priceNum ||

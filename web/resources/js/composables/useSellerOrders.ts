@@ -144,10 +144,19 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
         currentPage.value = 1;
     });
 
-    function updateOrderStatus(orderId: number, newStatus: string) {
+    function updateOrderStatus(
+        orderId: number,
+        newStatus: string,
+        trackingNumber?: string | null,
+        trackingCourier?: string | null,
+    ) {
         router.patch(
             `/orders/${orderId}/status`,
-            { status: newStatus },
+            {
+                status: newStatus,
+                tracking_number: trackingNumber,
+                tracking_courier: trackingCourier,
+            },
             {
                 preserveScroll: true,
                 onSuccess: () => {

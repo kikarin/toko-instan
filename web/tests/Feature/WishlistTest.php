@@ -8,8 +8,8 @@ use function Pest\Laravel\actingAs;
 
 function wishlistContext(): array
 {
-    $buyer = User::factory()->create(['role' => 'buyer']);
     $store = Store::factory()->create();
+    $buyer = User::factory()->create(['role' => 'buyer', 'store_id' => $store->id]);
     $product = Product::factory()->create(['store_id' => $store->id]);
 
     return compact('buyer', 'store', 'product');

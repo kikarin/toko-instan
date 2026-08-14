@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DTO\CreateOrderDTO;
 use App\Services\AddressService;
 use App\Services\OrderService;
+use App\Services\Payments\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,7 +15,8 @@ class CheckoutController extends Controller
 {
     public function __construct(
         protected OrderService $orderService,
-        protected AddressService $addressService
+        protected AddressService $addressService,
+        protected PaymentService $paymentService
     ) {}
 
     public function show(string $storeSlug, Request $request): Response
@@ -39,7 +41,7 @@ class CheckoutController extends Controller
             return back()->withErrors(['items' => $e->getMessage()]);
         }
 
-        return redirect()->route('orders.success', ['store_slug' => $storeSlug, 'orderNumber' => $order->order_number]);
+        return redirect($this->paymentService->initiate($order));
     }
 
     public function success(string $storeSlug, string $orderNumber): Response

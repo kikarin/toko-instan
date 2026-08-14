@@ -13,6 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
@@ -72,7 +73,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
 $reservedStoreSlugs = 'admin|login|register|dashboard|horizon|uploads|products|inventory|wallet|catalog|customers|profile|forgot-password|reset-password|auth|up';
 
-Route::middleware(['auth', 'role:buyer'])->prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$).+"])->group(function () {
+Route::middleware(['auth', 'role:buyer', 'store.access'])->prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
@@ -83,12 +84,21 @@ Route::middleware(['auth', 'role:buyer'])->prefix('{store_slug}')->where(['store
     Route::put('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
     Route::patch('/addresses/{id}/default', [AddressController::class, 'makeDefault'])->name('addresses.default');
-    Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
-    Route::post('/checkout', [CheckoutController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{orderNumber}/success', [CheckoutController::class, 'success'])->name('orders.success');
     Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
 });
+
+// Public checkout — guests can buy without logging in. Logged-in users are
+// restricted to their own store (guests roam freely).
+Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->middleware('store.access')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
+    Route::post('/checkout', [CheckoutController::class, 'store']);
+    Route::get('/orders/{orderNumber}/success', [CheckoutController::class, 'success'])->name('orders.success');
+});
+
+// Payment (public — order number acts as the access key)
+Route::get('/pay/{orderNumber}', [PaymentController::class, 'pay'])->name('payment.simulate');
+Route::post('/pay/{orderNumber}/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
 
 Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('seller.orders.index');
@@ -129,10 +139,13 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store');
 });
 
-// Public Storefront (Fallback routes)
+// Public Storefront (Fallback routes) — guests roam freely, logged-in users
+// are locked to their own store.
 Route::get('/{store_slug}', [StorePageController::class, 'show'])
-    ->where('store_slug', "^(?!($reservedStoreSlugs)$).+")
+    ->where('store_slug', "^(?!($reservedStoreSlugs)$)[^/]+")
+    ->middleware('store.access')
     ->name('store.show');
 Route::get('/{store_slug}/p/{product_slug}', [StorePageController::class, 'product'])
-    ->where('store_slug', "^(?!($reservedStoreSlugs)$).+")
+    ->where('store_slug', "^(?!($reservedStoreSlugs)$)[^/]+")
+    ->middleware('store.access')
     ->name('store.product.show');

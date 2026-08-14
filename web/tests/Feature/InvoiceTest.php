@@ -19,11 +19,13 @@ function invoiceContext(): array
         'role' => 'buyer',
         'email' => 'invoice-buyer@example.com',
         'name' => 'Budi Invoice',
+        'store_id' => $store->id,
     ]);
 
     $otherBuyer = User::factory()->create([
         'role' => 'buyer',
         'email' => 'orang-lain@example.com',
+        'store_id' => $store->id,
     ]);
 
     $product = Product::factory()->create([

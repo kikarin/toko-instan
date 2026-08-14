@@ -13,6 +13,9 @@ export interface BuyerOrder {
     store_name: string;
     items: BuyerOrderItem[];
     created_at: string | null;
+    tracking_number?: string | null;
+    tracking_courier?: string | null;
+    tracking_url?: string | null;
 }
 
 export interface SellerOrderItem {
@@ -39,6 +42,7 @@ export interface SellerOrder {
     items?: SellerOrderItem[];
     notes?: string;
     tracking_number?: string;
+    tracking_courier?: string;
 }
 
 export interface OrderInvoice {
@@ -48,7 +52,13 @@ export interface OrderInvoice {
     customer_email: string;
     customer_phone?: string | null;
     shipping_address?: string | null;
+    shipping_courier?: string | null;
+    payment_method?: string | null;
     notes?: string | null;
+    tracking_number?: string | null;
+    tracking_courier?: string | null;
+    tracking_url?: string | null;
+    shipped_at?: string | null;
     subtotal: number;
     subtotal_formatted: string;
     shipping_fee: number;
