@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
 import {
     Star,
     ShoppingCart,
@@ -14,7 +15,6 @@ import {
     Share2,
 } from 'lucide-vue-next';
 import { ref, watch, computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -70,7 +70,9 @@ watch(
 );
 
 const selectedVariant = computed(() => {
-    if (!props.product?.variants?.length || !props.product?.variant_options?.length) return null;
+    if (!props.product?.variants?.length || !props.product?.variant_options?.length) {
+return null;
+}
     
     const expectedName = props.product.variant_options
         .map((opt: any) => selectedOptions.value[opt.name] || '')
@@ -84,6 +86,7 @@ const displayImg = computed(() => {
     if (selectedVariant.value && selectedVariant.value.img) {
         return selectedVariant.value.img;
     }
+
     return props.product?.img;
 });
 
@@ -91,6 +94,7 @@ const displayPrice = computed(() => {
     if (selectedVariant.value && selectedVariant.value.price) {
         return selectedVariant.value.price;
     }
+
     return props.product?.price;
 });
 

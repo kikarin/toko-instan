@@ -46,7 +46,7 @@ test('platform register creates seller with custom slug', function () {
         'password' => 'secret12',
         'store_name' => 'Batik Indah',
         'store_slug' => 'batik-indah',
-    ])->assertRedirect('/dashboard');
+    ])->assertRedirect('/email/verify');
 
     $this->assertAuthenticated();
     expect(auth()->user()->role)->toBe('seller');

@@ -54,9 +54,18 @@ class OrderRepository
         return Order::where('customer_email', $email)->where('status', $status)->count();
     }
 
-    public function createOrder(CreateOrderDTO $dto, string $orderNumber, float $totalAmount): Order
-    {
-        return DB::transaction(function () use ($dto, $orderNumber, $totalAmount) {
+    public function createOrder(
+        CreateOrderDTO $dto,
+        string $orderNumber,
+        float $totalAmount,
+        float $shippingFee = 0,
+        ?string $shippingService = null,
+        int $discount = 0,
+        int $tax = 0,
+        ?int $voucherId = null,
+        ?string $voucherCode = null,
+    ): Order {
+        return DB::transaction(function () use ($dto, $orderNumber, $totalAmount, $shippingFee, $shippingService, $discount, $tax, $voucherId, $voucherCode) {
             $storeId = $this->resolveStoreId($dto);
             $tenantId = Store::query()->whereKey($storeId)->value('tenant_id');
 
@@ -68,7 +77,15 @@ class OrderRepository
                 'customer_phone' => $dto->customerPhone,
                 'shipping_address' => $dto->shippingAddress,
                 'total_amount' => $totalAmount,
+                'shipping_cost' => (int) $shippingFee,
+                'discount' => $discount,
+                'tax' => $tax,
+                'voucher_id' => $voucherId,
+                'voucher_code' => $voucherCode,
                 'status' => 'pending',
+                'payment_method' => $dto->paymentMethod,
+                'shipping_courier' => $dto->shippingCourier,
+                'shipping_service' => $shippingService,
                 'notes' => $dto->notes,
             ]);
 
@@ -115,6 +132,9 @@ class OrderRepository
             'product_variant_id' => $variant?->id,
             'name' => $name,
             'sku' => $sku,
+            'product_type' => $product->type ?? 'physical',
+            'digital_file_path' => $product->isDigital() ? $product->digital_file_path : null,
+            'digital_file_name' => $product->isDigital() ? $product->digital_file_name : null,
             'price' => $price,
             'qty' => $qty,
             'total' => $price * $qty,
@@ -163,7 +183,7 @@ class OrderRepository
      */
     public function getByBuyerEmail(string $email)
     {
-        return Order::with(['store', 'items'])
+        return Order::with(['store', 'items.product', 'items.review'])
             ->where('customer_email', $email)
             ->orderByDesc('created_at')
             ->get();
@@ -174,7 +194,7 @@ class OrderRepository
      */
     public function getSellerOrders(int $storeId)
     {
-        return Order::with(['store', 'items'])
+        return Order::with(['store', 'items', 'payments'])
             ->where('store_id', $storeId)
             ->orderByDesc('created_at')
             ->get();

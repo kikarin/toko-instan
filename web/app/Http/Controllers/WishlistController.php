@@ -24,12 +24,6 @@ class WishlistController extends Controller
 
     public function toggle(string $storeSlug, Request $request, int $productId): JsonResponse
     {
-        \Log::info('Wishlist Toggle Hit!', [
-            'storeSlug' => $storeSlug,
-            'productId' => $productId,
-            'user' => $request->user()?->email,
-        ]);
-
         $added = $this->wishlistService->toggle($request->user(), $productId);
 
         return response()->json([

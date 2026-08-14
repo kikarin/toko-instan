@@ -41,7 +41,22 @@ class ImageVariantService
             throw new RuntimeException('Gagal membaca file original dari R2.');
         }
 
-        $directory = trim(dirname($originalPath), '.');
+        return $this->generateFromBinary($binary, dirname($originalPath));
+    }
+
+    /**
+     * Generate variants from local bytes so the HTTP request does not round-trip R2.
+     *
+     * @return array{thumbnail: string, medium: string, large: string, paths: array{thumbnail: string, medium: string, large: string}}
+     */
+    public function generateFromBinary(string $binary, string $directory): array
+    {
+        if ($binary === '') {
+            throw new RuntimeException('Gagal membaca file original.');
+        }
+
+        $disk = Storage::disk('r2');
+        $directory = trim($directory, '.');
         $uuid = (string) Str::uuid();
 
         $urls = [];

@@ -3,6 +3,8 @@
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyTenant;
+use App\Http\Middleware\RecordStoreVisit;
+use App\Http\Middleware\SetCrossOriginOpenerPolicy;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,19 +20,30 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withBroadcasting(
+        __DIR__.'/../routes/channels.php',
+        ['middleware' => ['web', 'auth']],
+    )
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
+        $schedule->command('subscriptions:process')->daily();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             IdentifyTenant::class,
+            SetCrossOriginOpenerPolicy::class,
         ]);
 
         $middleware->alias([
             'role' => CheckRole::class,
             'tenant' => IdentifyTenant::class,
+            'store.visit' => RecordStoreVisit::class,
+        ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/midtrans',
         ]);
 
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->homePath() ?? '/dashboard');

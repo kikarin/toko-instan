@@ -22,9 +22,9 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { useStoreSettings } from '@/composables/useStoreSettings';
 import { useStoreTheme } from '@/composables/useStoreTheme';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { StoreData } from '@/types/store';
 
 interface Props {
@@ -703,6 +703,28 @@ useStoreTheme();
                             placeholder="Jl. Jendral Sudirman No. 42, Jakarta Selatan..."
                             class="text-xs"
                         />
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="flex flex-col gap-1.5">
+                            <Label class="text-xs font-bold text-[#1c1c22]"
+                                >Kota Asal Pengiriman</Label
+                            >
+                            <Input
+                                v-model="form.origin_city"
+                                placeholder="Jakarta Selatan"
+                                class="h-10 text-xs"
+                            />
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <Label class="text-xs font-bold text-[#1c1c22]"
+                                >Kode Pos Asal</Label
+                            >
+                            <Input
+                                v-model="form.origin_postal_code"
+                                placeholder="12190"
+                                class="h-10 text-xs"
+                            />
+                        </div>
                     </div>
                 </CardContent>
             </Card>

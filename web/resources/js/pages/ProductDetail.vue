@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import {
     Star,
     ShoppingCart,
@@ -19,15 +19,17 @@ import { ref, computed, watch } from 'vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useCart } from '@/composables/useCart';
 import { toast } from '@/components/ui/sonner';
 import { useActiveUser } from '@/composables/useActiveUser';
+import { useCart } from '@/composables/useCart';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import SeoHead, { type SeoMeta } from '@/components/SeoHead.vue';
 
 interface Props {
     store: any;
     theme: any;
     product: any;
+    seo?: SeoMeta | null;
 }
 
 const props = defineProps<Props>();
@@ -41,13 +43,18 @@ const activeTab = ref<'detail' | 'ulasan'>('detail');
 const { addItem } = useCart();
 
 function formatSold(n: number): string {
-    if (!n) return '0';
+    if (!n) {
+return '0';
+}
+
     if (n >= 1_000_000) {
         return `${(n / 1_000_000).toFixed(1)}jt+`;
     }
+
     if (n >= 1_000) {
         return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}rb+`;
     }
+
     return String(n);
 }
 
@@ -56,6 +63,7 @@ function handleAddToCart() {
         toast.error('Silakan login untuk menambahkan ke keranjang');
         const store = usePage().props.store as any;
         router.visit(store?.slug ? `/${store.slug}/login` : '/login');
+
         return;
     }
 
@@ -105,7 +113,9 @@ watch(
 );
 
 const selectedVariant = computed(() => {
-    if (!props.product.variants?.length || !props.product.variant_options?.length) return null;
+    if (!props.product.variants?.length || !props.product.variant_options?.length) {
+return null;
+}
     
     const expectedName = props.product.variant_options
         .map((opt: any) => selectedOptions.value[opt.name] || '')
@@ -119,6 +129,7 @@ const displayImg = computed(() => {
     if (selectedVariant.value && selectedVariant.value.img) {
         return selectedVariant.value.img;
     }
+
     return props.product.img;
 });
 
@@ -126,16 +137,44 @@ const displayPrice = computed(() => {
     if (selectedVariant.value && selectedVariant.value.price) {
         return selectedVariant.value.price;
     }
+
     return props.product.price;
 });
 
-const mockReviews: any[] = [];
+const reviews = computed(() => props.product.reviews ?? []);
 const ratingBreakdown: any[] = [];
+const reviewRating = ref(5);
+const reviewBody = ref('');
+const reviewPhoto = ref<File | null>(null);
+
+function onReviewPhoto(e: Event) {
+    const input = e.target as HTMLInputElement;
+    reviewPhoto.value = input.files?.[0] ?? null;
+}
+    const slug = (usePage().props.store as { slug?: string })?.slug ?? props.store.slug;
+    const data = new FormData();
+    data.append('rating', String(reviewRating.value));
+    data.append('body', reviewBody.value);
+    if (props.product.eligible_order_item_id) {
+        data.append('order_item_id', String(props.product.eligible_order_item_id));
+    }
+    if (reviewPhoto.value) {
+        data.append('photo', reviewPhoto.value);
+    }
+    router.post(`/${slug}/p/${props.product.slug}/reviews`, data, {
+        forceFormData: true,
+        onSuccess: () => toast.success('Ulasan terkirim'),
+        onError: (errors) => {
+            const first = Object.values(errors)[0];
+            toast.error(typeof first === 'string' ? first : 'Gagal kirim ulasan');
+        },
+    });
+}
 
 </script>
 
 <template>
-    <Head :title="`${product.name} - ${store.name}`" />
+    <SeoHead :seo="seo" :fallback-title="`${product.name} - ${store.name}`" />
 
     <StorefrontLayout>
         <main class="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-3 pt-4 pb-28 sm:gap-6 sm:p-6 lg:flex-row lg:items-start">
@@ -268,7 +307,7 @@ const ratingBreakdown: any[] = [];
                         <span>{{ formatSold(product.sold) }} terjual</span>
                         <span class="text-muted-foreground/30">|</span>
                         <button @click="activeTab = 'ulasan'" class="text-brand hover:underline cursor-pointer">
-                            {{ mockReviews.length }} ulasan
+                            {{ reviews.length }} ulasan
                         </button>
                     </div>
 
@@ -354,7 +393,7 @@ const ratingBreakdown: any[] = [];
                         "
                     >
                         {{ tab === 'detail' ? 'Deskripsi' : 'Ulasan' }}
-                        <span v-if="tab === 'ulasan'" class="ml-1 text-sm font-bold text-muted-foreground">({{ mockReviews.length }})</span>
+                        <span v-if="tab === 'ulasan'" class="ml-1 text-sm font-bold text-muted-foreground">({{ reviews.length }})</span>
                     </button>
                 </div>
 
@@ -392,8 +431,27 @@ const ratingBreakdown: any[] = [];
                             </div>
                         </div>
                     </div>
-                    <div v-else>
-                        <div v-if="!mockReviews.length" class="flex flex-col items-center gap-3 py-12 text-center">
+                    <div v-else class="flex flex-col gap-6">
+                        <form
+                            v-if="product.can_review"
+                            class="flex flex-col gap-3 rounded-2xl border p-4"
+                            @submit.prevent="submitReview"
+                        >
+                            <p class="text-sm font-bold">Tulis ulasan</p>
+                            <select v-model.number="reviewRating" class="h-10 rounded-md border bg-background px-2 text-sm">
+                                <option v-for="n in 5" :key="n" :value="n">{{ n }} bintang</option>
+                            </select>
+                            <textarea v-model="reviewBody" rows="3" class="rounded-md border p-2 text-sm" placeholder="Bagaimana produknya?" />
+                            <input type="file" accept="image/*" class="text-xs" @change="onReviewPhoto" />
+                            <Button type="submit" class="w-fit">Kirim ulasan</Button>
+                        </form>
+                        <div v-for="r in reviews" :key="r.id" class="rounded-2xl border p-4">
+                            <p class="text-sm font-bold">{{ r.author }} · {{ r.rating }}/5</p>
+                            <p class="text-xs text-muted-foreground">{{ r.created_at }}</p>
+                            <p class="mt-2 text-sm">{{ r.body }}</p>
+                            <img v-if="r.photo_url" :src="r.photo_url" alt="" class="mt-2 max-h-40 rounded-xl object-cover" />
+                        </div>
+                        <div v-if="!reviews.length" class="flex flex-col items-center gap-3 py-12 text-center">
                             <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
                                 <Star class="h-8 w-8 stroke-muted-foreground/30" />
                             </div>

@@ -7,6 +7,7 @@ namespace App\Enums;
  */
 enum WalletTransactionType: string
 {
+    case OrderDirect = 'order_direct';
     case OrderEscrow = 'order_escrow';
     case OrderReleasePending = 'order_release_pending';
     case OrderReleaseAvailable = 'order_release_available';

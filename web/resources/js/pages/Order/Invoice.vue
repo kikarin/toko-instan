@@ -17,8 +17,12 @@ const { storeName } = useStoreName();
 
 const userRole = computed(() => (page.props.auth as any)?.user?.role ?? 'buyer');
 const backUrl = computed(() => {
-    if (userRole.value === 'seller') return '/orders';
+    if (userRole.value === 'seller') {
+return '/orders';
+}
+
     const storeSlug = (page.props.store as any)?.slug ?? '';
+
     return `/${storeSlug}/orders`;
 });
 
@@ -248,6 +252,20 @@ function printInvoice() {
                                     ? invoice.shipping_fee_formatted
                                     : 'Gratis'
                             }}</span>
+                        </div>
+                        <div
+                            v-if="invoice.discount"
+                            class="flex items-center justify-between text-[#4a4a57]"
+                        >
+                            <span>Diskon {{ invoice.voucher_code ? `(${invoice.voucher_code})` : '' }}</span>
+                            <span class="font-mono font-semibold">-{{ invoice.discount_formatted }}</span>
+                        </div>
+                        <div
+                            v-if="invoice.tax"
+                            class="flex items-center justify-between text-[#4a4a57]"
+                        >
+                            <span>PPN</span>
+                            <span class="font-mono font-semibold">{{ invoice.tax_formatted }}</span>
                         </div>
                         <div
                             class="mt-2 flex items-center justify-between rounded-xl bg-card p-3.5 text-card-foreground"

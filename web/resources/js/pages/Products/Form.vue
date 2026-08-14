@@ -17,6 +17,8 @@ import {
     X,
     Layers,
 } from 'lucide-vue-next';
+import { computed } from 'vue';
+import ProductCard from '@/components/marketplace/ProductCard.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -31,11 +33,9 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { useProductForm } from '@/composables/useProductForm';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { Product, MarketplaceProduct } from '@/types/product';
-import ProductCard from '@/components/marketplace/ProductCard.vue';
-import { computed } from 'vue';
 
 interface Props {
     product?: Product;
@@ -62,11 +62,17 @@ const {
     description,
     sku,
     weightGram,
+    productType,
+    digitalFilePath,
+    digitalFileName,
     isLoading,
+    uploadingDigital,
     errors,
     fileInput,
+    digitalFileInput,
     formattedPricePreview,
     uploadImage,
+    uploadDigitalFile,
     back,
     submit,
     variantOptions,
@@ -95,6 +101,7 @@ function addVariantOption() {
     if (variantOptions.value.length >= 2) {
         return; // Max 2 options
     }
+
     variantOptions.value.push({ name: '', values: [] });
 }
 
@@ -105,6 +112,7 @@ function removeVariantOption(index: number) {
 
 function addOptionValue(index: number) {
     const val = variantOptions.value[index].inputValue?.trim();
+
     if (val && !variantOptions.value[index].values.includes(val)) {
         variantOptions.value[index].values.push(val);
         variantOptions.value[index].inputValue = '';
@@ -239,6 +247,89 @@ function removeOptionValue(optionIndex: number, valueIndex: number) {
                                     class="text-[11px] font-semibold text-destructive"
                                 >
                                     {{ errors.name }}
+                                </p>
+                            </div>
+
+                            <!-- Tipe Produk -->
+                            <div class="flex flex-col gap-1.5">
+                                <Label class="text-xs font-bold text-foreground">
+                                    Tipe Produk *
+                                </Label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        class="rounded-xl border px-3 py-3 text-left text-xs font-bold transition-colors"
+                                        :class="
+                                            productType === 'physical'
+                                                ? 'border-primary bg-primary/10 text-primary'
+                                                : 'border-border text-muted-foreground hover:bg-muted/40'
+                                        "
+                                        @click="productType = 'physical'"
+                                    >
+                                        Fisik (dikirim)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="rounded-xl border px-3 py-3 text-left text-xs font-bold transition-colors"
+                                        :class="
+                                            productType === 'digital'
+                                                ? 'border-primary bg-primary/10 text-primary'
+                                                : 'border-border text-muted-foreground hover:bg-muted/40'
+                                        "
+                                        @click="productType = 'digital'"
+                                    >
+                                        Digital (unduh)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="productType === 'digital'"
+                                class="flex flex-col gap-2 rounded-xl border border-dashed border-border bg-muted/20 p-4"
+                            >
+                                <Label class="text-xs font-bold text-foreground">
+                                    File Digital *
+                                </Label>
+                                <input
+                                    ref="digitalFileInput"
+                                    type="file"
+                                    class="hidden"
+                                    accept=".pdf,.zip,.rar,.7z,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp3,.mp4,.epub,.png,.jpg,.jpeg,.webp"
+                                    @change="uploadDigitalFile"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    class="h-10 w-fit rounded-xl text-xs font-bold"
+                                    :disabled="uploadingDigital"
+                                    @click="digitalFileInput?.click()"
+                                >
+                                    <Loader2
+                                        v-if="uploadingDigital"
+                                        class="mr-2 h-4 w-4 animate-spin"
+                                    />
+                                    <UploadCloud v-else class="mr-2 h-4 w-4" />
+                                    {{
+                                        digitalFilePath
+                                            ? 'Ganti File'
+                                            : 'Upload File ke CDN'
+                                    }}
+                                </Button>
+                                <p class="text-[10px] text-muted-foreground">
+                                    PDF, ZIP, dokumen, audio/video, atau gambar · max 50MB
+                                </p>
+                                <p
+                                    v-if="digitalFileName"
+                                    class="truncate text-[11px] font-medium text-foreground"
+                                >
+                                    {{ digitalFileName }}
+                                </p>
+                                <p
+                                    v-if="errors.digital_file_path"
+                                    class="text-[11px] font-semibold text-destructive"
+                                >
+                                    {{ errors.digital_file_path }}
                                 </p>
                             </div>
 

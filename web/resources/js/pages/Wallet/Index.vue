@@ -12,13 +12,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/AppLayout.vue';
 import {
     TRANSACTION_TYPE_LABEL as typeLabel,
     useWalletWithdraw,
     WITHDRAW_STATUS_LABEL as statusLabel,
     WITHDRAW_STATUS_VARIANT as statusVariant,
 } from '@/composables/useWalletWithdraw';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { WalletSummary } from '@/types/wallet';
 import type { Withdrawal } from '@/types/wallet';
 import type { WalletTransaction } from '@/types/wallet';
@@ -28,9 +28,15 @@ interface Props {
     wallet?: WalletSummary | null;
     withdrawals?: PagedList<Withdrawal> | null;
     transactions?: PagedList<WalletTransaction> | null;
+    plan?: {
+        plan_name: string;
+        is_premium: boolean;
+        withdraw_fee: number;
+        settlement_mode: string;
+    } | null;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const { form, submitting, submitWithdraw, goPage, goWithdrawPage } =
     useWalletWithdraw();
@@ -91,7 +97,7 @@ const { form, submitting, submitWithdraw, goPage, goWithdrawPage } =
                                 id="amount"
                                 v-model="form.amount"
                                 type="number"
-                                min="6000"
+                                :min="props.plan?.is_premium ? 1 : 6000"
                                 step="1000"
                                 placeholder="100000"
                                 required
@@ -126,8 +132,11 @@ const { form, submitting, submitWithdraw, goPage, goWithdrawPage } =
                         </div>
                     </div>
                     <p class="text-[10px] text-[#9090a0]">
-                        Biaya penarikan Rp5.000 (plan Free) dipotong dari
-                        jumlah.
+                        {{
+                            props.plan?.is_premium
+                                ? 'Premium: tanpa biaya penarikan. Dana order masuk saldo tersedia.'
+                                : 'Biaya penarikan Rp5.000 (plan Free) dipotong dari jumlah.'
+                        }}
                     </p>
                     <div>
                         <Button type="submit" :disabled="submitting">

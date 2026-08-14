@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\PaymentGateway;
+use App\Gateways\MidtransGateway;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\StockMovement;
@@ -29,6 +31,13 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(TenantContext::class, fn (): TenantContext => new TenantContext);
+
+        // Config-driven default gateway (online methods still pick Midtrans via PaymentService).
+        $this->app->bind(PaymentGateway::class, function ($app) {
+            return match (config('services.payment.default', 'midtrans')) {
+                default => $app->make(MidtransGateway::class),
+            };
+        });
     }
 
     /**

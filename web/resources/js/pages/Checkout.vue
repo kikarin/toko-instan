@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import {
     User,
     MapPin,
@@ -12,20 +13,19 @@ import {
     CheckCircle2,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { watch, onMounted } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/composables/useCart';
 import { useCheckout } from '@/composables/useCheckout';
-import { useStoreName } from '@/composables/useStoreName';
-import { Link } from '@inertiajs/vue3';
-import { watch, onMounted } from 'vue';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useIndoRegions } from '@/composables/useIndoRegions';
+import { useStoreName } from '@/composables/useStoreName';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 
 const props = defineProps<{
     addresses?: any[];
@@ -57,13 +57,24 @@ const {
     selectedCourier,
     selectedPayment,
     isLoading,
+    isLoadingRates,
     couriers,
     paymentMethods,
     subtotal,
     currentShippingFee,
+    discount,
+    tax,
+    ppnRate,
+    voucherCode,
+    appliedVoucher,
+    isApplyingVoucher,
+    applyVoucher,
+    clearVoucher,
     grandTotal,
     fmtRp,
     handleCheckoutSubmit,
+    loadShippingRates,
+    setManualCity,
 } = useCheckout(cartItemsRef);
 
 if (props.addresses && props.addresses.length > 0) {
@@ -82,6 +93,7 @@ onMounted(() => {
 
 watch([() => manualProvince.value, provinces], ([newProvName, provs], [oldProvName]) => {
     const prov = provs.find(p => p.name === newProvName);
+
     if (prov) {
         loadCities(prov.id);
     } else {
@@ -96,6 +108,7 @@ watch([() => manualProvince.value, provinces], ([newProvName, provs], [oldProvNa
 
 watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => {
     const city = cits.find(c => c.name === newCityName);
+
     if (city) {
         loadDistricts(city.id);
     } else {
@@ -268,7 +281,12 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div class="flex flex-col gap-1.5">
                                         <Label for="c-city" class="text-xs font-bold text-foreground">Kota/Kabupaten *</Label>
-                                        <Select v-model="manualCity" required :disabled="!manualProvince">
+                                        <Select
+                                            :model-value="manualCity"
+                                            required
+                                            :disabled="!manualProvince"
+                                            @update:model-value="(v) => setManualCity(String(v ?? ''))"
+                                        >
                                             <SelectTrigger id="c-city" class="bg-card">
                                                 <SelectValue placeholder="Pilih Kota/Kabupaten" />
                                             </SelectTrigger>
@@ -341,13 +359,43 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                             </CardTitle>
                         </CardHeader>
                         <CardContent class="flex flex-col gap-2.5 p-0">
+                            <p
+                                v-if="!manualCity && selectedAddressId === 'manual'"
+                                class="text-xs text-muted-foreground"
+                            >
+                                Pilih kota tujuan dulu untuk menghitung ongkir.
+                            </p>
+                            <p
+                                v-else-if="isLoadingRates"
+                                class="text-xs text-muted-foreground"
+                            >
+                                Menghitung ongkir...
+                            </p>
+                            <p
+                                v-else-if="couriers.length === 0"
+                                class="text-xs text-muted-foreground"
+                            >
+                                Ongkir belum muncul. Produk digital tidak perlu
+                                kurir. Untuk barang fisik, pastikan tipe produk
+                                di dashboard = Fisik, lalu klik tombol di bawah.
+                            </p>
+                            <Button
+                                v-if="couriers.length === 0 && (manualCity || selectedAddressId !== 'manual')"
+                                type="button"
+                                variant="outline"
+                                class="h-9 text-xs font-bold"
+                                :disabled="isLoadingRates"
+                                @click="loadShippingRates"
+                            >
+                                Coba hitung ongkir
+                            </Button>
                             <div
                                 v-for="c in couriers"
                                 :key="c.id"
-                                @click="selectedCourier = `${c.name} (${c.priceFmt})`"
+                                @click="selectedCourier = String(c.id)"
                                 class="flex cursor-pointer items-center justify-between rounded-2xl border p-3.5 transition-all"
                                 :class="[
-                                    selectedCourier.includes(c.name)
+                                    String(selectedCourier) === String(c.id)
                                         ? 'border-brand bg-brand-surface shadow-2xs'
                                         : 'border-border bg-card hover:border-border/60',
                                 ]"
@@ -356,13 +404,13 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                                     <div
                                         class="flex h-4 w-4 items-center justify-center rounded-full border-2"
                                         :class="
-                                            selectedCourier.includes(c.name)
+                                            String(selectedCourier) === String(c.id)
                                                 ? 'border-brand'
                                                 : 'border-border'
                                         "
                                     >
                                         <div
-                                            v-if="selectedCourier.includes(c.name)"
+                                            v-if="String(selectedCourier) === String(c.id)"
                                             class="h-2 w-2 rounded-full bg-brand"
                                         />
                                     </div>
@@ -373,20 +421,57 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                                             {{ c.name }}
                                         </p>
                                         <p class="text-[10px] text-muted-foreground">
-                                            Estimasi {{ c.est }}
+                                            Estimasi {{ c.etd }} hari
                                         </p>
                                     </div>
                                 </div>
                                 <span
                                     class="font-mono text-xs font-bold text-brand"
                                 >
-                                    {{
-                                        subtotal >= 300000
-                                            ? 'GRATIS'
-                                            : c.priceFmt
-                                    }}
+                                    {{ c.cost_fmt }}
                                 </span>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card class="p-6">
+                        <CardHeader class="mb-4 p-0">
+                            <CardTitle class="text-base">Voucher</CardTitle>
+                        </CardHeader>
+                        <CardContent class="flex flex-col gap-2 p-0">
+                            <div class="flex gap-2">
+                                <Input
+                                    v-model="voucherCode"
+                                    placeholder="KODE PROMO"
+                                    class="h-10 uppercase"
+                                    :disabled="!!appliedVoucher"
+                                />
+                                <Button
+                                    v-if="!appliedVoucher"
+                                    type="button"
+                                    variant="outline"
+                                    class="h-10"
+                                    :disabled="isApplyingVoucher"
+                                    @click="applyVoucher"
+                                >
+                                    Pakai
+                                </Button>
+                                <Button
+                                    v-else
+                                    type="button"
+                                    variant="ghost"
+                                    class="h-10"
+                                    @click="clearVoucher"
+                                >
+                                    Hapus
+                                </Button>
+                            </div>
+                            <p
+                                v-if="appliedVoucher"
+                                class="text-xs text-brand"
+                            >
+                                {{ appliedVoucher.name }} (−{{ fmtRp(appliedVoucher.discount) }})
+                            </p>
                         </CardContent>
                     </Card>
 
@@ -501,6 +586,20 @@ watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => 
                                             : fmtRp(currentShippingFee)
                                     }}
                                 </span>
+                            </div>
+                            <div
+                                v-if="discount > 0"
+                                class="flex justify-between text-muted-foreground"
+                            >
+                                <span>Diskon voucher</span>
+                                <span class="font-mono font-semibold">-{{ fmtRp(discount) }}</span>
+                            </div>
+                            <div
+                                v-if="tax > 0"
+                                class="flex justify-between text-muted-foreground"
+                            >
+                                <span>PPN {{ ppnRate }}%</span>
+                                <span class="font-mono font-semibold">{{ fmtRp(tax) }}</span>
                             </div>
                             <div
                                 class="flex justify-between pt-1 font-medium text-[#22a15a]"

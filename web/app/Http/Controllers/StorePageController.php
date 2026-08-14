@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Repositories\ProductRepository;
 use App\Repositories\StoreRepository;
+use App\Services\ReviewService;
+use App\Services\SeoService;
 use App\Services\StoreCmsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,7 +17,9 @@ class StorePageController extends Controller
     public function __construct(
         protected StoreRepository $storeRepository,
         protected ProductRepository $productRepository,
-        protected StoreCmsService $cmsService
+        protected StoreCmsService $cmsService,
+        protected ReviewService $reviewService,
+        protected SeoService $seoService,
     ) {}
 
     public function show(Request $request, string $slug): Response|HttpResponse
@@ -34,28 +38,28 @@ class StorePageController extends Controller
 
         $products = $this->productRepository->getActiveStoreProducts($store->id, $category)
             ->map(function ($product) use ($store) {
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'slug' => $product->slug,
-                'price' => 'Rp '.number_format($product->price, 0, ',', '.'),
-                'priceNum' => (int) $product->price,
-                'sold' => $product->sold,
-                'rating' => (float) $product->rating,
-                'store' => $store->name,
-                'storeSlug' => $store->slug,
-                'img' => $product->img,
-                'tag' => $product->tag,
-                'cat' => $product->category,
-                'description' => $product->description,
-                'sku' => $product->sku,
-                'brand' => $product->brand,
-                'weightGram' => $product->weight_gram,
-                'stock' => $product->stock,
-                'variant_options' => $product->variant_options,
-                'variants' => $product->variants,
-            ];
-        })->toArray();
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'slug' => $product->slug,
+                    'price' => 'Rp '.number_format($product->price, 0, ',', '.'),
+                    'priceNum' => (int) $product->price,
+                    'sold' => $product->sold,
+                    'rating' => (float) $product->rating,
+                    'store' => $store->name,
+                    'storeSlug' => $store->slug,
+                    'img' => $product->img,
+                    'tag' => $product->tag,
+                    'cat' => $product->category,
+                    'description' => $product->description,
+                    'sku' => $product->sku,
+                    'brand' => $product->brand,
+                    'weightGram' => $product->weight_gram,
+                    'stock' => $product->stock,
+                    'variant_options' => $product->variant_options,
+                    'variants' => $product->variants,
+                ];
+            })->toArray();
 
         // Get distinct categories from this store's products
         $categories = ['Semua', ...$this->productRepository->getActiveStoreCategories($store->id)];
@@ -102,6 +106,7 @@ class StorePageController extends Controller
             'filters' => [
                 'category' => $category ?: 'Semua',
             ],
+            'seo' => $this->seoService->forStore($store),
         ]);
     }
 
@@ -157,7 +162,21 @@ class StorePageController extends Controller
                         'img' => $variant->img,
                     ];
                 })->toArray(),
+                'reviews' => $this->reviewService->forProduct($product)->map(fn ($review) => [
+                    'id' => $review->id,
+                    'rating' => $review->rating,
+                    'body' => $review->body,
+                    'photo_url' => $review->photo_url,
+                    'author' => $review->user?->name ?? 'Pembeli',
+                    'created_at' => $review->created_at?->format('d M Y'),
+                ])->values()->all(),
+                'can_review' => (bool) ($request->user()
+                    && $this->reviewService->eligibleItem($request->user(), $product)),
+                'eligible_order_item_id' => $request->user()
+                    ? $this->reviewService->eligibleItem($request->user(), $product)?->id
+                    : null,
             ],
+            'seo' => $this->seoService->forProduct($store, $product),
         ]);
     }
 

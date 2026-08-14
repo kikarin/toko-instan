@@ -11,6 +11,7 @@ use App\Models\Store;
 use App\Repositories\ProductRepository;
 use App\Repositories\StoreRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use LogicException;
 
 class ProductService
@@ -40,7 +41,7 @@ class ProductService
 
         if (! $store) {
             // Return an empty paginator manually if needed, but for now we can just return a LengthAwarePaginator
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
+            return new LengthAwarePaginator([], 0, $perPage);
         }
 
         return $this->productRepository->getForStorePaginated($store->id, $perPage);
@@ -214,6 +215,10 @@ class ProductService
             'sku' => $product->sku ?: ('NK-'.strtoupper(substr(md5((string) $product->id), 0, 6))),
             'brand' => $product->brand ?: 'Nike',
             'weight_gram' => $product->weight_gram ?: 500,
+            'type' => $product->type ?: 'physical',
+            'digital_file_path' => $product->digital_file_path,
+            'digital_file_name' => $product->digital_file_name,
+            'digital_file_mime' => $product->digital_file_mime,
             'variant_options' => $product->variant_options,
             'variants' => $product->variants,
         ];

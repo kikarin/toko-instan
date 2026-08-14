@@ -42,6 +42,7 @@ function invoiceContext(): array
         'customer_phone' => '081299887766',
         'shipping_address' => 'Jl. Invoice 12, Bandung',
         'total_amount' => 65000,
+        'shipping_cost' => 15000,
         'status' => 'paid',
         'notes' => 'Mohon dicek paketnya',
     ]);

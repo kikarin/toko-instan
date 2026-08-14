@@ -30,6 +30,7 @@ export function useStoreTheme(themeOverride?: ThemePayload | null) {
 
     watchEffect(() => {
         applyTheme(current.value);
+        applyThemeMeta(themeOverride ?? (page.props.theme as ThemePayload | undefined));
     });
 
     return { theme: current };
@@ -46,7 +47,9 @@ const FALLBACK: ThemeColors = {
 };
 
 function resolveTheme(theme?: ThemePayload | null): ThemeColors {
-    if (!theme?.colors) return FALLBACK;
+    if (!theme?.colors) {
+return FALLBACK;
+}
 
     return {
         primary:   theme.colors.primary   || FALLBACK.primary,
@@ -60,7 +63,9 @@ function resolveTheme(theme?: ThemePayload | null): ThemeColors {
 // Apply to :root
 // ---------------------------------------------------------------------------
 function applyTheme(colors: ThemeColors): void {
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined') {
+return;
+}
 
     const root = document.documentElement;
     const isDarkPrimary = contrastColor(colors.primary) === '#ffffff';
@@ -132,6 +137,22 @@ function applyTheme(colors: ThemeColors): void {
     root.style.setProperty('--brand-strong', colors.strong);
     root.style.setProperty('--brand-cta-foreground', contrastColor(colors.strong));
     root.style.setProperty('--brand-soft', hexToRgba(colors.primary, 0.12));
+    root.style.setProperty('--brand-surface', hexToRgba(colors.primary, 0.06));
+}
+
+function applyThemeMeta(theme?: ThemePayload | null): void {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    const root = document.documentElement;
+    const variant =
+        theme?.variant ||
+        (theme?.key === 'fashion' || theme?.key === 'food' ? theme.key : 'modern');
+    root.dataset.themeVariant = variant;
+
+    const font = theme?.font || 'Outfit';
+    root.style.setProperty('--font-sans', `'${font}', 'Outfit', ui-sans-serif, system-ui, sans-serif`);
 }
 
 // ---------------------------------------------------------------------------
@@ -141,11 +162,15 @@ function applyTheme(colors: ThemeColors): void {
 /** Returns white or dark foreground based on perceived luminance of `hex`. */
 function contrastColor(hex: string): string {
     const rgb = hexToRgbTuple(hex);
-    if (!rgb) return '#ffffff';
+
+    if (!rgb) {
+return '#ffffff';
+}
 
     // sRGB luminance (WCAG formula)
     const [r, g, b] = rgb.map((c) => {
         const n = c / 255;
+
         return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
     });
 
@@ -157,7 +182,11 @@ function contrastColor(hex: string): string {
 
 function hexToRgba(hex: string, alpha: number): string {
     const rgb = hexToRgbTuple(hex);
-    if (!rgb) return `rgba(0,0,0,${alpha})`;
+
+    if (!rgb) {
+return `rgba(0,0,0,${alpha})`;
+}
+
     return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
 }
 
@@ -165,25 +194,39 @@ function hexToRgbTuple(hex: string): [number, number, number] | null {
     // If already rgba/rgb, try to parse
     if (hex.startsWith('rgb')) {
         const match = hex.match(/\d+/g);
+
         if (match && match.length >= 3) {
             return [parseInt(match[0]), parseInt(match[1]), parseInt(match[2])];
         }
     }
+
     const clean = hex.replace('#', '');
+
     if (clean.length === 3) {
         const r = parseInt(clean[0] + clean[0], 16);
         const g = parseInt(clean[1] + clean[1], 16);
         const b = parseInt(clean[2] + clean[2], 16);
+
         return [r, g, b];
     }
-    if (clean.length !== 6 && clean.length !== 8) return null;
+
+    if (clean.length !== 6 && clean.length !== 8) {
+return null;
+}
+
     const n = parseInt(clean.substring(0,6), 16);
+
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
 function darken(hex: string, factor: number): string {
     const rgb = hexToRgbTuple(hex);
-    if (!rgb) return '#18181c';
+
+    if (!rgb) {
+return '#18181c';
+}
+
     const [r, g, b] = rgb.map((c) => Math.max(0, Math.round(c * factor)));
+
     return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 }

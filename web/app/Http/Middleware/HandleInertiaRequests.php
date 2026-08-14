@@ -50,6 +50,12 @@ class HandleInertiaRequests extends Middleware
             ],
             'theme' => $this->activeTheme($request),
             'store' => $this->activeStore($request),
+            'csrf_token' => csrf_token(),
+            'notifications' => $request->user() && $request->user()->role === 'seller'
+                ? [
+                    'unread' => $request->user()->unreadNotifications()->count(),
+                ]
+                : null,
         ];
     }
 
@@ -71,6 +77,8 @@ class HandleInertiaRequests extends Middleware
         return [
             'key' => $theme['key'],
             'colors' => $theme['colors'],
+            'font' => $theme['font'],
+            'variant' => $theme['variant'] ?? 'modern',
         ];
     }
 
@@ -108,6 +116,8 @@ class HandleInertiaRequests extends Middleware
             'address' => $store->address,
             'instagram' => $store->instagram,
             'tiktok' => $store->tiktok,
+            'is_pkp' => (bool) $store->is_pkp,
+            'ppn_rate' => (float) config('tax.ppn_rate', 11),
         ];
     }
 

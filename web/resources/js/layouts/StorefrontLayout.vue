@@ -30,11 +30,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Toaster } from '@/components/ui/sonner';
-import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useCart } from '@/composables/useCart';
 import { useStoreTheme } from '@/composables/useStoreTheme';
 import { useWishlist } from '@/composables/useWishlist';
+import { logoutUser } from '@/lib/firebase';
 
 interface Props {
     cartCount?: number;
@@ -233,6 +233,14 @@ const bottomNavItems = computed(() => [
                         Cari
                     </Button>
                 </form>
+                <button
+                    v-if="storeData?.slug"
+                    type="button"
+                    class="hidden shrink-0 text-xs font-bold uppercase tracking-wide opacity-90 hover:opacity-100 md:inline"
+                    @click="navigate(`/${storeData.slug}/blog`)"
+                >
+                    Blog
+                </button>
 
                 <!-- Right Actions -->
                 <div class="ml-auto flex shrink-0 items-center gap-2">

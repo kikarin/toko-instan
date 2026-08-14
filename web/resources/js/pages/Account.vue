@@ -24,13 +24,13 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useCart } from '@/composables/useCart';
+import { useMarketplaceCart } from '@/composables/useMarketplaceCart';
 import { useStoreName } from '@/composables/useStoreName';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import type { ProductDetail } from '@/types/product';
 import type { UserProfile } from '@/types/user';
-import { useMarketplaceCart } from '@/composables/useMarketplaceCart';
 
 interface Props {
     user: UserProfile;

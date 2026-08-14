@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Store;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
 
 function checkoutBuyerContext(): array
 {
@@ -38,6 +39,18 @@ function checkoutBuyerContext(): array
 }
 
 test('checkout creates order header and order_items snapshots', function () {
+    Http::fake([
+        'app.sandbox.midtrans.com/*' => Http::response([
+            'token' => 'snap-token-checkout',
+            'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/x',
+        ], 201),
+    ]);
+
+    config([
+        'services.midtrans.server_key' => 'SB-Mid-server-test',
+        'services.midtrans.client_key' => 'SB-Mid-client-test',
+    ]);
+
     ['buyer' => $buyer, 'store' => $store, 'tenant' => $tenant, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
 
     $response = $this->actingAs($buyer)->post("/{$store->slug}/checkout", [
@@ -92,6 +105,14 @@ test('checkout creates order header and order_items snapshots', function () {
 });
 
 test('seller orders page includes line items after checkout', function () {
+    Http::fake([
+        'app.sandbox.midtrans.com/*' => Http::response([
+            'token' => 'snap-token-checkout',
+            'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/x',
+        ], 201),
+    ]);
+    config(['services.midtrans.server_key' => 'SB-Mid-server-test']);
+
     ['seller' => $seller, 'buyer' => $buyer, 'store' => $store, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
 
     $this->actingAs($buyer)->post("/{$store->slug}/checkout", [
@@ -122,6 +143,14 @@ test('seller orders page includes line items after checkout', function () {
 });
 
 test('buyer orders page includes line items after checkout', function () {
+    Http::fake([
+        'app.sandbox.midtrans.com/*' => Http::response([
+            'token' => 'snap-token-checkout',
+            'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/x',
+        ], 201),
+    ]);
+    config(['services.midtrans.server_key' => 'SB-Mid-server-test']);
+
     ['buyer' => $buyer, 'store' => $store, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
 
     $this->actingAs($buyer)->post("/{$store->slug}/checkout", [

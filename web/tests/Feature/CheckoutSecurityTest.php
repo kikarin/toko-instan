@@ -7,6 +7,21 @@ use App\Models\Store;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\FirebaseAuthService;
+use Illuminate\Support\Facades\Http;
+
+beforeEach(function () {
+    config([
+        'services.midtrans.server_key' => 'SB-Mid-server-test',
+        'services.midtrans.client_key' => 'SB-Mid-client-test',
+    ]);
+
+    Http::fake([
+        'app.sandbox.midtrans.com/*' => Http::response([
+            'token' => 'snap-token-sec',
+            'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/x',
+        ], 201),
+    ]);
+});
 
 function securityCheckoutContext(): array
 {

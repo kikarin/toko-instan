@@ -29,6 +29,18 @@ class ProductFactory extends Factory
             'tag' => null,
             'img' => null,
             'stock' => 100,
+            'type' => 'physical',
         ];
+    }
+
+    public function digital(): static
+    {
+        return $this->state(fn () => [
+            'type' => 'digital',
+            'digital_file_path' => 'digital/test/sample.pdf',
+            'digital_file_name' => 'sample.pdf',
+            'digital_file_mime' => 'application/pdf',
+            'weight_gram' => 0,
+        ]);
     }
 }

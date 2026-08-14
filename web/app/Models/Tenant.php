@@ -53,4 +53,22 @@ class Tenant extends Model
     {
         return $this->hasMany(Withdrawal::class);
     }
+
+    /**
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * @return HasOne<Subscription, $this>
+     */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', 'active')
+            ->latestOfMany();
+    }
 }
