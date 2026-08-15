@@ -1,7 +1,7 @@
 import { router, usePage } from '@inertiajs/vue3';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
 
 export interface SellerNotice {
@@ -48,6 +48,10 @@ export function useSellerNotifications() {
         items.value = items.value.map((n) => ({ ...n, read_at: n.read_at ?? 'now' }));
     }
 
+    function close() {
+        open.value = false;
+    }
+
     function toggle() {
         open.value = !open.value;
         if (open.value) {
@@ -56,8 +60,15 @@ export function useSellerNotifications() {
     }
 
     function visit(url?: string | null) {
+        close();
         if (url) {
             router.visit(url);
+        }
+    }
+
+    function onKeydown(e: KeyboardEvent) {
+        if (e.key === 'Escape') {
+            close();
         }
     }
 
@@ -67,6 +78,7 @@ export function useSellerNotifications() {
             return;
         }
 
+        document.addEventListener('keydown', onKeydown);
         refresh();
 
         const key = import.meta.env.VITE_REVERB_APP_KEY as string | undefined;
@@ -96,13 +108,14 @@ export function useSellerNotifications() {
     });
 
     onUnmounted(() => {
+        document.removeEventListener('keydown', onKeydown);
         echo?.disconnect();
         if (poll) {
             clearInterval(poll);
         }
     });
 
-    return { open, unread, items, toggle, visit };
+    return reactive({ open, unread, items, toggle, close, visit });
 }
 
 declare global {

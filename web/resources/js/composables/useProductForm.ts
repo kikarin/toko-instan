@@ -84,6 +84,11 @@ export function useProductForm(props: ProductFormProps) {
         props.product?.description ??
             'Produk original berkualitas tinggi dengan jaminan garansi keaslian 100%, material daya tahan maksimal, dan kenyamanan optimal.',
     );
+    const metaTitle = ref(props.product?.meta_title ?? '');
+    const metaDescription = ref(props.product?.meta_description ?? '');
+    const seoTags = ref(props.product?.seo_tags ?? '');
+    const marketingCaption = ref(props.product?.marketing_caption ?? '');
+    const generatingAi = ref(false);
     const sku = ref(props.product?.sku ?? '');
     const weightGram = ref(
         props.product?.weight_gram ? String(props.product.weight_gram) : '500',
@@ -286,6 +291,71 @@ return a;
         }
     }
 
+    async function generateAi(tasks: Array<'description' | 'seo' | 'caption'>) {
+        if (!name.value.trim()) {
+            toast.error('Isi nama produk dulu sebelum generate AI.');
+
+            return;
+        }
+
+        generatingAi.value = true;
+
+        try {
+            const response = await fetch('/products/ai-generate', {
+                method: 'POST',
+                headers: {
+                    ...xsrfHeaders(),
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name.value,
+                    category: selectedCategory.value,
+                    brand: selectedBrand.value,
+                    price: price.value,
+                    description: description.value,
+                    tasks,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message ?? 'Generate AI gagal.');
+            }
+
+            if (result.description) {
+                description.value = result.description;
+            }
+            if (result.meta_title) {
+                metaTitle.value = result.meta_title;
+            }
+            if (result.meta_description) {
+                metaDescription.value = result.meta_description;
+            }
+            if (Array.isArray(result.tags) && result.tags.length) {
+                seoTags.value = result.tags.join(', ');
+                const match = labelOptions.value.find((label) =>
+                    result.tags.some(
+                        (t: string) => t.toLowerCase() === label.toLowerCase(),
+                    ),
+                );
+                if (match) {
+                    selectedTag.value = match;
+                }
+            }
+            if (result.marketing_caption) {
+                marketingCaption.value = result.marketing_caption;
+            }
+
+            toast.success('Teks AI siap. Cek lalu simpan produk.');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Generate AI gagal.');
+        } finally {
+            generatingAi.value = false;
+        }
+    }
+
     function back() {
         router.visit('/products');
     }
@@ -309,6 +379,10 @@ return a;
                     : null,
             img: img.value,
             description: description.value,
+            meta_title: metaTitle.value || null,
+            meta_description: metaDescription.value || null,
+            seo_tags: seoTags.value || null,
+            marketing_caption: marketingCaption.value || null,
             sku: sku.value,
             brand: selectedBrand.value || null,
             weight_gram: weightGram.value,
@@ -365,6 +439,12 @@ return a;
         isActive,
         img,
         description,
+        metaTitle,
+        metaDescription,
+        seoTags,
+        marketingCaption,
+        generatingAi,
+        generateAi,
         sku,
         weightGram,
         productType,

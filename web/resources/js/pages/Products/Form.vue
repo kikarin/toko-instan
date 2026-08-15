@@ -60,6 +60,12 @@ const {
     isActive,
     img,
     description,
+    metaTitle,
+    metaDescription,
+    seoTags,
+    marketingCaption,
+    generatingAi,
+    generateAi,
     sku,
     weightGram,
     productType,
@@ -404,12 +410,47 @@ function removeOptionValue(optionIndex: number, valueIndex: number) {
 
                             <!-- Deskripsi Produk -->
                             <div class="flex flex-col gap-1.5">
-                                <Label
-                                    for="product-description"
-                                    class="text-xs font-bold text-foreground"
-                                >
-                                    Deskripsi & Keunggulan Produk
-                                </Label>
+                                <div class="flex items-center justify-between gap-2">
+                                    <Label
+                                        for="product-description"
+                                        class="text-xs font-bold text-foreground"
+                                    >
+                                        Deskripsi & Keunggulan Produk
+                                    </Label>
+                                    <div class="flex flex-wrap justify-end gap-1">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            class="h-7 gap-1 text-[10px]"
+                                            :disabled="generatingAi"
+                                            @click="generateAi(['description'])"
+                                        >
+                                            <Sparkles class="h-3 w-3" />
+                                            Generate
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            class="h-7 gap-1 text-[10px]"
+                                            :disabled="generatingAi"
+                                            @click="generateAi(['seo'])"
+                                        >
+                                            SEO & tag
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            class="h-7 gap-1 text-[10px]"
+                                            :disabled="generatingAi"
+                                            @click="generateAi(['caption'])"
+                                        >
+                                            Caption
+                                        </Button>
+                                    </div>
+                                </div>
                                 <Textarea
                                     id="product-description"
                                     v-model="description"
@@ -417,6 +458,26 @@ function removeOptionValue(optionIndex: number, valueIndex: number) {
                                     placeholder="Tuliskan spesifikasi lengkap, keunggulan material, garansi toko, dan panduan ukuran..."
                                     class="rounded-xl text-xs"
                                 />
+                                <p v-if="generatingAi" class="text-[10px] text-muted-foreground">AI sedang menulis…</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div class="flex flex-col gap-1.5">
+                                    <Label class="text-xs font-bold">Meta title</Label>
+                                    <Input v-model="metaTitle" maxlength="70" class="h-10 rounded-xl text-xs" placeholder="Judul SEO" />
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <Label class="text-xs font-bold">Tag SEO</Label>
+                                    <Input v-model="seoTags" class="h-10 rounded-xl text-xs" placeholder="running, original, nike" />
+                                </div>
+                                <div class="flex flex-col gap-1.5 sm:col-span-2">
+                                    <Label class="text-xs font-bold">Meta description</Label>
+                                    <Input v-model="metaDescription" maxlength="160" class="h-10 rounded-xl text-xs" />
+                                </div>
+                                <div class="flex flex-col gap-1.5 sm:col-span-2">
+                                    <Label class="text-xs font-bold">Caption sosial media</Label>
+                                    <Textarea v-model="marketingCaption" rows="3" class="rounded-xl text-xs" placeholder="Caption IG / WA setelah generate" />
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

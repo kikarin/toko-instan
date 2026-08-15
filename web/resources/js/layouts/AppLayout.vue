@@ -8,6 +8,8 @@ import {
     Wallet,
     Ticket,
     Newspaper,
+    MessageCircle,
+    KeyRound,
     Crown,
     BarChart3,
     FileSpreadsheet,
@@ -16,6 +18,7 @@ import {
     ChevronsUpDown,
     Store,
     Bell,
+    X,
     Settings,
     Tags,
     Boxes,
@@ -24,6 +27,7 @@ import {
     ExternalLink,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { onClickOutside } from '@vueuse/core';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -106,6 +110,8 @@ useStoreTheme();
 
 const { storeName } = useStoreName();
 const notices = useSellerNotifications();
+const noticeRoot = ref<HTMLElement | null>(null);
+onClickOutside(noticeRoot, () => notices.close());
 
 const activeNavClass =
     'bg-sidebar-accent text-sidebar-accent-foreground font-black border border-sidebar-border shadow-md shadow-black/10 group-data-[collapsible=icon]:bg-sidebar-primary group-data-[collapsible=icon]:text-sidebar-primary-foreground group-data-[collapsible=icon]:border-none';
@@ -159,6 +165,8 @@ const financeNavItems: NavItem[] = [
     { icon: Crown, label: 'Langganan', route: '/subscription' },
     { icon: Ticket, label: 'Voucher', route: '/vouchers' },
     { icon: Newspaper, label: 'Blog', route: '/blog' },
+    { icon: MessageCircle, label: 'Chat', route: '/chats' },
+    { icon: KeyRound, label: 'API', route: '/developer' },
 ];
 
 const analyticsNavItems: NavItem[] = [
@@ -620,7 +628,7 @@ function isActive(item: NavItem): boolean {
                     </a>
 
                     <!-- Bell notification -->
-                    <div class="relative">
+                    <div ref="noticeRoot" class="relative">
                     <Button
                         variant="ghost"
                         size="sm"
@@ -637,7 +645,12 @@ function isActive(item: NavItem): boolean {
                         v-if="notices.open"
                         class="absolute right-0 z-50 mt-2 w-80 rounded-2xl border bg-card p-2 shadow-lg"
                     >
-                        <p class="px-2 py-1 text-xs font-bold">Notifikasi</p>
+                        <div class="flex items-center justify-between px-2 py-1">
+                            <p class="text-xs font-bold">Notifikasi</p>
+                            <button type="button" class="rounded-md p-1 text-muted-foreground hover:bg-muted" @click="notices.close()">
+                                <X class="h-3.5 w-3.5" />
+                            </button>
+                        </div>
                         <button
                             v-for="n in notices.items"
                             :key="n.id"

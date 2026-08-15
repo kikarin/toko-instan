@@ -38,6 +38,10 @@ class Product extends Model
         'brand',
         'weight_gram',
         'variant_options',
+        'meta_title',
+        'meta_description',
+        'seo_tags',
+        'marketing_caption',
     ];
 
     protected $casts = [

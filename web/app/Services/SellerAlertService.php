@@ -30,6 +30,11 @@ class SellerAlertService
             Mail::to($seller->email)->queue(new OrderCreatedMail($order));
         } catch (Throwable) {
         }
+
+        try {
+            app(WhatsAppService::class)->notifyNewOrder($order);
+        } catch (Throwable) {
+        }
     }
 
     public function notifyWithdrawalApproved(Withdrawal $withdrawal): void
@@ -46,6 +51,11 @@ class SellerAlertService
 
         try {
             Mail::to($seller->email)->queue(new WithdrawalApprovedMail($withdrawal));
+        } catch (Throwable) {
+        }
+
+        try {
+            app(WhatsAppService::class)->notifyWithdrawalApproved($withdrawal);
         } catch (Throwable) {
         }
     }

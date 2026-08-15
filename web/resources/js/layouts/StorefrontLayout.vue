@@ -17,6 +17,7 @@ import {
 import { LogOut, Store, Users as UsersIcon } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import CartDrawer from '@/components/marketplace/CartDrawer.vue';
+import StoreChatWidget from '@/components/StoreChatWidget.vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -514,6 +515,8 @@ const bottomNavItems = computed(() => [
         </nav>
 
         <Toaster richColors position="top-right" />
+
+        <StoreChatWidget v-if="storeData?.slug" :store-slug="storeData.slug" />
         
         <!-- Cart Drawer -->
         <CartDrawer

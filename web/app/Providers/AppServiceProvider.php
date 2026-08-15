@@ -2,8 +2,14 @@
 
 namespace App\Providers;
 
+use App\Contracts\AiProvider;
 use App\Contracts\PaymentGateway;
+use App\Contracts\WhatsAppGateway;
+use App\Gateways\FakeAiProvider;
+use App\Gateways\GeminiProvider;
+use App\Gateways\MetaWhatsAppGateway;
 use App\Gateways\MidtransGateway;
+use App\Gateways\OpenAiProvider;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\StockMovement;
@@ -38,6 +44,16 @@ class AppServiceProvider extends ServiceProvider
                 default => $app->make(MidtransGateway::class),
             };
         });
+
+        $this->app->bind(WhatsAppGateway::class, MetaWhatsAppGateway::class);
+
+        $this->app->bind(AiProvider::class, function ($app) {
+            return match (config('ai.driver', 'fake')) {
+                'openai' => $app->make(OpenAiProvider::class),
+                'gemini' => $app->make(GeminiProvider::class),
+                default => $app->make(FakeAiProvider::class),
+            };
+        });
     }
 
     /**
@@ -51,6 +67,14 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by(
                 strtolower((string) $request->input('email', '')).'|'.$request->ip(),
             );
+        });
+
+        RateLimiter::for('ai-generate', function ($request) {
+            return Limit::perMinute(10)->by((string) ($request->user()?->id ?: $request->ip()));
+        });
+
+        RateLimiter::for('api', function ($request) {
+            return Limit::perMinute(60)->by((string) ($request->user()?->id ?: $request->ip()));
         });
 
         Product::observe(ProductObserver::class);

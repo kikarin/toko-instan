@@ -51,6 +51,10 @@ class HandleInertiaRequests extends Middleware
             'theme' => $this->activeTheme($request),
             'store' => $this->activeStore($request),
             'csrf_token' => csrf_token(),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'plain_api_token' => $request->session()->get('plain_api_token'),
+            ],
             'notifications' => $request->user() && $request->user()->role === 'seller'
                 ? [
                     'unread' => $request->user()->unreadNotifications()->count(),

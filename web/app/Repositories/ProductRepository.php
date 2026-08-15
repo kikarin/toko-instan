@@ -161,6 +161,10 @@ class ProductRepository
             'brand' => $data->brand ?: 'Nike',
             'weight_gram' => $data->weightGram ?: 500,
             'variant_options' => $data->variantOptions,
+            'meta_title' => $data->metaTitle,
+            'meta_description' => $data->metaDescription,
+            'seo_tags' => $data->seoTags,
+            'marketing_caption' => $data->marketingCaption,
         ];
 
         $filtered = array_filter($attributes, function ($val, $key) {
@@ -195,6 +199,10 @@ class ProductRepository
             'brand' => $data->brand,
             'weight_gram' => $data->weightGram,
             'variant_options' => $data->variantOptions,
+            'meta_title' => $data->metaTitle,
+            'meta_description' => $data->metaDescription,
+            'seo_tags' => $data->seoTags,
+            'marketing_caption' => $data->marketingCaption,
         ];
 
         $filtered = array_filter($attributes, function ($val, $key) {

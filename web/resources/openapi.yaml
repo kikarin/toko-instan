@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: Toko Instan Public API
+  version: 1.0.0
+  description: REST API tenant (Sanctum bearer token). Buat key di dashboard Developer.
+servers:
+  - url: /api
+paths:
+  /products:
+    get:
+      summary: Daftar produk
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Buat produk
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, category, price, stock]
+              properties:
+                name: { type: string }
+                category: { type: string }
+                price: { type: number }
+                stock: { type: integer }
+                description: { type: string }
+      responses:
+        '201': { description: Created }
+  /products/{id}:
+    get:
+      summary: Detail produk
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    put:
+      summary: Update produk
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    delete:
+      summary: Hapus produk
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+  /orders:
+    get:
+      summary: Daftar pesanan toko
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK }
+  /orders/{orderNumber}:
+    get:
+      summary: Detail pesanan
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orderNumber
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum

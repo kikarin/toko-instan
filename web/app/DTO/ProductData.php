@@ -27,6 +27,10 @@ class ProductData
         public ?string $digitalFilePath = null,
         public ?string $digitalFileName = null,
         public ?string $digitalFileMime = null,
+        public ?string $metaTitle = null,
+        public ?string $metaDescription = null,
+        public ?string $seoTags = null,
+        public ?string $marketingCaption = null,
     ) {}
 
     public static function fromRequest(Request $request): self
@@ -47,6 +51,10 @@ class ProductData
             'digital_file_path' => ['nullable', 'string', 'max:2048'],
             'digital_file_name' => ['nullable', 'string', 'max:255'],
             'digital_file_mime' => ['nullable', 'string', 'max:120'],
+            'meta_title' => ['nullable', 'string', 'max:70'],
+            'meta_description' => ['nullable', 'string', 'max:160'],
+            'seo_tags' => ['nullable', 'string', 'max:255'],
+            'marketing_caption' => ['nullable', 'string', 'max:1000'],
             'variant_options' => ['nullable', 'array'],
             'variant_options.*.name' => ['required', 'string', 'max:255'],
             'variant_options.*.values' => ['required', 'array'],
@@ -81,6 +89,10 @@ class ProductData
             digitalFilePath: $validated['digital_file_path'] ?? null,
             digitalFileName: $validated['digital_file_name'] ?? null,
             digitalFileMime: $validated['digital_file_mime'] ?? null,
+            metaTitle: $validated['meta_title'] ?? null,
+            metaDescription: $validated['meta_description'] ?? null,
+            seoTags: $validated['seo_tags'] ?? null,
+            marketingCaption: $validated['marketing_caption'] ?? null,
         );
     }
 }

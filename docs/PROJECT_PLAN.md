@@ -13,12 +13,12 @@
 | Phase                     | Task    | Selesai    |
 | ------------------------- | ------- | ---------- |
 | Phase 0 — Foundation      | 16      | 16/16      |
-| Phase 1 — MVP             | 42      | 31/42      |
+| Phase 1 — MVP             | 42      | 42/42      |
 | Phase 1.5 — Beta & Launch | 10      | 0/10       |
-| Phase 2 — Growth          | 28      | 7/28       |
-| Phase 3 — Scale           | 18      | 0/18       |
+| Phase 2 — Growth          | 28      | 24/28      |
+| Phase 3 — Scale           | 18      | 9/18       |
 | Phase 4 — Enterprise      | 12      | 0/12       |
-| **Total**                 | **126** | **54/126** |
+| **Total**                 | **126** | **93/126** |
 
 
 > Update kolom "Selesai" manual saat milestone tercapai.
@@ -132,13 +132,13 @@
 - [x] **P1-001** — Register & login
   - **Deliverable:** Platform `/register` = **seller only**; buyer hanya di `/{store_slug}/register`; session auth Laravel OK; redirect benar
 
-- [ ] **P1-002** — Email verification
+- [x] **P1-002** — Email verification
   - **Deliverable:** Email verifikasi saat register, halaman "verify email", middleware `verified`
 
 - [x] **P1-003** — Forgot & reset password
   - **Deliverable:** Flow lupa password via email, halaman reset password (platform + storefront)
 
-- [ ] **P1-004** — OTP login (opsional MVP)
+- [x] **P1-004** — OTP login (opsional MVP)
   - **Deliverable:** Login via OTP ke email/phone; bisa di-skip jika belum ada provider SMS
 
 - [x] **P1-005** — Google login (opsional MVP)
@@ -186,7 +186,7 @@
 - [x] **P1-025** — Storefront product catalog
   - **Deliverable:** Halaman list produk + detail produk di storefront **publik** (tanpa wajib login)
 
-- [ ] **P1-026** — Digital product (basic)
+- [x] **P1-026** — Digital product (basic)
   - **Deliverable:** Tipe produk digital, upload file ke CDN, delivery setelah paid
 
 ---
@@ -234,19 +234,19 @@
 
 ## 1.6 Payment
 
-- [ ] **P1-050** — Payment gateway abstraction
+- [x] **P1-050** — Payment gateway abstraction
   - **Deliverable:** Interface `PaymentGateway`, config-driven provider
 
-- [ ] **P1-051** — Midtrans integration ⚠️ butuh P1-050
+- [x] **P1-051** — Midtrans integration ⚠️ butuh P1-050
   - **Deliverable:** VA, QRIS, e-wallet via Midtrans sandbox
 
-- [ ] **P1-052** — Payment webhook + idempotency
+- [x] **P1-052** — Payment webhook + idempotency
   - **Deliverable:** Webhook handler, idempotency key, update order status ke `Paid`
 
-- [ ] **P1-053** — Manual transfer (opsional MVP)
+- [x] **P1-053** — Manual transfer (opsional MVP)
   - **Deliverable:** Buyer upload bukti transfer, seller konfirmasi manual
 
-- [ ] **P1-054** — COD (opsional MVP)
+- [x] **P1-054** — COD (opsional MVP)
   - **Deliverable:** Opsi bayar di tempat, order flow COD
 
 ---
@@ -285,19 +285,19 @@
 
 ## 1.9 Subscription
 
-- [ ] **P1-080** — Subscription plans migration
+- [x] **P1-080** — Subscription plans migration
   - **Deliverable:** Tabel plans (Free, Premium Rp99k), tenant_subscriptions
 
-- [ ] **P1-081** — Upgrade ke Premium
+- [x] **P1-081** — Upgrade ke Premium
   - **Deliverable:** Flow upgrade, payment subscription, aktivasi fitur premium
 
-- [ ] **P1-082** — Direct settlement (Premium)
+- [x] **P1-082** — Direct settlement (Premium)
   - **Deliverable:** Premium seller — dana langsung ke rekening, skip escrow
 
-- [ ] **P1-083** — Subscription renewal & expiry
+- [x] **P1-083** — Subscription renewal & expiry
   - **Deliverable:** Auto-check expiry, downgrade ke Free, notifikasi renewal
 
-- [ ] **P1-084** — No withdraw fee (Premium)
+- [x] **P1-084** — No withdraw fee (Premium)
   - **Deliverable:** Premium seller withdraw tanpa fee Rp5.000
 
 ---
@@ -371,13 +371,13 @@
 
 ## 2.1 Shipping
 
-- [ ] **P2-001** — RajaOngkir / Biteship integration
+- [x] **P2-001** — RajaOngkir / Biteship integration
   - **Deliverable:** Cek ongkir by kota, pilih kurir di checkout
 
-- [ ] **P2-002** — Shipping di checkout
+- [x] **P2-002** — Shipping di checkout
   - **Deliverable:** Hitung ongkir real-time, tambah ke total order
 
-- [ ] **P2-003** — Order status shipping
+- [x] **P2-003** — Order status shipping
   - **Deliverable:** Status Packed → Shipped → Completed, input resi
 
 ---
@@ -386,13 +386,13 @@
 
 ## 2.2 Promo & Customer
 
-- [ ] **P2-010** — Voucher & discount
+- [x] **P2-010** — Voucher & discount
   - **Deliverable:** CRUD voucher (% / nominal), apply di checkout
 
 - [x] **P2-011** — Wishlist
   - **Deliverable:** Buyer simpan produk ke wishlist
 
-- [ ] **P2-012** — Review & rating
+- [x] **P2-012** — Review & rating
   - **Deliverable:** Buyer review produk, rating 1–5, foto review (CDN)
 
 ---
@@ -401,13 +401,13 @@
 
 ## 2.3 Tax Engine
 
-- [ ] **P2-020** — Seller tax profile
+- [x] **P2-020** — Seller tax profile
   - **Deliverable:** Form NPWP, NIK, PKP status, alamat faktur
 
-- [ ] **P2-021** — PPN calculation
+- [x] **P2-021** — PPN calculation
   - **Deliverable:** Auto hitung PPN di checkout untuk seller PKP
 
-- [ ] **P2-022** — Tax reports
+- [x] **P2-022** — Tax reports
   - **Deliverable:** Laporan pajak bulanan/tahunan, export CSV/Excel
 
 ---
@@ -422,7 +422,7 @@
 - [x] **P2-031** — Theme: Modern
   - **Deliverable:** 1 theme lengkap — homepage, katalog, detail, checkout
 
-- [ ] **P2-032** — Theme: Fashion & Food
+- [x] **P2-032** — Theme: Fashion & Food
   - **Deliverable:** 2 theme tambahan
 
 - [x] **P2-033** — Store CMS (landing page)
@@ -434,13 +434,13 @@
 
 ## 2.5 Analytics & Notification
 
-- [ ] **P2-040** — Analytics dashboard
+- [x] **P2-040** — Analytics dashboard
   - **Deliverable:** Chart revenue, orders, visitors — daily/weekly/monthly
 
-- [ ] **P2-041** — Email notification
+- [x] **P2-041** — Email notification
   - **Deliverable:** Email: order baru, withdraw approved, subscription expiry
 
-- [ ] **P2-042** — Realtime notification (Reverb)
+- [x] **P2-042** — Realtime notification (Reverb)
   - **Deliverable:** Notifikasi realtime di dashboard seller
 
 ---
@@ -464,10 +464,10 @@
 
 ## 2.7 Blog CMS
 
-- [ ] **P2-060** — Blog migration & CRUD
+- [x] **P2-060** — Blog migration & CRUD
   - **Deliverable:** Category, post, author, tag — dashboard CMS
 
-- [ ] **P2-061** — Blog storefront
+- [x] **P2-061** — Blog storefront
   - **Deliverable:** Halaman blog di storefront, SEO meta
 
 ---
@@ -476,13 +476,13 @@
 
 ## 2.8 SEO
 
-- [ ] **P2-070** — Sitemap & robots.txt
+- [x] **P2-070** — Sitemap & robots.txt
   - **Deliverable:** Auto-generate sitemap per toko, robots.txt
 
-- [ ] **P2-071** — Meta tag & OpenGraph
+- [x] **P2-071** — Meta tag & OpenGraph
   - **Deliverable:** Meta title/description per halaman, OG image
 
-- [ ] **P2-072** — JSON-LD structured data
+- [x] **P2-072** — JSON-LD structured data
   - **Deliverable:** Product schema markup di halaman produk
 
 ---
@@ -500,16 +500,16 @@
 
 ## 3.1 AI Module
 
-- [ ] **P3-001** — AI service abstraction
+- [x] **P3-001** — AI service abstraction
   - **Deliverable:** Interface AI provider (OpenAI/Gemini), config-driven
 
-- [ ] **P3-002** — Generate product description
+- [x] **P3-002** — Generate product description
   - **Deliverable:** Tombol "Generate" di form produk, output deskripsi AI
 
-- [ ] **P3-003** — AI SEO & tags
+- [x] **P3-003** — AI SEO & tags
   - **Deliverable:** Generate meta title, description, product tags
 
-- [ ] **P3-004** — AI marketing caption
+- [x] **P3-004** — AI marketing caption
   - **Deliverable:** Generate caption promosi untuk social media
 
 ---
@@ -518,10 +518,10 @@
 
 ## 3.2 WhatsApp & Communication
 
-- [ ] **P3-010** — WhatsApp notification (Premium)
+- [x] **P3-010** — WhatsApp notification (Premium)
   - **Deliverable:** Notif order & withdraw via WhatsApp API
 
-- [ ] **P3-011** — AI reply customer
+- [x] **P3-011** — AI reply customer
   - **Deliverable:** Auto-reply chat customer (basic)
 
 ---
@@ -530,13 +530,13 @@
 
 ## 3.3 Public API
 
-- [ ] **P3-020** — API authentication (Sanctum)
+- [x] **P3-020** — API authentication (Sanctum)
   - **Deliverable:** API key per tenant, rate limiting
 
-- [ ] **P3-021** — REST API (products, orders)
+- [x] **P3-021** — REST API (products, orders)
   - **Deliverable:** CRUD products & read orders via API
 
-- [ ] **P3-022** — API documentation (Swagger)
+- [x] **P3-022** — API documentation (Swagger)
   - **Deliverable:** Swagger UI di `/api/docs`
 
 ---
@@ -626,20 +626,25 @@
 ## Changelog
 
 
-| Tanggal    | Update                                                                                                                                                    |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-06 | Initial project plan dibuat                                                                                                                               |
-| 2026-08-06 | Hapus branch naming & Docker; simplify git workflow                                                                                                       |
-| 2026-08-06 | Update progress: Foundation & Auth MVP tasks                                                                                                              |
-| 2026-08-07 | Rampung: P0-032/034, P1-030/043/044/090/091/092; P0-031 dikembalikan ke pending                                                                           |
-| 2026-08-07 | Phase 0 tuntas (17/17): P0-022 Redis+Horizon, P0-023 R2/S3 storage, P0-031 tenant middleware & subdomain routing, P0-033 CI pipeline                      |
-| 2026-08-07 | Backbone uang: P1-042/060/061/062/070/071/072 — wallet ledger immutable (schema.md), escrow, withdraw fee & approval; payment ditunda (provider-agnostic) |
-| 2026-08-08 | Audit SE: uncentang PARTIAL/FAIL; centang yang sudah jalan tapi belum dicentang (P1-011/021/023/031). Progress jujur: 23/127 |
-| 2026-08-10 | Audit SE setelah pull `devniko`: centang P1-025/040/043/044; perbaiki overview Phase 2 (7/28). Progress jujur: **36/127** |
-| 2026-08-10 | Audit setelah `3dd8b15`: centang P1-045 (invoice print-ready + test); modul seller Customers = ekstra (belum ada task ID). Progress: **37/127** |
-| 2026-08-10 | Phase 0 PARTIAL ditutup: Actions, composables/, Redis queue, R2 upload action+test, Auth/Dashboard layout, path-based storefront (P0-031/P1-013), `.env.example` lengkap. Progress: **46/127** |
-| 2026-08-10 | Phase 1 FAIL/PARTIAL ditutup: P1-001/005/010/012/024/090/091/092 — Google ID token, seller-only register+slug, toko tutup, resize 3 ukuran, dashboard scoped, admin tenants/orders + pending withdraw. Progress: **54/127** |
+| Tanggal    | Update                                                                                                                                                                                                                                         |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-06 | Initial project plan dibuat                                                                                                                                                                                                                    |
+| 2026-08-06 | Hapus branch naming & Docker; simplify git workflow                                                                                                                                                                                            |
+| 2026-08-06 | Update progress: Foundation & Auth MVP tasks                                                                                                                                                                                                   |
+| 2026-08-07 | Rampung: P0-032/034, P1-030/043/044/090/091/092; P0-031 dikembalikan ke pending                                                                                                                                                                |
+| 2026-08-07 | Phase 0 tuntas (17/17): P0-022 Redis+Horizon, P0-023 R2/S3 storage, P0-031 tenant middleware & subdomain routing, P0-033 CI pipeline                                                                                                           |
+| 2026-08-07 | Backbone uang: P1-042/060/061/062/070/071/072 — wallet ledger immutable (schema.md), escrow, withdraw fee & approval; payment ditunda (provider-agnostic)                                                                                      |
+| 2026-08-08 | Audit SE: uncentang PARTIAL/FAIL; centang yang sudah jalan tapi belum dicentang (P1-011/021/023/031). Progress jujur: 23/127                                                                                                                   |
+| 2026-08-10 | Audit SE setelah pull `devniko`: centang P1-025/040/043/044; perbaiki overview Phase 2 (7/28). Progress jujur: **36/127**                                                                                                                      |
+| 2026-08-10 | Audit setelah `3dd8b15`: centang P1-045 (invoice print-ready + test); modul seller Customers = ekstra (belum ada task ID). Progress: **37/127**                                                                                                |
+| 2026-08-10 | Phase 0 PARTIAL ditutup: Actions, composables/, Redis queue, R2 upload action+test, Auth/Dashboard layout, path-based storefront (P0-031/P1-013), `.env.example` lengkap. Progress: **46/127**                                                 |
+| 2026-08-10 | Phase 1 FAIL/PARTIAL ditutup: P1-001/005/010/012/024/090/091/092 — Google ID token, seller-only register+slug, toko tutup, resize 3 ukuran, dashboard scoped, admin tenants/orders + pending withdraw. Progress: **54/127**                    |
 | 2026-08-12 | Audit SE setelah pull (merge `65f9388`): **rollback centang** yang broken — AuthService fatal, AdminService missing methods, UploadController 500, Register merge-broken. Centang P1-003 password reset. Progress jujur: **45/126** (P0 14/16) |
-| 2026-08-12 | SE fix merge breakage: AuthService/Register/Upload/Admin/Withdrawal + Horizon gate+snapshot + admin route order. Re-centang P0-022/023, P1-001/005/010/024/090/091/092. Progress: **54/126** (P0 16/16 · P1 31/42) |
+| 2026-08-12 | SE fix merge breakage: AuthService/Register/Upload/Admin/Withdrawal + Horizon gate+snapshot + admin route order. Re-centang P0-022/023, P1-001/005/010/024/090/091/092. Progress: **54/126** (P0 16/16 · P1 31/42)                             |
+| 2026-08-13 | Audit SE: checklist **54/126 jujur**. Fix route product detail (`/{slug}` `.+` menelan `/p/...` → `[^/]+` + urutan route). Extra tanpa Task ID: `/customers`, activity-log, impersonate.                                                       |
+| 2026-08-13 | P1-002 email verification + `verified` middleware; P1-004 OTP login email-only (skip SMS); P1-026 digital product (type, R2 upload, download setelah paid). Progress: **57/126** (P1 34/42).                                                   |
+| 2026-08-13 | P1-050–054 Payment: `PaymentGateway` + Midtrans Snap (VA/QRIS/e-wallet) + webhook idempotent → Paid + manual transfer proof + COD. Progress: **62/126** (P1 39/42).                                                                            |
+| 2026-08-14 | P1-080–084 Subscription: plans Free/Premium, upgrade Midtrans, direct settlement, expiry+renewal mail, withdraw fee 0. Phase 1 **42/42**. Progress: **67/126**.                                                                                |
+| 2026-08-14 | P2-001–003 Shipping: RajaOngkir/Biteship + fallback quote, ongkir di checkout, Packed→Shipped+resi. Progress: **70/126** (P2 10/28).                                                                                                           |
 
 

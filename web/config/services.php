@@ -72,4 +72,10 @@ return [
         'base_url' => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
     ],
 
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'base_url' => env('WHATSAPP_BASE_URL', 'https://graph.facebook.com/v21.0'),
+    ],
+
 ];

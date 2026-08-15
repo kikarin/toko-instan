@@ -221,6 +221,10 @@ class ProductService
             'digital_file_mime' => $product->digital_file_mime,
             'variant_options' => $product->variant_options,
             'variants' => $product->variants,
+            'meta_title' => $product->meta_title,
+            'meta_description' => $product->meta_description,
+            'seo_tags' => $product->seo_tags,
+            'marketing_caption' => $product->marketing_caption,
         ];
     }
 

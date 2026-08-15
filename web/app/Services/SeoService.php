@@ -26,8 +26,8 @@ class SeoService
      */
     public function forProduct(Store $store, Product $product): array
     {
-        $title = $product->name.' — '.$store->name;
-        $raw = strip_tags((string) $product->description);
+        $title = ($product->meta_title ?: $product->name).' — '.$store->name;
+        $raw = $product->meta_description ?: strip_tags((string) $product->description);
         $description = $this->clip($raw !== '' ? $raw : 'Beli '.$product->name.' di '.$store->name);
         $url = url('/'.$store->slug.'/p/'.$product->slug);
 

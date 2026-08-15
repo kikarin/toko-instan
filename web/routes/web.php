@@ -12,6 +12,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CheckoutVoucherController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\DigitalDownloadController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\MediaProxyController;
@@ -21,14 +22,17 @@ use App\Http\Controllers\OtpLoginController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductAiController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SellerChatController;
 use App\Http\Controllers\SellerNotificationController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoreBlogController;
+use App\Http\Controllers\StoreChatController;
 use App\Http\Controllers\StoreCmsController;
 use App\Http\Controllers\StorePageController;
 use App\Http\Controllers\StoreSettingsController;
@@ -108,7 +112,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(fu
     Route::patch('/withdrawals/{id}/transferred', [AdminWithdrawalController::class, 'markTransferred'])->name('admin.withdrawals.transferred');
 });
 
-$reservedStoreSlugs = 'admin|login|register|dashboard|horizon|uploads|products|inventory|wallet|catalog|customers|profile|forgot-password|reset-password|auth|up|email|otp-login|webhooks|media|vouchers|tax-reports|blog';
+$reservedStoreSlugs = 'admin|login|register|dashboard|horizon|uploads|products|inventory|wallet|catalog|customers|profile|forgot-password|reset-password|auth|up|email|otp-login|webhooks|media|vouchers|tax-reports|blog|chats|developer|api';
 
 Route::middleware(['auth', 'verified'])->prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->group(function () {
     Route::post('/shipping/quote', [ShippingController::class, 'quote'])->name('shipping.quote');
@@ -143,6 +147,10 @@ Route::middleware(['auth', 'verified', 'role:seller'])->group(function () {
     Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('seller.orders.invoice');
     Route::get('/notifications', [SellerNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read', [SellerNotificationController::class, 'markRead'])->name('notifications.read');
+    Route::get('/chats', [SellerChatController::class, 'index'])->name('chats.index');
+    Route::get('/developer', [DeveloperController::class, 'index'])->name('developer.index');
+    Route::post('/developer/tokens', [DeveloperController::class, 'store'])->name('developer.tokens.store');
+    Route::delete('/developer/tokens/{id}', [DeveloperController::class, 'destroy'])->name('developer.tokens.destroy');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/store-settings', [StoreSettingsController::class, 'edit'])->name('store-settings.edit');
     Route::put('/store-settings', [StoreSettingsController::class, 'update'])->name('store-settings.update');
@@ -154,6 +162,9 @@ Route::middleware(['auth', 'verified', 'role:seller'])->group(function () {
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::post('/products/ai-generate', [ProductAiController::class, 'generate'])
+        ->middleware('throttle:ai-generate')
+        ->name('products.ai.generate');
     Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
@@ -193,6 +204,13 @@ Route::middleware(['auth', 'verified', 'role:seller'])->group(function () {
     Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store');
     Route::post('/uploads/digital', [UploadController::class, 'storeDigital'])->name('uploads.digital');
 });
+
+Route::get('/{store_slug}/chat', [StoreChatController::class, 'show'])
+    ->where('store_slug', "^(?!($reservedStoreSlugs)$)[^/]+")
+    ->name('store.chat.show');
+Route::post('/{store_slug}/chat', [StoreChatController::class, 'store'])
+    ->where('store_slug', "^(?!($reservedStoreSlugs)$)[^/]+")
+    ->name('store.chat.store');
 
 Route::get('/{store_slug}/sitemap.xml', [SeoController::class, 'sitemap'])
     ->where('store_slug', "^(?!($reservedStoreSlugs)$)[^/]+")
