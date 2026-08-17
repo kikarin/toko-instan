@@ -16,9 +16,9 @@
 | Phase 1 — MVP             | 42      | 42/42      |
 | Phase 1.5 — Beta & Launch | 10      | 0/10       |
 | Phase 2 — Growth          | 28      | 24/28      |
-| Phase 3 — Scale           | 18      | 9/18       |
+| Phase 3 — Scale           | 18      | 15/18      |
 | Phase 4 — Enterprise      | 12      | 0/12       |
-| **Total**                 | **126** | **93/126** |
+| **Total**                 | **126** | **99/126** |
 
 
 > Update kolom "Selesai" manual saat milestone tercapai.
@@ -545,10 +545,10 @@
 
 ## 3.4 Affiliate & Automation
 
-- [ ] **P3-030** — Referral system
+- [x] **P3-030** — Referral system
   - **Deliverable:** Kode referral, tracking, komisi
 
-- [ ] **P3-031** — FAQ generator (AI)
+- [x] **P3-031** — FAQ generator (AI)
   - **Deliverable:** Generate FAQ otomatis dari data produk
 
 ---
@@ -557,19 +557,19 @@
 
 ## 3.5 Platform Maturity
 
-- [ ] **P3-040** — Audit log
+- [x] **P3-040** — Audit log
   - **Deliverable:** Semua aksi penting tercatat di schema `audit`
 
-- [ ] **P3-041** — Customer support (ticket)
+- [x] **P3-041** — Customer support (ticket)
   - **Deliverable:** Ticket system: buat, balas, status
 
-- [ ] **P3-042** — Knowledge base & FAQ
+- [x] **P3-042** — Knowledge base & FAQ
   - **Deliverable:** Halaman FAQ & knowledge base untuk seller
 
 - [ ] **P3-043** — Payment gateway #2 (Xendit/Duitku)
   - **Deliverable:** Provider kedua via abstraction layer
 
-- [ ] **P3-044** — Custom domain (Premium)
+- [x] **P3-044** — Custom domain (Premium)
   - **Deliverable:** Premium seller pasang domain sendiri via Cloudflare API
 
 ---
