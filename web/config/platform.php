@@ -26,4 +26,6 @@ return [
 
     'reserved_labels' => ['www', 'app'],
 
+    'reserved_paths' => 'admin|login|register|dashboard|api|horizon|up|media|webhooks|developer|chats',
+
 ];

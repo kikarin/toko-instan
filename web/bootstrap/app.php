@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Middleware\CaptureReferral;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\EnsureSellerApi;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyTenant;
 use App\Http\Middleware\RecordStoreVisit;
+use App\Http\Middleware\RewriteCustomDomainRequest;
 use App\Http\Middleware\SetCrossOriginOpenerPolicy;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -31,11 +33,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('subscriptions:process')->daily();
     })
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(RewriteCustomDomainRequest::class);
+
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             IdentifyTenant::class,
             SetCrossOriginOpenerPolicy::class,
+            CaptureReferral::class,
         ]);
 
         $middleware->alias([

@@ -525,6 +525,14 @@ function openProductDetail(product: any) {
                     </div>
                 </div>
             </div>
+
+            <section v-if="(page.props.faqs as any[])?.length" class="rounded-2xl border bg-card p-4">
+                <h2 class="mb-3 text-sm font-bold">FAQ</h2>
+                <div v-for="(f, i) in (page.props.faqs as any[])" :key="i" class="mb-3">
+                    <p class="text-xs font-bold">{{ f.question }}</p>
+                    <p class="text-xs text-muted-foreground">{{ f.answer }}</p>
+                </div>
+            </section>
         </main>
 
         <!-- Floating Quick Cart Bar -->

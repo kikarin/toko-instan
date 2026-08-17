@@ -7,6 +7,7 @@ use App\Repositories\StoreRepository;
 use App\Services\ReviewService;
 use App\Services\SeoService;
 use App\Services\StoreCmsService;
+use App\Services\StoreFaqService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,6 +21,7 @@ class StorePageController extends Controller
         protected StoreCmsService $cmsService,
         protected ReviewService $reviewService,
         protected SeoService $seoService,
+        protected StoreFaqService $faqService,
     ) {}
 
     public function show(Request $request, string $slug): Response|HttpResponse
@@ -107,6 +109,7 @@ class StorePageController extends Controller
                 'category' => $category ?: 'Semua',
             ],
             'seo' => $this->seoService->forStore($store),
+            'faqs' => $this->faqService->listForStore($store),
         ]);
     }
 

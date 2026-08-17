@@ -78,4 +78,9 @@ return [
         'base_url' => env('WHATSAPP_BASE_URL', 'https://graph.facebook.com/v21.0'),
     ],
 
+    'cloudflare' => [
+        'token' => env('CLOUDFLARE_API_TOKEN'),
+        'zone_id' => env('CLOUDFLARE_ZONE_ID'),
+    ],
+
 ];

@@ -214,6 +214,26 @@ class WalletService
         );
     }
 
+    public function creditReferral(int $walletId, float $amount, int $orderId): WalletTransaction
+    {
+        $reference = [self::class.'_referral_order', $orderId];
+        $existing = $this->ledgerRow(WalletTransactionType::Referral, $reference);
+        if ($existing) {
+            return $existing;
+        }
+
+        return $this->commit(
+            $walletId,
+            type: WalletTransactionType::Referral,
+            amount: $amount,
+            applyToBalance: true,
+            applyToPending: false,
+            isCredit: true,
+            reference: $reference,
+            description: 'Komisi referral order #'.$orderId
+        );
+    }
+
     /**
      * @param  array{0: string, 1: int|string}  $reference
      */

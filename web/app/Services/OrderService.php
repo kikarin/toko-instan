@@ -24,6 +24,7 @@ class OrderService
         protected VoucherService $voucherService,
         protected TaxService $taxService,
         protected SellerAlertService $sellerAlertService,
+        protected ReferralService $referralService,
     ) {}
 
     public function getCustomerOrderCounts(?string $email): array
@@ -186,6 +187,8 @@ class OrderService
             'status' => 'paid',
             'paid_at' => $order->paid_at ?? now(),
         ]);
+
+        $this->referralService->creditFromPaidOrder($order->fresh(['store.tenant']));
     }
 
     public function markOrderCompleted(Order $order): void

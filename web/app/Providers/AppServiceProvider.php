@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Contracts\AiProvider;
+use App\Contracts\DomainGateway;
 use App\Contracts\PaymentGateway;
 use App\Contracts\WhatsAppGateway;
+use App\Gateways\CloudflareDomainGateway;
 use App\Gateways\FakeAiProvider;
 use App\Gateways\GeminiProvider;
 use App\Gateways\MetaWhatsAppGateway;
@@ -46,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(WhatsAppGateway::class, MetaWhatsAppGateway::class);
+        $this->app->bind(DomainGateway::class, CloudflareDomainGateway::class);
 
         $this->app->bind(AiProvider::class, function ($app) {
             return match (config('ai.driver', 'fake')) {

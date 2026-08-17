@@ -17,4 +17,5 @@ enum WalletTransactionType: string
     case WithdrawRelease = 'withdraw_release';
     case WithdrawPaid = 'withdraw_paid';
     case Adjustment = 'adjustment';
+    case Referral = 'referral';
 }

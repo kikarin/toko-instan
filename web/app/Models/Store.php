@@ -55,6 +55,8 @@ class Store extends Model
         'theme',
         'theme_colors',
         'showcase',
+        'custom_domain',
+        'custom_domain_status',
     ];
 
     protected $casts = [

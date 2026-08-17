@@ -70,7 +70,7 @@ class AuthService
                 'store_slug' => $dto->storeSlug,
                 'store_name' => $dto->storeName,
             ]);
-            ($this->createTenantAndStore)($user->id, $dto->storeName, $slug);
+            ($this->createTenantAndStore)($user->id, $dto->storeName, $slug, $dto->referralCode);
         }
 
         Auth::login($user, true);
@@ -136,7 +136,7 @@ class AuthService
 
             if ($role === 'seller') {
                 $slug = $this->resolveStoreSlug($data);
-                ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug);
+                ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug, $this->referralCodeFromRequest());
             }
         }
 
@@ -201,7 +201,7 @@ class AuthService
             }
 
             $slug = $this->resolveStoreSlug($data);
-            ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug);
+            ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug, $this->referralCodeFromRequest());
         }
     }
 
@@ -231,5 +231,13 @@ class AuthService
         }
 
         return $slug;
+    }
+
+    protected function referralCodeFromRequest(): ?string
+    {
+        $request = request();
+        $code = $request->input('referral_code') ?: $request->cookie((string) config('referral.cookie', 'ref_code'));
+
+        return $code ? strtoupper((string) $code) : null;
     }
 }
