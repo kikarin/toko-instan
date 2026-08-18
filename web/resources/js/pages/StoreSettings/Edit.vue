@@ -55,7 +55,7 @@ useStoreTheme();
 <template>
     <Head title="Pengaturan & Branding Toko — Dashboard Merchant" />
 
-    <AppLayout title="Pengaturan Toko" activePage="Dashboard">
+    <AppLayout title="Pengaturan Toko" activePage="Pengaturan Toko">
         <div class="flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
             <!-- ── Top Title Bar ── -->
             <div

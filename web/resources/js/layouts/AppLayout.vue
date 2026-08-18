@@ -125,15 +125,7 @@ const userEmail = computed(() => {
 const mainNavItems: NavItem[] = [
     { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
     { icon: Tags, label: 'Katalog', route: '/catalog' },
-    {
-        icon: Package,
-        label: 'Produk',
-        route: '/products',
-        children: [
-            { label: 'Katalog Produk', route: '/products' },
-            { label: '+ Tambah Produk', route: '/products/create' },
-        ],
-    },
+    { icon: Package, label: 'Produk', route: '/products' },
     { icon: Boxes, label: 'Stok & Inventory', route: '/inventory' },
     {
         icon: ShoppingCart,
