@@ -1,21 +1,18 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import {
+    AlertCircle,
+    Eye,
+    EyeOff,
+    Loader2,
     Lock,
     Mail,
-    User,
-    Store,
-    AlertCircle,
-    Loader2,
     Sparkles,
-    Link2,
+    Store,
+    User,
 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/sonner';
+import { toast, Toaster } from '@/components/ui/sonner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { signInWithGooglePopup } from '@/lib/firebase';
 
@@ -24,11 +21,15 @@ const props = defineProps<{
     intent?: 'platform' | 'storefront';
 }>();
 
-const isBuyerStorefront = computed(() => props.intent === 'storefront');
+const isBuyerStorefront = computed(
+    () => props.intent === 'storefront' || Boolean(props.store),
+);
+
 const registerUrl = computed(() =>
-    isBuyerStorefront.value && props.store
-        ? `/${props.store.slug}/register`
-        : '/register',
+    props.store ? `/${props.store.slug}/register` : '/register',
+);
+const loginUrl = computed(() =>
+    props.store ? `/${props.store.slug}/login` : '/login',
 );
 
 const name = ref('');
@@ -37,6 +38,7 @@ const storeSlug = ref('');
 const slugTouched = ref(false);
 const email = ref('');
 const password = ref('');
+const showPassword = ref(false);
 const isLoading = ref(false);
 const isGoogleLoading = ref(false);
 const errorMessage = ref<string | null>(null);
@@ -94,6 +96,7 @@ async function handleRegister() {
               store_slug: storeSlug.value,
               email: email.value,
               password: password.value,
+              referral_code: new URLSearchParams(window.location.search).get('ref') || '',
           };
 
     router.post(registerUrl.value, payload, {
@@ -150,6 +153,7 @@ async function handleGoogleLogin() {
             intent: 'register',
             store_name: isBuyerStorefront.value ? null : storeName.value,
             store_slug: isBuyerStorefront.value ? null : storeSlug.value,
+            referral_code: new URLSearchParams(window.location.search).get('ref') || '',
             store_slug_context: isBuyerStorefront.value
                 ? (props.store?.slug ?? null)
                 : null,
@@ -184,102 +188,62 @@ async function handleGoogleLogin() {
     <Head title="Daftar Akun Baru - Toko Instan" />
 
     <AuthLayout spacious>
-        <div class="flex flex-col items-center text-center">
+        <!-- Header -->
+        <div class="mb-6 flex flex-col items-center text-center">
             <div
-                class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#e07c28] to-[#c2500a] text-2xl font-extrabold text-white shadow-lg shadow-[#e07c28]/30"
+                class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand/70 text-xl font-extrabold text-brand-foreground shadow-lg ring-1 shadow-brand/30 ring-white/20"
             >
                 S
             </div>
-            <div class="mb-1 flex items-center gap-1.5">
+
+            <div class="flex items-center gap-2">
                 <h1
-                    class="text-2xl font-extrabold tracking-tight text-[#1c1c22]"
+                    class="text-[26px] leading-tight font-extrabold tracking-tight text-foreground"
                 >
                     {{
-                        isBuyerStorefront && props.store
+                        props.store
                             ? `Daftar di ${props.store.name}`
                             : 'Buat Toko di Toko Instan'
                     }}
                 </h1>
-                <Badge
-                    v-if="!isBuyerStorefront"
-                    variant="amber"
-                    class="px-1.5 py-0 text-[9px] uppercase"
-                    >GRATIS</Badge
+                <span
+                    v-if="!props.store"
+                    class="rounded-full bg-brand px-2 py-0.5 text-[9px] font-extrabold tracking-widest text-brand-foreground uppercase"
+                    >Gratis</span
                 >
             </div>
-            <p class="text-xs text-[#9090a0]">
+            <p class="mt-2 text-sm text-muted-foreground">
                 {{
-                    isBuyerStorefront
-                        ? 'Gabung sebagai pembeli dan nikmati promo'
-                        : 'Daftar sebagai seller dan buat toko Anda'
+                    props.store
+                        ? 'Gabung sebagai member dan nikmati promo'
+                        : 'Daftar sebagai pemilik toko dan mulai jualan'
                 }}
             </p>
         </div>
 
-        <Card class="border-black/10 p-6 shadow-md md:p-8">
+        <!-- Panel -->
+        <div
+            class="rounded-3xl border border-border bg-card p-6 shadow-xl shadow-black/5 md:p-8"
+        >
+            <!-- Error Alert -->
             <div
                 v-if="errorMessage"
-                class="mb-5 flex items-start gap-2.5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs font-medium text-red-600"
+                class="mb-5 flex items-start gap-2.5 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs font-medium text-destructive"
             >
                 <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{{ errorMessage }}</span>
             </div>
 
-            <div
-                v-if="!isBuyerStorefront"
-                class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
-            >
-                <div class="flex flex-col gap-1">
-                    <label
-                        class="flex items-center gap-1.5 text-xs font-bold text-[#1c1c22]"
-                    >
-                        <Store class="h-3.5 w-3.5 text-[#9090a0]" /> Nama Toko *
-                    </label>
-                    <Input
-                        v-model="storeName"
-                        type="text"
-                        placeholder="Contoh: NovaBatik Studio"
-                        required
-                        class="h-10"
-                    />
-                </div>
-                <div class="flex flex-col gap-1">
-                    <label
-                        class="flex items-center gap-1.5 text-xs font-bold text-[#1c1c22]"
-                    >
-                        <Link2 class="h-3.5 w-3.5 text-[#9090a0]" /> Slug URL *
-                    </label>
-                    <Input
-                        :model-value="storeSlug"
-                        type="text"
-                        placeholder="nova-batik"
-                        required
-                        class="h-10"
-                        @update:model-value="
-                            (v) => {
-                                slugTouched = true;
-                                storeSlug = slugify(String(v));
-                            }
-                        "
-                    />
-                    <p class="text-[10px] text-[#9090a0]">
-                        Storefront:
-                        <span class="font-mono text-[#1c1c22]"
-                            >/{{ storeSlug || 'slug-toko' }}</span
-                        >
-                    </p>
-                </div>
-            </div>
-
-            <Button
-                variant="outline"
-                class="flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border-black/12 bg-white py-2.5 text-xs font-semibold shadow-2xs transition-all hover:bg-black/5"
-                :disabled="isGoogleLoading || isLoading"
+            <!-- Google Sign Up -->
+            <button
+                type="button"
                 @click="handleGoogleLogin"
+                :disabled="isGoogleLoading || isLoading"
+                class="flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-card text-sm font-semibold text-foreground shadow-xs transition-all hover:bg-muted/60 hover:shadow-sm active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
             >
                 <Loader2
                     v-if="isGoogleLoading"
-                    class="h-4 w-4 animate-spin text-[#e07c28]"
+                    class="h-4 w-4 animate-spin text-brand"
                 />
                 <template v-else>
                     <svg class="h-4 w-4" viewBox="0 0 24 24">
@@ -302,73 +266,149 @@ async function handleGoogleLogin() {
                     </svg>
                     <span>Daftar Cepat dengan Google</span>
                 </template>
-            </Button>
+            </button>
 
-            <div class="relative my-5 flex items-center justify-center">
+            <!-- Divider -->
+            <div class="relative my-6 flex items-center justify-center">
                 <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-black/10" />
+                    <div class="w-full border-t border-border" />
                 </div>
                 <span
-                    class="relative bg-white px-3 text-[11px] font-medium tracking-wider text-[#9090a0] uppercase"
+                    class="relative bg-card px-3 text-[11px] font-semibold tracking-widest text-muted-foreground uppercase"
                 >
                     atau isi form
                 </span>
             </div>
 
-            <form
-                class="flex flex-col gap-3.5"
-                @submit.prevent="handleRegister"
-            >
-                <div class="flex flex-col gap-1">
+            <!-- Registration Form -->
+            <form @submit.prevent="handleRegister" class="flex flex-col gap-4">
+                <div>
                     <label
-                        class="flex items-center gap-1.5 text-xs font-bold text-[#1c1c22]"
+                        class="mb-1.5 block text-xs font-bold text-foreground"
                     >
-                        <User class="h-3.5 w-3.5 text-[#9090a0]" /> Nama Lengkap
+                        Nama Lengkap
                     </label>
-                    <Input
-                        v-model="name"
-                        type="text"
-                        placeholder="Nama Anda"
-                        required
-                        class="h-10"
-                    />
+                    <div class="relative">
+                        <User
+                            class="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
+                        <input
+                            v-model="name"
+                            type="text"
+                            placeholder="Nama Anda"
+                            required
+                            class="auth-field"
+                        />
+                    </div>
                 </div>
 
-                <div class="flex flex-col gap-1">
+                <template v-if="!isBuyerStorefront">
+                    <div>
+                        <label
+                            class="mb-1.5 block text-xs font-bold text-foreground"
+                        >
+                            Nama Toko Online *
+                        </label>
+                        <div class="relative">
+                            <Store
+                                class="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                            />
+                            <input
+                                v-model="storeName"
+                                type="text"
+                                placeholder="Contoh: NovaBatik Studio"
+                                required
+                                class="auth-field"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label
+                            class="mb-1.5 block text-xs font-bold text-foreground"
+                        >
+                            Slug Toko *
+                        </label>
+                        <div class="relative">
+                            <span
+                                class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+                                >/</span
+                            >
+                            <input
+                                v-model="storeSlug"
+                                type="text"
+                                placeholder="nova-batik"
+                                required
+                                class="auth-field pl-8"
+                                @input="slugTouched = true"
+                            />
+                        </div>
+                        <p class="mt-1.5 text-[11px] text-muted-foreground">
+                            URL toko:
+                            <span class="font-semibold text-foreground"
+                                >/{{ storeSlug || 'slug-toko' }}</span
+                            >
+                        </p>
+                    </div>
+                </template>
+
+                <div>
                     <label
-                        class="flex items-center gap-1.5 text-xs font-bold text-[#1c1c22]"
+                        class="mb-1.5 block text-xs font-bold text-foreground"
                     >
-                        <Mail class="h-3.5 w-3.5 text-[#9090a0]" /> Email
+                        Email
                     </label>
-                    <Input
-                        v-model="email"
-                        type="email"
-                        placeholder="nama@email.com"
-                        required
-                        class="h-10"
-                    />
+                    <div class="relative">
+                        <Mail
+                            class="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
+                        <input
+                            v-model="email"
+                            type="email"
+                            placeholder="nama@email.com"
+                            required
+                            class="auth-field"
+                        />
+                    </div>
                 </div>
 
-                <div class="flex flex-col gap-1">
+                <div>
                     <label
-                        class="flex items-center gap-1.5 text-xs font-bold text-[#1c1c22]"
+                        class="mb-1.5 block text-xs font-bold text-foreground"
                     >
-                        <Lock class="h-3.5 w-3.5 text-[#9090a0]" /> Kata Sandi
+                        Kata Sandi
                     </label>
-                    <Input
-                        v-model="password"
-                        type="password"
-                        placeholder="Minimal 6 karakter"
-                        required
-                        class="h-10"
-                    />
+                    <div class="relative">
+                        <Lock
+                            class="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        />
+                        <input
+                            v-model="password"
+                            :type="showPassword ? 'text' : 'password'"
+                            placeholder="Minimal 6 karakter"
+                            required
+                            class="auth-field pr-11"
+                        />
+                        <button
+                            type="button"
+                            @click="showPassword = !showPassword"
+                            class="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                            :aria-label="
+                                showPassword
+                                    ? 'Sembunyikan kata sandi'
+                                    : 'Tampilkan kata sandi'
+                            "
+                        >
+                            <EyeOff v-if="showPassword" class="h-4 w-4" />
+                            <Eye v-else class="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
 
-                <Button
+                <button
                     type="submit"
-                    variant="amber"
-                    class="mt-3 flex h-11 w-full items-center justify-center gap-2 text-xs font-bold shadow-md"
                     :disabled="isLoading || isGoogleLoading"
+                    class="group mt-1 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-sm font-bold text-brand-foreground shadow-lg shadow-brand/25 transition-all hover:brightness-110 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
                 >
                     <Loader2 v-if="isLoading" class="h-4 w-4 animate-spin" />
                     <template v-else>
@@ -379,29 +419,22 @@ async function handleGoogleLogin() {
                                 : 'Buat Toko Sekarang'
                         }}</span>
                     </template>
-                </Button>
+                </button>
             </form>
-        </Card>
+        </div>
 
-        <div class="text-center text-xs text-[#9090a0]">
+        <!-- Bottom Link -->
+        <div class="mt-6 text-center text-sm text-muted-foreground">
             Sudah punya akun?
             <a
-                :href="
-                    isBuyerStorefront && props.store
-                        ? `/${props.store.slug}/login`
-                        : '/login'
-                "
-                class="ml-1 font-bold text-[#e07c28] hover:underline"
-                @click.prevent="
-                    router.visit(
-                        isBuyerStorefront && props.store
-                            ? `/${props.store.slug}/login`
-                            : '/login',
-                    )
-                "
+                :href="loginUrl"
+                @click.prevent="router.visit(loginUrl)"
+                class="ml-1 font-bold text-brand hover:underline"
             >
                 Masuk di sini
             </a>
         </div>
+
+        <Toaster position="top-right" />
     </AuthLayout>
 </template>

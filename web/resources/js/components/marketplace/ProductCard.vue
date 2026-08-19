@@ -97,6 +97,16 @@ function formatSold(n: number): string {
 
         <!-- ── Product Info (Dynamic Theme Tint) ── -->
         <div class="flex flex-1 flex-col gap-1.5 p-3.5 transition-colors duration-300">
+            <!-- Category & SKU -->
+            <div v-if="product.sku || product.cat" class="flex items-center justify-between gap-1.5">
+                <span v-if="product.cat" class="truncate rounded-md bg-brand-surface px-1.5 py-0.5 text-[8px] font-black tracking-widest text-brand uppercase">
+                    {{ product.cat }}
+                </span>
+                <span v-if="product.sku" class="truncate font-mono text-[9px] font-bold text-muted-foreground/70">
+                    SKU: {{ product.sku }}
+                </span>
+            </div>
+
             <!-- Product name — 2 lines max -->
             <p class="line-clamp-2 text-xs leading-snug font-extrabold text-foreground group-hover:text-brand-strong transition-colors">
                 {{ product.name }}
@@ -114,16 +124,22 @@ function formatSold(n: number): string {
                 </p>
             </div>
 
-            <!-- Rating + Sold -->
-            <div class="mt-auto flex items-center gap-1.5 border-t border-brand/15 pt-2">
-                <div class="flex items-center gap-0.5">
-                    <Star class="h-3.5 w-3.5 fill-amber-400 stroke-amber-400" />
-                    <span class="text-[10px] font-extrabold text-muted-foreground">{{
-                        product.rating
-                        }}</span>
+            <!-- Rating + Sold + Stock -->
+            <div class="mt-auto flex items-center justify-between border-t border-brand/15 pt-2">
+                <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-0.5">
+                        <Star class="h-3.5 w-3.5 fill-accent stroke-accent" />
+                        <span class="text-[10px] font-extrabold text-muted-foreground">{{
+                            product.rating
+                            }}</span>
+                    </div>
+                    <span class="text-[10px] text-muted">·</span>
+                    <span class="text-[10px] font-semibold text-muted-foreground">{{ formatSold(product.sold) }} terjual</span>
                 </div>
-                <span class="text-[10px] text-muted">·</span>
-                <span class="text-[10px] font-semibold text-muted-foreground">{{ formatSold(product.sold) }} terjual</span>
+                
+                <span v-if="product.stock !== undefined" class="text-[9px] font-bold" :class="product.stock > 5 ? 'text-muted-foreground' : 'text-destructive'">
+                    Sisa {{ product.stock }}
+                </span>
             </div>
         </div>
     </div>

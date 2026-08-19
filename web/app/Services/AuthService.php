@@ -3,13 +3,16 @@
 namespace App\Services;
 
 use App\Actions\CreateTenantAndStore;
-use App\Exceptions\InvalidGoogleTokenException;
+use App\DTO\Auth\LoginDTO;
+use App\DTO\Auth\RegisterDTO;
 use App\Models\User;
 use App\Repositories\StoreRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class AuthService
 {
@@ -20,12 +23,9 @@ class AuthService
         protected StoreRepository $storeRepository
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $credentials
-     */
-    public function login(array $credentials, ?int $storeId = null): bool
+    public function login(LoginDTO $dto, ?int $storeId = null): bool
     {
-        $buyerCredentials = $credentials;
+        $buyerCredentials = $dto->toArray();
         $buyerCredentials['store_id'] = $storeId;
 
         if (Auth::attempt($buyerCredentials, true)) {
@@ -35,12 +35,12 @@ class AuthService
         }
 
         if ($storeId !== null) {
-            $globalCredentials = $credentials;
+            $globalCredentials = $dto->toArray();
             $globalCredentials['store_id'] = null;
 
-            $user = $this->userRepository->findByEmail($credentials['email'], null);
+            $user = $this->userRepository->findByEmail($dto->email, null);
 
-            if ($user && in_array($user->role, ['seller', 'admin'])) {
+            if ($user && in_array($user->role, ['seller', 'admin'], true)) {
                 if (Auth::attempt($globalCredentials, true)) {
                     request()->session()->regenerate();
 
@@ -52,29 +52,31 @@ class AuthService
         return false;
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function register(array $data): bool
+    public function register(RegisterDTO $dto, ?int $storeId = null): bool
     {
-        $role = $data['role'] ?? ($data['store_name'] ? 'seller' : 'buyer');
+        $role = $storeId ? 'buyer' : 'seller';
 
         $user = $this->userRepository->createUser([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'password' => $dto->password,
             'role' => $role,
-            'store_id' => $data['store_id'] ?? null,
+            'store_id' => $storeId,
             'auth_provider' => 'email',
         ]);
 
-        if ($role === 'seller' && ! empty($data['store_name'])) {
-            $slug = $this->resolveStoreSlug($data);
-            ($this->createTenantAndStore)($user->id, $data['store_name'], $slug);
+        if ($role === 'seller' && filled($dto->storeName)) {
+            $slug = $this->resolveStoreSlug([
+                'store_slug' => $dto->storeSlug,
+                'store_name' => $dto->storeName,
+            ]);
+            ($this->createTenantAndStore)($user->id, $dto->storeName, $slug, $dto->referralCode);
         }
 
         Auth::login($user, true);
         request()->session()->regenerate();
+
+        $user->sendEmailVerificationNotification();
 
         return true;
     }
@@ -88,9 +90,9 @@ class AuthService
     {
         try {
             $identity = $this->firebaseAuthService->verifyIdToken($data['id_token']);
-        } catch (InvalidGoogleTokenException $e) {
+        } catch (RuntimeException $e) {
             throw ValidationException::withMessages([
-                'id_token' => 'Token Google tidak valid. Silakan coba lagi.',
+                'id_token' => $e->getMessage() ?: 'Token Google tidak valid. Silakan coba lagi.',
             ]);
         }
 
@@ -101,10 +103,11 @@ class AuthService
         }
 
         $storeId = $data['store_id'] ?? null;
-        $intent = $data['intent'] ?? ($storeId ? 'login' : 'login');
+        $intent = $data['intent'] ?? 'login';
 
         $user = $this->userRepository->findByFirebaseUid($identity['uid'], $storeId)
-            ?? $this->userRepository->findByEmail($identity['email'], $storeId);
+            ?? $this->userRepository->findByEmail($identity['email'], $storeId)
+            ?? $this->userRepository->findByEmailGlobal($identity['email']);
 
         if ($user === null && $intent === 'register') {
             $role = $storeId ? 'buyer' : 'seller';
@@ -115,19 +118,25 @@ class AuthService
                 ]);
             }
 
-            $user = $this->userRepository->createUser([
-                'name' => $identity['name'] ?: strstr($identity['email'], '@', true) ?: 'User',
-                'email' => $identity['email'],
-                'role' => $role,
-                'store_id' => $storeId,
-                'auth_provider' => 'google',
-                'firebase_uid' => $identity['uid'],
-                'avatar' => $identity['picture'],
-            ]);
+            try {
+                $user = $this->userRepository->createUser([
+                    'name' => $identity['name'] ?: strstr($identity['email'], '@', true) ?: 'User',
+                    'email' => $identity['email'],
+                    'role' => $role,
+                    'store_id' => $storeId,
+                    'auth_provider' => 'google',
+                    'firebase_uid' => $identity['uid'],
+                ]);
+                $user->forceFill(['email_verified_at' => now()])->save();
+            } catch (UniqueConstraintViolationException $e) {
+                throw ValidationException::withMessages([
+                    'id_token' => 'Email sudah terdaftar. Silakan login dengan Google atau akun yang sama.',
+                ]);
+            }
 
             if ($role === 'seller') {
                 $slug = $this->resolveStoreSlug($data);
-                ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug);
+                ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug, $this->referralCodeFromRequest());
             }
         }
 
@@ -137,18 +146,63 @@ class AuthService
             ]);
         }
 
-        if ($user->firebase_uid !== $identity['uid']) {
+        if ($intent === 'register' && $storeId === null) {
+            $this->ensureSellerStoreFromGoogle($user, $data, $identity);
+        }
+
+        if ($user->firebase_uid !== $identity['uid'] || ! $user->hasVerifiedEmail()) {
             $user->forceFill([
                 'firebase_uid' => $identity['uid'],
                 'auth_provider' => 'google',
-                'avatar' => $identity['picture'] ?: $user->avatar,
+                'avatar' => $identity['picture'] ?? $user->avatar,
+                'email_verified_at' => $user->email_verified_at ?? now(),
             ])->save();
         }
 
         Auth::login($user, true);
         request()->session()->regenerate();
 
-        return $user;
+        return $user->fresh();
+    }
+
+    /**
+     * Promote an existing buyer (or seller without a store) when registering a shop via Google.
+     *
+     * @param  array{store_name?: string|null, store_slug?: string|null}  $data
+     * @param  array{uid: string, email: string|null, name: string|null}  $identity
+     */
+    protected function ensureSellerStoreFromGoogle(User $user, array $data, array $identity): void
+    {
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        $needsStore = ! $user->tenants()->exists();
+
+        if (! $user->isSeller() || $user->store_id !== null) {
+            if (empty($data['store_name']) && $needsStore) {
+                throw ValidationException::withMessages([
+                    'store_name' => 'Nama toko wajib diisi untuk daftar seller.',
+                ]);
+            }
+
+            $user->forceFill([
+                'role' => 'seller',
+                'store_id' => null,
+                'name' => $identity['name'] ?: $user->name,
+            ])->save();
+        }
+
+        if ($needsStore) {
+            if (empty($data['store_name'])) {
+                throw ValidationException::withMessages([
+                    'store_name' => 'Nama toko wajib diisi untuk daftar seller.',
+                ]);
+            }
+
+            $slug = $this->resolveStoreSlug($data);
+            ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug, $this->referralCodeFromRequest());
+        }
     }
 
     public function logout(): void
@@ -177,5 +231,13 @@ class AuthService
         }
 
         return $slug;
+    }
+
+    protected function referralCodeFromRequest(): ?string
+    {
+        $request = request();
+        $code = $request->input('referral_code') ?: $request->cookie((string) config('referral.cookie', 'ref_code'));
+
+        return $code ? strtoupper((string) $code) : null;
     }
 }

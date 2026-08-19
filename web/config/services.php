@@ -37,7 +37,50 @@ return [
 
     'firebase' => [
         'credentials' => env('FIREBASE_CREDENTIALS'),
-        'project_id' => env('FIREBASE_PROJECT_ID', env('VITE_FIREBASE_PROJECT_ID')),
+        'project_id' => preg_replace(
+            '/\.(firebaseapp\.com|web\.app)$/i',
+            '',
+            (string) env('FIREBASE_PROJECT_ID', env('VITE_FIREBASE_PROJECT_ID')),
+        ),
+    ],
+
+    'payment' => [
+        'default' => env('PAYMENT_PROVIDER', 'midtrans'),
+    ],
+
+    'midtrans' => [
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'is_production' => (bool) env('MIDTRANS_IS_PRODUCTION', false),
+        'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
+    ],
+
+    'shipping' => [
+        'provider' => env('SHIPPING_PROVIDER', 'rajaongkir'),
+        'origin_city' => env('SHIPPING_ORIGIN_CITY', 'Jakarta Selatan'),
+        'origin_postal_code' => env('SHIPPING_ORIGIN_POSTAL_CODE', '12190'),
+        'couriers' => env('SHIPPING_COURIERS', 'jne:jnt:sicepat'),
+    ],
+
+    'rajaongkir' => [
+        'key' => env('RAJAONGKIR_API_KEY'),
+        'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1'),
+    ],
+
+    'biteship' => [
+        'key' => env('BITESHIP_API_KEY'),
+        'base_url' => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
+    ],
+
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'base_url' => env('WHATSAPP_BASE_URL', 'https://graph.facebook.com/v21.0'),
+    ],
+
+    'cloudflare' => [
+        'token' => env('CLOUDFLARE_API_TOKEN'),
+        'zone_id' => env('CLOUDFLARE_ZONE_ID'),
     ],
 
 ];

@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import { useStorage } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
@@ -19,7 +19,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
     }
 
     function syncToBackend(id: number, added: boolean) {
-        const storeSlug = (router.page.props.store as any)?.slug ?? '';
+        const storeSlug = usePage().props.store?.slug ?? '';
         const url = storeSlug ? `/${storeSlug}/wishlist/${id}` : `/wishlist/${id}`;
         
         fetch(url, {
@@ -38,21 +38,31 @@ export const useWishlistStore = defineStore('wishlist', () => {
             if (res.status === 401) {
                 // Not authenticated
                 toast.error('Silakan login terlebih dahulu.');
+
                 // Revert local state
                 if (added) {
                     items.value = items.value.filter(i => i.id !== id);
                 }
             } else if (res.status === 403) {
                 toast.error('Akses ditolak.');
-                if (added) items.value = items.value.filter(i => i.id !== id);
+
+                if (added) {
+items.value = items.value.filter(i => i.id !== id);
+}
             } else if (!res.ok) {
                 toast.error('Gagal menyimpan wishlist.');
-                if (added) items.value = items.value.filter(i => i.id !== id);
+
+                if (added) {
+items.value = items.value.filter(i => i.id !== id);
+}
             }
         }).catch((err) => {
             console.error('Wishlist sync error:', err);
             toast.error('Gagal terhubung ke server.');
-            if (added) items.value = items.value.filter(i => i.id !== id);
+
+            if (added) {
+items.value = items.value.filter(i => i.id !== id);
+}
         });
     }
 

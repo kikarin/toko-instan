@@ -28,8 +28,8 @@ defineProps<Props>();
             class="group flex cursor-pointer items-center gap-3 rounded-2xl border p-3 transition-all duration-200"
             :class="[
                 i === 0
-                    ? 'border-amber-500/30 bg-amber-50/40 shadow-xs hover:shadow-md'
-                    : 'border-black/8 bg-white hover:border-black/15 hover:bg-zinc-50 hover:shadow-xs',
+                    ? 'border-primary/30 bg-primary/5 shadow-xs hover:shadow-md'
+                    : 'border-border bg-card hover:border-border/80 hover:bg-muted/50 hover:shadow-xs',
             ]"
         >
             <!-- Rank Badge -->
@@ -37,12 +37,12 @@ defineProps<Props>();
                 class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-black shadow-2xs"
                 :class="[
                     i === 0
-                        ? 'bg-amber-500 text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : i === 1
-                          ? 'bg-zinc-800 text-white'
+                          ? 'bg-foreground text-background'
                           : i === 2
-                            ? 'bg-zinc-600 text-white'
-                            : 'bg-zinc-100 text-zinc-500',
+                            ? 'bg-muted-foreground text-background'
+                            : 'bg-muted text-muted-foreground',
                 ]"
             >
                 <Trophy v-if="i === 0" class="h-3.5 w-3.5 text-white" />
@@ -58,26 +58,26 @@ defineProps<Props>();
 
             <div class="min-w-0 flex-1">
                 <p
-                    class="truncate text-xs font-extrabold text-[#1c1c22] transition-colors group-hover:text-amber-600"
+                    class="truncate text-xs font-extrabold text-foreground transition-colors group-hover:text-primary"
                 >
                     {{ seller.name }}
                 </p>
                 <div
-                    class="flex items-center gap-2 text-[10px] font-medium text-zinc-400"
+                    class="flex items-center gap-2 text-[10px] font-medium text-muted-foreground/80"
                 >
                     <span>{{ seller.orders }} Terjual</span>
                     <span>•</span>
                     <span
-                        class="flex items-center gap-0.5 font-bold text-amber-500"
+                        class="flex items-center gap-0.5 font-bold text-primary"
                     >
-                        <Star class="h-3 w-3 fill-amber-400 text-amber-400" />
+                        <Star class="h-3 w-3 fill-primary text-primary" />
                         {{ seller.rating }}
                     </span>
                 </div>
             </div>
 
             <div class="flex shrink-0 flex-col items-end gap-0.5 text-right">
-                <p class="font-mono text-xs font-black text-amber-600">
+                <p class="font-mono text-xs font-black text-primary">
                     {{ seller.gmv }}
                 </p>
                 <Badge

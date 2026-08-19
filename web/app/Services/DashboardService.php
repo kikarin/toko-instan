@@ -11,7 +11,8 @@ class DashboardService
     public function __construct(
         protected StoreRepository $storeRepository,
         protected OrderRepository $orderRepository,
-        protected WithdrawalRepository $withdrawalRepository
+        protected WithdrawalRepository $withdrawalRepository,
+        protected AnalyticsService $analyticsService,
     ) {}
 
     /**
@@ -80,13 +81,13 @@ class DashboardService
                 'cs' => 'rgba(34,161,90,0.12)',
             ],
             [
-                'label' => 'Escrow Pending',
-                'value' => 'Rp '.number_format($pendingEscrow, 0, ',', '.'),
+                'label' => 'Pengunjung Hari Ini',
+                'value' => number_format($this->analyticsService->visitorsToday($storeId), 0, ',', '.'),
                 'delta' => 'live',
                 'up' => null,
-                'sub' => 'menunggu settle',
-                'c' => '#d97706',
-                'cs' => 'rgba(217,119,6,0.12)',
+                'sub' => 'sesi unik',
+                'c' => '#0ea5e9',
+                'cs' => 'rgba(14,165,233,0.12)',
             ],
         ];
 
@@ -116,6 +117,7 @@ class DashboardService
             'orderFlow' => $orderFlow,
             'topSellers' => $topSellers,
             'wallet' => $wallet,
+            'charts' => $this->analyticsService->chartsForStore($storeId),
             'store' => $primaryStore ? [
                 'id' => $primaryStore->id,
                 'name' => $primaryStore->name,

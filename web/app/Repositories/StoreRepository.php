@@ -46,6 +46,11 @@ class StoreRepository
         return Store::where('slug', $slug)->first();
     }
 
+    public function findById(int $id): ?Store
+    {
+        return Store::find($id);
+    }
+
     /**
      * @return Collection<int, Store>
      */
@@ -95,5 +100,10 @@ class StoreRepository
         if ($store) {
             $store->increment('total_orders', 1);
         }
+    }
+
+    public function update(Store $store, array $data): bool
+    {
+        return $store->update($data);
     }
 }

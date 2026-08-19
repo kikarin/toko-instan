@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { MapPin, Plus, Pencil, Trash2, Check } from 'lucide-vue-next';
+import { onMounted, watch } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import { Switch } from '@/components/ui/switch';
 import { useAddresses } from '@/composables/useAddresses';
 import { useIndoRegions } from '@/composables/useIndoRegions';
-import { onMounted, watch } from 'vue';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import type { Address } from '@/types/address';
 
 interface Props {
@@ -41,6 +41,7 @@ onMounted(() => {
 
 watch([() => form.province, provinces], ([newProvName, provs], [oldProvName]) => {
     const prov = provs.find(p => p.name === newProvName);
+
     if (prov) {
         loadCities(prov.id);
     } else {
@@ -55,6 +56,7 @@ watch([() => form.province, provinces], ([newProvName, provs], [oldProvName]) =>
 
 watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
     const city = cits.find(c => c.name === newCityName);
+
     if (city) {
         loadDistricts(city.id);
     } else {
@@ -89,7 +91,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                 </div>
                 <Button
                     v-if="!showForm"
-                    variant="amber"
+                    variant="default"
                     size="sm"
                     @click="openNew"
                 >
@@ -207,7 +209,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                         />
                     </div>
                     <div class="flex gap-2 sm:col-span-2">
-                        <Button type="submit" variant="amber">Simpan</Button>
+                        <Button type="submit" variant="default">Simpan</Button>
                         <Button
                             type="button"
                             variant="outline"
@@ -223,7 +225,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                 <div
                     v-for="a in addresses ?? []"
                     :key="a.id"
-                    class="rounded-2xl border border-black/5 bg-white p-4 shadow-sm"
+                    class="rounded-2xl border border-border bg-white p-4 shadow-sm"
                 >
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3">
@@ -244,7 +246,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                                     </p>
                                     <Badge
                                         v-if="a.is_default"
-                                        variant="amber"
+                                        variant="default"
                                         class="px-2 py-0 text-[9px] uppercase"
                                     >
                                         Utama
@@ -276,7 +278,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                class="text-red-500 hover:bg-red-50"
+                                class="text-destructive hover:bg-destructive/10"
                                 @click="deleteTarget = a"
                             >
                                 <Trash2 class="h-3.5 w-3.5" />
@@ -310,7 +312,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                         Tambahkan alamat pengiriman pertamamu.
                     </p>
                     <Button
-                        variant="amber"
+                        variant="default"
                         size="sm"
                         class="mt-3 text-xs font-bold"
                         @click="openNew"

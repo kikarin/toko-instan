@@ -101,8 +101,9 @@ it('halaman inventory menampilkan daftar produk dan statistik', function () {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Inventory/Index')
-            ->has('products', 1)
-            ->where('products.0.id', $product->id)
+            ->has('products.data', 1)
+            ->where('products.total', 1)
+            ->where('products.data.0.id', $product->id)
             ->where('lowStockCount', 1));
 });
 

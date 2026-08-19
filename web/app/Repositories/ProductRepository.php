@@ -73,6 +73,66 @@ class ProductRepository
             ->get();
     }
 
+    public function getActiveProductsForStore(int $storeId): Collection
+    {
+        return Product::where('store_id', $storeId)
+            ->where('is_active', true)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function getActiveStoreProducts(int $storeId, ?string $category = null): Collection
+    {
+        $query = Product::where('store_id', $storeId)->where('is_active', true);
+
+        if ($category && $category !== 'Semua') {
+            $query->where('category', $category);
+        }
+
+        return $query->get();
+    }
+
+    public function getActiveStoreCategories(int $storeId): array
+    {
+        return Product::where('store_id', $storeId)
+            ->where('is_active', true)
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->values()
+            ->toArray();
+    }
+
+    public function countActiveStoreProducts(int $storeId): int
+    {
+        return Product::where('store_id', $storeId)->where('is_active', true)->count();
+    }
+
+    public function findActiveProductBySlug(int $storeId, string $slug): ?Product
+    {
+        return Product::where('store_id', $storeId)
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->with(['variants'])
+            ->first();
+    }
+
+    public function getForStorePaginated(int $storeId, int $perPage = 10)
+    {
+        return Product::where('store_id', $storeId)
+            ->orderByDesc('created_at')
+            ->paginate($perPage);
+    }
+
+    public function getInventoryStats(int $storeId, int $lowStockThreshold): array
+    {
+        return [
+            'total' => Product::where('store_id', $storeId)->count(),
+            'low_stock' => Product::where('store_id', $storeId)->where('stock', '<=', $lowStockThreshold)->count(),
+            'out_of_stock' => Product::where('store_id', $storeId)->where('stock', 0)->count(),
+        ];
+    }
+
     public function findForStore(int $id, int $storeId): ?Product
     {
         return Product::where('id', $id)->where('store_id', $storeId)->first();
@@ -93,16 +153,31 @@ class ProductRepository
             'stock' => $data->stock,
             'is_active' => $data->isActive,
             'description' => $data->description,
+            'type' => $data->type,
+            'digital_file_path' => $data->digitalFilePath,
+            'digital_file_name' => $data->digitalFileName,
+            'digital_file_mime' => $data->digitalFileMime,
             'sku' => $data->sku ?: ('NK-'.strtoupper(\Str::random(6))),
             'brand' => $data->brand ?: 'Nike',
             'weight_gram' => $data->weightGram ?: 500,
+            'variant_options' => $data->variantOptions,
+            'meta_title' => $data->metaTitle,
+            'meta_description' => $data->metaDescription,
+            'seo_tags' => $data->seoTags,
+            'marketing_caption' => $data->marketingCaption,
         ];
 
         $filtered = array_filter($attributes, function ($val, $key) {
             return Schema::hasColumn('products', $key);
         }, ARRAY_FILTER_USE_BOTH);
 
-        return Product::create($filtered);
+        $product = Product::create($filtered);
+
+        if ($data->variants !== null) {
+            $this->syncVariants($product, $data->variants);
+        }
+
+        return $product;
     }
 
     public function updateProduct(Product $product, ProductData $data): void
@@ -116,9 +191,18 @@ class ProductRepository
             'img' => $data->img,
             'is_active' => $data->isActive,
             'description' => $data->description,
+            'type' => $data->type,
+            'digital_file_path' => $data->digitalFilePath,
+            'digital_file_name' => $data->digitalFileName,
+            'digital_file_mime' => $data->digitalFileMime,
             'sku' => $data->sku,
             'brand' => $data->brand,
             'weight_gram' => $data->weightGram,
+            'variant_options' => $data->variantOptions,
+            'meta_title' => $data->metaTitle,
+            'meta_description' => $data->metaDescription,
+            'seo_tags' => $data->seoTags,
+            'marketing_caption' => $data->marketingCaption,
         ];
 
         $filtered = array_filter($attributes, function ($val, $key) {
@@ -126,6 +210,50 @@ class ProductRepository
         }, ARRAY_FILTER_USE_BOTH);
 
         $product->update($filtered);
+
+        if ($data->variants !== null) {
+            $this->syncVariants($product, $data->variants);
+        }
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $variants
+     */
+    protected function syncVariants(Product $product, array $variants): void
+    {
+        $existingVariantIds = $product->variants()->pluck('id')->toArray();
+        $updatedVariantIds = [];
+
+        foreach ($variants as $variantData) {
+            if (! empty($variantData['id']) && in_array($variantData['id'], $existingVariantIds)) {
+                // Update existing
+                $product->variants()->where('id', $variantData['id'])->update([
+                    'name' => $variantData['name'],
+                    'price' => $variantData['price'] ?? null,
+                    'stock' => $variantData['stock'] ?? 0,
+                    'sku' => $variantData['sku'] ?? null,
+                    'img' => $variantData['img'] ?? null,
+                ]);
+                $updatedVariantIds[] = $variantData['id'];
+            } else {
+                // Create new
+                $newVariant = $product->variants()->create([
+                    'name' => $variantData['name'],
+                    'price' => $variantData['price'] ?? null,
+                    'stock' => $variantData['stock'] ?? 0,
+                    'sku' => $variantData['sku'] ?? null,
+                    'img' => $variantData['img'] ?? null,
+                    'is_active' => true,
+                ]);
+                $updatedVariantIds[] = $newVariant->id;
+            }
+        }
+
+        // Delete variants that were not in the updated list
+        $variantsToDelete = array_diff($existingVariantIds, $updatedVariantIds);
+        if (! empty($variantsToDelete)) {
+            $product->variants()->whereIn('id', $variantsToDelete)->delete();
+        }
     }
 
     public function updateStock(Product $product, int $stock): void

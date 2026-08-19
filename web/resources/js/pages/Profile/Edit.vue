@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { ArrowLeft, ChevronRight, Copy, Info, Check } from 'lucide-vue-next';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -14,9 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/sonner';
 import { Textarea } from '@/components/ui/textarea';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/composables/useCart';
 import { useProfileEdit } from '@/composables/useProfileEdit';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import type { UserProfile } from '@/types/user';
 
 interface Props {
@@ -85,7 +85,7 @@ const {
 
                     <!-- Nama -->
                     <button type="button" @click="openEditModal('name', nameValue)"
-                        class="flex cursor-pointer items-center justify-between border-b border-black/5 px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
+                        class="flex cursor-pointer items-center justify-between border-b border-border px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
                         <span class="w-28 shrink-0 text-xs font-semibold text-[#9090a0]">Nama</span>
                         <span class="flex-1 truncate text-left text-xs font-semibold text-[#1c1c22]">{{ nameValue
                             }}</span>
@@ -94,7 +94,7 @@ const {
 
                     <!-- Username -->
                     <button type="button" @click="openEditModal('username', usernameValue)"
-                        class="flex cursor-pointer items-center justify-between border-b border-black/5 px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
+                        class="flex cursor-pointer items-center justify-between border-b border-border px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
                         <span class="w-28 shrink-0 text-xs font-semibold text-[#9090a0]">Username</span>
                         <span class="flex-1 truncate text-left text-xs" :class="usernameValue
                                 ? 'font-semibold text-[#1c1c22]'
@@ -107,7 +107,7 @@ const {
 
                     <!-- Bio -->
                     <button type="button" @click="openEditModal('bio', bioValue)"
-                        class="flex cursor-pointer items-center justify-between border-b border-black/5 px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
+                        class="flex cursor-pointer items-center justify-between border-b border-border px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
                         <span class="w-28 shrink-0 text-xs font-semibold text-[#9090a0]">Bio</span>
                         <span class="flex-1 truncate text-left text-xs" :class="bioValue
                                 ? 'font-semibold text-[#1c1c22]'
@@ -120,7 +120,7 @@ const {
                 </div>
 
                 <!-- Grey Divider -->
-                <div class="my-2 h-2 border-y border-black/5 bg-[#f5f4f0]" />
+                <div class="my-2 h-2 border-y border-border bg-[#f5f4f0]" />
 
                 <!-- ── Section 2: Info pribadi ── -->
                 <div class="flex flex-col">
@@ -130,7 +130,7 @@ const {
                     </div>
 
                     <!-- User ID -->
-                    <div class="flex items-center justify-between border-b border-black/5 px-4 py-3.5 sm:px-6">
+                    <div class="flex items-center justify-between border-b border-border px-4 py-3.5 sm:px-6">
                         <span class="w-28 shrink-0 text-xs font-semibold text-[#9090a0]">User ID</span>
                         <span class="flex-1 text-left font-mono text-xs font-semibold text-[#1c1c22]">{{ user.userId
                             }}</span>
@@ -148,7 +148,7 @@ const {
                             'Email tidak dapat diubah langsung demi keamanan akun.',
                         )
                         "
-                        class="flex cursor-pointer items-center justify-between border-b border-black/5 px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
+                        class="flex cursor-pointer items-center justify-between border-b border-border px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
                         <span class="w-28 shrink-0 text-xs font-semibold text-[#9090a0]">E-mail</span>
                         <span class="flex-1 truncate text-left text-xs font-semibold text-[#1c1c22]">{{ user.email
                             }}</span>
@@ -157,7 +157,7 @@ const {
 
                     <!-- Nomor HP -->
                     <button type="button" @click="openEditModal('phone', phoneValue)"
-                        class="flex cursor-pointer items-center justify-between border-b border-black/5 px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
+                        class="flex cursor-pointer items-center justify-between border-b border-border px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
                         <span class="w-28 shrink-0 text-xs font-semibold text-[#9090a0]">Nomor HP</span>
                         <div class="flex flex-1 flex-col items-start gap-1">
                             <span class="text-xs font-semibold text-[#1c1c22]">{{ phoneValue }}</span>
@@ -170,7 +170,7 @@ const {
 
                     <!-- Jenis Kelamin -->
                     <button type="button" @click="openEditModal('gender', genderValue)"
-                        class="flex cursor-pointer items-center justify-between border-b border-black/5 px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
+                        class="flex cursor-pointer items-center justify-between border-b border-border px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
                         <span class="w-28 shrink-0 text-xs font-semibold text-[#9090a0]">Jenis Kelamin</span>
                         <span class="flex-1 text-left text-xs font-semibold text-[#1c1c22]">{{ genderValue }}</span>
                         <ChevronRight class="h-4 w-4 shrink-0 text-[#9090a0]" />
@@ -178,7 +178,7 @@ const {
 
                     <!-- Tanggal Lahir -->
                     <button type="button" @click="openEditModal('birthDate', birthDateValue)"
-                        class="flex cursor-pointer items-center justify-between border-b border-black/5 px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
+                        class="flex cursor-pointer items-center justify-between border-b border-border px-4 py-3.5 text-left transition-colors hover:bg-[#faf9f6] sm:px-6">
                         <span class="w-28 shrink-0 text-xs font-semibold text-[#9090a0]">Tanggal Lahir</span>
                         <span class="flex-1 text-left text-xs font-semibold text-[#1c1c22]">{{ birthDateValue }}</span>
                         <ChevronRight class="h-4 w-4 shrink-0 text-[#9090a0]" />
@@ -231,13 +231,13 @@ const {
                     <template v-if="activeEditField === 'avatar'">
                         <Label class="text-xs font-bold text-[#1c1c22]">URL Foto Profil</Label>
                         <Input v-model="tempEditValue" type="url" placeholder="https://example.com/avatar.jpg"
-                            class="h-10 rounded-xl border-black/10 text-xs focus-visible:ring-[#e07c28]" />
+                            class="h-10 rounded-xl border-border text-xs focus-visible:ring-[#e07c28]" />
                     </template>
 
                     <!-- Text / Textarea Edit -->
                     <template v-else-if="activeEditField === 'bio'">
                         <Textarea v-model="tempEditValue" placeholder="Tulis bio tentangmu..." rows="3"
-                            class="rounded-xl border-black/10 text-xs focus-visible:ring-[#e07c28]" />
+                            class="rounded-xl border-border text-xs focus-visible:ring-[#e07c28]" />
                     </template>
 
                     <template v-else-if="activeEditField === 'gender'">
@@ -245,14 +245,14 @@ const {
                             <button type="button" @click="tempEditValue = 'Pria'"
                                 class="flex-1 rounded-xl border py-2.5 text-xs font-bold transition-all" :class="tempEditValue === 'Pria'
                                         ? 'border-[#e07c28] bg-[#fdf0e4] text-[#e07c28]'
-                                        : 'border-black/10 text-[#4a4a57]'
+                                        : 'border-border text-[#4a4a57]'
                                     ">
                                 Pria
                             </button>
                             <button type="button" @click="tempEditValue = 'Wanita'"
                                 class="flex-1 rounded-xl border py-2.5 text-xs font-bold transition-all" :class="tempEditValue === 'Wanita'
                                         ? 'border-[#e07c28] bg-[#fdf0e4] text-[#e07c28]'
-                                        : 'border-black/10 text-[#4a4a57]'
+                                        : 'border-border text-[#4a4a57]'
                                     ">
                                 Wanita
                             </button>
@@ -261,7 +261,7 @@ const {
 
                     <template v-else>
                         <Input v-model="tempEditValue" type="text" :placeholder="`Masukkan ${activeEditField}...`"
-                            class="h-10 rounded-xl border-black/10 text-xs focus-visible:ring-[#e07c28]" />
+                            class="h-10 rounded-xl border-border text-xs focus-visible:ring-[#e07c28]" />
                     </template>
                 </div>
 
@@ -269,7 +269,7 @@ const {
                     <Button variant="outline" size="sm" class="rounded-xl text-xs" @click="activeEditField = null">
                         Batal
                     </Button>
-                    <Button variant="amber" size="sm" class="rounded-xl text-xs font-bold" @click="saveField">
+                    <Button variant="default" size="sm" class="rounded-xl text-xs font-bold" @click="saveField">
                         Simpan
                     </Button>
                 </DialogFooter>

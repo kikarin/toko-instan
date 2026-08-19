@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\WithdrawalStatus;
 use App\Models\Wallet;
 use App\Models\Withdrawal;
+use App\Repositories\WithdrawalRepository;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -13,14 +14,29 @@ class WithdrawService
     public const FREE_PLAN_FEE = 5000;
 
     public function __construct(
-        protected WalletService $walletService
+        protected WalletService $walletService,
+        protected WithdrawalRepository $withdrawalRepository
     ) {}
 
     public function feeFor(Wallet $wallet): float
     {
-        $plan = $wallet->tenant?->plan;
+        $tenant = $wallet->tenant;
 
-        return $plan === null || $plan === 'free' ? self::FREE_PLAN_FEE : 0;
+        if (! $tenant) {
+            return self::FREE_PLAN_FEE;
+        }
+
+        return (float) app(SubscriptionService::class)->withdrawFeeFor($tenant);
+    }
+
+    public function getAllWithdrawals(?string $status = null)
+    {
+        return $this->withdrawalRepository->getAllWithdrawals($status);
+    }
+
+    public function getWithdrawal(int $id): Withdrawal
+    {
+        return $this->withdrawalRepository->findOrFail($id);
     }
 
     /**
@@ -76,6 +92,8 @@ class WithdrawService
             'status' => WithdrawalStatus::Approved->value,
             'approved_at' => now(),
         ]);
+
+        app(SellerAlertService::class)->notifyWithdrawalApproved($withdrawal->fresh(['tenant.user', 'wallet.tenant.user']));
     }
 
     public function markTransferred(Withdrawal $withdrawal): void

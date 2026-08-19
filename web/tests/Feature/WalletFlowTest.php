@@ -185,7 +185,7 @@ test('withdraw approve and transfer transitions', function () {
 
 test('premium plan has zero withdraw fee', function () {
     $store = Store::factory()->create();
-    $store->tenant->update(['plan' => 'pro']);
+    $store->tenant->update(['plan' => 'premium']);
 
     $order = Order::factory()->create([
         'store_id' => $store->id,
@@ -208,4 +208,12 @@ test('premium plan has zero withdraw fee', function () {
 
     expect((float) $withdrawal->fee)->toBe(0.0)
         ->and((float) $withdrawal->net_amount)->toBe(100000.0);
+
+    $wallet->refresh();
+    expect((float) $wallet->balance)->toBe(0.0)
+        ->and((float) $wallet->pending_balance)->toBe(0.0);
+
+    expect(WalletTransaction::where('wallet_id', $wallet->id)->pluck('type')->all())
+        ->toContain(WalletTransactionType::OrderDirect->value)
+        ->not->toContain(WalletTransactionType::OrderEscrow->value);
 });

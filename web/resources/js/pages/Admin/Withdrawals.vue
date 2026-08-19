@@ -92,7 +92,7 @@ function submitReject() {
                     <div
                         v-for="w in withdrawals ?? []"
                         :key="w.id"
-                        class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/5 bg-[#faf9f6] px-4 py-3"
+                        class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-[#faf9f6] px-4 py-3"
                     >
                         <div class="min-w-0">
                             <p class="text-xs font-bold text-[#1c1c22]">
@@ -120,7 +120,7 @@ function submitReject() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    class="text-[10px] text-[#22a15a] hover:bg-emerald-50"
+                                    class="text-[10px] text-emerald-600 hover:bg-emerald-500/10"
                                     @click="approve(w)"
                                 >
                                     <Check class="h-3.5 w-3.5" /> Approve
@@ -128,7 +128,7 @@ function submitReject() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    class="text-[10px] text-red-500 hover:bg-red-50"
+                                    class="text-[10px] text-destructive hover:bg-destructive/10"
                                     @click="
                                         rejectId = w.id;
                                         rejectReason = '';
@@ -142,7 +142,7 @@ function submitReject() {
                                 v-if="w.status === 'approved'"
                                 variant="ghost"
                                 size="sm"
-                                class="text-[10px] text-[#0e9f8a] hover:bg-teal-50"
+                                class="text-[10px] text-emerald-600 hover:bg-emerald-500/10"
                                 @click="transferred(w)"
                             >
                                 <Check class="h-3.5 w-3.5" /> Sudah Transfer

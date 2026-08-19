@@ -51,7 +51,7 @@ function onBackdrop() {
                             class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                             :class="
                                 tone === 'danger'
-                                    ? 'bg-red-50 text-red-500'
+                                    ? 'bg-destructive/10 text-destructive'
                                     : 'bg-[#6d4fc21a] text-[#6d4fc2]'
                             "
                         >

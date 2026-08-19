@@ -7,9 +7,9 @@ import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/composables/useCart';
 import { useWishlist } from '@/composables/useWishlist';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import type { ProductDetail } from '@/types/product';
 import type { WishlistItem } from '@/types/product';
 
@@ -113,7 +113,7 @@ function openProductDetail(product: any) {
                         v-if="wishlistCount > 0"
                         variant="outline"
                         size="sm"
-                        class="h-8 gap-1.5 border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                        class="h-8 gap-1.5 border-destructive/20 text-xs font-semibold text-destructive hover:bg-destructive/10"
                         @click="
                             () => {
                                 clearWishlist();
@@ -149,9 +149,9 @@ function openProductDetail(product: any) {
                         class="flex flex-col items-center justify-center gap-3 py-20 text-center"
                     >
                         <div
-                            class="flex h-20 w-20 items-center justify-center rounded-full border border-rose-100 bg-rose-50"
+                            class="flex h-20 w-20 items-center justify-center rounded-full border border-destructive/10 bg-destructive/5"
                         >
-                            <Heart class="h-10 w-10 text-rose-400" />
+                            <Heart class="h-10 w-10 text-destructive" />
                         </div>
                         <div>
                             <h2 class="text-base font-extrabold text-[#1c1c22]">
@@ -163,7 +163,7 @@ function openProductDetail(product: any) {
                             </p>
                         </div>
                         <Button
-                            variant="amber"
+                            variant="default"
                             size="sm"
                             class="mt-2 gap-2 rounded-xl px-6 text-xs font-bold shadow-md"
                             @click="router.visit('/' + (usePage().props.store?.slug ?? ''))"

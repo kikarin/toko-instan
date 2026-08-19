@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\DTO\Store\StoreCmsDTO;
 use App\Models\Store;
-use App\Repositories\StoreRepository;
+use App\Repositories\ProductRepository;
 use App\Services\StoreCmsService;
+use App\Services\StoreService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,7 +16,8 @@ class StoreCmsController extends Controller
 {
     public function __construct(
         protected StoreCmsService $cmsService,
-        protected StoreRepository $storeRepository
+        protected StoreService $storeService,
+        protected ProductRepository $productRepository
     ) {}
 
     public function edit(Request $request): Response|RedirectResponse
@@ -25,11 +27,8 @@ class StoreCmsController extends Controller
         if (! $store) {
             return Inertia::render('StoreSettings/Edit');
         }
-        $products = $store->products()
-            ->where('is_active', true)
-            ->orderByDesc('created_at')
-            ->get()
-            ->map(fn (Product $p) => [
+        $products = $this->productRepository->getActiveProductsForStore($store->id)
+            ->map(fn ($p) => [
                 'id' => $p->id,
                 'name' => $p->name,
                 'price' => 'Rp '.number_format($p->price, 0, ',', '.'),
@@ -49,52 +48,20 @@ class StoreCmsController extends Controller
     {
         $store = $this->storeOwnerOrFail($request->user()->id);
 
-        $validated = $request->validate([
-            'theme' => 'required|string|in:teal,sky,navy,sand,forest,custom',
-            'theme_colors.primary' => 'required|regex:/^#[0-9a-fA-F]{6}$/',
-            'theme_colors.secondary' => 'required|regex:/^#[0-9a-fA-F]{6}$/',
-            'theme_colors.accent' => 'required|regex:/^#[0-9a-fA-F]{6}$/',
-            'theme_colors.strong' => 'required|regex:/^#[0-9a-fA-F]{6}$/',
-            'showcase.hero.title' => 'nullable|string|max:255',
-            'showcase.hero.subtitle' => 'nullable|string|max:500',
-            'showcase.hero.cta_label' => 'nullable|string|max:100',
-            'showcase.hero.image' => 'nullable|url',
-            'showcase.about.title' => 'nullable|string|max:255',
-            'showcase.about.text' => 'nullable|string|max:2000',
-            'showcase.contact.show' => 'nullable|boolean',
-            'showcase.featured_product_ids' => 'nullable|array',
-            'showcase.featured_product_ids.*' => 'integer',
-            'showcase.testimonials' => 'nullable|array',
-            'showcase.testimonials.*.name' => 'nullable|string|max:255',
-            'showcase.testimonials.*.role' => 'nullable|string|max:255',
-            'showcase.testimonials.*.text' => 'nullable|string|max:2000',
-            'showcase.testimonials.*.rating' => 'nullable|integer|between:1,5',
-        ]);
-
-        $showcase = $this->cmsService->normalize($store->showcase);
-        $rawShowcase = $validated['showcase'] ?? [];
-
-        foreach ($rawShowcase as $section => $values) {
-            $showcase[$section] = array_replace($showcase[$section] ?? [], $values);
-        }
-
-        $store->update([
-            'theme' => $validated['theme'],
-            'theme_colors' => $validated['theme_colors'],
-            'showcase' => $showcase,
-        ]);
+        $dto = StoreCmsDTO::fromRequest($request);
+        $this->cmsService->updateCms($store, $dto);
 
         return redirect()->back()->with('success', 'Tampilan & konten toko berhasil diperbarui!');
     }
 
     private function storeForUser(int $userId): ?Store
     {
-        return $this->storeRepository->getStoreForUser($userId);
+        return $this->storeService->getStoreForUser($userId);
     }
 
     private function storeOwnerOrFail(int $userId): Store
     {
-        $store = $this->storeRepository->getStoreForUser($userId);
+        $store = $this->storeService->getStoreForUser($userId);
 
         if (! $store) {
             abort(404, 'Store tidak ditemukan');

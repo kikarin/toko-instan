@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Store;
+use App\DTO\Auth\LoginDTO;
+use App\DTO\Auth\RegisterDTO;
 use App\Repositories\StoreRepository;
 use App\Services\AuthService;
 use Illuminate\Http\RedirectResponse;
@@ -28,12 +29,9 @@ class AuthController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $dto = LoginDTO::fromRequest($request);
 
-        if (! $this->authService->login($credentials)) {
+        if (! $this->authService->login($dto)) {
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
@@ -53,24 +51,10 @@ class AuthController extends Controller
 
     public function register(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users')->whereNull('store_id'),
-            ],
-            'password' => ['required', 'string', 'min:6'],
-            'store_name' => ['required', 'string', 'max:255'],
-            'store_slug' => ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('stores', 'slug')],
-        ]);
+        $dto = RegisterDTO::fromRequest($request);
+        $this->authService->register($dto);
 
-        $validated['role'] = 'seller';
-
-        $this->authService->register($validated);
-
-        $user = $request->user();
-
-        return redirect()->intended($user?->homePath() ?? '/');
+        return redirect()->route('verification.notice');
     }
 
     public function google(Request $request): RedirectResponse
@@ -113,10 +97,27 @@ class AuthController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         $user = $request->user();
-        $storeSlug = null;
+        $storeSlug = $request->input('store_slug');
 
-        if ($user && $user->store_id) {
-            $store = Store::find($user->store_id);
+        if (! $storeSlug) {
+            $referer = $request->header('referer');
+            if ($referer) {
+                $path = parse_url($referer, PHP_URL_PATH);
+                if ($path) {
+                    $parts = explode('/', trim($path, '/'));
+                    if (count($parts) > 0 && ! in_array($parts[0], ['login', 'register', 'dashboard', 'admin', 'logout'])) {
+                        $possibleSlug = $parts[0];
+                        $store = $this->storeRepository->findBySlug($possibleSlug);
+                        if ($store) {
+                            $storeSlug = $possibleSlug;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (! $storeSlug && $user && $user->store_id) {
+            $store = $this->storeRepository->findById($user->store_id);
             if ($store) {
                 $storeSlug = $store->slug;
             }
@@ -151,12 +152,9 @@ class AuthController extends Controller
             abort(404);
         }
 
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $dto = LoginDTO::fromRequest($request);
 
-        if (! $this->authService->login($credentials, $store->id)) {
+        if (! $this->authService->login($dto, $store->id)) {
             throw ValidationException::withMessages([
                 'email' => 'Akun belum terdaftar di toko ini atau kata sandi salah.',
             ]);
@@ -187,22 +185,9 @@ class AuthController extends Controller
             abort(404);
         }
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users')->where('store_id', $store->id),
-            ],
-            'password' => ['required', 'string', 'min:6'],
-        ]);
+        $dto = RegisterDTO::fromRequest($request, $store->id);
+        $this->authService->register($dto, $store->id);
 
-        $validated['role'] = 'buyer';
-        $validated['store_id'] = $store->id;
-
-        $this->authService->register($validated);
-
-        $user = $request->user();
-
-        return redirect()->intended($user?->homePath() ?? '/');
+        return redirect()->route('verification.notice');
     }
 }
