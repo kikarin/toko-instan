@@ -3,6 +3,7 @@
 use App\Http\Middleware\CaptureReferral;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\EnsureSellerApi;
+use App\Http\Middleware\EnsureStoreAccess;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyTenant;
 use App\Http\Middleware\RecordStoreVisit;

@@ -17,39 +17,6 @@ export interface ShippingQuote {
     description: string;
 }
 
-export const PAYMENT_METHODS = [
-    {
-        id: 'qris',
-        name: 'QRIS (All Bank & E-Wallet)',
-        desc: 'BCA, Mandiri, GoPay, ShopeePay via Midtrans',
-        icon: '📱',
-    },
-    {
-        id: 'va',
-        name: 'Virtual Account Bank',
-        desc: 'BCA, Mandiri, BNI, BRI via Midtrans',
-        icon: '🏦',
-    },
-    {
-        id: 'ewallet',
-        name: 'E-Wallet',
-        desc: 'GoPay, ShopeePay via Midtrans',
-        icon: '💳',
-    },
-    {
-        id: 'transfer',
-        name: 'Transfer Manual',
-        desc: 'Transfer bank lalu upload bukti',
-        icon: '📄',
-    },
-    {
-        id: 'cod',
-        name: 'Bayar di Tempat (COD)',
-        desc: 'Bayar tunai ke kurir saat barang sampai',
-        icon: '💵',
-    },
-];
-
 export function useCheckout(cartItems: ComputedRef<CartItem[]>) {
     const { clear: clearCart } = useCart();
     const activeUser = useActiveUser();
@@ -129,7 +96,6 @@ export function useCheckout(cartItems: ComputedRef<CartItem[]>) {
     const isLoadingRates = ref(false);
 
     const couriers = ref<ShippingQuote[]>([]);
-    const paymentMethods = PAYMENT_METHODS;
 
     const selectedCourier = ref('');
     const selectedPayment = ref('qris');
@@ -428,7 +394,6 @@ export function useCheckout(cartItems: ComputedRef<CartItem[]>) {
         isLoading,
         isLoadingRates,
         couriers,
-        paymentMethods,
         subtotal,
         currentShippingFee,
         discount,

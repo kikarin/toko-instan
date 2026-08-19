@@ -18,6 +18,8 @@ import {
     ChevronRight as ChevronRightIcon,
     ShoppingCart,
     LayoutGrid,
+    ArrowUp,
+    ArrowDown,
 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import ProductCard from '@/components/marketplace/ProductCard.vue';
@@ -444,14 +446,14 @@ function openProductDetail(product: any) {
                                     ? 'border-primary bg-primary/10 text-primary'
                                     : 'border-border bg-card hover:bg-muted'
                                     ">
-                                Harga ↑
+                                Harga <ArrowUp class="inline h-3.5 w-3.5" />
                             </button>
                             <button @click="sortOption = 'price_desc'"
                                 class="cursor-pointer rounded-lg border px-3 py-1.5 font-bold transition-all" :class="sortOption === 'price_desc'
                                     ? 'border-primary bg-primary/10 text-primary'
                                     : 'border-border bg-card hover:bg-muted'
                                     ">
-                                Harga ↓
+                                Harga <ArrowDown class="inline h-3.5 w-3.5" />
                             </button>
                         </div>
                     </div>

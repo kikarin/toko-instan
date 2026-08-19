@@ -123,11 +123,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(fu
 
 $reservedStoreSlugs = 'admin|login|register|dashboard|horizon|uploads|products|inventory|wallet|catalog|customers|profile|forgot-password|reset-password|auth|up|email|otp-login|webhooks|media|vouchers|tax-reports|blog|chats|developer|api|referral|faqs|help|support|store-domain';
 
-Route::middleware(['auth', 'verified'])->prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->group(function () {
-    Route::post('/shipping/quote', [ShippingController::class, 'quote'])->name('shipping.quote');
-    Route::post('/vouchers/preview', [CheckoutVoucherController::class, 'preview'])->name('vouchers.preview');
-});
-
 Route::middleware(['auth', 'verified', 'role:buyer'])->prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
@@ -145,6 +140,11 @@ Route::middleware(['auth', 'verified', 'role:buyer'])->prefix('{store_slug}')->w
 
 // Public checkout — guests can buy without logging in. Logged-in users are
 // restricted to their own store (guests roam freely).
+Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->group(function () {
+    Route::post('/shipping/quote', [ShippingController::class, 'quote'])->name('shipping.quote');
+    Route::post('/vouchers/preview', [CheckoutVoucherController::class, 'preview'])->name('vouchers.preview');
+});
+
 Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->middleware('store.access')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout', [CheckoutController::class, 'store']);

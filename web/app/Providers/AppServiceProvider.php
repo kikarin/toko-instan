@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\AiProvider;
 use App\Contracts\DomainGateway;
-// use App\Contracts\PaymentGateway;
+use App\Contracts\PaymentGateway;
 use App\Contracts\WhatsAppGateway;
 use App\Gateways\CloudflareDomainGateway;
 use App\Gateways\FakeAiProvider;
@@ -22,7 +22,6 @@ use App\Observers\ProductObserver;
 use App\Observers\StockMovementObserver;
 use App\Observers\StoreObserver;
 use App\Observers\WithdrawalObserver;
-use App\Services\Payments\Contracts\PaymentGateway;
 use App\Services\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;

@@ -20,7 +20,6 @@ import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
-import { useActiveUser } from '@/composables/useActiveUser';
 import { useCart } from '@/composables/useCart';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import SeoHead, { type SeoMeta } from '@/components/SeoHead.vue';
@@ -57,14 +56,6 @@ return '0';
 }
 
 function handleAddToCart() {
-    if (!activeUser.value) {
-        toast.error('Silakan login untuk menambahkan ke keranjang');
-        const store = usePage().props.store as any;
-        router.visit(store?.slug ? `/${store.slug}/login` : '/login');
-
-        return;
-    }
-
     const rawPrice =
         selectedVariant.value?.priceNum ||
         props.product.priceNum ||
@@ -149,6 +140,8 @@ function onReviewPhoto(e: Event) {
     const input = e.target as HTMLInputElement;
     reviewPhoto.value = input.files?.[0] ?? null;
 }
+
+function submitReview() {
     const slug = (usePage().props.store as { slug?: string })?.slug ?? props.store.slug;
     const data = new FormData();
     data.append('rating', String(reviewRating.value));

@@ -94,8 +94,11 @@ class PaymentController extends Controller
         $payment = Payment::query()
             ->whereHas('order', function ($q) use ($orderNumber, $storeSlug, $request) {
                 $q->where('order_number', $orderNumber)
-                    ->where('customer_email', $request->user()->email)
                     ->whereHas('store', fn ($sq) => $sq->where('slug', $storeSlug));
+
+                if ($email = $request->user()?->email) {
+                    $q->where('customer_email', $email);
+                }
             })
             ->latest('id')
             ->firstOrFail();

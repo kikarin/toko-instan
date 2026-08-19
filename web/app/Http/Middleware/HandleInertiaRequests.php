@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Controllers\AdminController;
+use App\Models\Order;
 use App\Models\Store;
 use App\Repositories\StoreRepository;
 use App\Services\StoreCmsService;
@@ -60,6 +61,7 @@ class HandleInertiaRequests extends Middleware
                     'unread' => $request->user()->unreadNotifications()->count(),
                 ]
                 : null,
+            'pending_orders' => $this->pendingOrdersCount($request),
         ];
     }
 
@@ -144,5 +146,25 @@ class HandleInertiaRequests extends Middleware
         }
 
         return $this->storeRepository->getStoreForUser($user->id);
+    }
+
+    private function pendingOrdersCount(Request $request): ?int
+    {
+        $user = $request->user();
+
+        if (! $user || $user->role !== 'seller') {
+            return null;
+        }
+
+        $store = $this->resolveSharedStore($request);
+
+        if (! $store) {
+            return null;
+        }
+
+        return Order::query()
+            ->where('store_id', $store->id)
+            ->where('status', 'pending')
+            ->count();
     }
 }

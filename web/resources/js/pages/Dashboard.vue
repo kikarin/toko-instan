@@ -10,6 +10,7 @@ import {
     Box,
     Eye,
     Landmark,
+    Waves,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import KpiCard from '@/components/dashboard/KpiCard.vue';
@@ -95,7 +96,8 @@ const {
                         <h1
                             class="text-2xl font-black tracking-tight text-primary-foreground sm:text-3xl"
                         >
-                            Selamat Datang, {{ storeName }} 👋
+                            Selamat Datang, {{ storeName }}
+                            <Waves class="inline h-5 w-5" />
                         </h1>
                         <p class="max-w-2xl text-xs text-primary-foreground/80 sm:text-sm">
                             Pantau kesehatan finansial toko Anda, kelola alur

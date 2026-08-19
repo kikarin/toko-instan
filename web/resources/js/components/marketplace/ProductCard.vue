@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Heart, Star, ShoppingCart } from 'lucide-vue-next';
+import { Heart, Star, ShoppingCart, Zap } from 'lucide-vue-next';
 import { toast } from '@/components/ui/sonner';
 import { useWishlist } from '@/composables/useWishlist';
 import type { MarketplaceProduct } from '@/types/product';
@@ -89,8 +89,8 @@ function formatSold(n: number): string {
             <div v-if="product.freeShipping"
                 class="absolute right-0 bottom-0 left-0 flex items-center gap-1 bg-gradient-to-t from-black/70 to-transparent px-2.5 pt-4 pb-1.5">
                 <span
-                    class="rounded-md px-1.5 py-0.5 text-[9px] font-black tracking-wider text-brand-foreground uppercase shadow-xs bg-brand">
-                    ⚡ Gratis Ongkir
+                    class="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-black tracking-wider text-brand-foreground uppercase shadow-xs bg-brand">
+                    <Zap class="h-2.5 w-2.5" /> Gratis Ongkir
                 </span>
             </div>
         </div>

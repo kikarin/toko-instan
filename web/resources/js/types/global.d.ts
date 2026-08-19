@@ -21,6 +21,8 @@ declare module '@inertiajs/core' {
             auth: Auth;
             store: StorefrontInfo | null;
             sidebarOpen: boolean;
+            pending_orders: number | null;
+            notifications: { unread: number } | null;
             [key: string]: unknown;
         };
     }
