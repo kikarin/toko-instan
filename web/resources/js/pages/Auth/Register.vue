@@ -96,6 +96,7 @@ async function handleRegister() {
               store_slug: storeSlug.value,
               email: email.value,
               password: password.value,
+              referral_code: new URLSearchParams(window.location.search).get('ref') || '',
           };
 
     router.post(registerUrl.value, payload, {
@@ -152,6 +153,7 @@ async function handleGoogleLogin() {
             intent: 'register',
             store_name: isBuyerStorefront.value ? null : storeName.value,
             store_slug: isBuyerStorefront.value ? null : storeSlug.value,
+            referral_code: new URLSearchParams(window.location.search).get('ref') || '',
             store_slug_context: isBuyerStorefront.value
                 ? (props.store?.slug ?? null)
                 : null,

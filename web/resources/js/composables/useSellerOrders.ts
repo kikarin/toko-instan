@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/vue3';
-import { computed, ref, watch  } from 'vue';
-import type {ComputedRef} from 'vue';
+import { computed, ref, watch } from 'vue';
+import type { ComputedRef } from 'vue';
 import { toast } from '@/components/ui/sonner';
 import type { SellerOrder } from '@/types/order';
 
@@ -14,6 +14,7 @@ export const ORDER_STATUS_BADGE: Record<
     pending: { label: 'Menunggu Bayar', variant: 'amber' },
     paid: { label: 'Sudah Dibayar', variant: 'teal' },
     processing: { label: 'Diproses Seller', variant: 'violetSolid' },
+    packed: { label: 'Dikemas', variant: 'violetSolid' },
     shipped: { label: 'Dikirim', variant: 'teal' },
     completed: { label: 'Selesai', variant: 'teal' },
     cancelled: { label: 'Dibatalkan', variant: 'rose' },
@@ -26,14 +27,12 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
     const perPage = ref(5);
     const expandedOrders = ref<Record<number, boolean>>({});
 
-    // Dynamic KPI metrics computed directly from orders (No Hardcoding)
     const totalOrdersCount = computed(() => orders.value.length);
 
     const pendingCount = computed(
         () =>
-            orders.value.filter(
-                (o) => o.status.toLowerCase() === 'pending',
-            ).length,
+            orders.value.filter((o) => o.status.toLowerCase() === 'pending')
+                .length,
     );
 
     const processingCount = computed(
@@ -43,18 +42,22 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
             ).length,
     );
 
+    const packedCount = computed(
+        () =>
+            orders.value.filter((o) => o.status.toLowerCase() === 'packed')
+                .length,
+    );
+
     const shippedCount = computed(
         () =>
-            orders.value.filter(
-                (o) => o.status.toLowerCase() === 'shipped',
-            ).length,
+            orders.value.filter((o) => o.status.toLowerCase() === 'shipped')
+                .length,
     );
 
     const completedCount = computed(
         () =>
-            orders.value.filter(
-                (o) => o.status.toLowerCase() === 'completed',
-            ).length,
+            orders.value.filter((o) => o.status.toLowerCase() === 'completed')
+                .length,
     );
 
     const totalRevenueSum = computed(() => {
@@ -71,7 +74,6 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
         }).format(val);
     }
 
-    // Filtered Orders Computation
     const filteredOrders = computed(() => {
         let list = orders.value;
 
@@ -87,16 +89,15 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
                 (o) =>
                     o.order_number.toLowerCase().includes(q) ||
                     o.customer_name.toLowerCase().includes(q) ||
-                    o.customer_email.toLowerCase().includes(q) ||
-                    o.customer_phone.toLowerCase().includes(q),
+                    o.customer_email.toLowerCase().includes(q),
             );
         }
 
         return list;
     });
 
-    const totalPages = computed(
-        () => Math.ceil(filteredOrders.value.length / perPage.value) || 1,
+    const totalPages = computed(() =>
+        Math.max(1, Math.ceil(filteredOrders.value.length / perPage.value)),
     );
 
     const paginatedOrders = computed(() => {
@@ -147,15 +148,15 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
     function updateOrderStatus(
         orderId: number,
         newStatus: string,
-        trackingNumber?: string | null,
-        trackingCourier?: string | null,
+        trackingNumber?: string,
     ) {
         router.patch(
             `/orders/${orderId}/status`,
             {
                 status: newStatus,
-                tracking_number: trackingNumber,
-                tracking_courier: trackingCourier,
+                ...(trackingNumber
+                    ? { tracking_number: trackingNumber }
+                    : {}),
             },
             {
                 preserveScroll: true,
@@ -171,6 +172,22 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
         );
     }
 
+    function confirmPayment(paymentId: number) {
+        router.post(
+            `/payments/${paymentId}/confirm`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success('Pembayaran dikonfirmasi (Paid).');
+                },
+                onError: () => {
+                    toast.error('Gagal konfirmasi pembayaran.');
+                },
+            },
+        );
+    }
+
     return {
         searchQuery,
         statusFilter,
@@ -180,6 +197,7 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
         totalOrdersCount,
         pendingCount,
         processingCount,
+        packedCount,
         shippedCount,
         completedCount,
         totalRevenueSum,
@@ -194,6 +212,7 @@ export function useSellerOrders(orders: ComputedRef<SellerOrder[]>) {
         goToPage,
         toggleExpand,
         updateOrderStatus,
+        confirmPayment,
         statusBadgeMap: ORDER_STATUS_BADGE,
     };
 }

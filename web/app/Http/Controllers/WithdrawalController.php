@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\Wallet\WithdrawalRequestDTO;
 use App\Repositories\WithdrawalRepository;
+use App\Services\SubscriptionService;
 use App\Services\WalletService;
 use App\Services\WithdrawService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -17,7 +18,8 @@ class WithdrawalController extends Controller
     public function __construct(
         protected WithdrawService $withdrawService,
         protected WithdrawalRepository $withdrawalRepository,
-        protected WalletService $walletService
+        protected WalletService $walletService,
+        protected SubscriptionService $subscriptionService,
     ) {}
 
     public function index(Request $request): Response
@@ -35,11 +37,14 @@ class WithdrawalController extends Controller
             ? $this->walletService->getTransactionsPaginated($wallet->id, 10, $request->integer('page', 1))
             : null;
 
+        $plan = $tenant ? $this->subscriptionService->summaryFor($tenant) : null;
+
         return Inertia::render('Wallet/Index', [
             'wallet' => $wallet ? [
                 'balance' => 'Rp '.number_format((float) $wallet->balance, 0, ',', '.'),
                 'pending_balance' => 'Rp '.number_format((float) $wallet->pending_balance, 0, ',', '.'),
             ] : null,
+            'plan' => $plan,
             'withdrawals' => $withdrawals ? [
                 'data' => $withdrawals->map(fn ($w) => [
                     'id' => $w->id,

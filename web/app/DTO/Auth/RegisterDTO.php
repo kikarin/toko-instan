@@ -15,6 +15,7 @@ class RegisterDTO
         public ?string $role = null,
         public ?string $storeName = null,
         public ?string $storeSlug = null,
+        public ?string $referralCode = null,
     ) {}
 
     public static function fromRequest(Request $request, ?int $storeId = null): self
@@ -34,6 +35,7 @@ class RegisterDTO
             'role' => ['nullable', 'string', 'in:seller,buyer'],
             'store_name' => ['nullable', 'string', 'max:255'],
             'store_slug' => ['nullable', 'string', 'max:255', 'alpha_dash'],
+            'referral_code' => ['nullable', 'string', 'max:16'],
         ];
 
         if ($storeId === null) {
@@ -51,6 +53,7 @@ class RegisterDTO
             role: $storeId ? 'buyer' : 'seller',
             storeName: $validated['store_name'] ?? null,
             storeSlug: $validated['store_slug'] ?? null,
+            referralCode: $validated['referral_code'] ?? $request->cookie((string) config('referral.cookie', 'ref_code')),
         );
     }
 

@@ -15,6 +15,7 @@ export function useIndoRegions() {
 
     async function loadProvinces() {
         isLoadingProvinces.value = true;
+
         try {
             const res = await fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json');
             provinces.value = await res.json();
@@ -27,6 +28,7 @@ export function useIndoRegions() {
 
     async function loadCities(provinceId: string) {
         isLoadingCities.value = true;
+
         try {
             const res = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`);
             cities.value = await res.json();
@@ -39,6 +41,7 @@ export function useIndoRegions() {
 
     async function loadDistricts(cityId: string) {
         isLoadingDistricts.value = true;
+
         try {
             const res = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${cityId}.json`);
             districts.value = await res.json();

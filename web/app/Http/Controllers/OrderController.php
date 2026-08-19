@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\Order\UpdateOrderStatusDTO;
 use App\Services\OrderService;
+use App\Services\PaymentService;
 use App\Services\StoreService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,7 +15,8 @@ class OrderController extends Controller
 {
     public function __construct(
         protected OrderService $orderService,
-        protected StoreService $storeService
+        protected StoreService $storeService,
+        protected PaymentService $paymentService,
     ) {}
 
     public function index(Request $request, ?string $storeSlug = null): Response
@@ -27,6 +29,8 @@ class OrderController extends Controller
             $sellerOrders = $store
                 ? $this->orderService->sellerOrders($store->id)
                     ->map(function ($order) {
+                        $payment = $order->payments->sortByDesc('id')->first();
+
                         return [
                             'id' => $order->id,
                             'order_number' => $order->order_number,
@@ -34,14 +38,25 @@ class OrderController extends Controller
                             'customer_email' => $order->customer_email,
                             'customer_phone' => $order->customer_phone,
                             'shipping_address' => $order->shipping_address,
+                            'shipping_courier' => $order->shipping_courier,
+                            'shipping_cost' => (int) ($order->shipping_cost ?? 0),
+                            'tracking_number' => $order->tracking_number,
                             'store_name' => $order->store->name ?? 'Toko Resmi',
                             'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
                             'total_num' => (float) $order->total_amount,
                             'status' => strtolower($order->status),
+                            'payment_method' => $order->payment_method,
                             'created_at' => $order->created_at?->format('d M Y, H:i'),
                             'notes' => $order->notes,
-                            'tracking_number' => $order->tracking_number,
-                            'tracking_courier' => $order->tracking_courier,
+                            'payment' => $payment ? [
+                                'id' => $payment->id,
+                                'provider' => $payment->provider->value,
+                                'method' => $payment->method->value,
+                                'status' => $payment->status->value,
+                                'proof_name' => $payment->proof_name,
+                                'can_confirm' => in_array($payment->provider->value, ['manual', 'cod'], true)
+                                    && $payment->status->value !== 'paid',
+                            ] : null,
                             'items' => $order->items->map(fn ($item) => [
                                 'id' => $item->id,
                                 'product_name' => $item->name,
@@ -62,24 +77,43 @@ class OrderController extends Controller
         }
 
         $orders = $this->orderService->buyerOrders($user)
-            ->map(function ($order) {
+            ->map(function ($order) use ($storeSlug) {
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
                     'store_name' => $order->store->name ?? 'Toko Resmi',
                     'total_amount' => 'Rp '.number_format($order->total_amount, 0, ',', '.'),
                     'status' => strtolower($order->status),
-                    'created_at' => $order->created_at?->format('d M Y, H:i'),
+                    'shipping_courier' => $order->shipping_courier,
                     'tracking_number' => $order->tracking_number,
-                    'tracking_courier' => $order->tracking_courier,
-                    'tracking_url' => $this->orderService->trackingUrlFor($order),
-                    'items' => $order->items->map(fn ($item) => [
-                        'product_name' => $item->name,
-                        'sku' => $item->sku,
-                        'qty' => $item->qty,
-                        'price' => (float) $item->price,
-                        'subtotal' => (float) $item->total,
-                    ])->values()->all(),
+                    'created_at' => $order->created_at?->format('d M Y, H:i'),
+                    'items' => $order->items->map(function ($item) use ($order, $storeSlug) {
+                        $isDigital = ($item->product_type ?? 'physical') === 'digital';
+                        $canDownload = $isDigital
+                            && filled($item->digital_file_path)
+                            && in_array($order->status, ['paid', 'processing', 'packed', 'shipped', 'completed'], true);
+
+                        return [
+                            'id' => $item->id,
+                            'product_name' => $item->name,
+                            'sku' => $item->sku,
+                            'qty' => $item->qty,
+                            'price' => (float) $item->price,
+                            'subtotal' => (float) $item->total,
+                            'product_type' => $item->product_type ?? 'physical',
+                            'product_id' => $item->product_id,
+                            'product_slug' => $item->product?->slug,
+                            'can_review' => $item->product
+                                && in_array($order->status, ['paid', 'processing', 'packed', 'shipped', 'completed'], true)
+                                && $item->review === null,
+                            'download_url' => $canDownload
+                                ? route('orders.digital.download', [
+                                    'store_slug' => $storeSlug ?? $order->store?->slug,
+                                    'orderItemId' => $item->id,
+                                ])
+                                : null,
+                        ];
+                    })->values()->all(),
                 ];
             })
             ->values()

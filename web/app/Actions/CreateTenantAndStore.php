@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\Store;
 use App\Models\Tenant;
 use App\Repositories\StoreRepository;
+use App\Services\ReferralService;
 
 class CreateTenantAndStore
 {
@@ -17,8 +18,12 @@ class CreateTenantAndStore
      *
      * @return array{tenant: Tenant, store: Store}
      */
-    public function __invoke(int $userId, string $storeName, string $slug): array
+    public function __invoke(int $userId, string $storeName, string $slug, ?string $referralCode = null): array
     {
-        return $this->storeRepository->createTenantAndStore($userId, $storeName, $slug);
+        $created = $this->storeRepository->createTenantAndStore($userId, $storeName, $slug);
+        app(ReferralService::class)->ensureCode($created['tenant']);
+        app(ReferralService::class)->attachToNewTenant($created['tenant'], $referralCode);
+
+        return $created;
     }
 }

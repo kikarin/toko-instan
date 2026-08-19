@@ -2,7 +2,6 @@
 
 namespace App\Actions;
 
-use App\Jobs\ProcessImageVariants;
 use App\Services\ImageVariantService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -36,8 +35,8 @@ class UploadProductImage
             throw new RuntimeException('Upload gagal.');
         }
 
-        $variants = (new ProcessImageVariants($originalPath))
-            ->handle($this->imageVariantService);
+        $binary = $file->get() ?: (string) file_get_contents($file->getRealPath());
+        $variants = $this->imageVariantService->generateFromBinary($binary, dirname($originalPath));
 
         return [
             'path' => $variants['paths']['medium'],

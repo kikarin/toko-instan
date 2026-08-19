@@ -1,6 +1,7 @@
 import { router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
+import { useActiveUser } from '@/composables/useActiveUser';
 import { useCart } from '@/composables/useCart';
 import type { ProductDetail } from '@/types/product';
 
@@ -16,6 +17,14 @@ export function useMarketplaceCart() {
     } = useCart();
 
     function addToCart(product: ProductDetail, addQty = 1) {
+        if (!activeUser.value) {
+            toast.error('Silakan login untuk menambahkan ke keranjang');
+            const store = usePage().props.store;
+            router.visit(store?.slug ? `/${store.slug}/login` : '/login');
+
+            return;
+        }
+
         const rawPrice =
             product.priceNum ||
             parseInt(product.price.replace(/[^\d]/g, ''), 10) ||

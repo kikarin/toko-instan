@@ -3,8 +3,8 @@
 namespace App\DTO\Store;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Validator;
 
 class StoreSettingsDTO
 {
@@ -41,7 +41,8 @@ class StoreSettingsDTO
             'hero_config.fake_buyer_count' => 'nullable|string|max:20',
             'phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string',
+            'origin_city' => 'nullable|string|max:120',
+            'origin_postal_code' => 'nullable|string|max:10',
             'instagram' => 'nullable|string|max:255',
             'tiktok' => 'nullable|string|max:255',
             'headline' => 'nullable|string|max:255',

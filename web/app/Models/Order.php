@@ -25,21 +25,40 @@ class Order extends Model
         'payment_method',
         'total_amount',
         'status',
-        'paid_at',
+        'payment_method',
+        'shipping_courier',
+        'shipping_service',
+        'shipping_cost',
         'tracking_number',
-        'tracking_courier',
+        'paid_at',
+        'packed_at',
         'shipped_at',
         'notes',
+        'discount',
+        'tax',
+        'voucher_id',
+        'voucher_code',
     ];
 
     protected $attributes = [
         'status' => 'pending',
     ];
 
-    protected $casts = [
-        'paid_at' => 'datetime',
-        'shipped_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'total_amount' => 'decimal:2',
+            'shipping_cost' => 'integer',
+            'discount' => 'integer',
+            'tax' => 'integer',
+            'paid_at' => 'datetime',
+            'packed_at' => 'datetime',
+            'shipped_at' => 'datetime',
+        ];
+    }
 
     /**
      * @return BelongsTo<Store, $this>
@@ -63,5 +82,13 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 }

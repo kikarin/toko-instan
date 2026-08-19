@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import {
     ShoppingCart,
     Search,
@@ -20,14 +21,13 @@ import {
     FileText,
     Printer,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { useSellerOrders } from '@/composables/useSellerOrders';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { SellerOrder } from '@/types/order';
 
 interface Props {
@@ -38,6 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
     orders: () => [],
 });
 
+const trackingDraft = ref<Record<number, string>>({});
 const ordersRef = computed(() => props.orders ?? []);
 
 const {
@@ -49,6 +50,7 @@ const {
     totalOrdersCount,
     pendingCount,
     processingCount,
+    packedCount,
     shippedCount,
     completedCount,
     totalRevenueSum,
@@ -63,6 +65,7 @@ const {
     goToPage,
     toggleExpand,
     updateOrderStatus,
+    confirmPayment,
     statusBadgeMap,
 } = useSellerOrders(ordersRef);
 
@@ -227,6 +230,14 @@ function shipOrder(order: SellerOrder) {
                             ">
                         Diproses ({{ processingCount }})
                     </button>
+                    <button @click="statusFilter = 'packed'"
+                        class="cursor-pointer rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
+                        :class="statusFilter === 'packed'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'text-muted-foreground hover:text-foreground'
+                            ">
+                        Dikemas ({{ packedCount }})
+                    </button>
                     <button @click="statusFilter = 'shipped'"
                         class="cursor-pointer rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="statusFilter === 'shipped'
@@ -341,17 +352,16 @@ function shipOrder(order: SellerOrder) {
                                         Pengiriman</span>
                                     <span class="leading-tight font-semibold text-foreground">{{
                                         order.shipping_address }}</span>
-                                </div>
-                            </div>
-
-                            <div v-if="order.tracking_number" class="flex items-start gap-2.5 rounded-2xl border border-border bg-muted/30 p-3">
-                                <Truck class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                                <div class="flex min-w-0 flex-col">
-                                    <span class="text-[10px] font-bold text-muted-foreground uppercase">Nomor Resi</span>
-                                    <span class="truncate font-mono font-black text-foreground">{{ order.tracking_number
-                                        }}</span>
-                                    <span class="truncate text-[10px] text-muted-foreground">{{ order.tracking_courier
-                                        }}</span>
+                                    <span
+                                        v-if="order.shipping_courier"
+                                        class="mt-1 text-[10px] text-muted-foreground"
+                                        >Kurir: {{ order.shipping_courier }}</span
+                                    >
+                                    <span
+                                        v-if="order.tracking_number"
+                                        class="font-mono text-[10px] font-bold text-primary"
+                                        >Resi: {{ order.tracking_number }}</span
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -359,6 +369,16 @@ function shipOrder(order: SellerOrder) {
                         <!-- Dynamic Action Buttons (State Controlled) -->
                         <div
                             class="flex w-full shrink-0 flex-wrap items-center gap-2 border-t border-border pt-3 md:w-auto md:border-t-0 md:pt-0">
+                            <Button
+                                v-if="order.payment?.can_confirm"
+                                size="sm"
+                                class="h-10 cursor-pointer gap-2 rounded-xl bg-emerald-600 px-5 text-xs font-black text-white shadow-md hover:bg-emerald-600/90"
+                                @click="confirmPayment(order.payment.id)"
+                            >
+                                <DollarSign class="h-4 w-4" />
+                                Konfirmasi Bayar
+                            </Button>
+
                             <Button v-if="
                                 order.status.toLowerCase() === 'pending' ||
                                 order.status.toLowerCase() === 'paid'
@@ -375,10 +395,36 @@ function shipOrder(order: SellerOrder) {
                                 order.status.toLowerCase() === 'processing'
                             " size="sm"
                                 class="h-10 cursor-pointer gap-2 rounded-xl bg-secondary px-5 text-xs font-black text-secondary-foreground shadow-md hover:bg-secondary/80"
-                                @click="shipOrder(order)">
-                                <Truck class="h-4 w-4" />
-                                Kirim Pesanan
+                                @click="updateOrderStatus(order.id, 'packed')">
+                                <PackageCheck class="h-4 w-4" />
+                                Tandai Dikemas
                             </Button>
+
+                            <div
+                                v-if="order.status.toLowerCase() === 'packed'"
+                                class="flex w-full flex-col gap-2 sm:w-56"
+                            >
+                                <Input
+                                    :model-value="trackingDraft[order.id] ?? order.tracking_number ?? ''"
+                                    placeholder="No. resi"
+                                    class="h-10 text-xs"
+                                    @update:model-value="(v) => (trackingDraft[order.id] = String(v))"
+                                />
+                                <Button
+                                    size="sm"
+                                    class="h-10 cursor-pointer gap-2 rounded-xl bg-secondary px-5 text-xs font-black"
+                                    @click="
+                                        updateOrderStatus(
+                                            order.id,
+                                            'shipped',
+                                            trackingDraft[order.id] || order.tracking_number,
+                                        )
+                                    "
+                                >
+                                    <Truck class="h-4 w-4" />
+                                    Kirim + Resi
+                                </Button>
+                            </div>
 
                             <Button v-if="order.status.toLowerCase() === 'shipped'" size="sm"
                                 class="h-10 cursor-pointer gap-2 rounded-xl bg-accent px-5 text-xs font-black text-accent-foreground shadow-md hover:bg-accent/80"

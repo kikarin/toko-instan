@@ -16,7 +16,7 @@ class StoreCmsDTO
     public static function fromRequest(Request $request): self
     {
         $validated = Validator::make($request->all(), [
-            'theme' => 'required|string|in:teal,sky,navy,sand,forest,custom',
+            'theme' => 'required|string|in:teal,modern,fashion,food,sky,navy,sand,forest,custom',
             'theme_colors.primary' => 'required|regex:/^#[0-9a-fA-F]{6}$/',
             'theme_colors.secondary' => 'required|regex:/^#[0-9a-fA-F]{6}$/',
             'theme_colors.accent' => 'required|regex:/^#[0-9a-fA-F]{6}$/',

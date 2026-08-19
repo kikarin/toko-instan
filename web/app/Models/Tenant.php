@@ -20,6 +20,8 @@ class Tenant extends Model
         'slug',
         'plan',
         'status',
+        'referral_code',
+        'referred_by_tenant_id',
     ];
 
     /**
@@ -52,5 +54,33 @@ class Tenant extends Model
     public function withdrawals(): HasMany
     {
         return $this->hasMany(Withdrawal::class);
+    }
+
+    /**
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * @return HasOne<Subscription, $this>
+     */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', 'active')
+            ->latestOfMany();
+    }
+
+    public function referredBy(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'referred_by_tenant_id');
+    }
+
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(self::class, 'referred_by_tenant_id');
     }
 }

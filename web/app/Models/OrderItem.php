@@ -6,6 +6,7 @@ use Database\Factories\OrderItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class OrderItem extends Model
 {
@@ -19,6 +20,9 @@ class OrderItem extends Model
         'product_variant_id',
         'name',
         'sku',
+        'product_type',
+        'digital_file_path',
+        'digital_file_name',
         'price',
         'qty',
         'total',
@@ -66,5 +70,10 @@ class OrderItem extends Model
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
     }
 }

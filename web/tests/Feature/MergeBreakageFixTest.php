@@ -4,6 +4,8 @@ use App\Models\Store;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Withdrawal;
+use App\Services\AuthService;
+use App\Services\FirebaseAuthService;
 use Illuminate\Support\Facades\Hash;
 
 test('platform register creates seller and ignores buyer role intent', function () {
@@ -13,7 +15,7 @@ test('platform register creates seller and ignores buyer role intent', function 
         'password' => 'secret12',
         'store_name' => 'Toko Seller Only',
         'store_slug' => 'toko-seller-only',
-    ])->assertRedirect('/dashboard');
+    ])->assertRedirect('/email/verify');
 
     $this->assertAuthenticated();
     expect(auth()->user()->role)->toBe('seller');
@@ -125,7 +127,7 @@ test('google login path uses single id-token service entrypoint', function () {
         'store_id' => null,
     ]);
 
-    $this->mock(\App\Services\FirebaseAuthService::class, function ($mock) {
+    $this->mock(FirebaseAuthService::class, function ($mock) {
         $mock->shouldReceive('verifyIdToken')
             ->once()
             ->with('token-ok')
@@ -137,12 +139,12 @@ test('google login path uses single id-token service entrypoint', function () {
             ]);
     });
 
-    $methods = (new ReflectionClass(\App\Services\AuthService::class))
+    $methods = (new ReflectionClass(AuthService::class))
         ->getMethods(ReflectionMethod::IS_PUBLIC);
 
     $googleMethods = array_values(array_filter(
         $methods,
-        fn (ReflectionMethod $m) => $m->getName() === 'loginWithGoogle' && $m->class === \App\Services\AuthService::class
+        fn (ReflectionMethod $m) => $m->getName() === 'loginWithGoogle' && $m->class === AuthService::class
     ));
 
     expect($googleMethods)->toHaveCount(1);

@@ -17,6 +17,7 @@ import {
 import { LogOut, Store, Users as UsersIcon } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import CartDrawer from '@/components/marketplace/CartDrawer.vue';
+import StoreChatWidget from '@/components/StoreChatWidget.vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,11 +31,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Toaster } from '@/components/ui/sonner';
-import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useCart } from '@/composables/useCart';
 import { useStoreTheme } from '@/composables/useStoreTheme';
 import { useWishlist } from '@/composables/useWishlist';
+import { logoutUser } from '@/lib/firebase';
 
 interface Props {
     cartCount?: number;
@@ -233,6 +234,14 @@ const bottomNavItems = computed(() => [
                         Cari
                     </Button>
                 </form>
+                <button
+                    v-if="storeData?.slug"
+                    type="button"
+                    class="hidden shrink-0 text-xs font-bold uppercase tracking-wide opacity-90 hover:opacity-100 md:inline"
+                    @click="navigate(`/${storeData.slug}/blog`)"
+                >
+                    Blog
+                </button>
 
                 <!-- Right Actions -->
                 <div class="ml-auto flex shrink-0 items-center gap-2">
@@ -506,6 +515,8 @@ const bottomNavItems = computed(() => [
         </nav>
 
         <Toaster richColors position="top-right" />
+
+        <StoreChatWidget v-if="storeData?.slug" :store-slug="storeData.slug" />
         
         <!-- Cart Drawer -->
         <CartDrawer

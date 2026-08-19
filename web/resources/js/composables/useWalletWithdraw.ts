@@ -20,6 +20,7 @@ export const WITHDRAW_STATUS_VARIANT: Record<
 };
 
 export const TRANSACTION_TYPE_LABEL: Record<string, string> = {
+    order_direct: 'Settlement langsung',
     order_escrow: 'Escrow penjualan',
     order_release_pending: 'Lepas escrow',
     order_release_available: 'Dana tersedia',

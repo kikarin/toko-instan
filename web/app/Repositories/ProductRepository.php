@@ -84,7 +84,7 @@ class ProductRepository
     public function getActiveStoreProducts(int $storeId, ?string $category = null): Collection
     {
         $query = Product::where('store_id', $storeId)->where('is_active', true);
-        
+
         if ($category && $category !== 'Semua') {
             $query->where('category', $category);
         }
@@ -153,10 +153,18 @@ class ProductRepository
             'stock' => $data->stock,
             'is_active' => $data->isActive,
             'description' => $data->description,
+            'type' => $data->type,
+            'digital_file_path' => $data->digitalFilePath,
+            'digital_file_name' => $data->digitalFileName,
+            'digital_file_mime' => $data->digitalFileMime,
             'sku' => $data->sku ?: ('NK-'.strtoupper(\Str::random(6))),
             'brand' => $data->brand ?: 'Nike',
             'weight_gram' => $data->weightGram ?: 500,
             'variant_options' => $data->variantOptions,
+            'meta_title' => $data->metaTitle,
+            'meta_description' => $data->metaDescription,
+            'seo_tags' => $data->seoTags,
+            'marketing_caption' => $data->marketingCaption,
         ];
 
         $filtered = array_filter($attributes, function ($val, $key) {
@@ -183,10 +191,18 @@ class ProductRepository
             'img' => $data->img,
             'is_active' => $data->isActive,
             'description' => $data->description,
+            'type' => $data->type,
+            'digital_file_path' => $data->digitalFilePath,
+            'digital_file_name' => $data->digitalFileName,
+            'digital_file_mime' => $data->digitalFileMime,
             'sku' => $data->sku,
             'brand' => $data->brand,
             'weight_gram' => $data->weightGram,
             'variant_options' => $data->variantOptions,
+            'meta_title' => $data->metaTitle,
+            'meta_description' => $data->metaDescription,
+            'seo_tags' => $data->seoTags,
+            'marketing_caption' => $data->marketingCaption,
         ];
 
         $filtered = array_filter($attributes, function ($val, $key) {
@@ -201,7 +217,7 @@ class ProductRepository
     }
 
     /**
-     * @param array<int, array<string, mixed>> $variants
+     * @param  array<int, array<string, mixed>>  $variants
      */
     protected function syncVariants(Product $product, array $variants): void
     {
@@ -209,7 +225,7 @@ class ProductRepository
         $updatedVariantIds = [];
 
         foreach ($variants as $variantData) {
-            if (!empty($variantData['id']) && in_array($variantData['id'], $existingVariantIds)) {
+            if (! empty($variantData['id']) && in_array($variantData['id'], $existingVariantIds)) {
                 // Update existing
                 $product->variants()->where('id', $variantData['id'])->update([
                     'name' => $variantData['name'],
@@ -235,7 +251,7 @@ class ProductRepository
 
         // Delete variants that were not in the updated list
         $variantsToDelete = array_diff($existingVariantIds, $updatedVariantIds);
-        if (!empty($variantsToDelete)) {
+        if (! empty($variantsToDelete)) {
             $product->variants()->whereIn('id', $variantsToDelete)->delete();
         }
     }

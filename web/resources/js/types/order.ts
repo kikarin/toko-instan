@@ -1,9 +1,14 @@
 export interface BuyerOrderItem {
+    id?: number;
     product_name: string;
     sku?: string | null;
     qty: number;
     price?: number;
     subtotal?: number;
+    product_type?: 'physical' | 'digital';
+    can_review?: boolean;
+    product_slug?: string | null;
+    download_url?: string | null;
 }
 
 export interface BuyerOrder {
@@ -12,8 +17,9 @@ export interface BuyerOrder {
     total_amount: string;
     store_name: string;
     items: BuyerOrderItem[];
-    created_at: string | null;
     tracking_number?: string | null;
+    shipping_courier?: string | null;
+    created_at: string | null;
     tracking_courier?: string | null;
     tracking_url?: string | null;
 }
@@ -38,11 +44,20 @@ export interface SellerOrder {
     total_amount: string;
     total_num: number;
     status: string;
+    payment_method?: string | null;
     created_at: string;
     items?: SellerOrderItem[];
     notes?: string;
     tracking_number?: string;
-    tracking_courier?: string;
+    tracking_courier?: string | null;
+    payment?: {
+        id: number;
+        provider: string;
+        method: string;
+        status: string;
+        proof_name?: string | null;
+        can_confirm?: boolean;
+    } | null;
 }
 
 export interface OrderInvoice {
@@ -63,6 +78,11 @@ export interface OrderInvoice {
     subtotal_formatted: string;
     shipping_fee: number;
     shipping_fee_formatted: string;
+    discount?: number;
+    discount_formatted?: string;
+    voucher_code?: string | null;
+    tax?: number;
+    tax_formatted?: string;
     total_amount: string;
     total_num: number;
     status: string;

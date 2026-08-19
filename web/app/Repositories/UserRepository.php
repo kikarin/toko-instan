@@ -23,6 +23,11 @@ class UserRepository
             ->first();
     }
 
+    public function findByEmailGlobal(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+
     public function countAll(): int
     {
         return User::count();
@@ -35,10 +40,7 @@ class UserRepository
 
     public function findByFirebaseUid(string $uid, ?int $storeId = null): ?User
     {
-        return User::where('firebase_uid', $uid)
-            ->when($storeId !== null, fn ($query) => $query->where('store_id', $storeId))
-            ->when($storeId === null, fn ($query) => $query->whereNull('store_id'))
-            ->first();
+        return User::where('firebase_uid', $uid)->first();
     }
 
     public function findOrFail(int $id): User

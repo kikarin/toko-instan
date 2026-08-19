@@ -43,6 +43,14 @@ class ActivityLogController extends Controller
             'withdrawal_request' => 'mengajukan penarikan',
             'withdrawal_status' => 'status penarikan diubah',
             'store_updated' => 'pengaturan toko diubah',
+            'ticket_created' => 'tiket dibuat',
+            'ticket_replied' => 'tiket dibalas',
+            'ticket_status' => 'status tiket diubah',
+            'faq_generated' => 'FAQ digenerate',
+            'referral_signup' => 'seller daftar via referral',
+            'referral_commission' => 'komisi referral',
+            'custom_domain' => 'custom domain dipasang',
+            'custom_domain_removed' => 'custom domain dilepas',
             default => $action,
         };
     }

@@ -7,6 +7,7 @@ import {
     LogOut,
     LogIn,
     Banknote,
+    LifeBuoy,
     Building2,
     ShoppingCart,
 } from 'lucide-vue-next';
@@ -33,12 +34,12 @@ import {
     SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
-import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useStoreTheme } from '@/composables/useStoreTheme';
+import { logoutUser } from '@/lib/firebase';
 
 interface Props {
-    activePage?: 'Admin' | 'Users' | 'Tenants' | 'Orders' | 'Penarikan';
+    activePage?: 'Admin' | 'Users' | 'Tenants' | 'Orders' | 'Penarikan' | 'Tiket';
 }
 
 withDefaults(defineProps<Props>(), {
@@ -65,6 +66,7 @@ const navItems = [
     { icon: Building2, label: 'Tenants', route: '/admin/tenants' },
     { icon: ShoppingCart, label: 'Orders', route: '/admin/orders' },
     { icon: Banknote, label: 'Penarikan', route: '/admin/withdrawals' },
+    { icon: LifeBuoy, label: 'Tiket', route: '/admin/tickets' },
 ];
 
 function navigate(url: string) {

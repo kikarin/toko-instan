@@ -2,6 +2,16 @@
 
 namespace App\Providers;
 
+use App\Contracts\AiProvider;
+use App\Contracts\DomainGateway;
+// use App\Contracts\PaymentGateway;
+use App\Contracts\WhatsAppGateway;
+use App\Gateways\CloudflareDomainGateway;
+use App\Gateways\FakeAiProvider;
+use App\Gateways\GeminiProvider;
+use App\Gateways\MetaWhatsAppGateway;
+use App\Gateways\MidtransGateway;
+use App\Gateways\OpenAiProvider;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\StockMovement;
@@ -13,7 +23,6 @@ use App\Observers\StockMovementObserver;
 use App\Observers\StoreObserver;
 use App\Observers\WithdrawalObserver;
 use App\Services\Payments\Contracts\PaymentGateway;
-use App\Services\Payments\SimulatedPaymentGateway;
 use App\Services\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,10 +41,22 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TenantContext::class, fn (): TenantContext => new TenantContext);
 
-        $this->app->singleton(PaymentGateway::class, function ($app) {
-            $gateway = config('payment.gateways.'.config('payment.default').'.driver', SimulatedPaymentGateway::class);
+        // Config-driven default gateway (online methods still pick Midtrans via PaymentService).
+        $this->app->bind(PaymentGateway::class, function ($app) {
+            return match (config('services.payment.default', 'midtrans')) {
+                default => $app->make(MidtransGateway::class),
+            };
+        });
 
-            return $app->make($gateway);
+        $this->app->bind(WhatsAppGateway::class, MetaWhatsAppGateway::class);
+        $this->app->bind(DomainGateway::class, CloudflareDomainGateway::class);
+
+        $this->app->bind(AiProvider::class, function ($app) {
+            return match (config('ai.driver', 'fake')) {
+                'openai' => $app->make(OpenAiProvider::class),
+                'gemini' => $app->make(GeminiProvider::class),
+                default => $app->make(FakeAiProvider::class),
+            };
         });
     }
 
@@ -50,6 +71,14 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by(
                 strtolower((string) $request->input('email', '')).'|'.$request->ip(),
             );
+        });
+
+        RateLimiter::for('ai-generate', function ($request) {
+            return Limit::perMinute(10)->by((string) ($request->user()?->id ?: $request->ip()));
+        });
+
+        RateLimiter::for('api', function ($request) {
+            return Limit::perMinute(60)->by((string) ($request->user()?->id ?: $request->ip()));
         });
 
         Product::observe(ProductObserver::class);

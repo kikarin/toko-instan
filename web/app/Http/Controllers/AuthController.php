@@ -54,9 +54,7 @@ class AuthController extends Controller
         $dto = RegisterDTO::fromRequest($request);
         $this->authService->register($dto);
 
-        $user = $request->user();
-
-        return redirect()->intended($user?->homePath() ?? '/');
+        return redirect()->route('verification.notice');
     }
 
     public function google(Request $request): RedirectResponse
@@ -190,8 +188,6 @@ class AuthController extends Controller
         $dto = RegisterDTO::fromRequest($request, $store->id);
         $this->authService->register($dto, $store->id);
 
-        $user = $request->user();
-
-        return redirect()->intended($user?->homePath() ?? '/');
+        return redirect()->route('verification.notice');
     }
 }

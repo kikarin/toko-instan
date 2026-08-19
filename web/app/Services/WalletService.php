@@ -30,6 +30,34 @@ class WalletService
     }
 
     /**
+     * Premium direct settlement: credit available balance immediately. Idempotent per order.
+     */
+    public function creditOrderDirect(
+        int $walletId,
+        float $amount,
+        int $orderId,
+        string $description = 'Settlement langsung penjualan'
+    ): WalletTransaction {
+        $reference = [Wallet::class.'_order', $orderId];
+
+        $existing = $this->ledgerRow(WalletTransactionType::OrderDirect, $reference);
+        if ($existing) {
+            return $existing;
+        }
+
+        return $this->commit(
+            $walletId,
+            type: WalletTransactionType::OrderDirect,
+            amount: $amount,
+            applyToBalance: true,
+            applyToPending: false,
+            isCredit: true,
+            reference: $reference,
+            description: $description
+        );
+    }
+
+    /**
      * Order dibayar -> pending_balance naik (escrow). Idempotent per order.
      */
     public function creditOrderEscrow(
@@ -70,6 +98,14 @@ class WalletService
     public function releaseEscrowToAvailable(int $walletId, float $amount, int $orderId): void
     {
         $reference = [Wallet::class.'_order', $orderId];
+
+        if (WalletTransaction::where('wallet_id', $walletId)
+            ->where('reference_type', $reference[0])
+            ->where('reference_id', $reference[1])
+            ->where('type', WalletTransactionType::OrderDirect->value)
+            ->exists()) {
+            return;
+        }
 
         if (WalletTransaction::where('wallet_id', $walletId)
             ->where('reference_type', $reference[0])
@@ -175,6 +211,26 @@ class WalletService
             isCredit: false,
             reference: $reference,
             description: 'Biaya penarikan'
+        );
+    }
+
+    public function creditReferral(int $walletId, float $amount, int $orderId): WalletTransaction
+    {
+        $reference = [self::class.'_referral_order', $orderId];
+        $existing = $this->ledgerRow(WalletTransactionType::Referral, $reference);
+        if ($existing) {
+            return $existing;
+        }
+
+        return $this->commit(
+            $walletId,
+            type: WalletTransactionType::Referral,
+            amount: $amount,
+            applyToBalance: true,
+            applyToPending: false,
+            isCredit: true,
+            reference: $reference,
+            description: 'Komisi referral order #'.$orderId
         );
     }
 

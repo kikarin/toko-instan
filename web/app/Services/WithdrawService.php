@@ -20,9 +20,13 @@ class WithdrawService
 
     public function feeFor(Wallet $wallet): float
     {
-        $plan = $wallet->tenant?->plan;
+        $tenant = $wallet->tenant;
 
-        return $plan === null || $plan === 'free' ? self::FREE_PLAN_FEE : 0;
+        if (! $tenant) {
+            return self::FREE_PLAN_FEE;
+        }
+
+        return (float) app(SubscriptionService::class)->withdrawFeeFor($tenant);
     }
 
     public function getAllWithdrawals(?string $status = null)
@@ -88,6 +92,8 @@ class WithdrawService
             'status' => WithdrawalStatus::Approved->value,
             'approved_at' => now(),
         ]);
+
+        app(SellerAlertService::class)->notifyWithdrawalApproved($withdrawal->fresh(['tenant.user', 'wallet.tenant.user']));
     }
 
     public function markTransferred(Withdrawal $withdrawal): void

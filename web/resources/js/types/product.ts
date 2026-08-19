@@ -14,6 +14,14 @@ export interface Product {
     description?: string | null;
     brand?: string | null;
     weight_gram?: number;
+    type?: 'physical' | 'digital';
+    digital_file_path?: string | null;
+    digital_file_name?: string | null;
+    digital_file_mime?: string | null;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    seo_tags?: string | null;
+    marketing_caption?: string | null;
     low_stock?: boolean;
     variant_options?: Array<{ name: string; values: string[] }>;
     variants?: ProductVariant[];

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -19,7 +20,7 @@ class FirebaseAuthService
      */
     public function verifyIdToken(string $idToken): array
     {
-        $projectId = (string) config('services.firebase.project_id');
+        $projectId = $this->projectId();
 
         if ($projectId === '') {
             throw new RuntimeException('FIREBASE_PROJECT_ID tidak dikonfigurasi.');
@@ -34,7 +35,7 @@ class FirebaseAuthService
         try {
             $payload = JWT::decode($idToken, $this->keys());
         } catch (\Throwable $e) {
-            throw new RuntimeException('Token Google tidak valid: ' . $e->getMessage(), 0, $e);
+            throw new RuntimeException('Token Google tidak valid: '.$e->getMessage(), 0, $e);
         }
 
         if (($payload->iss ?? null) !== 'https://securetoken.google.com/'.$projectId) {
@@ -57,7 +58,17 @@ class FirebaseAuthService
     }
 
     /**
-     * @return array<string, \Firebase\JWT\Key>
+     * Resolve Firebase project id, stripping a common authDomain misconfiguration.
+     */
+    public function projectId(): string
+    {
+        $projectId = (string) config('services.firebase.project_id');
+
+        return (string) preg_replace('/\.(firebaseapp\.com|web\.app)$/i', '', $projectId);
+    }
+
+    /**
+     * @return array<string, Key>
      */
     protected function keys(): array
     {

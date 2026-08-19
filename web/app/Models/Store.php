@@ -45,6 +45,8 @@ class Store extends Model
         'tiktok',
         'headline',
         'is_active',
+        'origin_city',
+        'origin_postal_code',
         'npwp',
         'nik',
         'is_pkp',
@@ -53,6 +55,8 @@ class Store extends Model
         'theme',
         'theme_colors',
         'showcase',
+        'custom_domain',
+        'custom_domain_status',
     ];
 
     protected $casts = [

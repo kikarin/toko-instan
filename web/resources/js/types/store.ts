@@ -17,6 +17,8 @@ export interface HeroConfig {
 export interface ThemePayload {
     key?: string;
     colors?: Partial<ThemeColors>;
+    font?: string;
+    variant?: string;
 }
 
 export interface ThemeInfo {
@@ -24,6 +26,7 @@ export interface ThemeInfo {
     label: string;
     colors: ThemeColors;
     font: string;
+    variant?: string;
 }
 
 export interface StoreData {
@@ -41,6 +44,8 @@ export interface StoreData {
     phone?: string;
     email?: string;
     address?: string;
+    origin_city?: string;
+    origin_postal_code?: string;
     instagram?: string;
     tiktok?: string;
     headline?: string;

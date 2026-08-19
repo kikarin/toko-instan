@@ -34,6 +34,9 @@ const loginUrl = computed(() =>
 const forgotUrl = computed(() =>
     props.store ? `/${props.store.slug}/forgot-password` : '/forgot-password',
 );
+const otpUrl = computed(() =>
+    props.store ? `/${props.store.slug}/otp-login` : '/otp-login',
+);
 const registerUrl = computed(() =>
     props.store ? `/${props.store.slug}/register` : '/register',
 );
@@ -287,6 +290,14 @@ async function handleGoogleLogin() {
                         />
                     </template>
                 </button>
+
+                <a
+                    :href="otpUrl"
+                    class="block text-center text-xs font-semibold text-brand hover:underline"
+                    @click.prevent="router.visit(otpUrl)"
+                >
+                    Masuk dengan kode OTP (email)
+                </a>
             </form>
         </div>
 

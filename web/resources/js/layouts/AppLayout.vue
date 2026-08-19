@@ -7,12 +7,23 @@ import {
     Users,
     Wallet,
     Ticket,
+    Gift,
+    CircleHelp,
+    LifeBuoy,
+    Globe,
+    Newspaper,
+    MessageCircle,
+    KeyRound,
+    BookOpen,
+    Crown,
     BarChart3,
+    FileSpreadsheet,
     LogOut,
     ChevronRight,
     ChevronsUpDown,
     Store,
     Bell,
+    X,
     Settings,
     Tags,
     Boxes,
@@ -21,6 +32,7 @@ import {
     ExternalLink,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { onClickOutside } from '@vueuse/core';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -54,10 +66,11 @@ import {
     SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
-import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useStoreName } from '@/composables/useStoreName';
 import { useStoreTheme } from '@/composables/useStoreTheme';
+import { useSellerNotifications } from '@/composables/useSellerNotifications';
+import { logoutUser } from '@/lib/firebase';
 
 interface NavItem {
     icon: any;
@@ -78,10 +91,12 @@ interface Props {
         | 'Pengaturan Toko'
         | 'Pelanggan'
         | 'Dompet'
+        | 'Langganan'
         | 'Voucher'
         | 'Analitik'
         | 'Tampilan & Konten'
-        | 'Riwayat Aktivitas';
+        | 'Riwayat Aktivitas'
+        | 'Laporan Pajak';
     period?: 'Hari' | 'Minggu' | 'Bulan';
 }
 
@@ -99,6 +114,9 @@ const activeUser = useActiveUser();
 useStoreTheme();
 
 const { storeName } = useStoreName();
+const notices = useSellerNotifications();
+const noticeRoot = ref<HTMLElement | null>(null);
+onClickOutside(noticeRoot, () => notices.close());
 
 const activeNavClass =
     'bg-sidebar-accent text-sidebar-accent-foreground font-black border border-sidebar-border shadow-md shadow-black/10 group-data-[collapsible=icon]:bg-sidebar-primary group-data-[collapsible=icon]:text-sidebar-primary-foreground group-data-[collapsible=icon]:border-none';
@@ -149,11 +167,21 @@ const mainNavItems: NavItem[] = [
 
 const financeNavItems: NavItem[] = [
     { icon: Wallet, label: 'Dompet', route: '/wallet' },
-    { icon: Ticket, label: 'Voucher', route: '#' },
+    { icon: Crown, label: 'Langganan', route: '/subscription' },
+    { icon: Ticket, label: 'Voucher', route: '/vouchers' },
+    { icon: Gift, label: 'Referral', route: '/referral' },
+    { icon: Newspaper, label: 'Blog', route: '/blog' },
+    { icon: CircleHelp, label: 'FAQ', route: '/faqs' },
+    { icon: LifeBuoy, label: 'Tiket', route: '/support' },
+    { icon: BookOpen, label: 'Bantuan', route: '/help' },
+    { icon: Globe, label: 'Domain', route: '/store-domain' },
+    { icon: MessageCircle, label: 'Chat', route: '/chats' },
+    { icon: KeyRound, label: 'API', route: '/developer' },
 ];
 
 const analyticsNavItems: NavItem[] = [
     { icon: BarChart3, label: 'Analitik', route: '#' },
+    { icon: FileSpreadsheet, label: 'Laporan Pajak', route: '/tax-reports' },
 ];
 
 // Track open submenus (default open if active)
@@ -610,20 +638,42 @@ function isActive(item: NavItem): boolean {
                     </a>
 
                     <!-- Bell notification -->
+                    <div ref="noticeRoot" class="relative">
                     <Button
                         variant="ghost"
                         size="sm"
                         class="relative h-8 w-8 shrink-0 rounded-xl p-0 hover:bg-secondary sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground"
-                        @click="navigate('#')"
+                        @click="notices.toggle()"
                     >
                         <Bell class="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                         <span
-                            class="absolute top-1.5 right-1.5 h-2 w-2 animate-ping rounded-full bg-primary sm:top-2 sm:right-2"
-                        />
-                        <span
+                            v-if="notices.unread > 0"
                             class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary sm:top-2 sm:right-2"
                         />
                     </Button>
+                    <div
+                        v-if="notices.open"
+                        class="absolute right-0 z-50 mt-2 w-80 rounded-2xl border bg-card p-2 shadow-lg"
+                    >
+                        <div class="flex items-center justify-between px-2 py-1">
+                            <p class="text-xs font-bold">Notifikasi</p>
+                            <button type="button" class="rounded-md p-1 text-muted-foreground hover:bg-muted" @click="notices.close()">
+                                <X class="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                        <button
+                            v-for="n in notices.items"
+                            :key="n.id"
+                            type="button"
+                            class="w-full rounded-xl px-2 py-2 text-left hover:bg-muted"
+                            @click="notices.visit(n.url)"
+                        >
+                            <p class="text-xs font-bold">{{ n.title }}</p>
+                            <p class="text-[11px] text-muted-foreground">{{ n.body }}</p>
+                        </button>
+                        <p v-if="!notices.items.length" class="px-2 py-4 text-xs text-muted-foreground">Belum ada notifikasi.</p>
+                    </div>
+                    </div>
 
                     <!-- User info chip (Responsive on mobile) -->
                     <div

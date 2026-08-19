@@ -6,6 +6,7 @@ use Database\Factories\ActivityLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use LogicException;
 
 /**
@@ -21,8 +22,6 @@ class ActivityLog extends Model
 
     public const UPDATED_AT = null;
 
-    protected $table = 'activity_logs';
-
     protected $fillable = [
         'tenant_id',
         'user_id',
@@ -37,6 +36,15 @@ class ActivityLog extends Model
         'properties' => 'array',
         'created_at' => 'datetime',
     ];
+
+    public function getTable(): string
+    {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            return 'audit.activity_logs';
+        }
+
+        return 'activity_logs';
+    }
 
     /**
      * Enforce immutability: an existing entry can never be updated.

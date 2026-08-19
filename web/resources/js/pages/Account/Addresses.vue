@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { MapPin, Plus, Pencil, Trash2, Check } from 'lucide-vue-next';
+import { onMounted, watch } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import { Switch } from '@/components/ui/switch';
 import { useAddresses } from '@/composables/useAddresses';
 import { useIndoRegions } from '@/composables/useIndoRegions';
-import { onMounted, watch } from 'vue';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import type { Address } from '@/types/address';
 
 interface Props {
@@ -41,6 +41,7 @@ onMounted(() => {
 
 watch([() => form.province, provinces], ([newProvName, provs], [oldProvName]) => {
     const prov = provs.find(p => p.name === newProvName);
+
     if (prov) {
         loadCities(prov.id);
     } else {
@@ -55,6 +56,7 @@ watch([() => form.province, provinces], ([newProvName, provs], [oldProvName]) =>
 
 watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
     const city = cits.find(c => c.name === newCityName);
+
     if (city) {
         loadDistricts(city.id);
     } else {

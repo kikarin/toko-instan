@@ -29,11 +29,16 @@ export function hexToRgba(hex: string, alpha: number): string {
 
 export function darken(hex: string, factor: number): string {
     const clean = hex.replace('#', '');
-    if (clean.length !== 6) return '#18181c';
+
+    if (clean.length !== 6) {
+return '#18181c';
+}
+
     const n = parseInt(clean, 16);
     const r = Math.round(((n >> 16) & 255) * factor);
     const g = Math.round(((n >> 8) & 255) * factor);
     const b = Math.round((n & 255) * factor);
+
     return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 }
 

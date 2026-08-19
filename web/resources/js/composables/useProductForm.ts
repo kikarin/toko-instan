@@ -84,14 +84,27 @@ export function useProductForm(props: ProductFormProps) {
         props.product?.description ??
             'Produk original berkualitas tinggi dengan jaminan garansi keaslian 100%, material daya tahan maksimal, dan kenyamanan optimal.',
     );
+    const metaTitle = ref(props.product?.meta_title ?? '');
+    const metaDescription = ref(props.product?.meta_description ?? '');
+    const seoTags = ref(props.product?.seo_tags ?? '');
+    const marketingCaption = ref(props.product?.marketing_caption ?? '');
+    const generatingAi = ref(false);
     const sku = ref(props.product?.sku ?? '');
     const weightGram = ref(
         props.product?.weight_gram ? String(props.product.weight_gram) : '500',
     );
+    const productType = ref<'physical' | 'digital'>(
+        props.product?.type === 'digital' ? 'digital' : 'physical',
+    );
+    const digitalFilePath = ref(props.product?.digital_file_path ?? '');
+    const digitalFileName = ref(props.product?.digital_file_name ?? '');
+    const digitalFileMime = ref(props.product?.digital_file_mime ?? '');
     const isLoading = ref(false);
     const uploading = ref(false);
+    const uploadingDigital = ref(false);
     const errors = ref<Record<string, string>>({});
     const fileInput = ref<HTMLInputElement | null>(null);
+    const digitalFileInput = ref<HTMLInputElement | null>(null);
 
     const variantOptions = ref<VariantOption[]>(
         props.product?.variant_options?.map(opt => ({
@@ -117,6 +130,7 @@ export function useProductForm(props: ProductFormProps) {
     function generateVariants() {
         if (variantOptions.value.length === 0) {
             variants.value = [];
+
             return;
         }
 
@@ -130,7 +144,10 @@ export function useProductForm(props: ProductFormProps) {
         const newVariants: VariantData[] = [];
 
         combinations.forEach((combo) => {
-            if (combo.length === 0) return;
+            if (combo.length === 0) {
+return;
+}
+
             const name = combo.join(' - ');
             const existing = variants.value.find((v) => v.name === name);
 
@@ -154,7 +171,10 @@ export function useProductForm(props: ProductFormProps) {
     function cartesianProduct(arrays: string[][]): string[][] {
         return arrays.reduce<string[][]>(
             (a, b) => {
-                if (b.length === 0) return a;
+                if (b.length === 0) {
+return a;
+}
+
                 return a.flatMap((d) => b.map((e) => [...d, e]));
             },
             [[]]
@@ -176,6 +196,18 @@ export function useProductForm(props: ProductFormProps) {
         }).format(num);
     });
 
+    function xsrfHeaders(): HeadersInit {
+        const xsrfToken = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('XSRF-TOKEN='))
+            ?.split('=')[1];
+
+        return {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-XSRF-TOKEN': xsrfToken ? decodeURIComponent(xsrfToken) : '',
+        };
+    }
+
     async function uploadImage(e: Event) {
         const target = e.target as HTMLInputElement;
         const file = target.files?.[0];
@@ -190,19 +222,9 @@ export function useProductForm(props: ProductFormProps) {
             const formData = new FormData();
             formData.append('file', file);
 
-            const xsrfToken = document.cookie
-                .split('; ')
-                .find((row) => row.startsWith('XSRF-TOKEN='))
-                ?.split('=')[1];
-
             const response = await fetch('/uploads', {
                 method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-XSRF-TOKEN': xsrfToken
-                        ? decodeURIComponent(xsrfToken)
-                        : '',
-                },
+                headers: xsrfHeaders(),
                 body: formData,
             });
 
@@ -219,6 +241,118 @@ export function useProductForm(props: ProductFormProps) {
         } finally {
             uploading.value = false;
             target.value = '';
+        }
+    }
+
+    async function uploadDigitalFile(e: Event) {
+        const target = e.target as HTMLInputElement;
+        const file = target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        uploadingDigital.value = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/uploads/digital', {
+                method: 'POST',
+                headers: xsrfHeaders(),
+                body: formData,
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok || !result.path) {
+                const validationMsg =
+                    result?.errors?.file?.[0] ??
+                    result?.message ??
+                    'Upload file digital gagal.';
+
+                throw new Error(validationMsg);
+            }
+
+            digitalFilePath.value = result.path;
+            digitalFileName.value = result.name;
+            digitalFileMime.value = result.mime;
+            toast.success('File digital berhasil diunggah!');
+        } catch (err) {
+            toast.error(
+                err instanceof Error
+                    ? err.message
+                    : 'Gagal mengunggah file digital.',
+            );
+        } finally {
+            uploadingDigital.value = false;
+            target.value = '';
+        }
+    }
+
+    async function generateAi(tasks: Array<'description' | 'seo' | 'caption'>) {
+        if (!name.value.trim()) {
+            toast.error('Isi nama produk dulu sebelum generate AI.');
+
+            return;
+        }
+
+        generatingAi.value = true;
+
+        try {
+            const response = await fetch('/products/ai-generate', {
+                method: 'POST',
+                headers: {
+                    ...xsrfHeaders(),
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name.value,
+                    category: selectedCategory.value,
+                    brand: selectedBrand.value,
+                    price: price.value,
+                    description: description.value,
+                    tasks,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message ?? 'Generate AI gagal.');
+            }
+
+            if (result.description) {
+                description.value = result.description;
+            }
+            if (result.meta_title) {
+                metaTitle.value = result.meta_title;
+            }
+            if (result.meta_description) {
+                metaDescription.value = result.meta_description;
+            }
+            if (Array.isArray(result.tags) && result.tags.length) {
+                seoTags.value = result.tags.join(', ');
+                const match = labelOptions.value.find((label) =>
+                    result.tags.some(
+                        (t: string) => t.toLowerCase() === label.toLowerCase(),
+                    ),
+                );
+                if (match) {
+                    selectedTag.value = match;
+                }
+            }
+            if (result.marketing_caption) {
+                marketingCaption.value = result.marketing_caption;
+            }
+
+            toast.success('Teks AI siap. Cek lalu simpan produk.');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Generate AI gagal.');
+        } finally {
+            generatingAi.value = false;
         }
     }
 
@@ -245,9 +379,20 @@ export function useProductForm(props: ProductFormProps) {
                     : null,
             img: img.value,
             description: description.value,
+            meta_title: metaTitle.value || null,
+            meta_description: metaDescription.value || null,
+            seo_tags: seoTags.value || null,
+            marketing_caption: marketingCaption.value || null,
             sku: sku.value,
             brand: selectedBrand.value || null,
             weight_gram: weightGram.value,
+            type: productType.value,
+            digital_file_path:
+                productType.value === 'digital' ? digitalFilePath.value : null,
+            digital_file_name:
+                productType.value === 'digital' ? digitalFileName.value : null,
+            digital_file_mime:
+                productType.value === 'digital' ? digitalFileMime.value : null,
             variant_options: variantOptions.value,
             variants: variants.value,
         };
@@ -294,14 +439,27 @@ export function useProductForm(props: ProductFormProps) {
         isActive,
         img,
         description,
+        metaTitle,
+        metaDescription,
+        seoTags,
+        marketingCaption,
+        generatingAi,
+        generateAi,
         sku,
         weightGram,
+        productType,
+        digitalFilePath,
+        digitalFileName,
+        digitalFileMime,
         isLoading,
         uploading,
+        uploadingDigital,
         errors,
         fileInput,
+        digitalFileInput,
         formattedPricePreview,
         uploadImage,
+        uploadDigitalFile,
         back,
         submit,
         variantOptions,

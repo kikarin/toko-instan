@@ -8,6 +8,7 @@ use App\DTO\Auth\RegisterDTO;
 use App\Models\User;
 use App\Repositories\StoreRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -69,11 +70,13 @@ class AuthService
                 'store_slug' => $dto->storeSlug,
                 'store_name' => $dto->storeName,
             ]);
-            ($this->createTenantAndStore)($user->id, $dto->storeName, $slug);
+            ($this->createTenantAndStore)($user->id, $dto->storeName, $slug, $dto->referralCode);
         }
 
         Auth::login($user, true);
         request()->session()->regenerate();
+
+        $user->sendEmailVerificationNotification();
 
         return true;
     }
@@ -103,7 +106,8 @@ class AuthService
         $intent = $data['intent'] ?? 'login';
 
         $user = $this->userRepository->findByFirebaseUid($identity['uid'], $storeId)
-            ?? $this->userRepository->findByEmail($identity['email'], $storeId);
+            ?? $this->userRepository->findByEmail($identity['email'], $storeId)
+            ?? $this->userRepository->findByEmailGlobal($identity['email']);
 
         if ($user === null && $intent === 'register') {
             $role = $storeId ? 'buyer' : 'seller';
@@ -114,19 +118,25 @@ class AuthService
                 ]);
             }
 
-            $user = $this->userRepository->createUser([
-                'name' => $identity['name'] ?: strstr($identity['email'], '@', true) ?: 'User',
-                'email' => $identity['email'],
-                'role' => $role,
-                'store_id' => $storeId,
-                'auth_provider' => 'google',
-                'firebase_uid' => $identity['uid'],
-                // 'avatar' => $identity['picture'],
-            ]);
+            try {
+                $user = $this->userRepository->createUser([
+                    'name' => $identity['name'] ?: strstr($identity['email'], '@', true) ?: 'User',
+                    'email' => $identity['email'],
+                    'role' => $role,
+                    'store_id' => $storeId,
+                    'auth_provider' => 'google',
+                    'firebase_uid' => $identity['uid'],
+                ]);
+                $user->forceFill(['email_verified_at' => now()])->save();
+            } catch (UniqueConstraintViolationException $e) {
+                throw ValidationException::withMessages([
+                    'id_token' => 'Email sudah terdaftar. Silakan login dengan Google atau akun yang sama.',
+                ]);
+            }
 
             if ($role === 'seller') {
                 $slug = $this->resolveStoreSlug($data);
-                ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug);
+                ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug, $this->referralCodeFromRequest());
             }
         }
 
@@ -136,18 +146,63 @@ class AuthService
             ]);
         }
 
-        if ($user->firebase_uid !== $identity['uid']) {
+        if ($intent === 'register' && $storeId === null) {
+            $this->ensureSellerStoreFromGoogle($user, $data, $identity);
+        }
+
+        if ($user->firebase_uid !== $identity['uid'] || ! $user->hasVerifiedEmail()) {
             $user->forceFill([
                 'firebase_uid' => $identity['uid'],
                 'auth_provider' => 'google',
-                'avatar' => $identity['picture'] ?: $user->avatar,
+                'avatar' => $identity['picture'] ?? $user->avatar,
+                'email_verified_at' => $user->email_verified_at ?? now(),
             ])->save();
         }
 
         Auth::login($user, true);
         request()->session()->regenerate();
 
-        return $user;
+        return $user->fresh();
+    }
+
+    /**
+     * Promote an existing buyer (or seller without a store) when registering a shop via Google.
+     *
+     * @param  array{store_name?: string|null, store_slug?: string|null}  $data
+     * @param  array{uid: string, email: string|null, name: string|null}  $identity
+     */
+    protected function ensureSellerStoreFromGoogle(User $user, array $data, array $identity): void
+    {
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        $needsStore = ! $user->tenants()->exists();
+
+        if (! $user->isSeller() || $user->store_id !== null) {
+            if (empty($data['store_name']) && $needsStore) {
+                throw ValidationException::withMessages([
+                    'store_name' => 'Nama toko wajib diisi untuk daftar seller.',
+                ]);
+            }
+
+            $user->forceFill([
+                'role' => 'seller',
+                'store_id' => null,
+                'name' => $identity['name'] ?: $user->name,
+            ])->save();
+        }
+
+        if ($needsStore) {
+            if (empty($data['store_name'])) {
+                throw ValidationException::withMessages([
+                    'store_name' => 'Nama toko wajib diisi untuk daftar seller.',
+                ]);
+            }
+
+            $slug = $this->resolveStoreSlug($data);
+            ($this->createTenantAndStore)($user->id, (string) $data['store_name'], $slug, $this->referralCodeFromRequest());
+        }
     }
 
     public function logout(): void
@@ -176,5 +231,13 @@ class AuthService
         }
 
         return $slug;
+    }
+
+    protected function referralCodeFromRequest(): ?string
+    {
+        $request = request();
+        $code = $request->input('referral_code') ?: $request->cookie((string) config('referral.cookie', 'ref_code'));
+
+        return $code ? strtoupper((string) $code) : null;
     }
 }

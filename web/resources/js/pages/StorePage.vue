@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Head, usePage } from '@inertiajs/vue3';
-import emblaCarouselVue from 'embla-carousel-vue';
+import { usePage } from '@inertiajs/vue3';
 import Autoplay from 'embla-carousel-autoplay';
 import Fade from 'embla-carousel-fade';
+import emblaCarouselVue from 'embla-carousel-vue';
 import {
     Flame,
     Sparkles,
@@ -25,15 +25,17 @@ import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useMarketplaceCart } from '@/composables/useMarketplaceCart';
 import { useMarketplaceCatalog } from '@/composables/useMarketplaceCatalog';
 import { useMarketplaceFilters } from '@/composables/useMarketplaceFilters';
 import { useProductPagination } from '@/composables/useProductPagination';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import SeoHead, { type SeoMeta } from '@/components/SeoHead.vue';
 import type { ProductDetail } from '@/types/product';
 import type { StorefrontInfo } from '@/types/store';
 
 const page = usePage();
+const seo = computed(() => (page.props.seo as SeoMeta | undefined) ?? null);
 const storefront = computed<StorefrontInfo | null>(
     () => (page.props.store as StorefrontInfo | undefined) ?? null,
 );
@@ -42,9 +44,11 @@ const activeBanners = computed(() => {
     if (storefront.value?.banner_urls && storefront.value.banner_urls.length > 0) {
         return storefront.value.banner_urls;
     }
+
     if (storefront.value?.banner_url) {
         return [storefront.value.banner_url];
     }
+
     return [];
 });
 
@@ -117,6 +121,7 @@ const processedProducts = computed(() => {
         const max = Number(maxStr);
         result = result.filter((p) => {
             const num = p.priceNum ?? Number(String(p.price || '').replace(/[^0-9]/g, ''));
+
             return num >= min && num <= max;
         });
     }
@@ -131,12 +136,14 @@ const processedProducts = computed(() => {
         result.sort((a, b) => {
             const numA = a.priceNum ?? Number(String(a.price || '').replace(/[^0-9]/g, ''));
             const numB = b.priceNum ?? Number(String(b.price || '').replace(/[^0-9]/g, ''));
+
             return numA - numB;
         });
     } else if (sortOption.value === 'price_desc') {
         result.sort((a, b) => {
             const numA = a.priceNum ?? Number(String(a.price || '').replace(/[^0-9]/g, ''));
             const numB = b.priceNum ?? Number(String(b.price || '').replace(/[^0-9]/g, ''));
+
             return numB - numA;
         });
     } else {
@@ -180,7 +187,7 @@ function openProductDetail(product: any) {
 
 <template>
 
-    <Head :title="`${storefront?.name ?? 'Toko Resmi'} — Marketplace`" />
+    <SeoHead :seo="seo" :fallback-title="`${storefront?.name ?? 'Toko Resmi'} — Marketplace`" />
 
     <StorefrontLayout :cartCount="totalCartCount" :searchQuery="searchQ" @open-cart="isCartOpen = true" @search="applySearch">
         <main class="mx-auto flex w-full max-w-[1600px] flex-col gap-4 px-3 pt-3 pb-28 sm:gap-6 sm:p-6">
@@ -518,6 +525,14 @@ function openProductDetail(product: any) {
                     </div>
                 </div>
             </div>
+
+            <section v-if="(page.props.faqs as any[])?.length" class="rounded-2xl border bg-card p-4">
+                <h2 class="mb-3 text-sm font-bold">FAQ</h2>
+                <div v-for="(f, i) in (page.props.faqs as any[])" :key="i" class="mb-3">
+                    <p class="text-xs font-bold">{{ f.question }}</p>
+                    <p class="text-xs text-muted-foreground">{{ f.answer }}</p>
+                </div>
+            </section>
         </main>
 
         <!-- Floating Quick Cart Bar -->
