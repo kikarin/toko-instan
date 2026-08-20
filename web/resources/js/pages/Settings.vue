@@ -3,10 +3,10 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import { ArrowLeft, ChevronDown, LogOut, ChevronRight } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { logoutUser } from '@/lib/firebase';
 import { useCart } from '@/composables/useCart';
 import { useStoreName } from '@/composables/useStoreName';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import { logoutUser } from '@/lib/firebase';
 import type { UserProfile } from '@/types/user';
 
 interface Props {

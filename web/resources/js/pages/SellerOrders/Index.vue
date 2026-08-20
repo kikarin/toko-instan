@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import {
     ShoppingCart,
     Search,
@@ -21,13 +22,12 @@ import {
     Printer,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { router } from '@inertiajs/vue3';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { useSellerOrders } from '@/composables/useSellerOrders';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { SellerOrder } from '@/types/order';
 
 interface Props {

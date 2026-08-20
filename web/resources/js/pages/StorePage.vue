@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, usePage } from '@inertiajs/vue3';
-import emblaCarouselVue from 'embla-carousel-vue';
 import Autoplay from 'embla-carousel-autoplay';
 import Fade from 'embla-carousel-fade';
+import emblaCarouselVue from 'embla-carousel-vue';
 import {
     Flame,
     Sparkles,
@@ -25,11 +25,11 @@ import ProductDetailModal from '@/components/marketplace/ProductDetailModal.vue'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useMarketplaceCart } from '@/composables/useMarketplaceCart';
 import { useMarketplaceCatalog } from '@/composables/useMarketplaceCatalog';
 import { useMarketplaceFilters } from '@/composables/useMarketplaceFilters';
 import { useProductPagination } from '@/composables/useProductPagination';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import type { ProductDetail } from '@/types/product';
 import type { StorefrontInfo } from '@/types/store';
 
@@ -42,9 +42,11 @@ const activeBanners = computed(() => {
     if (storefront.value?.banner_urls && storefront.value.banner_urls.length > 0) {
         return storefront.value.banner_urls;
     }
+
     if (storefront.value?.banner_url) {
         return [storefront.value.banner_url];
     }
+
     return [];
 });
 
@@ -117,6 +119,7 @@ const processedProducts = computed(() => {
         const max = Number(maxStr);
         result = result.filter((p) => {
             const num = p.priceNum ?? Number(String(p.price || '').replace(/[^0-9]/g, ''));
+
             return num >= min && num <= max;
         });
     }
@@ -131,12 +134,14 @@ const processedProducts = computed(() => {
         result.sort((a, b) => {
             const numA = a.priceNum ?? Number(String(a.price || '').replace(/[^0-9]/g, ''));
             const numB = b.priceNum ?? Number(String(b.price || '').replace(/[^0-9]/g, ''));
+
             return numA - numB;
         });
     } else if (sortOption.value === 'price_desc') {
         result.sort((a, b) => {
             const numA = a.priceNum ?? Number(String(a.price || '').replace(/[^0-9]/g, ''));
             const numB = b.priceNum ?? Number(String(b.price || '').replace(/[^0-9]/g, ''));
+
             return numB - numA;
         });
     } else {

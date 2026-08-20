@@ -24,6 +24,7 @@ export function useAddresses() {
 
     function getBaseUrl() {
         const storeSlug = (usePage().props.store as any)?.slug ?? '';
+
         return storeSlug ? `/${storeSlug}` : '';
     }
 

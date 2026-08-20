@@ -22,9 +22,9 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { useStoreSettings } from '@/composables/useStoreSettings';
 import { useStoreTheme } from '@/composables/useStoreTheme';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { StoreData } from '@/types/store';
 
 interface Props {

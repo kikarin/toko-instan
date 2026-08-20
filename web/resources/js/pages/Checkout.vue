@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import {
     User,
     MapPin,
@@ -12,20 +13,19 @@ import {
     CheckCircle2,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { watch, onMounted } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { useCart } from '@/composables/useCart';
 import { useCheckout } from '@/composables/useCheckout';
-import { useStoreName } from '@/composables/useStoreName';
-import { Link } from '@inertiajs/vue3';
-import { watch, onMounted } from 'vue';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useIndoRegions } from '@/composables/useIndoRegions';
+import { useStoreName } from '@/composables/useStoreName';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 
 const props = defineProps<{
     addresses?: any[];
@@ -82,6 +82,7 @@ onMounted(() => {
 
 watch([() => manualProvince.value, provinces], ([newProvName, provs], [oldProvName]) => {
     const prov = provs.find(p => p.name === newProvName);
+
     if (prov) {
         loadCities(prov.id);
     } else {
@@ -96,6 +97,7 @@ watch([() => manualProvince.value, provinces], ([newProvName, provs], [oldProvNa
 
 watch([() => manualCity.value, cities], ([newCityName, cits], [oldCityName]) => {
     const city = cits.find(c => c.name === newCityName);
+
     if (city) {
         loadDistricts(city.id);
     } else {

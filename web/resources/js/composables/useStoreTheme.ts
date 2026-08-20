@@ -46,7 +46,9 @@ const FALLBACK: ThemeColors = {
 };
 
 function resolveTheme(theme?: ThemePayload | null): ThemeColors {
-    if (!theme?.colors) return FALLBACK;
+    if (!theme?.colors) {
+return FALLBACK;
+}
 
     return {
         primary:   theme.colors.primary   || FALLBACK.primary,
@@ -60,7 +62,9 @@ function resolveTheme(theme?: ThemePayload | null): ThemeColors {
 // Apply to :root
 // ---------------------------------------------------------------------------
 function applyTheme(colors: ThemeColors): void {
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined') {
+return;
+}
 
     const root = document.documentElement;
 
@@ -99,11 +103,15 @@ function applyTheme(colors: ThemeColors): void {
 /** Returns white or dark foreground based on perceived luminance of `hex`. */
 function contrastColor(hex: string): string {
     const rgb = hexToRgbTuple(hex);
-    if (!rgb) return '#ffffff';
+
+    if (!rgb) {
+return '#ffffff';
+}
 
     // sRGB luminance (WCAG formula)
     const [r, g, b] = rgb.map((c) => {
         const n = c / 255;
+
         return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
     });
 
@@ -115,20 +123,34 @@ function contrastColor(hex: string): string {
 
 function hexToRgba(hex: string, alpha: number): string {
     const rgb = hexToRgbTuple(hex);
-    if (!rgb) return `rgba(224,124,40,${alpha})`;
+
+    if (!rgb) {
+return `rgba(224,124,40,${alpha})`;
+}
+
     return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
 }
 
 function hexToRgbTuple(hex: string): [number, number, number] | null {
     const clean = hex.replace('#', '');
-    if (clean.length !== 6) return null;
+
+    if (clean.length !== 6) {
+return null;
+}
+
     const n = parseInt(clean, 16);
+
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
 function darken(hex: string, factor: number): string {
     const rgb = hexToRgbTuple(hex);
-    if (!rgb) return '#18181c';
+
+    if (!rgb) {
+return '#18181c';
+}
+
     const [r, g, b] = rgb.map((c) => Math.round(c * factor));
+
     return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 }

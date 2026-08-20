@@ -32,11 +32,11 @@ import {
 } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { useProductActions } from '@/composables/useProductActions';
 import { useProductFilters } from '@/composables/useProductFilters';
 import { useProductStats } from '@/composables/useProductStats';
 import { useProductStock } from '@/composables/useProductStock';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { Product } from '@/types/product';
 
 interface Props {

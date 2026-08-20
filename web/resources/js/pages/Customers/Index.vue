@@ -35,7 +35,11 @@ const perPage = ref(10);
 
 const filteredCustomers = computed(() => {
     const q = searchQuery.value.toLowerCase().trim();
-    if (!q) return props.customers;
+
+    if (!q) {
+return props.customers;
+}
+
     return props.customers.filter(
         (c) =>
             (c.name && c.name.toLowerCase().includes(q)) ||
@@ -51,11 +55,15 @@ const totalPages = computed(() => {
 const paginatedCustomers = computed(() => {
     const start = (currentPage.value - 1) * perPage.value;
     const end = start + perPage.value;
+
     return filteredCustomers.value.slice(start, end);
 });
 
 const paginationStart = computed(() => {
-    if (filteredCustomers.value.length === 0) return 0;
+    if (filteredCustomers.value.length === 0) {
+return 0;
+}
+
     return (currentPage.value - 1) * perPage.value + 1;
 });
 

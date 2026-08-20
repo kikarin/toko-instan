@@ -30,11 +30,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Toaster } from '@/components/ui/sonner';
-import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useCart } from '@/composables/useCart';
 import { useStoreTheme } from '@/composables/useStoreTheme';
 import { useWishlist } from '@/composables/useWishlist';
+import { logoutUser } from '@/lib/firebase';
 
 interface Props {
     cartCount?: number;
@@ -302,25 +302,30 @@ const bottomNavItems = computed(() => [
                     >
                         <DropdownMenu>
                             <DropdownMenuTrigger as-child>
-                                <Avatar
-                                    :src="activeUser.photoURL || undefined"
-                                    :fallback="userInitial"
-                                    :hue="220"
-                                    size="sm"
-                                    class="cursor-pointer transition-all hover:ring-2 hover:ring-(--brand)"
-                                />
+                                <button
+                                    class="flex items-center gap-2 rounded-xl border border-border bg-background px-2.5 py-1.5 shadow-2xs transition-all hover:bg-muted/60 hover:border-brand/40 cursor-pointer"
+                                    title="Menu Akun"
+                                >
+                                    <Avatar
+                                        :src="activeUser.photoURL || undefined"
+                                        :fallback="userInitial"
+                                        :hue="220"
+                                        size="sm"
+                                        class="cursor-pointer"
+                                    />
+                                    <span class="hidden text-xs font-bold text-foreground md:inline max-w-[100px] truncate">
+                                        {{ userDisplayName }}
+                                    </span>
+                                </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent class="w-52" align="end">
+                                <!-- Isi dropdown menu tetap sama seperti sebelumnya -->
                                 <DropdownMenuLabel class="font-normal">
                                     <div class="flex flex-col space-y-1">
-                                        <p
-                                            class="text-xs leading-none font-bold text-foreground"
-                                        >
+                                        <p class="text-xs leading-none font-bold text-foreground">
                                             {{ userDisplayName }}
                                         </p>
-                                        <p
-                                            class="max-w-[180px] truncate text-[10px] leading-none text-muted-foreground"
-                                        >
+                                        <p class="max-w-[180px] truncate text-[10px] leading-none text-muted-foreground">
                                             {{ activeUser.email }}
                                         </p>
                                     </div>
@@ -335,10 +340,7 @@ const bottomNavItems = computed(() => [
                                     <span>Pesanan Saya</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    v-if="
-                                        userRole === 'seller' ||
-                                        userRole === 'admin'
-                                    "
+                                    v-if="userRole === 'seller' || userRole === 'admin'"
                                     @click="navigate('/dashboard')"
                                 >
                                     <Store class="mr-2 h-3.5 w-3.5" />

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
-import { Lock, Mail, AlertCircle, ArrowRight, Loader2 } from 'lucide-vue-next';
+
 import { ref, computed } from 'vue';
+import { Head, router, useForm } from '@inertiajs/vue3'; // <--- Tambahkan useForm di sini
+import { Eye, EyeOff, Lock, Mail, AlertCircle, ArrowRight, Loader2 } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,14 @@ const password = ref('');
 const isLoading = ref(false);
 const isGoogleLoading = ref(false);
 const errorMessage = ref<string | null>(null);
+const form = useForm({
+    email: '',
+    password: '',
+});
+const showPassword = ref(false);
+const togglePasswordVisibility = () => {
+    showPassword.value = !showPassword.value;
+};
 
 const loginUrl = computed(() =>
     isStorefront.value && props.store ? `/${props.store.slug}/login` : '/login',
@@ -220,13 +229,25 @@ async function handleGoogleLogin() {
                                 >Lupa sandi?</a
                             >
                         </div>
-                        <Input
-                            v-model="password"
-                            type="password"
-                            placeholder="••••••••"
-                            required
-                            class="h-10"
-                        />
+                        <div class="relative">
+                            <Input
+                                v-model="password"
+                                :type="showPassword ? 'text' : 'password'"
+                                placeholder="••••••••"
+                                required
+                                class="h-10 pr-10"
+                            />
+                            
+                            <!-- Tombol untuk toggle ikon Mata (Show/Hide) -->
+                            <button
+                                type="button"
+                                @click="togglePasswordVisibility"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                            >
+                                <Eye v-if="showPassword" class="h-4 w-4 text-[#9090a0]" />
+                                <EyeOff v-else class="h-4 w-4 text-[#9090a0]" />
+                            </button>
+                        </div>
                     </div>
 
                     <Button

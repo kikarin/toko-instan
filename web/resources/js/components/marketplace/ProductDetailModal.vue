@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
 import {
     Star,
     ShoppingCart,
@@ -14,7 +15,6 @@ import {
     Share2,
 } from 'lucide-vue-next';
 import { ref, watch, computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

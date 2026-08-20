@@ -19,10 +19,10 @@ import { ref, computed } from 'vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import { useCart } from '@/composables/useCart';
 import { toast } from '@/components/ui/sonner';
 import { useActiveUser } from '@/composables/useActiveUser';
+import { useCart } from '@/composables/useCart';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 
 interface Props {
     store: any;
@@ -41,13 +41,18 @@ const activeTab = ref<'detail' | 'ulasan'>('detail');
 const { addItem } = useCart();
 
 function formatSold(n: number): string {
-    if (!n) return '0';
+    if (!n) {
+return '0';
+}
+
     if (n >= 1_000_000) {
         return `${(n / 1_000_000).toFixed(1)}jt+`;
     }
+
     if (n >= 1_000) {
         return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}rb+`;
     }
+
     return String(n);
 }
 
@@ -56,6 +61,7 @@ function handleAddToCart() {
         toast.error('Silakan login untuk menambahkan ke keranjang');
         const store = usePage().props.store as any;
         router.visit(store?.slug ? `/${store.slug}/login` : '/login');
+
         return;
     }
 

@@ -12,13 +12,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/AppLayout.vue';
 import {
     TRANSACTION_TYPE_LABEL as typeLabel,
     useWalletWithdraw,
     WITHDRAW_STATUS_LABEL as statusLabel,
     WITHDRAW_STATUS_VARIANT as statusVariant,
 } from '@/composables/useWalletWithdraw';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { WalletSummary } from '@/types/wallet';
 import type { Withdrawal } from '@/types/wallet';
 import type { WalletTransaction } from '@/types/wallet';

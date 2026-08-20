@@ -1,8 +1,8 @@
 import { router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { toast } from '@/components/ui/sonner';
-import { useCart } from '@/composables/useCart';
 import { useActiveUser } from '@/composables/useActiveUser';
+import { useCart } from '@/composables/useCart';
 import type { ProductDetail } from '@/types/product';
 
 export function useMarketplaceCart() {
@@ -22,6 +22,7 @@ export function useMarketplaceCart() {
             toast.error('Silakan login untuk menambahkan ke keranjang');
             const store = usePage().props.store as any;
             router.visit(store?.slug ? `/${store.slug}/login` : '/login');
+
             return;
         }
 

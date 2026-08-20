@@ -21,8 +21,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { useCatalogManager } from '@/composables/useCatalogManager';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { CatalogItem } from '@/types/catalog';
 import type { CatalogLabelItem } from '@/types/catalog';
 

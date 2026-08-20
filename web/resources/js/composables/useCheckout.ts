@@ -84,8 +84,10 @@ export function useCheckout(cartItems: ComputedRef<CartItem[]>) {
     const customerName = computed(() => {
         if (selectedAddressId.value !== 'manual') {
             const addr = availableAddresses.value.find(a => a.id === selectedAddressId.value);
+
             return addr ? addr.recipient_name : manualName.value;
         }
+
         return manualName.value;
     });
 
@@ -94,16 +96,20 @@ export function useCheckout(cartItems: ComputedRef<CartItem[]>) {
     const customerPhone = computed(() => {
         if (selectedAddressId.value !== 'manual') {
             const addr = availableAddresses.value.find(a => a.id === selectedAddressId.value);
+
             return addr ? addr.phone : manualPhone.value;
         }
+
         return manualPhone.value;
     });
 
     const shippingAddress = computed(() => {
         if (selectedAddressId.value !== 'manual') {
             const addr = availableAddresses.value.find(a => a.id === selectedAddressId.value);
+
             if (addr) {
                 const districtPart = addr.district ? `${addr.district}, ` : '';
+
                 return `[${addr.label}] ${addr.address}, ${districtPart}${addr.city}, ${addr.province}, ${addr.postal_code}`;
             }
         }

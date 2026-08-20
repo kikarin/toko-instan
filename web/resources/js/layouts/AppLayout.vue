@@ -54,10 +54,10 @@ import {
     SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
-import { logoutUser } from '@/lib/firebase';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useStoreName } from '@/composables/useStoreName';
 import { useStoreTheme } from '@/composables/useStoreTheme';
+import { logoutUser } from '@/lib/firebase';
 
 interface NavItem {
     icon: any;

@@ -73,7 +73,9 @@ export function useStoreSettings(store: StoreData) {
     const newBannerUrl = ref('');
 
     function addBannerUrl() {
-        if (!newBannerUrl.value) return;
+        if (!newBannerUrl.value) {
+return;
+}
         
         // Push to existing banners array so it gets submitted
         form.existing_banners.push(newBannerUrl.value);
@@ -90,9 +92,11 @@ export function useStoreSettings(store: StoreData) {
         } else {
             // It's a newly uploaded file
             const newFileIndex = index - form.existing_banners.length;
+
             if (formWithFiles.banner_files) {
                 formWithFiles.banner_files.splice(newFileIndex, 1);
             }
+
             bannerPreviewUrls.value.splice(index, 1);
         }
     }
@@ -100,10 +104,13 @@ export function useStoreSettings(store: StoreData) {
     const newHighlight = ref('');
     
     function addHighlight() {
-        if (!newHighlight.value.trim()) return;
+        if (!newHighlight.value.trim()) {
+return;
+}
         
         if (form.highlights.length >= 3) {
             toast.error('Maksimal 3 highlights');
+
             return;
         }
 

@@ -26,9 +26,9 @@ import {
     CardDescription,
     CardContent,
 } from '@/components/ui/card';
-import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { useSellerDashboard } from '@/composables/useSellerDashboard';
 import { useStoreName } from '@/composables/useStoreName';
+import DashboardLayout from '@/layouts/DashboardLayout.vue';
 
 interface Props {
     kpis?: any[];

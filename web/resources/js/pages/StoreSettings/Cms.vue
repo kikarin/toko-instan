@@ -24,11 +24,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import AppLayout from '@/layouts/AppLayout.vue';
 import {
     COLOR_TOKENS as colorTokens,
     useStoreCms,
 } from '@/composables/useStoreCms';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { ProductOption } from '@/types/product';
 import type { ThemeInfo } from '@/types/store';
 import type { StoreShowcase } from '@/types/store';

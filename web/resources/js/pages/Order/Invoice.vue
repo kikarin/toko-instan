@@ -17,8 +17,12 @@ const { storeName } = useStoreName();
 
 const userRole = computed(() => (page.props.auth as any)?.user?.role ?? 'buyer');
 const backUrl = computed(() => {
-    if (userRole.value === 'seller') return '/orders';
+    if (userRole.value === 'seller') {
+return '/orders';
+}
+
     const storeSlug = (page.props.store as any)?.slug ?? '';
+
     return `/${storeSlug}/orders`;
 });
 

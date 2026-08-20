@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import AdminLayout from '@/layouts/AdminLayout.vue';
 import { useAdminUsers } from '@/composables/useAdminUsers';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 import type { AdminUser } from '@/types/admin';
 
 interface Props {
