@@ -66,6 +66,7 @@ import {
     SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
+import ImpersonationBanner from '@/components/impersonation/ImpersonationBanner.vue';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useStoreName } from '@/composables/useStoreName';
 import { useStoreTheme } from '@/composables/useStoreTheme';
@@ -585,6 +586,7 @@ function isActive(item: NavItem): boolean {
 
         <!-- ── Main Content Area ── -->
         <SidebarInset class="bg-background">
+            <ImpersonationBanner />
             <!-- Top Header Bar (Mobile Responsive) -->
             <header
                 class="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-card/90 px-3 backdrop-blur-md transition-all sm:h-16 sm:px-6"

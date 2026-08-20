@@ -129,7 +129,7 @@ class OrderService
             $tax = $this->taxService->ppnAmount($store, $dpp);
             $totalAmount = $dpp + $shippingFee + $tax;
 
-            $orderNumber = 'ORD-'.date('Ymd').'-'.strtoupper(Str::random(4));
+            $orderNumber = 'ORD-'.date('Ymd').'-'.strtoupper(Str::random(10));
 
             $order = $this->orderRepository->createOrder(
                 $dto,
@@ -197,14 +197,14 @@ class OrderService
                     'Escrow penjualan (order '.$order->order_number.')'
                 );
             }
-
-            $order->update([
-                'status' => 'paid',
-                'paid_at' => $order->paid_at ?? now(),
-            ]);
-
-            $this->referralService->creditFromPaidOrder($order->fresh(['store.tenant']));
         }
+
+        $order->update([
+            'status' => 'paid',
+            'paid_at' => $order->paid_at ?? now(),
+        ]);
+
+        $this->referralService->creditFromPaidOrder($order->fresh(['store.tenant']));
     }
 
     public function markOrderCompleted(Order $order): void

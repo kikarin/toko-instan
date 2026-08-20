@@ -1,8 +1,14 @@
 <?php
 
+use App\Enums\WithdrawalStatus;
 use App\Http\Controllers\AdminController;
+use App\Models\Order;
 use App\Models\Store;
 use App\Models\User;
+use App\Models\Withdrawal;
+use App\Services\OrderService;
+use App\Services\WalletService;
+use App\Services\WithdrawService;
 
 function adminUser(): User
 {
@@ -77,4 +83,57 @@ test('impersonation info is shared to the frontend', function () {
         ->assertInertia(fn ($page) => $page
             ->component('StorePage')
             ->where('auth.impersonating.id', $admin->id));
+});
+
+test('an admin can approve and mark a withdrawal as transferred', function () {
+    $admin = adminUser();
+    $store = Store::factory()->create();
+    $store->tenant->update(['plan' => 'free']);
+
+    $order = Order::factory()->create([
+        'store_id' => $store->id,
+        'total_amount' => 100000,
+        'status' => 'pending',
+    ]);
+
+    $orderService = app(OrderService::class);
+    $orderService->markOrderPaid($order);
+    $orderService->markOrderCompleted($order);
+
+    $wallet = app(WalletService::class)->ensureForTenant($store->tenant_id);
+
+    $withdrawal = app(WithdrawService::class)->request(
+        $wallet,
+        50000,
+        ['bank_name' => 'BCA', 'account_number' => '1234', 'account_name' => 'Budi'],
+        $store->id
+    );
+
+    $this->actingAs($admin)
+        ->patch("/admin/withdrawals/{$withdrawal->id}/approve")
+        ->assertRedirect();
+
+    expect($withdrawal->refresh()->status)->toBe(WithdrawalStatus::Approved->value);
+
+    $this->actingAs($admin)
+        ->patch("/admin/withdrawals/{$withdrawal->id}/transferred")
+        ->assertRedirect();
+
+    expect($withdrawal->refresh()->status)->toBe(WithdrawalStatus::Transferred->value)
+        ->and($withdrawal->refresh()->transferred_at)->not->toBeNull();
+});
+
+test('a non-admin cannot mark a withdrawal as transferred', function () {
+    $seller = User::factory()->state(['role' => 'seller'])->create();
+    $store = Store::factory()->create();
+    $withdrawal = Withdrawal::factory()->create([
+        'store_id' => $store->id,
+        'status' => WithdrawalStatus::Approved->value,
+    ]);
+
+    $this->actingAs($seller)
+        ->patch("/admin/withdrawals/{$withdrawal->id}/transferred")
+        ->assertRedirect('/dashboard');
+
+    expect($withdrawal->refresh()->status)->toBe(WithdrawalStatus::Approved->value);
 });

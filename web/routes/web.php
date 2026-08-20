@@ -115,6 +115,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(fu
     Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('admin.withdrawals.index');
     Route::patch('/withdrawals/{id}/approve', [AdminWithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
     Route::patch('/withdrawals/{id}/reject', [AdminWithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
+    Route::patch('/withdrawals/{id}/transferred', [AdminWithdrawalController::class, 'markTransferred'])->name('admin.withdrawals.transferred');
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('admin.tickets.index');
     Route::get('/tickets/{id}', [AdminTicketController::class, 'show'])->name('admin.tickets.show');
     Route::post('/tickets/{id}/replies', [AdminTicketController::class, 'reply'])->name('admin.tickets.reply');
@@ -140,12 +141,12 @@ Route::middleware(['auth', 'verified', 'role:buyer'])->prefix('{store_slug}')->w
 
 // Public checkout — guests can buy without logging in. Logged-in users are
 // restricted to their own store (guests roam freely).
-Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->group(function () {
+Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->middleware('throttle:20,1')->group(function () {
     Route::post('/shipping/quote', [ShippingController::class, 'quote'])->name('shipping.quote');
     Route::post('/vouchers/preview', [CheckoutVoucherController::class, 'preview'])->name('vouchers.preview');
 });
 
-Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->middleware('store.access')->group(function () {
+Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->middleware(['store.access', 'throttle:60,1'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout', [CheckoutController::class, 'store']);
     Route::get('/orders/{orderNumber}/success', [CheckoutController::class, 'success'])->name('orders.success');
