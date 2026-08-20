@@ -73,11 +73,11 @@ test('midtrans webhook marks order paid with idempotency', function () {
 });
 
 test('syncing midtrans status via API marks order paid', function () {
-    $buyer = User::factory()->create(['role' => 'buyer']);
     $seller = User::factory()->create(['role' => 'seller']);
     $tenant = Tenant::factory()->create(['user_id' => $seller->id]);
     $store = Store::factory()->create(['tenant_id' => $tenant->id]);
     Wallet::factory()->create(['tenant_id' => $tenant->id]);
+    $buyer = User::factory()->create(['role' => 'buyer', 'store_id' => $store->id]);
 
     $order = Order::factory()->create([
         'store_id' => $store->id,

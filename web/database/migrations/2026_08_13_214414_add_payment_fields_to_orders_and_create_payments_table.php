@@ -8,11 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->string('payment_method', 40)->nullable()->after('status');
-            $table->string('shipping_courier', 100)->nullable()->after('payment_method');
-            $table->timestamp('paid_at')->nullable()->after('shipping_courier');
-        });
+        // Schema::table('orders', function (Blueprint $table) {
+        //     $table->string('payment_method', 40)->nullable()->after('status');
+        //     $table->string('shipping_courier', 100)->nullable()->after('payment_method');
+        //     $table->timestamp('paid_at')->nullable()->after('shipping_courier');
+        // });
 
         Schema::create('payments', function (Blueprint $table) {
             $table->id();

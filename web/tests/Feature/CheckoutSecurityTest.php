@@ -32,6 +32,7 @@ function securityCheckoutContext(): array
         'role' => 'buyer',
         'email' => 'security-buyer@example.com',
         'name' => 'Buyer Aman',
+        'store_id' => $store->id,
     ]);
 
     $product = Product::factory()->create([

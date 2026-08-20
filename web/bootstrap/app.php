@@ -3,6 +3,7 @@
 use App\Http\Middleware\CaptureReferral;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\EnsureSellerApi;
+use App\Http\Middleware\EnsureStoreAccess;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyTenant;
 use App\Http\Middleware\RecordStoreVisit;
@@ -45,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => CheckRole::class,
+            'store.access' => EnsureStoreAccess::class,
             'tenant' => IdentifyTenant::class,
             'store.visit' => RecordStoreVisit::class,
             'seller.api' => EnsureSellerApi::class,

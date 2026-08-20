@@ -66,6 +66,7 @@ import {
     SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
+import ImpersonationBanner from '@/components/impersonation/ImpersonationBanner.vue';
 import { useActiveUser } from '@/composables/useActiveUser';
 import { useStoreName } from '@/composables/useStoreName';
 import { useStoreTheme } from '@/composables/useStoreTheme';
@@ -139,8 +140,10 @@ const userEmail = computed(() => {
     return activeUser.value?.email ?? 'seller@toko.com';
 });
 
+const pendingOrders = computed(() => usePage().props.pending_orders ?? 0);
+
 // Nav groups
-const mainNavItems: NavItem[] = [
+const mainNavItems = computed<NavItem[]>(() => [
     { icon: LayoutDashboard, label: 'Dashboard', route: '/dashboard' },
     { icon: Tags, label: 'Katalog', route: '/catalog' },
     { icon: Package, label: 'Produk', route: '/products' },
@@ -149,13 +152,13 @@ const mainNavItems: NavItem[] = [
         icon: ShoppingCart,
         label: 'Pesanan',
         route: '/orders',
-        badge: 3,
+        badge: pendingOrders.value || undefined,
     },
     { icon: Settings, label: 'Pengaturan Toko', route: '/store-settings' },
     { icon: Palette, label: 'Tampilan & Konten', route: '/store-cms' },
     { icon: ScrollText, label: 'Riwayat Aktivitas', route: '/activity-log' },
     { icon: Users, label: 'Pelanggan', route: '/customers' },
-];
+]);
 
 const financeNavItems: NavItem[] = [
     { icon: Wallet, label: 'Dompet', route: '/wallet' },
@@ -330,12 +333,15 @@ function isActive(item: NavItem): boolean {
                                             class="group-data-[collapsible=icon]:hidden"
                                             >{{ item.label }}</span
                                         >
-                                        <SidebarMenuBadge
+                                        <span
                                             v-if="item.badge"
-                                            class="rounded-full bg-[var(--sidebar-primary)] px-1.5 py-0.5 text-[9px] font-black text-[var(--sidebar-primary-foreground)] shadow-xs group-data-[collapsible=icon]:hidden"
+                                            class="relative ml-auto flex items-center group-data-[collapsible=icon]:hidden"
                                         >
-                                            {{ item.badge }}
-                                        </SidebarMenuBadge>
+                                            <span class="absolute -inset-0.5 animate-ping rounded-full bg-[var(--sidebar-primary)] opacity-30" />
+                                            <span class="relative flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--sidebar-primary)] px-1.5 text-[10px] font-black leading-none text-[var(--sidebar-primary-foreground)] shadow-md">
+                                                {{ item.badge }}
+                                            </span>
+                                        </span>
                                     </SidebarMenuButton>
                                 </template>
                             </SidebarMenuItem>
@@ -572,6 +578,7 @@ function isActive(item: NavItem): boolean {
 
         <!-- ── Main Content Area ── -->
         <SidebarInset class="bg-background">
+            <ImpersonationBanner />
             <!-- Top Header Bar (Mobile Responsive) -->
             <header
                 class="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-card/90 px-3 backdrop-blur-md transition-all sm:h-16 sm:px-6"

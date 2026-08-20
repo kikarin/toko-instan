@@ -115,6 +115,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(fu
     Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('admin.withdrawals.index');
     Route::patch('/withdrawals/{id}/approve', [AdminWithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
     Route::patch('/withdrawals/{id}/reject', [AdminWithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
+    Route::patch('/withdrawals/{id}/transferred', [AdminWithdrawalController::class, 'markTransferred'])->name('admin.withdrawals.transferred');
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('admin.tickets.index');
     Route::get('/tickets/{id}', [AdminTicketController::class, 'show'])->name('admin.tickets.show');
     Route::post('/tickets/{id}/replies', [AdminTicketController::class, 'reply'])->name('admin.tickets.reply');
@@ -122,11 +123,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(fu
 });
 
 $reservedStoreSlugs = 'admin|login|register|dashboard|horizon|uploads|products|inventory|wallet|catalog|customers|profile|forgot-password|reset-password|auth|up|email|otp-login|webhooks|media|vouchers|tax-reports|blog|chats|developer|api|referral|faqs|help|support|store-domain';
-
-Route::middleware(['auth', 'verified'])->prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->group(function () {
-    Route::post('/shipping/quote', [ShippingController::class, 'quote'])->name('shipping.quote');
-    Route::post('/vouchers/preview', [CheckoutVoucherController::class, 'preview'])->name('vouchers.preview');
-});
 
 Route::middleware(['auth', 'verified', 'role:buyer'])->prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account');
@@ -139,9 +135,20 @@ Route::middleware(['auth', 'verified', 'role:buyer'])->prefix('{store_slug}')->w
     Route::put('/addresses/{id}', [AddressController::class, 'update'])->name('addresses.update');
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
     Route::patch('/addresses/{id}/default', [AddressController::class, 'makeDefault'])->name('addresses.default');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
+});
+
+// Public checkout — guests can buy without logging in. Logged-in users are
+// restricted to their own store (guests roam freely).
+Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->middleware('throttle:20,1')->group(function () {
+    Route::post('/shipping/quote', [ShippingController::class, 'quote'])->name('shipping.quote');
+    Route::post('/vouchers/preview', [CheckoutVoucherController::class, 'preview'])->name('vouchers.preview');
+});
+
+Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->middleware(['store.access', 'throttle:60,1'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout', [CheckoutController::class, 'store']);
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{orderNumber}/success', [CheckoutController::class, 'success'])->name('orders.success');
     Route::post('/orders/{orderNumber}/sync-payment', [PaymentController::class, 'sync'])->name('orders.sync-payment');
     Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
@@ -150,7 +157,11 @@ Route::middleware(['auth', 'verified', 'role:buyer'])->prefix('{store_slug}')->w
     Route::post('/p/{product_slug}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
-Route::middleware(['auth', 'verified', 'role:seller'])->group(function () {
+// Payment (public — order number acts as the access key)
+Route::get('/pay/{orderNumber}', [PaymentController::class, 'pay'])->name('payment.simulate');
+Route::post('/pay/{orderNumber}/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
+
+Route::middleware(['auth', 'role:seller'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('seller.orders.index');
     Route::get('/customers', [CustomerController::class, 'index'])->name('seller.customers.index');
     Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('seller.orders.invoice');

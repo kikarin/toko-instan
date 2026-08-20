@@ -72,6 +72,28 @@ const {
 function openInvoice(orderNumber: string) {
     router.get(`/orders/${orderNumber}/invoice`);
 }
+
+function shipOrder(order: SellerOrder) {
+    const trackingNumber = window.prompt(
+        'Masukkan nomor resi pengiriman (mis. J&T / JNE / SiCepat):',
+        order.tracking_number ?? '',
+    );
+
+    if (trackingNumber === null) {
+        return;
+    }
+
+    const trackingCourier = window.prompt(
+        'Nama kurir (J&T Express / JNE / SiCepat BEST):',
+        order.tracking_courier ?? 'J&T Express',
+    );
+
+    if (trackingCourier === null) {
+        return;
+    }
+
+    updateOrderStatus(order.id, 'shipped', trackingNumber, trackingCourier);
+}
 </script>
 
 <template>

@@ -120,7 +120,7 @@ test('inactive products are hidden from the storefront catalog', function () {
     Product::factory()->create(['store_id' => $store->id, 'is_active' => true]);
     Product::factory()->create(['store_id' => $store->id, 'is_active' => false]);
 
-    $buyer = User::factory()->state(['role' => 'buyer'])->create();
+    $buyer = User::factory()->state(['role' => 'buyer', 'store_id' => $store->id])->create();
 
     $this->actingAs($buyer)
         ->get("/{$store->slug}")

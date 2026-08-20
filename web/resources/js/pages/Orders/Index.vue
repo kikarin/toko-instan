@@ -147,6 +147,37 @@ function openInvoice(orderNumber: string) {
                         </p>
                     </div>
 
+                    <!-- tracking -->
+                    <div
+                        v-if="o.tracking_number"
+                        class="mt-3 flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2"
+                    >
+                        <div>
+                            <p class="text-[10px] text-muted-foreground">
+                                Nomor Resi ({{ o.tracking_courier }})
+                            </p>
+                            <p
+                                class="font-mono text-xs font-bold text-foreground"
+                            >
+                                {{ o.tracking_number }}
+                            </p>
+                        </div>
+                        <a
+                            v-if="o.tracking_url"
+                            :href="o.tracking_url"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                class="h-8 text-[10px] font-bold"
+                            >
+                                Lacak
+                            </Button>
+                        </a>
+                    </div>
+
                     <!-- footer -->
                     <div
                         class="flex items-center justify-between border-t border-border pt-3"

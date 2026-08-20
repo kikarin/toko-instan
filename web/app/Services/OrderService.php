@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\DTO\CreateOrderDTO;
 use App\DTO\Order\UpdateOrderStatusDTO;
+use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\StoreRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class OrderService
@@ -127,7 +129,7 @@ class OrderService
             $tax = $this->taxService->ppnAmount($store, $dpp);
             $totalAmount = $dpp + $shippingFee + $tax;
 
-            $orderNumber = 'ORD-'.date('Ymd').'-'.strtoupper(Str::random(4));
+            $orderNumber = 'ORD-'.date('Ymd').'-'.strtoupper(Str::random(10));
 
             $order = $this->orderRepository->createOrder(
                 $dto,
@@ -165,22 +167,36 @@ class OrderService
             throw new \RuntimeException('Order tanpa store tidak bisa diproses escrow.');
         }
 
-        $wallet = $this->walletService->ensureForTenant($tenantId);
+        $isPremium = $order->store?->tenant?->plan === 'premium';
 
-        if ($this->subscriptionService->usesDirectSettlement($tenant)) {
-            $this->walletService->creditOrderDirect(
-                $wallet->id,
-                (float) $order->total_amount,
-                $order->id,
-                'Settlement langsung (order '.$order->order_number.')'
-            );
-        } else {
+        if ($isPremium) {
+            // TODO: premium direct settlement (payout ke rekening seller).
+            // Belum ada infrastruktur payout — hanya dicatat sebagai ledger informasi.
+            $wallet = $this->walletService->ensureForTenant($tenantId);
             $this->walletService->creditOrderEscrow(
                 $wallet->id,
                 (float) $order->total_amount,
                 $order->id,
-                'Escrow penjualan (order '.$order->order_number.')'
+                'Premium settlement (direct) - order '.$order->order_number
             );
+        } else {
+            $wallet = $this->walletService->ensureForTenant($tenantId);
+
+            if ($this->subscriptionService->usesDirectSettlement($tenant)) {
+                $this->walletService->creditOrderDirect(
+                    $wallet->id,
+                    (float) $order->total_amount,
+                    $order->id,
+                    'Settlement langsung (order '.$order->order_number.')'
+                );
+            } else {
+                $this->walletService->creditOrderEscrow(
+                    $wallet->id,
+                    (float) $order->total_amount,
+                    $order->id,
+                    'Escrow penjualan (order '.$order->order_number.')'
+                );
+            }
         }
 
         $order->update([
@@ -245,14 +261,25 @@ class OrderService
                 'status' => 'packed',
                 'packed_at' => $order->packed_at ?? now(),
             ]),
-            'shipped' => $order->update([
-                'status' => 'shipped',
-                'tracking_number' => $dto->trackingNumber,
-                'shipped_at' => $order->shipped_at ?? now(),
-            ]),
             'completed' => $this->markOrderCompleted($order),
+            'shipped' => $this->markOrderShipped($order, $dto),
             default => $order->update(['status' => $dto->status]),
         };
+    }
+
+    public function markOrderShipped(Order $order, UpdateOrderStatusDTO $dto): void
+    {
+        $order->update([
+            'status' => 'shipped',
+            'tracking_number' => $dto->trackingNumber,
+            'tracking_courier' => $dto->trackingCourier,
+            'shipped_at' => now(),
+        ]);
+
+        if ($order->customer_email) {
+            Mail::to($order->customer_email)
+                ->queue(new OrderShippedMail($order));
+        }
     }
 
     /**
@@ -289,7 +316,13 @@ class OrderService
             'customer_email' => $order->customer_email,
             'customer_phone' => $order->customer_phone,
             'shipping_address' => $order->shipping_address,
+            'shipping_courier' => $order->shipping_courier,
+            'payment_method' => $order->payment_method,
             'notes' => $order->notes,
+            'tracking_number' => $order->tracking_number,
+            'tracking_courier' => $order->tracking_courier,
+            'tracking_url' => $this->trackingUrlFor($order),
+            'shipped_at' => $order->shipped_at?->format('d M Y, H:i'),
             'subtotal' => $subtotal,
             'subtotal_formatted' => 'Rp '.number_format($subtotal, 0, ',', '.'),
             'discount' => $discount,
@@ -308,5 +341,20 @@ class OrderService
             'created_at' => $order->created_at ? $order->created_at->format('j M Y, H:i') : date('j M Y, H:i'),
             'items' => $items,
         ];
+    }
+
+    public function trackingUrlFor(Order $order): ?string
+    {
+        $number = $order->tracking_number;
+
+        if (! $number) {
+            return null;
+        }
+
+        return match ($order->tracking_courier) {
+            'J&T Express' => 'https://www.jet.co.id/track/trace?no='.$number,
+            'SiCepat BEST' => 'https://www.sicepat.com/track?waybill='.$number,
+            default => 'https://www.jne.co.id/en/tracking/trace?awb='.$number,
+        };
     }
 }

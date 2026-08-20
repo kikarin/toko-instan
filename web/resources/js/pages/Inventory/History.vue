@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { ArrowLeft, Boxes, TrendingDown, TrendingUp } from 'lucide-vue-next';
+import { ArrowLeft, ArrowRight, Boxes, TrendingDown, TrendingUp } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -100,7 +100,9 @@ function typeLabel(type: string) {
                             {{ m.delta > 0 ? '+' : '' }}{{ m.delta }}
                         </p>
                         <p class="text-[10px] text-[#9090a0]">
-                            {{ m.stock_before }} → {{ m.stock_after }}
+                            {{ m.stock_before }}
+                            <ArrowRight class="inline h-3 w-3" />
+                            {{ m.stock_after }}
                         </p>
                     </div>
                 </div>

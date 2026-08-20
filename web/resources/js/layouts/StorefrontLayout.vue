@@ -17,6 +17,7 @@ import {
 import { LogOut, Store, Users as UsersIcon } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import CartDrawer from '@/components/marketplace/CartDrawer.vue';
+import ImpersonationBanner from '@/components/impersonation/ImpersonationBanner.vue';
 import StoreChatWidget from '@/components/StoreChatWidget.vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -159,6 +160,7 @@ const bottomNavItems = computed(() => [
     <div
         class="relative flex min-h-screen flex-col overflow-x-clip font-sans bg-background"
     >
+        <ImpersonationBanner />
         <!-- ── Top Buyer Header Bar ── -->
         <header
             class="sticky top-0 z-50 border-b border-border bg-[var(--header)] text-[var(--header-foreground)] shadow-md select-none"

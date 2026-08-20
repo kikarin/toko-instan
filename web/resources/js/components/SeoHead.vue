@@ -21,7 +21,11 @@ const props = defineProps<{
 
 const title = computed(() => props.seo?.title ?? props.fallbackTitle ?? 'Toko Instan');
 const jsonLd = computed(() =>
-    props.seo?.json_ld ? JSON.stringify(props.seo.json_ld) : null,
+    props.seo?.json_ld
+        ? JSON.stringify(props.seo.json_ld)
+              .replace(/</g, '\\u003c')
+              .replace(/>/g, '\\u003e')
+        : null,
 );
 </script>
 

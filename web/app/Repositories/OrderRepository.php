@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\DTO\CreateOrderDTO;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -71,11 +72,14 @@ class OrderRepository
 
             $order = Order::create([
                 'store_id' => $storeId,
+                'customer_id' => $this->resolveCustomerId($storeId, $dto),
                 'order_number' => $orderNumber,
                 'customer_name' => $dto->customerName,
                 'customer_email' => $dto->customerEmail,
                 'customer_phone' => $dto->customerPhone,
                 'shipping_address' => $dto->shippingAddress,
+                'shipping_courier' => $dto->shippingCourier,
+                'payment_method' => $dto->paymentMethod,
                 'total_amount' => $totalAmount,
                 'shipping_cost' => (int) $shippingFee,
                 'discount' => $discount,
@@ -95,6 +99,34 @@ class OrderRepository
 
             return $order->load('items');
         });
+    }
+
+    /**
+     * Find an existing customer for the store+email or create a new one,
+     * linking the registered user when they are signed in.
+     */
+    protected function resolveCustomerId(int $storeId, CreateOrderDTO $dto): string
+    {
+        $customer = Customer::query()
+            ->where('store_id', $storeId)
+            ->where('email', $dto->customerEmail)
+            ->first();
+
+        if ($customer) {
+            if ($customer->user_id === null && auth()->id() !== null) {
+                $customer->update(['user_id' => auth()->id()]);
+            }
+
+            return $customer->id;
+        }
+
+        return Customer::create([
+            'store_id' => $storeId,
+            'user_id' => auth()->id(),
+            'name' => $dto->customerName,
+            'email' => $dto->customerEmail,
+            'phone' => $dto->customerPhone,
+        ])->id;
     }
 
     /**
@@ -197,22 +229,6 @@ class OrderRepository
         return Order::with(['store', 'items', 'payments'])
             ->where('store_id', $storeId)
             ->orderByDesc('created_at')
-            ->get();
-    }
-
-    /**
-     * @return Collection<int, Order>
-     */
-    public function getCustomersByStore(int $storeId)
-    {
-        return Order::where('store_id', $storeId)
-            ->select('customer_name', 'customer_email', 'customer_phone')
-            ->selectRaw('COUNT(*) as total_orders')
-            ->selectRaw('SUM(total_amount) as total_spent')
-            ->selectRaw('MIN(created_at) as first_order_at')
-            ->selectRaw('MAX(created_at) as last_order_at')
-            ->groupBy('customer_email', 'customer_name', 'customer_phone')
-            ->orderByDesc('last_order_at')
             ->get();
     }
 

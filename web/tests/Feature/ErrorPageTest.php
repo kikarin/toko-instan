@@ -20,7 +20,7 @@ test('403 dirender sebagai halaman error Inertia', function () {
     $store = Store::factory()->create(['tenant_id' => $tenant->id]);
 
     $buyer = User::factory()->create(['role' => 'buyer', 'email' => 'pemilik-order@example.com']);
-    $otherBuyer = User::factory()->create(['role' => 'buyer', 'email' => 'orang-lain@example.com']);
+    $otherBuyer = User::factory()->create(['role' => 'buyer', 'email' => 'orang-lain@example.com', 'store_id' => $store->id]);
 
     Product::factory()->create(['store_id' => $store->id]);
 

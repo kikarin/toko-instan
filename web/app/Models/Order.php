@@ -15,11 +15,14 @@ class Order extends Model
 
     protected $fillable = [
         'store_id',
+        'customer_id',
         'order_number',
         'customer_name',
         'customer_email',
         'customer_phone',
         'shipping_address',
+        'shipping_courier',
+        'payment_method',
         'total_amount',
         'status',
         'payment_method',
@@ -63,6 +66,14 @@ class Order extends Model
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
+    }
+
+    /**
+     * @return BelongsTo<Customer, $this>
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     /**

@@ -52,7 +52,7 @@ class CheckoutController extends Controller
             throw $e;
         } catch (RuntimeException $e) {
             throw ValidationException::withMessages([
-                'checkout' => $e->getMessage(),
+                'items' => $e->getMessage(),
             ]);
         }
 
