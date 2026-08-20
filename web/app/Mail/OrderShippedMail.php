@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Order;
+use App\Services\OrderTrackingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -25,10 +26,13 @@ class OrderShippedMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
+        $this->order->loadMissing(['items', 'store']);
+
         return new Content(
             markdown: 'mail.order-shipped',
             with: [
                 'order' => $this->order,
+                'trackingUrl' => app(OrderTrackingService::class)->signedUrl($this->order),
             ],
         );
     }

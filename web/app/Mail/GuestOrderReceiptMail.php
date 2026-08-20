@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderConfirmationMail extends Mailable implements ShouldQueue
+class GuestOrderReceiptMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -20,7 +20,7 @@ class OrderConfirmationMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pesanan '.$this->order->order_number.' Telah Dibayar - '.($this->order->store?->name ?? 'Toko Instan'),
+            subject: 'Pesanan '.$this->order->order_number.' Diterima - '.($this->order->store?->name ?? 'Toko Instan'),
         );
     }
 
@@ -29,7 +29,7 @@ class OrderConfirmationMail extends Mailable implements ShouldQueue
         $this->order->loadMissing(['items', 'store']);
 
         return new Content(
-            markdown: 'mail.order-confirmation',
+            markdown: 'mail.guest-order-receipt',
             with: [
                 'order' => $this->order,
                 'trackingUrl' => app(OrderTrackingService::class)->signedUrl($this->order),

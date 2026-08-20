@@ -119,6 +119,18 @@ function navigate(url: string) {
 const page = usePage();
 const storeData = computed(() => page.props.store as any);
 
+const isLoggedIn = computed(() => Boolean((page.props.auth as any)?.user));
+
+const ordersNavHref = computed(() => {
+    const slug = storeData.value?.slug ?? '';
+
+    return isLoggedIn.value ? `/${slug}/orders` : `/${slug}/cek-pesanan`;
+});
+
+const ordersNavLabel = computed(() =>
+    isLoggedIn.value ? 'Pesanan Saya' : 'Cek Pesanan',
+);
+
 const userRole = computed(() => {
     return (page.props.auth as any)?.user?.role ?? 'buyer';
 });
@@ -147,10 +159,10 @@ const bottomNavItems = computed(() => [
     },
     { label: 'Keranjang', icon: ShoppingBag, href: null, match: '__cart' },
     {
-        label: 'Pesanan',
+        label: ordersNavLabel.value,
         icon: ClipboardList,
-        href: storeData.value?.slug ? `/${storeData.value.slug}/orders` : '/orders',
-        match: '/orders',
+        href: ordersNavHref.value,
+        match: isLoggedIn.value ? '/orders' : '/cek-pesanan',
     },
     { label: 'Akun', icon: UserCircle2, href: storeData.value?.slug ? `/${storeData.value.slug}/account` : '/account', match: '/account' },
 ]);
@@ -261,12 +273,12 @@ const bottomNavItems = computed(() => [
                         variant="ghost"
                         size="sm"
                         class="hidden items-center gap-1.5 text-xs font-semibold hover:bg-[var(--header-foreground)]/10 hover:text-[var(--header-foreground)] opacity-90 hover:opacity-100 lg:flex"
-                        @click="navigate(`/${storeData?.slug ?? ''}/orders`)"
+                        @click="navigate(ordersNavHref)"
                     >
                         <ReceiptText
                             class="h-4 w-4"
                         />
-                        <span>Pesanan Saya</span>
+                        <span>{{ ordersNavLabel }}</span>
                     </Button>
 
                     <!-- Wishlist — hide on mobile -->

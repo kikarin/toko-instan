@@ -16,6 +16,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\DigitalDownloadController;
 use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\GuestOrderTrackingController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\MediaProxyController;
 use App\Http\Controllers\MidtransWebhookController;
@@ -149,7 +150,12 @@ Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)
 Route::prefix('{store_slug}')->where(['store_slug' => "^(?!($reservedStoreSlugs)$)[^/]+"])->middleware(['store.access', 'throttle:60,1'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout', [CheckoutController::class, 'store']);
+    Route::get('/cek-pesanan', [GuestOrderTrackingController::class, 'show'])->name('orders.track.lookup');
+    Route::post('/cek-pesanan', [GuestOrderTrackingController::class, 'lookup'])->middleware('throttle:10,1')->name('orders.track.lookup.submit');
     Route::get('/orders/{orderNumber}/success', [CheckoutController::class, 'success'])->name('orders.success');
+    Route::get('/orders/{orderNumber}/track', [CheckoutController::class, 'track'])
+        ->middleware('signed')
+        ->name('orders.track');
     Route::post('/orders/{orderNumber}/sync-payment', [PaymentController::class, 'sync'])->name('orders.sync-payment');
     Route::get('/orders/{orderNumber}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
     Route::get('/orders/items/{orderItemId}/download', [DigitalDownloadController::class, 'download'])->name('orders.digital.download');

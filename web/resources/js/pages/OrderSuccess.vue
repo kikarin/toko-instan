@@ -158,6 +158,11 @@ function uploadProof(e: Event) {
             <p class="mt-1 mb-8 max-w-md text-center text-xs text-[#9090a0]">
                 Terima kasih telah berbelanja di {{ storeName }}. Pesanan
                 Anda sedang diproses dengan garansi 100% keaslian.
+                <span v-if="isGuest" class="mt-2 block">
+                    Link lacak pesanan juga dikirim ke email Anda — gunakan
+                    tombol <strong>Cek Pesanan</strong> di header jika perlu
+                    membuka status lagi nanti.
+                </span>
             </p>
 
             <!-- Invoice Card -->

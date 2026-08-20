@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\DTO\CreateOrderDTO;
 use App\Enums\PaymentProvider;
+use App\Mail\GuestOrderReceiptMail;
 use App\Services\AddressService;
 use App\Services\OrderService;
 use App\Services\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -54,6 +56,10 @@ class CheckoutController extends Controller
             throw ValidationException::withMessages([
                 'items' => $e->getMessage(),
             ]);
+        }
+
+        if ($order->customer_email) {
+            Mail::to($order->customer_email)->queue(new GuestOrderReceiptMail($order));
         }
 
         return redirect()
@@ -111,5 +117,10 @@ class CheckoutController extends Controller
                 ? 'https://app.midtrans.com/snap/snap.js'
                 : 'https://app.sandbox.midtrans.com/snap/snap.js',
         ]);
+    }
+
+    public function track(string $storeSlug, string $orderNumber, Request $request): Response
+    {
+        return $this->success($storeSlug, $orderNumber, $request);
     }
 }

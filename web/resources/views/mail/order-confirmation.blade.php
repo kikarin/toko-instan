@@ -13,6 +13,10 @@ Pesanan **{{ $order->order_number }}** di **{{ $order->store?->name ?? 'Toko Ins
 
 **Total Pembayaran: Rp {{ number_format((float) $order->total_amount, 0, ',', '.') }}**
 
+@component('mail::button', ['url' => $trackingUrl])
+Lacak Pesanan
+@endcomponent
+
 Pesanan Anda sedang diproses dan akan segera dikirim. Anda akan menerima email lain beserta nomor resi begitu pesanan dikirim oleh penjual.
 
 Salam,<br>

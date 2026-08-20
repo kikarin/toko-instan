@@ -17,6 +17,10 @@ Lacak di: https://www.jne.co.id/en/tracking/trace?awb={{ $order->tracking_number
 Pesanan Anda sudah dikirim dan sedang dalam perjalanan.
 @endif
 
+@component('mail::button', ['url' => $trackingUrl])
+Lacak Pesanan
+@endcomponent
+
 Terima kasih telah berbelanja di {{ $order->store?->name ?? 'Toko Instan' }}!
 
 Salam,<br>
