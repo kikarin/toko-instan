@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Nunito:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap');
 @import 'tailwindcss';
 @import 'vue-sonner/style.css';
 
@@ -41,16 +41,44 @@
     --color-brand: var(--brand, #e07c28);
     --color-brand-foreground: var(--brand-foreground, #ffffff);
     --color-brand-secondary: var(--brand-secondary, #6d4fc2);
-    --color-brand-secondary-foreground: var(--brand-secondary-foreground, #ffffff);
+    --color-brand-secondary-foreground: var(
+        --brand-secondary-foreground,
+        #ffffff
+    );
     --color-brand-accent: var(--brand-accent, #0e9f8a);
     --color-brand-accent-foreground: var(--brand-accent-foreground, #ffffff);
     --color-brand-strong: var(--brand-strong, #e0405a);
     --color-brand-cta-foreground: var(--brand-cta-foreground, #ffffff);
     --color-brand-soft: var(--brand-soft, rgba(224, 124, 40, 0.12));
     --color-brand-surface: var(--brand-surface, rgba(224, 124, 40, 0.06));
+
+    --animate-rise: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-rise {
+        animation: none;
+    }
+}
+
+/* Shared auth form field */
+.auth-field {
+    @apply h-11 w-full rounded-xl border border-border bg-background/50 pr-3.5 pl-10 text-sm text-foreground shadow-xs transition-all outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15;
 }
 
 :root {
+    /* Semantic Tokens (Controlled by useStoreTheme globally) */
     --background: #f5f4f0;
     --foreground: #1c1c22;
     --card: #ffffff;
@@ -72,6 +100,12 @@
     --ring: #e07c28;
     --radius: 1rem;
 
+    /* Layout Specific Tokens */
+    --header: #ffffff;
+    --header-foreground: #1c1c22;
+    --footer: #ffffff;
+    --footer-foreground: #1c1c22;
+
     --sidebar: #18181c;
     --sidebar-foreground: #ffffff;
     --sidebar-primary: #f59e0b;
@@ -81,37 +115,13 @@
     --sidebar-border: rgba(255, 255, 255, 0.1);
     --sidebar-ring: #f59e0b;
 
-    --bg-main: #f5f4f0;
-    --surface: #faf9f6;
-    --panel: #ffffff;
-    --sidebar-bg: #ffffff;
-    --border-color: rgba(0, 0, 0, 0.07);
+    /* Legacy/Direct fallbacks (kept for compatibility during refactor) */
+    --bg-main: var(--background);
+    --surface: var(--card);
+    --panel: var(--card);
+    --sidebar-bg: var(--sidebar);
+    --border-color: var(--border);
     --border-hi: rgba(0, 0, 0, 0.13);
-
-    --brand-amber: #e07c28;
-    --brand-amber-soft: rgba(224, 124, 40, 0.1);
-    --brand-violet: #6d4fc2;
-    --brand-violet-soft: rgba(109, 79, 194, 0.1);
-    --brand-teal: #0e9f8a;
-    --brand-teal-soft: rgba(14, 159, 138, 0.1);
-    --brand-rose: #e0405a;
-    --brand-rose-soft: rgba(224, 64, 90, 0.1);
-    --brand-sky: #3b82f6;
-    --brand-sky-soft: rgba(59, 130, 246, 0.1);
-    --brand-green: #22a15a;
-    --brand-green-soft: rgba(34, 161, 90, 0.1);
-
-    /* Theme tokens — overridden per store via useStoreTheme */
-    --brand: #e07c28;
-    --brand-foreground: #ffffff;
-    --brand-secondary: #6d4fc2;
-    --brand-secondary-foreground: #ffffff;
-    --brand-accent: #0e9f8a;
-    --brand-accent-foreground: #ffffff;
-    --brand-strong: #e0405a;
-    --brand-cta-foreground: #ffffff;
-    --brand-soft: rgba(224, 124, 40, 0.12);
-    --brand-surface: rgba(224, 124, 40, 0.06);
 }
 
 body {
@@ -135,4 +145,27 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme-variant='fashion'] {
+    --radius: 0.25rem;
+}
+
+html[data-theme-variant='fashion'] body {
+    letter-spacing: 0.01em;
+}
+
+html[data-theme-variant='fashion'] h1,
+html[data-theme-variant='fashion'] h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+}
+
+html[data-theme-variant='food'] {
+    --radius: 1.25rem;
+}
+
+html[data-theme-variant='food'] .rounded-2xl,
+html[data-theme-variant='food'] .rounded-3xl {
+    border-radius: 1.5rem;
 }

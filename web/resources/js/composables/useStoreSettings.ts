@@ -27,6 +27,8 @@ export function useStoreSettings(store: StoreData) {
         phone: store?.phone || '',
         email: store?.email || '',
         address: store?.address || '',
+        origin_city: store?.origin_city || '',
+        origin_postal_code: store?.origin_postal_code || '',
         instagram: store?.instagram || '',
         tiktok: store?.tiktok || '',
         headline: store?.headline || '',

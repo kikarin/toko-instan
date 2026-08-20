@@ -123,7 +123,7 @@ function formatRupiah(val: number): string {
             <!-- Stats Overview -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <Card class="flex items-center gap-4 p-5 shadow-sm">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/100/10 text-accent">
                         <Users class="h-6 w-6" />
                     </div>
                     <div>
@@ -141,7 +141,7 @@ function formatRupiah(val: number): string {
                     </div>
                 </Card>
                 <Card class="flex items-center gap-4 p-5 shadow-sm">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                         <DollarSign class="h-6 w-6" />
                     </div>
                     <div>
@@ -176,7 +176,7 @@ function formatRupiah(val: number): string {
                 <div v-else class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-black/5 bg-[#fafafa] text-[11px] font-black tracking-wider text-[#9090a0] uppercase">
+                            <tr class="border-b border-border bg-[#fafafa] text-[11px] font-black tracking-wider text-[#9090a0] uppercase">
                                 <th class="px-5 py-3.5">Pelanggan</th>
                                 <th class="px-5 py-3.5">Kontak</th>
                                 <th class="px-5 py-3.5 text-center">Total Pesanan</th>
@@ -205,7 +205,7 @@ function formatRupiah(val: number): string {
                                         <div v-if="customer.phone" class="flex items-center gap-1.5">
                                             <Phone class="h-3.5 w-3.5 text-[#9090a0]" /> {{ customer.phone }}
                                         </div>
-                                        <span v-if="!customer.email && !customer.phone" class="text-zinc-400 italic">Tidak ada kontak</span>
+                                        <span v-if="!customer.email && !customer.phone" class="text-muted-foreground italic">Tidak ada kontak</span>
                                     </div>
                                 </td>
                                 <td class="px-5 py-4 text-center">
@@ -230,10 +230,10 @@ function formatRupiah(val: number): string {
                 <!-- Pagination Footer -->
                 <div
                     v-if="filteredCustomers.length > 0"
-                    class="flex flex-col items-center justify-between gap-4 border-t border-black/5 bg-[#fafafa] p-4 sm:flex-row sm:px-6"
+                    class="flex flex-col items-center justify-between gap-4 border-t border-border bg-[#fafafa] p-4 sm:flex-row sm:px-6"
                 >
                     <div
-                        class="flex items-center gap-3 text-xs font-semibold text-zinc-500"
+                        class="flex items-center gap-3 text-xs font-semibold text-muted-foreground"
                     >
                         <span>
                             Menampilkan
@@ -247,7 +247,7 @@ function formatRupiah(val: number): string {
                             pelanggan
                         </span>
                         <div
-                            class="flex items-center gap-1.5 rounded-xl border border-black/10 bg-white px-2.5 py-1"
+                            class="flex items-center gap-1.5 rounded-xl border border-border bg-white px-2.5 py-1"
                         >
                             <span>Per Halaman:</span>
                             <select
@@ -282,8 +282,8 @@ function formatRupiah(val: number): string {
                                 class="h-9 w-9 cursor-pointer rounded-xl text-xs font-black transition-all"
                                 :class="
                                     currentPage === p
-                                        ? 'bg-amber-500 text-white shadow-xs'
-                                        : 'border border-black/8 bg-white text-zinc-600 hover:bg-zinc-100'
+                                        ? 'bg-accent/100 text-white shadow-xs'
+                                        : 'border border-border bg-background text-muted-foreground hover:bg-muted'
                                 "
                             >
                                 {{ p }}

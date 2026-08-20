@@ -6,24 +6,20 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
-function wishlistBuyer(): User
-{
-    return User::factory()->create(['role' => 'buyer']);
-}
-
-function wishlistProduct(): Product
+function wishlistContext(): array
 {
     $store = Store::factory()->create();
+    $buyer = User::factory()->create(['role' => 'buyer', 'store_id' => $store->id]);
     $product = Product::factory()->create(['store_id' => $store->id]);
 
-    return $product;
+    return compact('buyer', 'store', 'product');
 }
 
 it('menampilkan daftar wishlist kosong untuk buyer', function () {
-    $buyer = wishlistBuyer();
+    ['buyer' => $buyer, 'store' => $store] = wishlistContext();
 
     actingAs($buyer)
-        ->get('/wishlist')
+        ->get("/{$store->slug}/wishlist")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Wishlist')
@@ -31,11 +27,10 @@ it('menampilkan daftar wishlist kosong untuk buyer', function () {
 });
 
 it('buyer dapat menambahkan produk ke wishlist', function () {
-    $buyer = wishlistBuyer();
-    $product = wishlistProduct();
+    ['buyer' => $buyer, 'store' => $store, 'product' => $product] = wishlistContext();
 
     actingAs($buyer)
-        ->post("/wishlist/{$product->id}")
+        ->post("/{$store->slug}/wishlist/{$product->id}")
         ->assertOk()
         ->assertJson(['added' => true, 'count' => 1]);
 
@@ -46,12 +41,11 @@ it('buyer dapat menambahkan produk ke wishlist', function () {
 });
 
 it('toggle wishlist menghapus produk jika sudah ada', function () {
-    $buyer = wishlistBuyer();
-    $product = wishlistProduct();
+    ['buyer' => $buyer, 'store' => $store, 'product' => $product] = wishlistContext();
     $buyer->wishlistProducts()->attach($product->id);
 
     actingAs($buyer)
-        ->post("/wishlist/{$product->id}")
+        ->post("/{$store->slug}/wishlist/{$product->id}")
         ->assertOk()
         ->assertJson(['added' => false, 'count' => 0]);
 
@@ -62,12 +56,11 @@ it('toggle wishlist menghapus produk jika sudah ada', function () {
 });
 
 it('buyer dapat menghapus produk dari wishlist', function () {
-    $buyer = wishlistBuyer();
-    $product = wishlistProduct();
+    ['buyer' => $buyer, 'store' => $store, 'product' => $product] = wishlistContext();
     $buyer->wishlistProducts()->attach($product->id);
 
     actingAs($buyer)
-        ->delete("/wishlist/{$product->id}")
+        ->delete("/{$store->slug}/wishlist/{$product->id}")
         ->assertRedirect();
 
     $this->assertDatabaseMissing('wishlists', [
@@ -77,12 +70,11 @@ it('buyer dapat menghapus produk dari wishlist', function () {
 });
 
 it('menampilkan produk wishlist yang tersimpan', function () {
-    $buyer = wishlistBuyer();
-    $product = wishlistProduct();
+    ['buyer' => $buyer, 'store' => $store, 'product' => $product] = wishlistContext();
     $buyer->wishlistProducts()->attach($product->id);
 
     actingAs($buyer)
-        ->get('/wishlist')
+        ->get("/{$store->slug}/wishlist")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Wishlist')

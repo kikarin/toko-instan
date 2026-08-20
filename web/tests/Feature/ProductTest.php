@@ -21,10 +21,12 @@ test('guest is redirected away from products', function () {
     $this->get('/products')->assertRedirect('/login');
 });
 
-test('seller is redirected from buyer marketplace products', function () {
+test('buyer is redirected from the seller products page', function () {
     $buyer = User::factory()->state(['role' => 'buyer'])->create();
+    $store = Store::factory()->create();
+    $buyer->update(['store_id' => $store->id]);
 
-    $this->actingAs($buyer)->get('/products')->assertRedirect('/marketplace');
+    $this->actingAs($buyer)->get('/products')->assertRedirect("/{$store->slug}");
 });
 
 test('seller can view the products of their primary store', function () {
@@ -113,20 +115,21 @@ test('seller can toggle product active status', function () {
     $this->assertDatabaseHas('products', ['id' => $product->id, 'is_active' => false]);
 });
 
-test('inactive products are hidden from the marketplace catalog', function () {
+test('inactive products are hidden from the storefront catalog', function () {
     [$seller, $store] = sellerContext();
     Product::factory()->create(['store_id' => $store->id, 'is_active' => true]);
     Product::factory()->create(['store_id' => $store->id, 'is_active' => false]);
 
-    $buyer = User::factory()->state(['role' => 'buyer'])->create();
+    $buyer = User::factory()->state(['role' => 'buyer', 'store_id' => $store->id])->create();
 
     $this->actingAs($buyer)
-        ->get('/marketplace')
-        ->assertInertia(fn ($page) => $page->component('Marketplace'))
+        ->get("/{$store->slug}")
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('StorePage'))
         ->assertInertia(fn ($page) => $page->has('products', 1));
 });
 
-test('marketplace only shows products from the seller own store', function () {
+test('storefront catalog only shows products from the store itself', function () {
     $seller = User::factory()->state(['role' => 'seller'])->create();
     $sellerTenant = Tenant::factory()->create(['user_id' => $seller->id]);
     $sellerStore = Store::factory()->create(['tenant_id' => $sellerTenant->id]);
@@ -136,7 +139,8 @@ test('marketplace only shows products from the seller own store', function () {
     Product::factory()->create(['store_id' => $otherStore->id, 'is_active' => true]);
 
     $this->actingAs($seller)
-        ->get('/marketplace')
+        ->get("/{$sellerStore->slug}")
+        ->assertOk()
         ->assertInertia(fn ($page) => $page->has('products', 1))
         ->assertInertia(fn ($page) => $page->where('products.0.id', $ownedProduct->id));
 });

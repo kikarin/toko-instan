@@ -73,8 +73,8 @@ const userInitial = computed(() => {
 
 // Cart
 const {
-    items: cartItems,
-    totalCount: totalCartCount,
+    cartItems,
+    totalCartCount,
     isCartOpen,
     openCart,
     addToCart,
@@ -124,9 +124,9 @@ function openProductDetail(product: any) {
                             </h1>
                             <div class="flex items-center gap-2">
                                 <Button
-                                    variant="amber"
+                                    variant="default"
                                     size="sm"
-                                    class="h-6 gap-1 rounded-full bg-black px-2.5 text-[10px] font-black text-amber-400 uppercase shadow-2xs hover:bg-zinc-800"
+                                    class="h-6 gap-1 rounded-full bg-black px-2.5 text-[10px] font-black text-accent uppercase shadow-2xs hover:bg-foreground/90"
                                     @click="
                                         toast.info(
                                             `Akun Anda terverifikasi sebagai ${storeName} Member.`,
@@ -134,7 +134,7 @@ function openProductDetail(product: any) {
                                     "
                                 >
                                     <ShoppingBag
-                                        class="h-3 w-3 text-amber-400"
+                                        class="h-3 w-3 text-accent"
                                     />
                                     {{ storeName }} Member VIP
                                 </Button>
@@ -174,21 +174,21 @@ function openProductDetail(product: any) {
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <!-- Banner 1 -->
                             <div
-                                class="flex items-center justify-between rounded-xl border border-black/10 bg-gradient-to-r from-zinc-900 via-black to-zinc-800 p-3.5 text-white"
+                                class="flex items-center justify-between rounded-xl border border-border bg-gradient-to-r from-zinc-900 via-black to-zinc-800 p-3.5 text-white"
                             >
                                 <div>
                                     <p
-                                        class="text-xs leading-tight font-bold text-amber-400"
+                                        class="text-xs leading-tight font-bold text-accent"
                                     >
                                         {{ storeName }} Member Rewards
                                     </p>
-                                    <p class="mt-0.5 text-[10px] text-zinc-300">
+                                    <p class="mt-0.5 text-[10px] text-muted-foreground">
                                         Dapatkan diskon khusus & rilis sepatu
                                         perdana
                                     </p>
                                 </div>
                                 <div
-                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-black shadow-xs"
+                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-black shadow-xs"
                                 >
                                     <ShoppingBag class="h-5 w-5" />
                                 </div>
@@ -201,10 +201,10 @@ function openProductDetail(product: any) {
                                 <div>
                                     <div class="flex items-center gap-1">
                                         <Sparkles
-                                            class="h-3.5 w-3.5 fill-amber-200 text-amber-200"
+                                            class="h-3.5 w-3.5 fill-accent/80 text-accent/80"
                                         />
                                         <span
-                                            class="text-xs font-black tracking-wider text-amber-100 uppercase"
+                                            class="text-xs font-black tracking-wider text-accent-foreground uppercase"
                                             >Official Guarantee</span
                                         >
                                     </div>
@@ -236,7 +236,7 @@ function openProductDetail(product: any) {
                                 "
                             >
                                 <div
-                                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-xs font-black text-rose-600"
+                                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-destructive/20 text-xs font-black text-destructive"
                                 >
                                     %
                                 </div>
@@ -260,7 +260,7 @@ function openProductDetail(product: any) {
                                 "
                             >
                                 <div
-                                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-xs font-black text-emerald-600"
+                                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/20 text-xs font-black text-emerald-600"
                                 >
                                     <Truck class="h-4 w-4" />
                                 </div>
@@ -284,12 +284,12 @@ function openProductDetail(product: any) {
                                 "
                             >
                                 <div
-                                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-xs font-black text-amber-600"
+                                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/20 text-xs font-black text-accent"
                                 >
                                     <Gift class="h-4 w-4" />
                                 </div>
                                 <span
-                                    class="text-xs font-extrabold text-amber-600"
+                                    class="text-xs font-extrabold text-accent"
                                     >1.250 pts</span
                                 >
                                 <span
@@ -418,7 +418,7 @@ function openProductDetail(product: any) {
                                     />
                                     <span
                                         v-if="orderCounts.sudah_tiba > 0"
-                                        class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-black text-white"
+                                        class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/100 text-[9px] font-black text-white"
                                     >
                                         {{ orderCounts.sudah_tiba }}
                                     </span>
@@ -439,7 +439,7 @@ function openProductDetail(product: any) {
                                 <div
                                     class="flex h-11 w-11 items-center justify-center rounded-2xl border border-black/6 bg-[#faf9f6] text-[#1c1c22] transition-all group-hover:scale-105"
                                 >
-                                    <Star class="h-5 w-5 text-amber-500" />
+                                    <Star class="h-5 w-5 text-accent" />
                                 </div>
                                 <span
                                     class="text-[11px] font-semibold text-[#4a4a57]"
@@ -468,7 +468,7 @@ function openProductDetail(product: any) {
                                 <div
                                     class="flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white transition-all group-hover:scale-105"
                                 >
-                                    <Store class="h-6 w-6 text-amber-400" />
+                                    <Store class="h-6 w-6 text-accent" />
                                 </div>
                                 <span
                                     class="text-[11px] font-semibold text-[#4a4a57]"
@@ -486,7 +486,7 @@ function openProductDetail(product: any) {
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
                                 <div
-                                    class="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100/70 text-teal-600 transition-all group-hover:scale-105"
+                                    class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-600 transition-all group-hover:scale-105"
                                 >
                                     <Share2 class="h-6 w-6" />
                                 </div>
@@ -502,7 +502,7 @@ function openProductDetail(product: any) {
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
                                 <div
-                                    class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100/70 text-rose-600 transition-all group-hover:scale-105"
+                                    class="flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/20/70 text-destructive transition-all group-hover:scale-105"
                                 >
                                     <Heart class="h-6 w-6" />
                                 </div>
@@ -522,7 +522,7 @@ function openProductDetail(product: any) {
                                 class="group flex cursor-pointer flex-col items-center gap-2 p-1"
                             >
                                 <div
-                                    class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/70 text-indigo-600 transition-all group-hover:scale-105"
+                                    class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 text-primary transition-all group-hover:scale-105"
                                 >
                                     <Footprints class="h-6 w-6" />
                                 </div>

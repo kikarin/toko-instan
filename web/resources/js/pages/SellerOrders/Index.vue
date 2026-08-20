@@ -22,6 +22,7 @@ import {
     Printer,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -38,6 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
     orders: () => [],
 });
 
+const trackingDraft = ref<Record<number, string>>({});
 const ordersRef = computed(() => props.orders ?? []);
 
 const {
@@ -49,6 +51,7 @@ const {
     totalOrdersCount,
     pendingCount,
     processingCount,
+    packedCount,
     shippedCount,
     completedCount,
     totalRevenueSum,
@@ -63,11 +66,34 @@ const {
     goToPage,
     toggleExpand,
     updateOrderStatus,
+    confirmPayment,
     statusBadgeMap,
 } = useSellerOrders(ordersRef);
 
 function openInvoice(orderNumber: string) {
     router.get(`/orders/${orderNumber}/invoice`);
+}
+
+function shipOrder(order: SellerOrder) {
+    const trackingNumber = window.prompt(
+        'Masukkan nomor resi pengiriman (mis. J&T / JNE / SiCepat):',
+        order.tracking_number ?? '',
+    );
+
+    if (trackingNumber === null) {
+        return;
+    }
+
+    const trackingCourier = window.prompt(
+        'Nama kurir (J&T Express / JNE / SiCepat BEST):',
+        order.tracking_courier ?? 'J&T Express',
+    );
+
+    if (trackingCourier === null) {
+        return;
+    }
+
+    updateOrderStatus(order.id, 'shipped', trackingNumber, trackingCourier);
 }
 </script>
 
@@ -78,25 +104,25 @@ function openInvoice(orderNumber: string) {
     <AppLayout title="Pesanan" activePage="Pesanan">
         <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 sm:p-6 lg:p-8">
             <!-- ── Top Command Banner Hub ── -->
-            <div class="relative overflow-hidden rounded-3xl bg-zinc-900 p-6 text-white shadow-xl sm:p-8">
+            <div class="relative overflow-hidden rounded-3xl bg-primary p-6 text-primary-foreground shadow-xl sm:p-8">
                 <div
-                    class="absolute -top-10 -right-10 h-64 w-64 rounded-full bg-gradient-to-br from-amber-500/30 via-orange-500/20 to-transparent blur-3xl" />
+                    class="absolute -top-10 -right-10 h-64 w-64 rounded-full bg-gradient-to-br from-white/30 via-white/10 to-transparent blur-3xl" />
                 <div
-                    class="absolute -bottom-10 -left-10 h-64 w-64 rounded-full bg-gradient-to-br from-emerald-500/30 via-teal-500/10 to-transparent blur-3xl" />
+                    class="absolute -bottom-10 -left-10 h-64 w-64 rounded-full bg-gradient-to-br from-black/20 via-black/5 to-transparent blur-3xl" />
 
                 <div class="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div class="flex flex-col gap-2">
                         <div class="flex items-center gap-2">
                             <span
-                                class="inline-flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-400">
+                                class="inline-flex items-center gap-1 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-xs font-black text-primary-foreground">
                                 <Sparkles class="h-3.5 w-3.5" /> REALTIME ORDER
                                 FLOW
                             </span>
                         </div>
-                        <h1 class="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                        <h1 class="text-2xl font-black tracking-tight text-primary-foreground sm:text-3xl">
                             Manajemen Pesanan Masuk
                         </h1>
-                        <p class="max-w-2xl text-xs text-zinc-400 sm:text-sm">
+                        <p class="max-w-2xl text-xs text-primary-foreground/80 sm:text-sm">
                             Kelola pesanan pembeli, verifikasi pembayaran,
                             perbarui status pengiriman barang, dan pantau total
                             omzet masuk secara transparan.
@@ -105,16 +131,16 @@ function openInvoice(orderNumber: string) {
 
                     <!-- Dynamic Revenue Summary Counter -->
                     <div
-                        class="flex w-full shrink-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-md sm:w-auto sm:p-4">
+                        class="flex w-full shrink-0 items-center gap-3 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-3.5 backdrop-blur-md sm:w-auto sm:p-4">
                         <div
-                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 font-bold text-amber-400">
+                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/20 font-bold text-primary-foreground">
                             <DollarSign class="h-5 w-5" />
                         </div>
                         <div class="min-w-0">
                             <span
-                                class="block truncate text-[10px] font-bold tracking-wider text-zinc-400 uppercase">Total
+                                class="block truncate text-[10px] font-bold tracking-wider text-primary-foreground/80 uppercase">Total
                                 Omzet Pesanan Valid</span>
-                            <span class="block truncate font-mono text-lg font-black text-amber-400 sm:text-xl"
+                            <span class="block truncate font-mono text-lg font-black text-primary-foreground sm:text-xl"
                                 :title="formatRupiah(totalRevenueSum)">{{ formatRupiah(totalRevenueSum) }}</span>
                         </div>
                     </div>
@@ -122,49 +148,49 @@ function openInvoice(orderNumber: string) {
 
                 <!-- Dynamic Status Metrics Cards Bar (Mobile Responsive) -->
                 <div
-                    class="relative z-10 mt-6 grid grid-cols-2 gap-2.5 border-t border-white/10 pt-6 sm:grid-cols-3 sm:gap-3 md:grid-cols-5">
+                    class="relative z-10 mt-6 grid grid-cols-2 gap-2.5 border-t border-primary-foreground/10 pt-6 sm:grid-cols-3 sm:gap-3 md:grid-cols-5">
                     <div
-                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:p-3">
+                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:p-3">
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]">Total
+                            class="truncate text-[9px] font-extrabold tracking-wider text-primary-foreground/80 uppercase sm:text-[10px]">Total
                             Masuk</span>
-                        <span class="truncate font-mono text-sm font-black text-white sm:text-xl">{{ totalOrdersCount }}
+                        <span class="truncate font-mono text-sm font-black text-primary-foreground sm:text-xl">{{ totalOrdersCount }}
                             Orders</span>
                     </div>
 
                     <div
-                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:p-3">
+                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:p-3">
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]">Menunggu
+                            class="truncate text-[9px] font-extrabold tracking-wider text-primary-foreground/80 uppercase sm:text-[10px]">Menunggu
                             Bayar</span>
-                        <span class="truncate font-mono text-sm font-black text-amber-400 sm:text-xl">{{ pendingCount }}
+                        <span class="truncate font-mono text-sm font-black text-primary-foreground sm:text-xl">{{ pendingCount }}
                             Order</span>
                     </div>
 
                     <div
-                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:p-3">
+                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:p-3">
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]">Diproses
+                            class="truncate text-[9px] font-extrabold tracking-wider text-primary-foreground/80 uppercase sm:text-[10px]">Diproses
                             Seller</span>
-                        <span class="truncate font-mono text-sm font-black text-indigo-400 sm:text-xl">{{
+                        <span class="truncate font-mono text-sm font-black text-primary-foreground sm:text-xl">{{
                             processingCount }} Order</span>
                     </div>
 
                     <div
-                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:p-3">
+                        class="flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:p-3">
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]">Dalam
+                            class="truncate text-[9px] font-extrabold tracking-wider text-primary-foreground/80 uppercase sm:text-[10px]">Dalam
                             Pengiriman</span>
-                        <span class="truncate font-mono text-sm font-black text-blue-400 sm:text-xl">{{ shippedCount }}
+                        <span class="truncate font-mono text-sm font-black text-primary-foreground sm:text-xl">{{ shippedCount }}
                             Order</span>
                     </div>
 
                     <div
-                        class="col-span-2 flex min-w-0 flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md sm:col-span-1 sm:p-3">
+                        class="col-span-2 flex min-w-0 flex-col gap-1 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-2.5 backdrop-blur-md sm:col-span-1 sm:p-3">
                         <span
-                            class="truncate text-[9px] font-extrabold tracking-wider text-zinc-400 uppercase sm:text-[10px]">Selesai
+                            class="truncate text-[9px] font-extrabold tracking-wider text-primary-foreground/80 uppercase sm:text-[10px]">Selesai
                             / Paid</span>
-                        <span class="font-mono text-xl font-black text-emerald-400">{{ completedCount }} Order</span>
+                        <span class="font-mono text-xl font-black text-primary-foreground">{{ completedCount }} Order</span>
                     </div>
                 </div>
             </div>
@@ -173,51 +199,59 @@ function openInvoice(orderNumber: string) {
             <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                 <!-- Search Input -->
                 <div class="relative w-full lg:w-80">
-                    <Search class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                    <Search class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input v-model="searchQuery" placeholder="Cari No. Order / Nama / Email / HP..."
-                        class="h-10 rounded-2xl border-black/10 bg-white pl-10 text-xs" />
+                        class="h-10 rounded-2xl border-border bg-background pl-10 text-xs" />
                 </div>
 
                 <!-- Dynamic Status Filter Tabs (Counts computed directly from props.orders) -->
                 <div
-                    class="flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-black/8 bg-[#faf9f6] p-1 lg:w-auto">
+                    class="flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1 lg:w-auto">
                     <button @click="statusFilter = 'all'"
                         class="cursor-pointer rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="statusFilter === 'all'
-                                ? 'bg-black text-amber-400 shadow-xs'
-                                : 'text-zinc-600 hover:text-black'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'text-muted-foreground hover:text-foreground'
                             ">
                         Semua ({{ totalOrdersCount }})
                     </button>
                     <button @click="statusFilter = 'pending'"
                         class="cursor-pointer rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="statusFilter === 'pending'
-                                ? 'bg-amber-400 font-black text-black shadow-xs'
-                                : 'text-zinc-600 hover:text-black'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'text-muted-foreground hover:text-foreground'
                             ">
                         Pending ({{ pendingCount }})
                     </button>
                     <button @click="statusFilter = 'processing'"
                         class="cursor-pointer rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="statusFilter === 'processing'
-                                ? 'bg-indigo-600 text-white shadow-xs'
-                                : 'text-zinc-600 hover:text-black'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'text-muted-foreground hover:text-foreground'
                             ">
                         Diproses ({{ processingCount }})
+                    </button>
+                    <button @click="statusFilter = 'packed'"
+                        class="cursor-pointer rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
+                        :class="statusFilter === 'packed'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'text-muted-foreground hover:text-foreground'
+                            ">
+                        Dikemas ({{ packedCount }})
                     </button>
                     <button @click="statusFilter = 'shipped'"
                         class="cursor-pointer rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="statusFilter === 'shipped'
-                                ? 'bg-blue-600 text-white shadow-xs'
-                                : 'text-zinc-600 hover:text-black'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'text-muted-foreground hover:text-foreground'
                             ">
                         Dikirim ({{ shippedCount }})
                     </button>
                     <button @click="statusFilter = 'completed'"
                         class="cursor-pointer rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="statusFilter === 'completed'
-                                ? 'bg-emerald-600 text-white shadow-xs'
-                                : 'text-zinc-600 hover:text-black'
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'text-muted-foreground hover:text-foreground'
                             ">
                         Selesai ({{ completedCount }})
                     </button>
@@ -227,18 +261,18 @@ function openInvoice(orderNumber: string) {
             <!-- ── Order Cards List ── -->
             <div class="flex flex-col gap-4">
                 <Card v-for="order in paginatedOrders" :key="order.id"
-                    class="group relative overflow-hidden rounded-3xl border-black/8 bg-white shadow-xs transition-all duration-300 hover:border-amber-500/30 hover:shadow-xl">
+                    class="group relative overflow-hidden rounded-3xl border-border bg-card shadow-xs transition-all duration-300 hover:border-primary/50 hover:shadow-xl">
                     <!-- Header Card -->
                     <CardHeader
-                        class="flex flex-col items-start justify-between gap-3 border-b border-black/5 bg-[#faf9f6] p-5 sm:flex-row sm:items-center">
+                        class="flex flex-col items-start justify-between gap-3 border-b border-border bg-muted/30 p-5 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-3.5">
                             <div
-                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-900 font-black text-amber-400 shadow-xs">
+                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 font-black text-primary shadow-xs">
                                 <ShoppingCart class="h-5 w-5" />
                             </div>
                             <div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <h3 class="font-mono text-base font-black text-[#1c1c22]">
+                                    <h3 class="font-mono text-base font-black text-foreground">
                                         {{ order.order_number }}
                                     </h3>
                                     <Badge :variant="statusBadgeMap[
@@ -252,12 +286,12 @@ function openInvoice(orderNumber: string) {
                                         }}
                                     </Badge>
                                 </div>
-                                <p class="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-zinc-400">
-                                    <Clock class="h-3.5 w-3.5 text-zinc-400" />
+                                <p class="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                    <Clock class="h-3.5 w-3.5 text-muted-foreground" />
                                     <span>Dipesan pada
                                         {{ order.created_at }}</span>
                                     <span>•</span>
-                                    <span class="font-bold text-zinc-600">{{
+                                    <span class="font-bold text-muted-foreground">{{
                                         order.store_name
                                         }}</span>
                                 </p>
@@ -266,22 +300,22 @@ function openInvoice(orderNumber: string) {
 
                         <div class="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-end">
                             <div class="text-left sm:text-right">
-                                <span class="block text-[10px] font-extrabold text-zinc-400 uppercase">Total Tagihan
+                                <span class="block text-[10px] font-extrabold text-muted-foreground uppercase">Total Tagihan
                                     Order</span>
-                                <p class="font-mono text-lg font-black text-amber-600">
+                                <p class="font-mono text-lg font-black text-primary">
                                     {{ order.total_amount }}
                                 </p>
                             </div>
 
                             <Button variant="ghost" size="sm"
-                                class="h-9 rounded-xl px-3 text-xs font-bold text-zinc-500 hover:bg-black/5 hover:text-black"
+                                class="h-9 rounded-xl px-3 text-xs font-bold text-muted-foreground hover:bg-secondary hover:text-foreground"
                                 @click="toggleExpand(order.id)">
                                 <span>Rincian</span>
                                 <ChevronDown v-if="!expandedOrders[order.id]" class="ml-1 h-4 w-4" />
                                 <ChevronUp v-else class="ml-1 h-4 w-4" />
                             </Button>
                             <Button variant="outline" size="sm"
-                                class="h-9 rounded-xl px-3 text-xs font-bold text-zinc-600 hover:bg-black/5 hover:text-black"
+                                class="h-9 rounded-xl px-3 text-xs font-bold text-muted-foreground hover:bg-secondary hover:text-foreground"
                                 @click="openInvoice(order.order_number)">
                                 <Printer class="mr-1 h-3.5 w-3.5" /> Cetak Invoice
                             </Button>
@@ -292,63 +326,109 @@ function openInvoice(orderNumber: string) {
                     <CardContent class="flex flex-col items-start justify-between gap-6 p-5 md:flex-row">
                         <!-- Buyer Details Grid -->
                         <div class="grid flex-1 grid-cols-1 gap-4 text-xs sm:grid-cols-3">
-                            <div class="flex items-start gap-2.5 rounded-2xl border border-black/5 bg-zinc-50 p-3">
-                                <User class="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                            <div class="flex items-start gap-2.5 rounded-2xl border border-border bg-muted/30 p-3">
+                                <User class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                 <div class="flex min-w-0 flex-col">
-                                    <span class="text-[10px] font-bold text-zinc-400 uppercase">Nama Pembeli</span>
-                                    <span class="truncate font-extrabold text-[#1c1c22]">{{ order.customer_name
+                                    <span class="text-[10px] font-bold text-muted-foreground uppercase">Nama Pembeli</span>
+                                    <span class="truncate font-extrabold text-foreground">{{ order.customer_name
                                         }}</span>
-                                    <span class="truncate font-mono text-[10px] text-zinc-400">{{ order.customer_email
+                                    <span class="truncate font-mono text-[10px] text-muted-foreground">{{ order.customer_email
                                         }}</span>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-2.5 rounded-2xl border border-black/5 bg-zinc-50 p-3">
-                                <Phone class="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
+                            <div class="flex items-start gap-2.5 rounded-2xl border border-border bg-muted/30 p-3">
+                                <Phone class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                 <div class="flex min-w-0 flex-col">
-                                    <span class="text-[10px] font-bold text-zinc-400 uppercase">WhatsApp / No. HP</span>
-                                    <span class="font-mono font-black text-zinc-700">{{ order.customer_phone }}</span>
-                                    <span class="text-[10px] font-bold text-emerald-600">Terverifikasi</span>
+                                    <span class="text-[10px] font-bold text-muted-foreground uppercase">WhatsApp / No. HP</span>
+                                    <span class="font-mono font-black text-foreground">{{ order.customer_phone }}</span>
+                                    <span class="text-[10px] font-bold text-primary">Terverifikasi</span>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-2.5 rounded-2xl border border-black/5 bg-zinc-50 p-3">
-                                <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
+                            <div class="flex items-start gap-2.5 rounded-2xl border border-border bg-muted/30 p-3">
+                                <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                 <div class="flex min-w-0 flex-col">
-                                    <span class="text-[10px] font-bold text-zinc-400 uppercase">Alamat Tujuan
+                                    <span class="text-[10px] font-bold text-muted-foreground uppercase">Alamat Tujuan
                                         Pengiriman</span>
-                                    <span class="leading-tight font-semibold text-zinc-700">{{
+                                    <span class="leading-tight font-semibold text-foreground">{{
                                         order.shipping_address }}</span>
+                                    <span
+                                        v-if="order.shipping_courier"
+                                        class="mt-1 text-[10px] text-muted-foreground"
+                                        >Kurir: {{ order.shipping_courier }}</span
+                                    >
+                                    <span
+                                        v-if="order.tracking_number"
+                                        class="font-mono text-[10px] font-bold text-primary"
+                                        >Resi: {{ order.tracking_number }}</span
+                                    >
                                 </div>
                             </div>
                         </div>
 
                         <!-- Dynamic Action Buttons (State Controlled) -->
                         <div
-                            class="flex w-full shrink-0 flex-wrap items-center gap-2 border-t border-black/5 pt-3 md:w-auto md:border-t-0 md:pt-0">
+                            class="flex w-full shrink-0 flex-wrap items-center gap-2 border-t border-border pt-3 md:w-auto md:border-t-0 md:pt-0">
+                            <Button
+                                v-if="order.payment?.can_confirm"
+                                size="sm"
+                                class="h-10 cursor-pointer gap-2 rounded-xl bg-emerald-600 px-5 text-xs font-black text-white shadow-md hover:bg-emerald-600/90"
+                                @click="confirmPayment(order.payment.id)"
+                            >
+                                <DollarSign class="h-4 w-4" />
+                                Konfirmasi Bayar
+                            </Button>
+
                             <Button v-if="
                                 order.status.toLowerCase() === 'pending' ||
                                 order.status.toLowerCase() === 'paid'
                             " size="sm"
-                                class="h-10 cursor-pointer gap-2 rounded-xl bg-zinc-900 px-5 text-xs font-black text-amber-400 shadow-md hover:bg-black"
+                                class="h-10 cursor-pointer gap-2 rounded-xl bg-primary px-5 text-xs font-black text-primary-foreground shadow-md hover:bg-primary/90"
                                 @click="
                                     updateOrderStatus(order.id, 'processing')
                                     ">
-                                <PackageCheck class="h-4 w-4 text-amber-400" />
+                                <PackageCheck class="h-4 w-4" />
                                 Proses Pesanan
                             </Button>
 
                             <Button v-if="
                                 order.status.toLowerCase() === 'processing'
                             " size="sm"
-                                class="h-10 cursor-pointer gap-2 rounded-xl bg-blue-600 px-5 text-xs font-black text-white shadow-md hover:bg-blue-700"
-                                @click="updateOrderStatus(order.id, 'shipped')">
-                                <Truck class="h-4 w-4" />
-                                Kirim Pesanan
+                                class="h-10 cursor-pointer gap-2 rounded-xl bg-secondary px-5 text-xs font-black text-secondary-foreground shadow-md hover:bg-secondary/80"
+                                @click="updateOrderStatus(order.id, 'packed')">
+                                <PackageCheck class="h-4 w-4" />
+                                Tandai Dikemas
                             </Button>
 
+                            <div
+                                v-if="order.status.toLowerCase() === 'packed'"
+                                class="flex w-full flex-col gap-2 sm:w-56"
+                            >
+                                <Input
+                                    :model-value="trackingDraft[order.id] ?? order.tracking_number ?? ''"
+                                    placeholder="No. resi"
+                                    class="h-10 text-xs"
+                                    @update:model-value="(v) => (trackingDraft[order.id] = String(v))"
+                                />
+                                <Button
+                                    size="sm"
+                                    class="h-10 cursor-pointer gap-2 rounded-xl bg-secondary px-5 text-xs font-black"
+                                    @click="
+                                        updateOrderStatus(
+                                            order.id,
+                                            'shipped',
+                                            trackingDraft[order.id] || order.tracking_number,
+                                        )
+                                    "
+                                >
+                                    <Truck class="h-4 w-4" />
+                                    Kirim + Resi
+                                </Button>
+                            </div>
+
                             <Button v-if="order.status.toLowerCase() === 'shipped'" size="sm"
-                                class="h-10 cursor-pointer gap-2 rounded-xl bg-emerald-600 px-5 text-xs font-black text-white shadow-md hover:bg-emerald-700"
+                                class="h-10 cursor-pointer gap-2 rounded-xl bg-accent px-5 text-xs font-black text-accent-foreground shadow-md hover:bg-accent/80"
                                 @click="
                                     updateOrderStatus(order.id, 'completed')
                                     ">
@@ -361,7 +441,7 @@ function openInvoice(orderNumber: string) {
                                 'completed' &&
                                 order.status.toLowerCase() !== 'cancelled'
                             " variant="outline" size="sm"
-                                class="h-10 cursor-pointer rounded-xl border-rose-200 px-4 text-xs font-bold text-rose-600 hover:bg-rose-50"
+                                class="h-10 cursor-pointer rounded-xl border-destructive/30 px-4 text-xs font-bold text-destructive hover:bg-destructive/10"
                                 @click="
                                     updateOrderStatus(order.id, 'cancelled')
                                     ">
@@ -373,31 +453,31 @@ function openInvoice(orderNumber: string) {
 
                     <!-- Expandable Item Breakdown Drawer -->
                     <div v-if="expandedOrders[order.id]"
-                        class="flex flex-col gap-3 border-t border-black/5 bg-amber-50/20 p-5">
-                        <span class="flex items-center gap-1.5 text-xs font-black text-[#1c1c22]">
-                            <FileText class="h-4 w-4 text-amber-500" /> Rincian
+                        class="flex flex-col gap-3 border-t border-border bg-muted/50 p-5">
+                        <span class="flex items-center gap-1.5 text-xs font-black text-foreground">
+                            <FileText class="h-4 w-4 text-primary" /> Rincian
                             Barang Dipesan & Catatan Pembeli
                         </span>
 
                         <div v-if="order.items && order.items.length > 0"
-                            class="divide-y divide-black/5 overflow-hidden rounded-2xl border bg-white text-xs">
+                            class="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card text-xs">
                             <div v-for="item in order.items" :key="item.id"
                                 class="flex items-center justify-between gap-3 p-3">
                                 <div class="flex min-w-0 flex-col">
-                                    <span class="truncate font-bold text-[#1c1c22]">{{ item.product_name }}</span>
-                                    <span v-if="item.sku" class="font-mono text-[10px] text-zinc-400">SKU {{ item.sku
+                                    <span class="truncate font-bold text-foreground">{{ item.product_name }}</span>
+                                    <span v-if="item.sku" class="font-mono text-[10px] text-muted-foreground">SKU {{ item.sku
                                         }}</span>
                                 </div>
                                 <div class="flex shrink-0 items-center gap-4 font-mono">
-                                    <span class="text-zinc-500">{{ item.quantity }} pcs x
+                                    <span class="text-muted-foreground">{{ item.quantity }} pcs x
                                         {{ formatRupiah(item.price) }}</span>
-                                    <span class="font-black text-amber-600">{{
+                                    <span class="font-black text-primary">{{
                                         formatRupiah(item.subtotal)
                                         }}</span>
                                 </div>
                             </div>
                         </div>
-                        <p v-else class="rounded-xl border border-black/5 bg-white p-3 text-xs text-zinc-500 italic">
+                        <p v-else class="rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground italic">
                             Belum ada line item tersimpan untuk pesanan ini
                             (order lama sebelum snapshot). Total tagihan:
                             <b>{{ order.total_amount }}</b>.
@@ -407,14 +487,14 @@ function openInvoice(orderNumber: string) {
 
                 <!-- Empty State -->
                 <div v-if="filteredOrders.length === 0"
-                    class="flex flex-col items-center justify-center rounded-3xl border border-black/8 bg-white p-6 py-16 text-center shadow-xs">
-                    <div class="mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-50 text-amber-500">
+                    class="flex flex-col items-center justify-center rounded-3xl border border-border bg-card p-6 py-16 text-center shadow-xs">
+                    <div class="mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
                         <ShoppingCart class="h-8 w-8" />
                     </div>
-                    <h3 class="text-base font-black text-[#1c1c22]">
+                    <h3 class="text-base font-black text-foreground">
                         Tidak Ada Pesanan Ditemukan
                     </h3>
-                    <p class="mt-1 max-w-sm text-xs text-zinc-400">
+                    <p class="mt-1 max-w-sm text-xs text-muted-foreground">
                         Belum ada transaksi pesanan yang sesuai dengan kriteria
                         filter atau kata kunci pencarian kamu.
                     </p>
@@ -423,20 +503,20 @@ function openInvoice(orderNumber: string) {
 
             <!-- ── Pagination Bar ── -->
             <div v-if="filteredOrders.length > 0"
-                class="flex flex-col items-center justify-between gap-4 rounded-3xl border border-black/8 bg-white p-4 shadow-xs sm:flex-row">
-                <div class="flex items-center gap-3 text-xs font-semibold text-zinc-500">
+                class="flex flex-col items-center justify-between gap-4 rounded-3xl border border-border bg-card p-4 shadow-xs sm:flex-row">
+                <div class="flex items-center gap-3 text-xs font-semibold text-muted-foreground">
                     <span>Menampilkan
-                        <strong class="font-black text-[#1c1c22]">{{ paginationStart }}–{{ paginationEnd }}</strong>
+                        <strong class="font-black text-foreground">{{ paginationStart }}–{{ paginationEnd }}</strong>
                         dari
-                        <strong class="font-black text-[#1c1c22]">{{
+                        <strong class="font-black text-foreground">{{
                             filteredOrders.length
                             }}</strong>
                         pesanan</span>
-                    <span class="text-zinc-300">|</span>
+                    <span class="text-muted-foreground/50">|</span>
                     <div class="flex items-center gap-1.5">
                         <span>Per Halaman:</span>
                         <select v-model="perPage"
-                            class="h-8 cursor-pointer rounded-xl border border-black/10 bg-zinc-50 px-2 text-xs font-bold">
+                            class="h-8 cursor-pointer rounded-xl border border-border bg-muted/50 text-foreground px-2 text-xs font-bold">
                             <option :value="5">5</option>
                             <option :value="10">10</option>
                             <option :value="20">20</option>
@@ -453,8 +533,8 @@ function openInvoice(orderNumber: string) {
                     <div class="flex items-center gap-1 px-1">
                         <button v-for="p in totalPages" :key="p" @click="goToPage(p)"
                             class="h-9 w-9 cursor-pointer rounded-xl text-xs font-black transition-all" :class="currentPage === p
-                                    ? 'bg-black text-amber-400 shadow-xs'
-                                    : 'border border-black/8 bg-white text-zinc-600 hover:bg-zinc-100'
+                                    ? 'bg-primary text-primary-foreground shadow-xs'
+                                    : 'border border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground'
                                 ">
                             {{ p }}
                         </button>

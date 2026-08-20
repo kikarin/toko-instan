@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, Link } from '@inertiajs/vue3';
 import {
     Boxes,
     History,
@@ -10,6 +10,8 @@ import {
     Minus,
     Plus,
     AlertTriangle,
+    ChevronLeft,
+    ChevronRight,
 } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,7 +23,18 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import type { InventoryProduct } from '@/types/inventory';
 
 interface Props {
-    products?: InventoryProduct[];
+    products?: {
+        data: InventoryProduct[];
+        links: any[];
+        current_page: number;
+        last_page: number;
+        total: number;
+        from: number;
+        to: number;
+        per_page: number;
+        prev_page_url: string | null;
+        next_page_url: string | null;
+    };
     lowStockThreshold?: number;
     totalProducts?: number;
     lowStockCount?: number;
@@ -48,12 +61,12 @@ const {
         <main class="mx-auto flex w-full max-w-5xl flex-col gap-5 p-4 sm:p-6">
             <div>
                 <p
-                    class="mb-1 text-xs font-extrabold tracking-widest text-[#e07c28] uppercase"
+                    class="mb-1 text-xs font-extrabold tracking-widest text-primary uppercase"
                 >
                     Seller · Inventory
                 </p>
                 <h1
-                    class="flex items-center gap-2 text-2xl font-extrabold text-[#1c1c22]"
+                    class="flex items-center gap-2 text-2xl font-extrabold text-foreground"
                 >
                     <Boxes class="h-6 w-6" /> Manajemen Stok
                 </h1>
@@ -63,41 +76,41 @@ const {
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <Card class="p-4">
                     <p
-                        class="text-[10px] font-bold tracking-wide text-[#9090a0] uppercase"
+                        class="text-[10px] font-bold tracking-wide text-muted-foreground uppercase"
                     >
                         Total Produk
                     </p>
-                    <p class="mt-1 text-2xl font-extrabold text-[#1c1c22]">
+                    <p class="mt-1 text-2xl font-extrabold text-foreground">
                         {{ totalProducts }}
                     </p>
                 </Card>
                 <Card class="p-4">
                     <p
-                        class="text-[10px] font-bold tracking-wide text-[#9090a0] uppercase"
+                        class="text-[10px] font-bold tracking-wide text-muted-foreground uppercase"
                     >
                         Stok Menipis
                     </p>
-                    <p class="mt-1 text-2xl font-extrabold text-[#e07c28]">
+                    <p class="mt-1 text-2xl font-extrabold text-primary">
                         {{ lowStockCount }}
                     </p>
                 </Card>
                 <Card class="p-4">
                     <p
-                        class="text-[10px] font-bold tracking-wide text-[#9090a0] uppercase"
+                        class="text-[10px] font-bold tracking-wide text-muted-foreground uppercase"
                     >
                         Habis
                     </p>
-                    <p class="mt-1 text-2xl font-extrabold text-red-500">
+                    <p class="mt-1 text-2xl font-extrabold text-destructive">
                         {{ outOfStockCount }}
                     </p>
                 </Card>
                 <Card class="p-4">
                     <p
-                        class="text-[10px] font-bold tracking-wide text-[#9090a0] uppercase"
+                        class="text-[10px] font-bold tracking-wide text-muted-foreground uppercase"
                     >
                         Ambang Stok
                     </p>
-                    <p class="mt-1 text-2xl font-extrabold text-[#6d4fc2]">
+                    <p class="mt-1 text-2xl font-extrabold text-secondary">
                         {{ lowStockThreshold }}
                     </p>
                 </Card>
@@ -107,30 +120,30 @@ const {
             <Card class="overflow-hidden py-0">
                 <div class="flex flex-col">
                     <div
-                        v-for="p in products ?? []"
+                        v-for="p in products?.data ?? []"
                         :key="p.id"
-                        class="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 px-4 py-3.5 last:border-b-0 sm:px-5"
+                        class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3.5 last:border-b-0 sm:px-5"
                     >
                         <div class="flex min-w-0 items-center gap-3">
                             <img
                                 v-if="p.img"
                                 :src="p.img"
                                 :alt="p.name"
-                                class="h-12 w-12 shrink-0 rounded-xl border border-black/5 object-cover"
+                                class="h-12 w-12 shrink-0 rounded-xl border border-border object-cover"
                             />
                             <div
                                 v-else
-                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#f5f4f0]"
+                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted"
                             >
-                                <Boxes class="h-5 w-5 text-[#c8c8d5]" />
+                                <Boxes class="h-5 w-5 text-muted-foreground/50" />
                             </div>
                             <div class="min-w-0">
                                 <p
-                                    class="truncate text-sm font-bold text-[#1c1c22]"
+                                    class="truncate text-sm font-bold text-foreground"
                                 >
                                     {{ p.name }}
                                 </p>
-                                <p class="text-[10px] text-[#9090a0]">
+                                <p class="text-[10px] text-muted-foreground">
                                     {{ p.sku || 'Tanpa SKU' }} •
                                     {{ p.formatted_price }}
                                 </p>
@@ -147,7 +160,7 @@ const {
                             </span>
                             <span v-else-if="p.low_stock" class="mr-1">
                                 <Badge
-                                    variant="amber"
+                                    variant="default"
                                     class="px-2 py-0 text-[9px] uppercase"
                                 >
                                     <AlertTriangle class="h-2.5 w-2.5" />
@@ -155,7 +168,7 @@ const {
                                 </Badge>
                             </span>
                             <span
-                                class="mr-2 font-mono text-sm font-extrabold text-[#1c1c22]"
+                                class="mr-2 font-mono text-sm font-extrabold text-foreground"
                             >
                                 {{ p.stock }}
                             </span>
@@ -195,7 +208,7 @@ const {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    class="h-8 px-2 text-[11px] text-[#6d4fc2]"
+                                    class="h-8 px-2 text-[11px] text-secondary"
                                     @click="
                                         router.visit(
                                             `/inventory/${p.id}/history`,
@@ -210,23 +223,78 @@ const {
                     </div>
 
                     <div
-                        v-if="!(products ?? []).length"
+                        v-if="!(products?.data ?? []).length"
                         class="py-14 text-center"
                     >
                         <div
-                            class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f5f4f0]"
+                            class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-muted"
                         >
-                            <PackageX class="h-6 w-6 text-[#c8c8d5]" />
+                            <PackageX class="h-6 w-6 text-muted-foreground/50" />
                         </div>
-                        <p class="mt-3 text-sm font-semibold text-[#4a4a57]">
+                        <p class="mt-3 text-sm font-semibold text-foreground">
                             Belum ada produk
                         </p>
-                        <p class="mt-1 text-xs text-[#9090a0]">
+                        <p class="mt-1 text-xs text-muted-foreground">
                             Tambahkan produk untuk mulai mengelola stok.
                         </p>
                     </div>
                 </div>
             </Card>
+
+            <!-- ── Pagination Bar ── -->
+            <div v-if="(products?.total ?? 0) > 0"
+                class="flex flex-col items-center justify-between gap-4 rounded-3xl border border-border bg-card p-4 shadow-xs sm:flex-row">
+                <div class="flex items-center gap-3 text-xs font-semibold text-muted-foreground">
+                    <span>Menampilkan
+                        <strong class="font-black text-foreground">{{ products?.from ?? 0 }}–{{ products?.to ?? 0 }}</strong>
+                        dari
+                        <strong class="font-black text-foreground">{{ products?.total ?? 0 }}</strong>
+                        produk</span>
+                    <span class="text-muted-foreground/50">|</span>
+                    <div class="flex items-center gap-1.5">
+                        <span>Per Halaman:</span>
+                        <select
+                            class="h-8 cursor-pointer rounded-xl border border-border bg-muted/50 text-foreground px-2 text-xs font-bold"
+                            @change="(e) => router.get('/inventory', { per_page: (e.target as HTMLSelectElement).value }, { preserveState: true })"
+                        >
+                            <option :value="5" :selected="products?.per_page == 5">5</option>
+                            <option :value="10" :selected="products?.per_page == 10">10</option>
+                            <option :value="20" :selected="products?.per_page == 20">20</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <component :is="products?.prev_page_url ? Link : 'button'" :href="products?.prev_page_url ?? ''" 
+                        class="inline-flex items-center justify-center whitespace-nowrap border border-border bg-card hover:bg-secondary hover:text-foreground text-foreground h-9 cursor-pointer rounded-xl px-3 text-xs font-bold transition-all disabled:pointer-events-none disabled:opacity-50"
+                        :disabled="!products?.prev_page_url">
+                        <ChevronLeft class="mr-1 h-4 w-4" /> Prev
+                    </component>
+
+                    <div class="flex items-center gap-1 px-1">
+                        <template v-for="(link, k) in products?.links ?? []" :key="k">
+                            <!-- Skip 'Next' and 'Previous' which are the first and last items in Laravel links -->
+                            <component v-if="k > 0 && k < (products?.links.length ?? 0) - 1"
+                                :is="link.url ? Link : 'span'"
+                                :href="link.url"
+                                v-html="link.label"
+                                class="flex h-9 w-9 items-center justify-center cursor-pointer rounded-xl text-xs font-black transition-all"
+                                :class="link.active
+                                        ? 'bg-primary text-primary-foreground shadow-xs'
+                                        : 'border border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                "
+                            />
+                        </template>
+                    </div>
+
+                    <component :is="products?.next_page_url ? Link : 'button'" :href="products?.next_page_url ?? ''" 
+                        class="inline-flex items-center justify-center whitespace-nowrap border border-border bg-card hover:bg-secondary hover:text-foreground text-foreground h-9 cursor-pointer rounded-xl px-3 text-xs font-bold transition-all disabled:pointer-events-none disabled:opacity-50"
+                        :disabled="!products?.next_page_url">
+                        Next
+                        <ChevronRight class="ml-1 h-4 w-4" />
+                    </component>
+                </div>
+            </div>
 
             <!-- Action Modal -->
             <Teleport to="body">
@@ -239,14 +307,14 @@ const {
                         @click="activeAction = null"
                     />
                     <div
-                        class="relative z-10 w-full max-w-sm rounded-2xl border border-black/8 bg-white p-5 shadow-2xl"
+                        class="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl"
                     >
-                        <h2 class="text-sm font-extrabold text-[#1c1c22]">
+                        <h2 class="text-sm font-extrabold text-foreground">
                             {{ actionLabels[activeAction.action].title }}
                         </h2>
-                        <p class="mt-1 text-xs text-[#9090a0]">
+                        <p class="mt-1 text-xs text-muted-foreground">
                             {{ activeAction.product.name }} — stok saat ini
-                            <span class="font-bold text-[#1c1c22]">{{
+                            <span class="font-bold text-foreground">{{
                                 activeAction.product.stock
                             }}</span>
                         </p>

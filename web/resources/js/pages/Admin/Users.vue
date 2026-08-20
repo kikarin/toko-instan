@@ -68,7 +68,7 @@ const {
                     <div
                         v-for="u in filtered"
                         :key="u.id"
-                        class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/5 bg-[#faf9f6] px-4 py-3"
+                        class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-[#faf9f6] px-4 py-3"
                     >
                         <div class="flex min-w-0 items-center gap-3">
                             <div
@@ -110,7 +110,7 @@ const {
 
                             <!-- Role switcher -->
                             <div
-                                class="flex items-center gap-1 rounded-xl border border-black/10 bg-white p-0.5"
+                                class="flex items-center gap-1 rounded-xl border border-border bg-white p-0.5"
                             >
                                 <button
                                     v-for="r in ['buyer', 'seller', 'admin']"
@@ -130,7 +130,7 @@ const {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                class="text-[10px] text-red-500 hover:bg-red-50 hover:text-red-600"
+                                class="text-[10px] text-destructive hover:bg-destructive/10 hover:text-destructive"
                                 @click="confirmDelete(u)"
                             >
                                 <UserX class="h-3.5 w-3.5" />

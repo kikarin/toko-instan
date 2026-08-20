@@ -66,11 +66,16 @@ return [
             'secret' => env('R2_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
             'region' => env('R2_DEFAULT_REGION', 'auto'),
             'bucket' => env('R2_BUCKET', env('AWS_BUCKET')),
-            'url' => env('R2_URL', env('AWS_URL')),
+            'url' => env('R2_URL') ?: rtrim((string) env('APP_URL', 'http://localhost'), '/').'/media',
             'endpoint' => env('R2_ENDPOINT', env('AWS_ENDPOINT')),
             'use_path_style_endpoint' => env('R2_USE_PATH_STYLE_ENDPOINT', true),
             'throw' => true,
             'report' => true,
+            'visibility' => 'public',
+            'http' => [
+                'timeout' => (int) env('R2_HTTP_TIMEOUT', 60),
+                'connect_timeout' => (int) env('R2_CONNECT_TIMEOUT', 10),
+            ],
         ],
 
     ],

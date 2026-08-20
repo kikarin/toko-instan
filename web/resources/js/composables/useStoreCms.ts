@@ -27,6 +27,21 @@ export function hexToRgba(hex: string, alpha: number): string {
     return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
+export function darken(hex: string, factor: number): string {
+    const clean = hex.replace('#', '');
+
+    if (clean.length !== 6) {
+return '#18181c';
+}
+
+    const n = parseInt(clean, 16);
+    const r = Math.round(((n >> 16) & 255) * factor);
+    const g = Math.round(((n >> 8) & 255) * factor);
+    const b = Math.round((n & 255) * factor);
+
+    return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
+}
+
 export const COLOR_TOKENS: { token: keyof ThemeColors; label: string }[] = [
     { token: 'primary', label: 'Utama' },
     { token: 'secondary', label: 'Sekunder' },
@@ -66,10 +81,10 @@ export function useStoreCms(props: {
     const isCustom = ref(props.theme?.key === 'custom');
 
     const previewStyle = ref({
-        '--brand': previewColors.value.primary,
-        '--brand-secondary': previewColors.value.secondary,
-        '--brand-accent': previewColors.value.accent,
-        '--brand-strong': previewColors.value.strong,
+        '--primary': previewColors.value.primary,
+        '--secondary': previewColors.value.secondary,
+        '--accent': previewColors.value.accent,
+        '--destructive': previewColors.value.strong,
     });
 
     function selectTheme(key: string) {
@@ -97,10 +112,10 @@ export function useStoreCms(props: {
 
     function refreshPreviewStyle() {
         previewStyle.value = {
-            '--brand': previewColors.value.primary,
-            '--brand-secondary': previewColors.value.secondary,
-            '--brand-accent': previewColors.value.accent,
-            '--brand-strong': previewColors.value.strong,
+            '--primary': previewColors.value.primary,
+            '--secondary': previewColors.value.secondary,
+            '--accent': previewColors.value.accent,
+            '--destructive': previewColors.value.strong,
         };
 
         if (typeof document !== 'undefined') {
@@ -135,6 +150,7 @@ export function useStoreCms(props: {
                 previewColors.value.primary,
             );
             root.style.setProperty('--sidebar-ring', previewColors.value.primary);
+            root.style.setProperty('--sidebar-bg', darken(previewColors.value.primary, 0.4));
         }
     }
 

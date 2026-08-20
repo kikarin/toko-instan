@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\Admin\UpdateRoleDTO;
 use App\Models\Order;
 use App\Models\Tenant;
 use App\Models\User;
@@ -60,7 +61,7 @@ class AdminService
 
         return [
             'stats' => [
-                'users' => User::count(),
+                'users' => $this->userRepository->countAll(),
                 'stores' => $this->storeRepository->countActiveStores(),
                 'tenants' => Tenant::count(),
                 'products' => $this->productRepository->countTotalProducts(),
@@ -134,9 +135,19 @@ class AdminService
             ]);
     }
 
-    public function setRole(User $user, string $role): void
+    public function getUser(int $id): User
     {
-        $user->update(['role' => $role]);
+        return $this->userRepository->findOrFail($id);
+    }
+
+    public function findUser(int $id): ?User
+    {
+        return $this->userRepository->findById($id);
+    }
+
+    public function setRole(User $user, UpdateRoleDTO $dto): void
+    {
+        $user->update(['role' => $dto->role]);
     }
 
     public function deleteUser(User $user): void

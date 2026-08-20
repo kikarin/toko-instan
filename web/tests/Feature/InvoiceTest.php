@@ -19,11 +19,13 @@ function invoiceContext(): array
         'role' => 'buyer',
         'email' => 'invoice-buyer@example.com',
         'name' => 'Budi Invoice',
+        'store_id' => $store->id,
     ]);
 
     $otherBuyer = User::factory()->create([
         'role' => 'buyer',
         'email' => 'orang-lain@example.com',
+        'store_id' => $store->id,
     ]);
 
     $product = Product::factory()->create([
@@ -42,6 +44,7 @@ function invoiceContext(): array
         'customer_phone' => '081299887766',
         'shipping_address' => 'Jl. Invoice 12, Bandung',
         'total_amount' => 65000,
+        'shipping_cost' => 15000,
         'status' => 'paid',
         'notes' => 'Mohon dicek paketnya',
     ]);
@@ -60,10 +63,10 @@ function invoiceContext(): array
 }
 
 it('buyer dapat membuka invoice pesanan miliknya dengan rincian lengkap', function () {
-    ['buyer' => $buyer] = invoiceContext();
+    ['buyer' => $buyer, 'store' => $store] = invoiceContext();
 
     $this->actingAs($buyer)
-        ->get('/orders/INV-TEST-001/invoice')
+        ->get("/{$store->slug}/orders/INV-TEST-001/invoice")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Order/Invoice')
@@ -80,17 +83,17 @@ it('buyer dapat membuka invoice pesanan miliknya dengan rincian lengkap', functi
 });
 
 it('buyer lain tidak bisa membuka invoice orang lain', function () {
-    ['otherBuyer' => $otherBuyer] = invoiceContext();
+    ['otherBuyer' => $otherBuyer, 'store' => $store] = invoiceContext();
 
     $this->actingAs($otherBuyer)
-        ->get('/orders/INV-TEST-001/invoice')
+        ->get("/{$store->slug}/orders/INV-TEST-001/invoice")
         ->assertForbidden();
 });
 
 it('seller dapat membuka invoice order dari tokonya', function () {
-    ['seller' => $seller, 'buyer' => $buyer] = invoiceContext();
+    ['seller' => $seller, 'buyer' => $buyer, 'store' => $store] = invoiceContext();
 
-    $this->actingAs($buyer)->get('/orders/INV-TEST-001/invoice')->assertOk();
+    $this->actingAs($buyer)->get("/{$store->slug}/orders/INV-TEST-001/invoice")->assertOk();
 
     $this->actingAs($seller)
         ->get('/orders/INV-TEST-001/invoice')
@@ -113,9 +116,9 @@ it('seller menolak akses invoice order tokok orang lain', function () {
 });
 
 it('invoice mengembalikan 404 untuk nomor pesanan yang tidak diketahui', function () {
-    ['buyer' => $buyer] = invoiceContext();
+    ['buyer' => $buyer, 'store' => $store] = invoiceContext();
 
     $this->actingAs($buyer)
-        ->get('/orders/ORD-TIDAK-ADA/invoice')
+        ->get("/{$store->slug}/orders/ORD-TIDAK-ADA/invoice")
         ->assertNotFound();
 });

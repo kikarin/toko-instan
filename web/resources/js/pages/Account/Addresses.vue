@@ -91,7 +91,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                 </div>
                 <Button
                     v-if="!showForm"
-                    variant="amber"
+                    variant="default"
                     size="sm"
                     @click="openNew"
                 >
@@ -209,7 +209,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                         />
                     </div>
                     <div class="flex gap-2 sm:col-span-2">
-                        <Button type="submit" variant="amber">Simpan</Button>
+                        <Button type="submit" variant="default">Simpan</Button>
                         <Button
                             type="button"
                             variant="outline"
@@ -225,7 +225,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                 <div
                     v-for="a in addresses ?? []"
                     :key="a.id"
-                    class="rounded-2xl border border-black/5 bg-white p-4 shadow-sm"
+                    class="rounded-2xl border border-border bg-white p-4 shadow-sm"
                 >
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3">
@@ -246,7 +246,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                                     </p>
                                     <Badge
                                         v-if="a.is_default"
-                                        variant="amber"
+                                        variant="default"
                                         class="px-2 py-0 text-[9px] uppercase"
                                     >
                                         Utama
@@ -278,7 +278,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                class="text-red-500 hover:bg-red-50"
+                                class="text-destructive hover:bg-destructive/10"
                                 @click="deleteTarget = a"
                             >
                                 <Trash2 class="h-3.5 w-3.5" />
@@ -312,7 +312,7 @@ watch([() => form.city, cities], ([newCityName, cits], [oldCityName]) => {
                         Tambahkan alamat pengiriman pertamamu.
                     </p>
                     <Button
-                        variant="amber"
+                        variant="default"
                         size="sm"
                         class="mt-3 text-xs font-bold"
                         @click="openNew"

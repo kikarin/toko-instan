@@ -14,7 +14,17 @@ export interface Product {
     description?: string | null;
     brand?: string | null;
     weight_gram?: number;
+    type?: 'physical' | 'digital';
+    digital_file_path?: string | null;
+    digital_file_name?: string | null;
+    digital_file_mime?: string | null;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    seo_tags?: string | null;
+    marketing_caption?: string | null;
     low_stock?: boolean;
+    variant_options?: Array<{ name: string; values: string[] }>;
+    variants?: ProductVariant[];
 }
 
 export interface ProductVariant {
@@ -23,8 +33,10 @@ export interface ProductVariant {
     sku: string | null;
     price: number | null;
     formatted_price: string | null;
+    priceNum?: number;
     stock: number;
     is_active: boolean;
+    img?: string | null;
 }
 
 export interface MarketplaceProduct {
@@ -42,6 +54,8 @@ export interface MarketplaceProduct {
     discount?: number;
     originalPrice?: string;
     freeShipping?: boolean;
+    sku?: string;
+    stock?: number;
 }
 
 export interface ProductDetail extends MarketplaceProduct {
@@ -49,6 +63,10 @@ export interface ProductDetail extends MarketplaceProduct {
     sku?: string;
     brand?: string;
     weightGram?: number;
+    category?: string;
+    variant_id?: number;
+    variant_options?: Array<{ name: string; values: string[] }>;
+    variants?: ProductVariant[];
 }
 
 export interface WishlistItem {

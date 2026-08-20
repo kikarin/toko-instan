@@ -2,30 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ActivityLog;
-use App\Models\Store;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ActivityLogController extends Controller
 {
+    public function __construct(protected ActivityLogService $logService) {}
+
     public function index(Request $request): Response
     {
-        $store = Store::whereHas(
-            'tenant',
-            fn ($q) => $q->where('user_id', $request->user()->id)
-        )->first();
-
-        $logs = $store
-            ? ActivityLog::with('user')
-                ->where('tenant_id', $store->tenant_id)
-                ->latest('created_at')
-                ->paginate(20)
-            : collect();
+        $logs = $this->logService->getLogsForUser($request->user()->id, 20);
 
         return Inertia::render('ActivityLog/Index', [
-            'logs' => $logs->map(fn (ActivityLog $log) => [
+            'logs' => collect($logs->items())->map(fn ($log) => [
                 'id' => $log->id,
                 'action' => $log->action,
                 'action_label' => $this->actionLabel($log->action),
@@ -52,6 +43,14 @@ class ActivityLogController extends Controller
             'withdrawal_request' => 'mengajukan penarikan',
             'withdrawal_status' => 'status penarikan diubah',
             'store_updated' => 'pengaturan toko diubah',
+            'ticket_created' => 'tiket dibuat',
+            'ticket_replied' => 'tiket dibalas',
+            'ticket_status' => 'status tiket diubah',
+            'faq_generated' => 'FAQ digenerate',
+            'referral_signup' => 'seller daftar via referral',
+            'referral_commission' => 'komisi referral',
+            'custom_domain' => 'custom domain dipasang',
+            'custom_domain_removed' => 'custom domain dilepas',
             default => $action,
         };
     }

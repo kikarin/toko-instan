@@ -9,6 +9,7 @@ export function useProductVariants() {
         sku: '',
         price: '',
         stock: '0',
+        img: '',
     });
 
     const editingId = ref<number | null>(null);
@@ -18,6 +19,7 @@ export function useProductVariants() {
         price: '',
         stock: '0',
         is_active: true,
+        img: '',
     });
     const deleteTarget = ref<ProductVariant | null>(null);
     const productIdForEdit = ref<number | null>(null);
@@ -27,6 +29,7 @@ export function useProductVariants() {
         form.sku = '';
         form.price = '';
         form.stock = '0';
+        form.img = '';
     }
 
     function saveVariant(productId: number) {
@@ -37,6 +40,7 @@ export function useProductVariants() {
                 sku: form.sku || undefined,
                 price: form.price || undefined,
                 stock: form.stock || 0,
+                img: form.img || undefined,
             },
             {
                 onSuccess: () => {
@@ -55,6 +59,7 @@ export function useProductVariants() {
         editingForm.price = v.price === null ? '' : String(v.price);
         editingForm.stock = String(v.stock);
         editingForm.is_active = v.is_active;
+        editingForm.img = v.img ?? '';
         productIdForEdit.value = productId;
     }
 
@@ -71,6 +76,7 @@ export function useProductVariants() {
                 price: editingForm.price || undefined,
                 stock: editingForm.stock || 0,
                 is_active: editingForm.is_active,
+                img: editingForm.img || undefined,
             },
             {
                 onSuccess: () => {

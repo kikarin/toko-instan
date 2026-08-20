@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import {
     Sparkles,
     Wallet,
@@ -10,6 +10,7 @@ import {
     Box,
     Eye,
     Landmark,
+    Waves,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import KpiCard from '@/components/dashboard/KpiCard.vue';
@@ -35,7 +36,7 @@ interface Props {
     orderFlow?: any[];
     topSellers?: any[];
     wallet?: any;
-    store?: any;
+    charts?: any;
 }
 
 const props = defineProps<Props>();
@@ -65,13 +66,13 @@ const {
         >
             <!-- ── Top Command Banner ── -->
             <div
-                class="relative overflow-hidden rounded-3xl bg-zinc-900 p-6 text-white shadow-xl sm:p-8"
+                class="relative overflow-hidden rounded-3xl bg-primary p-6 text-primary-foreground shadow-xl sm:p-8"
             >
                 <div
-                    class="absolute -top-10 -right-10 h-72 w-72 rounded-full bg-gradient-to-br from-[#e07c28]/40 via-amber-500/20 to-transparent blur-3xl"
+                    class="absolute -top-10 -right-10 h-72 w-72 rounded-full bg-gradient-to-br from-white/30 via-white/10 to-transparent blur-3xl"
                 />
                 <div
-                    class="absolute -bottom-10 -left-10 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-600/30 via-teal-500/10 to-transparent blur-3xl"
+                    class="absolute -bottom-10 -left-10 h-72 w-72 rounded-full bg-gradient-to-br from-black/20 via-black/5 to-transparent blur-3xl"
                 />
 
                 <div
@@ -80,7 +81,7 @@ const {
                     <div class="flex flex-col gap-2">
                         <div class="flex items-center gap-2">
                             <span
-                                class="inline-flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-400"
+                                class="inline-flex items-center gap-1 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-xs font-black text-primary-foreground"
                             >
                                 <Sparkles class="h-3.5 w-3.5" /> SELLER COMMAND
                                 CENTER
@@ -93,11 +94,12 @@ const {
                             </Badge>
                         </div>
                         <h1
-                            class="text-2xl font-black tracking-tight text-white sm:text-3xl"
+                            class="text-2xl font-black tracking-tight text-primary-foreground sm:text-3xl"
                         >
-                            Selamat Datang, {{ storeName }} 👋
+                            Selamat Datang, {{ storeName }}
+                            <Waves class="inline h-5 w-5" />
                         </h1>
-                        <p class="max-w-2xl text-xs text-zinc-400 sm:text-sm">
+                        <p class="max-w-2xl text-xs text-primary-foreground/80 sm:text-sm">
                             Pantau kesehatan finansial toko Anda, kelola alur
                             transaksi pembeli, dan cairkan saldo dompet toko
                             secara real-time.
@@ -109,21 +111,21 @@ const {
                         class="flex w-full shrink-0 flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center"
                     >
                         <div
-                            class="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 px-4 backdrop-blur-md sm:justify-start"
+                            class="flex items-center justify-between gap-3 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-3 px-4 backdrop-blur-md sm:justify-start"
                         >
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 font-bold text-emerald-400"
+                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/20 font-bold text-primary-foreground"
                                 >
                                     <Wallet class="h-5 w-5" />
                                 </div>
                                 <div>
                                     <span
-                                        class="block text-[10px] font-bold tracking-wider text-zinc-400 uppercase"
+                                        class="block text-[10px] font-bold tracking-wider text-primary-foreground/80 uppercase"
                                         >Saldo Siap Tarik</span
                                     >
                                     <span
-                                        class="font-mono text-base font-black text-emerald-400 sm:text-lg"
+                                        class="font-mono text-base font-black text-primary-foreground sm:text-lg"
                                         >Rp 95.400.000</span
                                     >
                                 </div>
@@ -131,9 +133,9 @@ const {
                         </div>
 
                         <Button
-                            variant="amber"
+                            variant="secondary"
                             size="lg"
-                            class="w-full cursor-pointer rounded-2xl px-5 text-xs font-extrabold shadow-lg shadow-amber-500/25 sm:w-auto"
+                            class="w-full cursor-pointer rounded-2xl px-5 text-xs font-extrabold sm:w-auto"
                             @click="navigate('/wallet')"
                         >
                             <Landmark class="mr-2 h-4 w-4" /> Tarik Saldo /
@@ -152,23 +154,23 @@ const {
 
                 <!-- Quick Action Shortcuts Bar -->
                 <div
-                    class="relative z-10 mt-6 grid grid-cols-2 gap-3 border-t border-white/10 pt-6 sm:grid-cols-4"
+                    class="relative z-10 mt-6 grid grid-cols-2 gap-3 border-t border-primary-foreground/10 pt-6 sm:grid-cols-4"
                 >
                     <button
                         @click="navigate('/products/create')"
-                        class="group flex cursor-pointer items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-3 text-left transition-all hover:bg-white/10"
+                        class="group flex cursor-pointer items-center gap-2.5 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-3 text-left transition-all hover:bg-primary-foreground/10"
                     >
                         <div
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 font-bold text-amber-400"
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/20 font-bold text-primary-foreground"
                         >
                             <Plus class="h-4 w-4" />
                         </div>
                         <div>
                             <span
-                                class="block text-xs font-bold text-white transition-colors group-hover:text-amber-400"
+                                class="block text-xs font-bold text-primary-foreground transition-colors group-hover:opacity-80"
                                 >Tambah Produk</span
                             >
-                            <span class="text-[10px] text-zinc-400"
+                            <span class="text-[10px] text-primary-foreground/80"
                                 >Buat katalog baru</span
                             >
                         </div>
@@ -176,19 +178,19 @@ const {
 
                     <button
                         @click="navigate('/orders')"
-                        class="group flex cursor-pointer items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-3 text-left transition-all hover:bg-white/10"
+                        class="group flex cursor-pointer items-center gap-2.5 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-3 text-left transition-all hover:bg-primary-foreground/10"
                     >
                         <div
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 font-bold text-emerald-400"
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/20 font-bold text-primary-foreground"
                         >
                             <ShoppingCart class="h-4 w-4" />
                         </div>
                         <div>
                             <span
-                                class="block text-xs font-bold text-white transition-colors group-hover:text-emerald-400"
+                                class="block text-xs font-bold text-primary-foreground transition-colors group-hover:opacity-80"
                                 >Kelola Pesanan</span
                             >
-                            <span class="text-[10px] text-zinc-400"
+                            <span class="text-[10px] text-primary-foreground/80"
                                 >3 Order perlu dikirim</span
                             >
                         </div>
@@ -196,19 +198,19 @@ const {
 
                     <button
                         @click="navigate('/store-settings')"
-                        class="group flex cursor-pointer items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-3 text-left transition-all hover:bg-white/10"
+                        class="group flex cursor-pointer items-center gap-2.5 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-3 text-left transition-all hover:bg-primary-foreground/10"
                     >
                         <div
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 font-bold text-indigo-400"
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/20 font-bold text-primary-foreground"
                         >
                             <Settings class="h-4 w-4" />
                         </div>
                         <div>
                             <span
-                                class="block text-xs font-bold text-white transition-colors group-hover:text-indigo-400"
+                                class="block text-xs font-bold text-primary-foreground transition-colors group-hover:opacity-80"
                                 >Pengaturan Toko</span
                             >
-                            <span class="text-[10px] text-zinc-400"
+                            <span class="text-[10px] text-primary-foreground/80"
                                 >Banner & Legalitas PKP</span
                             >
                         </div>
@@ -216,19 +218,19 @@ const {
 
                     <button
                         @click="navigate('/catalog')"
-                        class="group flex cursor-pointer items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-3 text-left transition-all hover:bg-white/10"
+                        class="group flex cursor-pointer items-center gap-2.5 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-3 text-left transition-all hover:bg-primary-foreground/10"
                     >
                         <div
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-500/20 font-bold text-violet-400"
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/20 font-bold text-primary-foreground"
                         >
                             <Box class="h-4 w-4" />
                         </div>
                         <div>
                             <span
-                                class="block text-xs font-bold text-white transition-colors group-hover:text-violet-400"
+                                class="block text-xs font-bold text-primary-foreground transition-colors group-hover:opacity-80"
                                 >Taksonomi Katalog</span
                             >
-                            <span class="text-[10px] text-zinc-400"
+                            <span class="text-[10px] text-primary-foreground/80"
                                 >Kategori & Label Promo</span
                             >
                         </div>
@@ -256,15 +258,15 @@ const {
             </div>
 
             <!-- ── Revenue Analytics Area Chart Card ── -->
-            <Card class="rounded-3xl border-black/8 bg-white p-6 shadow-xs">
+            <Card class="rounded-3xl border-border bg-card p-6 shadow-xs">
                 <CardHeader
                     class="mb-4 flex flex-row items-center justify-between p-0"
                 >
                     <div>
-                        <CardTitle class="text-lg font-black text-[#1c1c22]"
+                        <CardTitle class="text-lg font-black text-foreground"
                             >Grafik Omzet & Growth Revenue</CardTitle
                         >
-                        <CardDescription class="mt-0.5 text-xs text-zinc-500">
+                        <CardDescription class="mt-0.5 text-xs text-muted-foreground">
                             Analisis tren pendapatan bersih toko per
                             {{
                                 period === 'Hari'
@@ -278,10 +280,10 @@ const {
 
                     <div class="flex items-center gap-4">
                         <div
-                            class="flex items-center gap-2 text-xs font-bold text-zinc-600"
+                            class="flex items-center gap-2 text-xs font-bold text-muted-foreground"
                         >
                             <span
-                                class="inline-block h-2.5 w-2.5 rounded-full bg-[#e07c28]"
+                                class="inline-block h-2.5 w-2.5 rounded-full bg-primary"
                             />
                             <span>Gross Revenue</span>
                         </div>
@@ -300,25 +302,25 @@ const {
             <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 xl:grid-cols-12">
                 <!-- Order Funnel -->
                 <Card
-                    class="flex flex-col justify-between rounded-3xl border-black/8 bg-white p-6 shadow-xs xl:col-span-4"
+                    class="flex flex-col justify-between rounded-3xl border-border bg-card p-6 shadow-xs xl:col-span-4"
                 >
                     <div>
                         <div class="mb-1 flex items-center justify-between">
                             <CardTitle
-                                class="text-base font-black text-[#1c1c22]"
+                                class="text-base font-black text-foreground"
                                 >Alur Funnel Pesanan</CardTitle
                             >
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                class="h-auto p-0 text-xs font-bold text-amber-600"
+                                class="h-auto p-0 text-xs font-bold text-primary"
                                 @click="navigate('/orders')"
                             >
                                 Lihat Semua
                                 <ChevronRight class="ml-0.5 h-3.5 w-3.5" />
                             </Button>
                         </div>
-                        <CardDescription class="mb-5 text-xs text-zinc-500"
+                        <CardDescription class="mb-5 text-xs text-muted-foreground"
                             >Status realtime alur pesanan
                             pembeli</CardDescription
                         >
@@ -326,13 +328,13 @@ const {
                     </div>
 
                     <div
-                        class="mt-6 flex items-center justify-between rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4"
+                        class="mt-6 flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/10 p-4"
                     >
-                        <span class="text-xs font-extrabold text-amber-900"
+                        <span class="text-xs font-extrabold text-primary"
                             >Total Order Terverifikasi</span
                         >
                         <span
-                            class="font-mono text-base font-black text-[#1c1c22]"
+                            class="font-mono text-base font-black text-foreground"
                         >
                             {{ totalOrdersThisMonth.toLocaleString('id') }}
                             Transaksi
@@ -342,22 +344,22 @@ const {
 
                 <!-- Top Sellers Products -->
                 <Card
-                    class="rounded-3xl border-black/8 bg-white p-6 shadow-xs xl:col-span-5"
+                    class="rounded-3xl border-border bg-card p-6 shadow-xs xl:col-span-5"
                 >
                     <div class="mb-1 flex items-center justify-between">
-                        <CardTitle class="text-base font-black text-[#1c1c22]"
+                        <CardTitle class="text-base font-black text-foreground"
                             >Produk Terlaris (Top Selling Items)</CardTitle
                         >
                         <Button
                             variant="ghost"
                             size="sm"
-                            class="h-auto p-0 text-xs font-bold text-amber-600"
+                            class="h-auto p-0 text-xs font-bold text-primary"
                             @click="navigate('/products')"
                         >
                             Katalog <ChevronRight class="ml-0.5 h-3.5 w-3.5" />
                         </Button>
                     </div>
-                    <CardDescription class="mb-4 text-xs text-zinc-500"
+                    <CardDescription class="mb-4 text-xs text-muted-foreground"
                         >Peringkat produk berdasarkan total GMV
                         penjualan</CardDescription
                     >

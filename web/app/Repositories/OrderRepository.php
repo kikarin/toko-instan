@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\DTO\CreateOrderDTO;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -49,21 +50,46 @@ class OrderRepository
             ->count();
     }
 
-    public function createOrder(CreateOrderDTO $dto, string $orderNumber, float $totalAmount): Order
+    public function countByCustomerEmailAndStatus(string $email, string $status): int
     {
-        return DB::transaction(function () use ($dto, $orderNumber, $totalAmount) {
+        return Order::where('customer_email', $email)->where('status', $status)->count();
+    }
+
+    public function createOrder(
+        CreateOrderDTO $dto,
+        string $orderNumber,
+        float $totalAmount,
+        float $shippingFee = 0,
+        ?string $shippingService = null,
+        int $discount = 0,
+        int $tax = 0,
+        ?int $voucherId = null,
+        ?string $voucherCode = null,
+    ): Order {
+        return DB::transaction(function () use ($dto, $orderNumber, $totalAmount, $shippingFee, $shippingService, $discount, $tax, $voucherId, $voucherCode) {
             $storeId = $this->resolveStoreId($dto);
             $tenantId = Store::query()->whereKey($storeId)->value('tenant_id');
 
             $order = Order::create([
                 'store_id' => $storeId,
+                'customer_id' => $this->resolveCustomerId($storeId, $dto),
                 'order_number' => $orderNumber,
                 'customer_name' => $dto->customerName,
                 'customer_email' => $dto->customerEmail,
                 'customer_phone' => $dto->customerPhone,
                 'shipping_address' => $dto->shippingAddress,
+                'shipping_courier' => $dto->shippingCourier,
+                'payment_method' => $dto->paymentMethod,
                 'total_amount' => $totalAmount,
+                'shipping_cost' => (int) $shippingFee,
+                'discount' => $discount,
+                'tax' => $tax,
+                'voucher_id' => $voucherId,
+                'voucher_code' => $voucherCode,
                 'status' => 'pending',
+                'payment_method' => $dto->paymentMethod,
+                'shipping_courier' => $dto->shippingCourier,
+                'shipping_service' => $shippingService,
                 'notes' => $dto->notes,
             ]);
 
@@ -76,31 +102,71 @@ class OrderRepository
     }
 
     /**
-     * @param  array{id?: int, variant_id?: int, name: string, price: float|int, qty: int}  $item
+     * Find an existing customer for the store+email or create a new one,
+     * linking the registered user when they are signed in.
+     */
+    protected function resolveCustomerId(int $storeId, CreateOrderDTO $dto): string
+    {
+        $customer = Customer::query()
+            ->where('store_id', $storeId)
+            ->where('email', $dto->customerEmail)
+            ->first();
+
+        if ($customer) {
+            if ($customer->user_id === null && auth()->id() !== null) {
+                $customer->update(['user_id' => auth()->id()]);
+            }
+
+            return $customer->id;
+        }
+
+        return Customer::create([
+            'store_id' => $storeId,
+            'user_id' => auth()->id(),
+            'name' => $dto->customerName,
+            'email' => $dto->customerEmail,
+            'phone' => $dto->customerPhone,
+        ])->id;
+    }
+
+    /**
+     * @param  array{id?: int, variant_id?: int, name?: string, price?: float|int, qty: int}  $item
      */
     protected function createOrderItem(Order $order, ?int $tenantId, array $item): OrderItem
     {
         $product = isset($item['id']) ? Product::query()->find($item['id']) : null;
+
+        if (! $product) {
+            throw new \RuntimeException('Produk tidak ditemukan.');
+        }
+
         $variant = isset($item['variant_id'])
-            ? ProductVariant::query()->find($item['variant_id'])
+            ? ProductVariant::query()->where('product_id', $product->id)->find($item['variant_id'])
             : null;
 
-        $price = (float) ($item['price'] ?? $variant?->price ?? $product?->price ?? 0);
+        if (isset($item['variant_id']) && $variant === null) {
+            throw new \RuntimeException('Varian produk tidak valid.');
+        }
+
+        $price = (float) ($variant?->price ?? $product->price ?? 0);
         $qty = max(1, (int) ($item['qty'] ?? 1));
-        $name = (string) ($item['name'] ?? $variant?->name ?? $product?->name ?? 'Produk');
-        $sku = $variant?->sku ?? $product?->sku;
+        $name = (string) ($variant?->name ?? $product->name ?? 'Produk');
+        $sku = $variant?->sku ?? $product->sku;
 
         if ($variant !== null && filled($variant->name) && ! str_contains($name, $variant->name)) {
-            $name = trim($name.' — '.$variant->name);
+            $name = trim($product->name.' — '.$variant->name);
         }
 
         return OrderItem::create([
             'tenant_id' => $tenantId,
             'order_id' => $order->id,
-            'product_id' => $product?->id,
+            'product_id' => $product->id,
             'product_variant_id' => $variant?->id,
             'name' => $name,
             'sku' => $sku,
+            'product_type' => $product->type ?? 'physical',
+            'digital_file_path' => $product->isDigital() ? $product->digital_file_path : null,
+            'digital_file_name' => $product->isDigital() ? $product->digital_file_name : null,
             'price' => $price,
             'qty' => $qty,
             'total' => $price * $qty,
@@ -109,18 +175,26 @@ class OrderRepository
 
     protected function resolveStoreId(CreateOrderDTO $dto): int
     {
+        $storeIds = [];
+
         foreach ($dto->items as $item) {
             if (! isset($item['id'])) {
                 continue;
             }
 
             $storeId = Product::query()->whereKey($item['id'])->value('store_id');
-            if ($storeId !== null) {
-                return (int) $storeId;
+            if ($storeId === null) {
+                throw new \RuntimeException('Produk tidak ditemukan.');
             }
+
+            $storeIds[] = (int) $storeId;
         }
 
-        return $dto->storeId;
+        if (count(array_unique($storeIds)) > 1) {
+            throw new \RuntimeException('Item pesanan berasal dari toko yang berbeda.');
+        }
+
+        return $storeIds[0] ?? throw new \RuntimeException('Pesanan tidak memiliki produk.');
     }
 
     /**
@@ -141,9 +215,30 @@ class OrderRepository
      */
     public function getByBuyerEmail(string $email)
     {
-        return Order::with(['store', 'items'])
+        return Order::with(['store', 'items.product', 'items.review'])
             ->where('customer_email', $email)
             ->orderByDesc('created_at')
             ->get();
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getSellerOrders(int $storeId)
+    {
+        return Order::with(['store', 'items', 'payments'])
+            ->where('store_id', $storeId)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function findByOrderNumberWithTenant(string $orderNumber): ?Order
+    {
+        return Order::with('store.tenant')->where('order_number', $orderNumber)->first();
+    }
+
+    public function findOrFail(int $id): Order
+    {
+        return Order::findOrFail($id);
     }
 }

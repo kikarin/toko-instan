@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Controllers\AdminController;
+use App\Models\Order;
 use App\Models\Store;
 use App\Repositories\StoreRepository;
 use App\Services\StoreCmsService;
@@ -50,6 +51,17 @@ class HandleInertiaRequests extends Middleware
             ],
             'theme' => $this->activeTheme($request),
             'store' => $this->activeStore($request),
+            'csrf_token' => csrf_token(),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'plain_api_token' => $request->session()->get('plain_api_token'),
+            ],
+            'notifications' => $request->user() && $request->user()->role === 'seller'
+                ? [
+                    'unread' => $request->user()->unreadNotifications()->count(),
+                ]
+                : null,
+            'pending_orders' => $this->pendingOrdersCount($request),
         ];
     }
 
@@ -71,6 +83,8 @@ class HandleInertiaRequests extends Middleware
         return [
             'key' => $theme['key'],
             'colors' => $theme['colors'],
+            'font' => $theme['font'],
+            'variant' => $theme['variant'] ?? 'modern',
         ];
     }
 
@@ -108,6 +122,8 @@ class HandleInertiaRequests extends Middleware
             'address' => $store->address,
             'instagram' => $store->instagram,
             'tiktok' => $store->tiktok,
+            'is_pkp' => (bool) $store->is_pkp,
+            'ppn_rate' => (float) config('tax.ppn_rate', 11),
         ];
     }
 
@@ -130,5 +146,25 @@ class HandleInertiaRequests extends Middleware
         }
 
         return $this->storeRepository->getStoreForUser($user->id);
+    }
+
+    private function pendingOrdersCount(Request $request): ?int
+    {
+        $user = $request->user();
+
+        if (! $user || $user->role !== 'seller') {
+            return null;
+        }
+
+        $store = $this->resolveSharedStore($request);
+
+        if (! $store) {
+            return null;
+        }
+
+        return Order::query()
+            ->where('store_id', $store->id)
+            ->where('status', 'pending')
+            ->count();
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Store;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
 
 function checkoutBuyerContext(): array
 {
@@ -16,6 +17,7 @@ function checkoutBuyerContext(): array
         'role' => 'buyer',
         'email' => 'buyer-order@example.com',
         'name' => 'Budi Buyer',
+        'store_id' => $store->id,
     ]);
 
     $productA = Product::factory()->create([
@@ -38,9 +40,21 @@ function checkoutBuyerContext(): array
 }
 
 test('checkout creates order header and order_items snapshots', function () {
+    Http::fake([
+        'app.sandbox.midtrans.com/*' => Http::response([
+            'token' => 'snap-token-checkout',
+            'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/x',
+        ], 201),
+    ]);
+
+    config([
+        'services.midtrans.server_key' => 'SB-Mid-server-test',
+        'services.midtrans.client_key' => 'SB-Mid-client-test',
+    ]);
+
     ['buyer' => $buyer, 'store' => $store, 'tenant' => $tenant, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
 
-    $response = $this->actingAs($buyer)->post('/checkout', [
+    $response = $this->actingAs($buyer)->post("/{$store->slug}/checkout", [
         'customer_name' => 'Budi Buyer',
         'customer_email' => $buyer->email,
         'customer_phone' => '08123456789',
@@ -62,7 +76,7 @@ test('checkout creates order header and order_items snapshots', function () {
         // subtotal 275000 < 300000 → +15000 shipping = 290000
         ->and((float) $order->total_amount)->toBe(290000.0);
 
-    $response->assertRedirect(route('orders.success', $order->order_number));
+    $response->assertRedirect(route('payment.simulate', ['orderNumber' => $order->order_number]));
 
     expect(OrderItem::where('order_id', $order->id)->count())->toBe(2);
 
@@ -92,9 +106,17 @@ test('checkout creates order header and order_items snapshots', function () {
 });
 
 test('seller orders page includes line items after checkout', function () {
-    ['seller' => $seller, 'buyer' => $buyer, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
+    Http::fake([
+        'app.sandbox.midtrans.com/*' => Http::response([
+            'token' => 'snap-token-checkout',
+            'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/x',
+        ], 201),
+    ]);
+    config(['services.midtrans.server_key' => 'SB-Mid-server-test']);
 
-    $this->actingAs($buyer)->post('/checkout', [
+    ['seller' => $seller, 'buyer' => $buyer, 'store' => $store, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
+
+    $this->actingAs($buyer)->post("/{$store->slug}/checkout", [
         'customer_name' => 'Budi Buyer',
         'customer_email' => $buyer->email,
         'customer_phone' => '08123456789',
@@ -122,9 +144,17 @@ test('seller orders page includes line items after checkout', function () {
 });
 
 test('buyer orders page includes line items after checkout', function () {
-    ['buyer' => $buyer, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
+    Http::fake([
+        'app.sandbox.midtrans.com/*' => Http::response([
+            'token' => 'snap-token-checkout',
+            'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/x',
+        ], 201),
+    ]);
+    config(['services.midtrans.server_key' => 'SB-Mid-server-test']);
 
-    $this->actingAs($buyer)->post('/checkout', [
+    ['buyer' => $buyer, 'store' => $store, 'productA' => $productA, 'productB' => $productB] = checkoutBuyerContext();
+
+    $this->actingAs($buyer)->post("/{$store->slug}/checkout", [
         'customer_name' => 'Budi Buyer',
         'customer_email' => $buyer->email,
         'customer_phone' => '08123456789',
@@ -136,7 +166,7 @@ test('buyer orders page includes line items after checkout', function () {
     ])->assertRedirect();
 
     $this->actingAs($buyer)
-        ->get('/orders')
+        ->get("/{$store->slug}/orders")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Orders/Index')

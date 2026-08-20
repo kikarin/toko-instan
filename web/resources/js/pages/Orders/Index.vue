@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3';
-import { ReceiptText, Package, Inbox } from 'lucide-vue-next';
+import { ReceiptText, Package, Inbox, Download } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useStoreName } from '@/composables/useStoreName';
@@ -20,6 +20,9 @@ const statusVariant: Record<string, 'amber' | 'teal' | 'rose' | 'violetSolid'> =
     {
         pending: 'amber',
         paid: 'teal',
+        processing: 'violetSolid',
+        packed: 'violetSolid',
+        shipped: 'teal',
         completed: 'teal',
         cancelled: 'rose',
     };
@@ -85,13 +88,19 @@ function openInvoice(orderNumber: string) {
                         <p class="text-[10px] text-muted-foreground">
                             {{ o.store_name }} · {{ o.created_at ?? '-' }}
                         </p>
+                        <p
+                            v-if="o.tracking_number"
+                            class="mt-1 font-mono text-[10px] font-bold text-brand"
+                        >
+                            Resi {{ o.shipping_courier ? o.shipping_courier + ' · ' : '' }}{{ o.tracking_number }}
+                        </p>
                     </div>
 
                     <!-- items -->
                     <div class="flex flex-col gap-2 py-3">
                         <div
                             v-for="it in o.items ?? []"
-                            :key="`${it.product_name}-${it.sku ?? ''}`"
+                            :key="`${it.id ?? it.product_name}-${it.sku ?? ''}`"
                             class="flex items-center gap-2.5"
                         >
                             <div
@@ -112,7 +121,23 @@ function openInvoice(orderNumber: string) {
                                     SKU {{ it.sku }}
                                 </p>
                             </div>
-                            <p class="text-xs text-muted-foreground">{{ it.qty }}x</p>
+                            <a
+                                v-if="it.can_review && it.product_slug"
+                                :href="`/${storeSlug}/p/${it.product_slug}`"
+                                class="text-[10px] font-bold text-brand"
+                            >
+                                Ulas
+                            </a>
+                            <a
+                                v-if="it.download_url"
+                                :href="it.download_url"
+                                class="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2 py-1 text-[10px] font-bold text-brand hover:bg-brand/15"
+                            >
+                                <Download class="h-3 w-3" /> Unduh
+                            </a>
+                            <p v-else class="text-xs text-muted-foreground">
+                                {{ it.qty }}x
+                            </p>
                         </div>
                         <p
                             v-if="!(o.items ?? []).length"
@@ -120,6 +145,37 @@ function openInvoice(orderNumber: string) {
                         >
                             Tidak ada rincian item untuk pesanan ini.
                         </p>
+                    </div>
+
+                    <!-- tracking -->
+                    <div
+                        v-if="o.tracking_number"
+                        class="mt-3 flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2"
+                    >
+                        <div>
+                            <p class="text-[10px] text-muted-foreground">
+                                Nomor Resi ({{ o.tracking_courier }})
+                            </p>
+                            <p
+                                class="font-mono text-xs font-bold text-foreground"
+                            >
+                                {{ o.tracking_number }}
+                            </p>
+                        </div>
+                        <a
+                            v-if="o.tracking_url"
+                            :href="o.tracking_url"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                class="h-8 text-[10px] font-bold"
+                            >
+                                Lacak
+                            </Button>
+                        </a>
                     </div>
 
                     <!-- footer -->

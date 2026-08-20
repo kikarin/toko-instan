@@ -76,10 +76,10 @@ const {
         >
             <!-- ── Header Banner Hub ── -->
             <div
-                class="relative overflow-hidden rounded-3xl bg-zinc-900 p-6 text-white shadow-xl sm:p-8"
+                class="relative overflow-hidden rounded-3xl bg-primary p-6 text-primary-foreground shadow-xl sm:p-8"
             >
                 <div
-                    class="absolute -top-10 -right-10 h-64 w-64 rounded-full bg-gradient-to-br from-[#e07c28]/40 via-amber-500/20 to-transparent blur-3xl"
+                    class="absolute -top-10 -right-10 h-64 w-64 rounded-full bg-gradient-to-br from-accent/40 via-accent/20 to-transparent blur-3xl"
                 />
                 <div
                     class="absolute -bottom-10 -left-10 h-64 w-64 rounded-full bg-gradient-to-br from-violet-600/30 via-indigo-500/10 to-transparent blur-3xl"
@@ -91,18 +91,18 @@ const {
                     <div class="flex flex-col gap-2">
                         <div class="flex items-center gap-2">
                             <span
-                                class="inline-flex items-center gap-1 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-400"
+                                class="inline-flex items-center gap-1 rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-black text-accent"
                             >
                                 <Sparkles class="h-3.5 w-3.5" /> SMART TAXONOMY
                                 ENGINE
                             </span>
                         </div>
                         <h1
-                            class="text-2xl font-black tracking-tight text-white sm:text-3xl"
+                            class="text-2xl font-black tracking-tight text-primary-foreground sm:text-3xl"
                         >
                             Pusat Pengelolaan Katalog & Label
                         </h1>
-                        <p class="max-w-2xl text-xs text-zinc-400 sm:text-sm">
+                        <p class="max-w-2xl text-xs text-muted-foreground sm:text-sm">
                             Organisir kategori produk, brand mitra, dan label
                             penawaran khusus toko Anda dengan mudah untuk
                             meningkatkan konversi penjualan.
@@ -112,36 +112,36 @@ const {
                     <!-- Quick Stats Overview -->
                     <div class="grid shrink-0 grid-cols-3 gap-3">
                         <div
-                            class="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md"
+                            class="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-background/5 p-3 backdrop-blur-md"
                         >
-                            <span class="text-2xl font-black text-amber-400">{{
+                            <span class="text-2xl font-black text-accent">{{
                                 (categories ?? []).length
                             }}</span>
                             <span
-                                class="text-[10px] font-bold tracking-wider text-zinc-400 uppercase"
+                                class="text-[10px] font-bold tracking-wider text-muted-foreground uppercase"
                                 >Kategori</span
                             >
                         </div>
                         <div
-                            class="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md"
+                            class="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-background/5 p-3 backdrop-blur-md"
                         >
-                            <span class="text-2xl font-black text-indigo-400">{{
+                            <span class="text-2xl font-black text-primary">{{
                                 (brands ?? []).length
                             }}</span>
                             <span
-                                class="text-[10px] font-bold tracking-wider text-zinc-400 uppercase"
+                                class="text-[10px] font-bold tracking-wider text-muted-foreground uppercase"
                                 >Brand</span
                             >
                         </div>
                         <div
-                            class="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md"
+                            class="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-background/5 p-3 backdrop-blur-md"
                         >
                             <span
-                                class="text-2xl font-black text-emerald-400"
+                                class="text-2xl font-black text-emerald-500"
                                 >{{ (labels ?? []).length }}</span
                             >
                             <span
-                                class="text-[10px] font-bold tracking-wider text-zinc-400 uppercase"
+                                class="text-[10px] font-bold tracking-wider text-muted-foreground uppercase"
                                 >Label / Tag</span
                             >
                         </div>
@@ -155,15 +155,15 @@ const {
             >
                 <!-- Navigation Tabs -->
                 <div
-                    class="flex w-full items-center gap-1.5 overflow-x-auto rounded-2xl border border-black/8 bg-[#faf9f6] p-1 sm:w-auto"
+                    class="flex w-full items-center gap-1.5 overflow-x-auto rounded-2xl border border-border bg-muted p-1 sm:w-auto"
                 >
                     <button
                         @click="activeTab = 'all'"
                         class="flex cursor-pointer items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="
                             activeTab === 'all'
-                                ? 'border border-black/8 bg-white text-[#1c1c22] shadow-xs'
-                                : 'text-[#9090a0] hover:text-[#1c1c22]'
+                                ? 'border border-border bg-background text-foreground shadow-xs'
+                                : 'text-[#9090a0] hover:text-foreground'
                         "
                     >
                         <LayoutGrid class="h-3.5 w-3.5" /> Ringkasan Semua
@@ -173,11 +173,11 @@ const {
                         class="flex cursor-pointer items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="
                             activeTab === 'category'
-                                ? 'border border-black/8 bg-white text-[#1c1c22] shadow-xs'
-                                : 'text-[#9090a0] hover:text-[#1c1c22]'
+                                ? 'border border-border bg-background text-foreground shadow-xs'
+                                : 'text-[#9090a0] hover:text-foreground'
                         "
                     >
-                        <FolderPlus class="h-3.5 w-3.5 text-amber-500" />
+                        <FolderPlus class="h-3.5 w-3.5 text-accent" />
                         Kategori ({{ (categories ?? []).length }})
                     </button>
                     <button
@@ -185,11 +185,11 @@ const {
                         class="flex cursor-pointer items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="
                             activeTab === 'brand'
-                                ? 'border border-black/8 bg-white text-[#1c1c22] shadow-xs'
-                                : 'text-[#9090a0] hover:text-[#1c1c22]'
+                                ? 'border border-border bg-background text-foreground shadow-xs'
+                                : 'text-[#9090a0] hover:text-foreground'
                         "
                     >
-                        <Award class="h-3.5 w-3.5 text-indigo-500" /> Brand ({{
+                        <Award class="h-3.5 w-3.5 text-primary" /> Brand ({{
                             (brands ?? []).length
                         }})
                     </button>
@@ -198,8 +198,8 @@ const {
                         class="flex cursor-pointer items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition-all"
                         :class="
                             activeTab === 'label'
-                                ? 'border border-black/8 bg-white text-[#1c1c22] shadow-xs'
-                                : 'text-[#9090a0] hover:text-[#1c1c22]'
+                                ? 'border border-border bg-background text-foreground shadow-xs'
+                                : 'text-[#9090a0] hover:text-foreground'
                         "
                     >
                         <TagIcon class="h-3.5 w-3.5 text-emerald-500" /> Label
@@ -210,12 +210,12 @@ const {
                 <!-- Search Input -->
                 <div class="relative w-full sm:w-64">
                     <Search
-                        class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400"
+                        class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                     />
                     <Input
                         v-model="searchQuery"
                         placeholder="Cari taksonomi..."
-                        class="h-10 rounded-2xl border-black/10 bg-white pl-9 text-xs"
+                        class="h-10 rounded-2xl border-black/10 bg-background pl-9 text-xs"
                     />
                 </div>
             </div>
@@ -228,15 +228,15 @@ const {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div
-                            class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 font-bold text-amber-600"
+                            class="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/10 font-bold text-accent"
                         >
                             <FolderPlus class="h-4 w-4" />
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-[#1c1c22]">
+                            <h3 class="text-base font-black text-foreground">
                                 Kategori Produk
                             </h3>
-                            <p class="text-xs text-zinc-500">
+                            <p class="text-xs text-muted-foreground">
                                 Kelompokkan jenis barang dagangan Anda
                             </p>
                         </div>
@@ -244,7 +244,7 @@ const {
                 </div>
 
                 <!-- Fast Add Category Input Card -->
-                <Card class="rounded-2xl border-black/8 bg-white p-4 shadow-xs">
+                <Card class="rounded-2xl border-border bg-background p-4 shadow-xs">
                     <form
                         @submit.prevent="saveCategory"
                         class="flex flex-col items-center gap-3 sm:flex-row"
@@ -258,7 +258,7 @@ const {
                         </div>
                         <Button
                             type="submit"
-                            variant="amber"
+                            variant="default"
                             class="h-10 w-full shrink-0 rounded-xl px-5 text-xs font-bold sm:w-auto"
                         >
                             <Plus class="mr-1 h-4 w-4" /> Tambah Kategori
@@ -273,7 +273,7 @@ const {
                     <div
                         v-for="c in filteredCategories"
                         :key="c.id"
-                        class="group relative flex flex-col justify-between gap-3 overflow-hidden rounded-2xl border border-black/8 bg-white p-4 transition-all duration-200 hover:border-amber-500/30 hover:shadow-md"
+                        class="group relative flex flex-col justify-between gap-3 overflow-hidden rounded-2xl border border-border bg-background p-4 transition-all duration-200 hover:border-accent/50 hover:shadow-md"
                     >
                         <div class="flex items-start justify-between gap-2">
                             <template v-if="isEditing('category', c.id)">
@@ -295,7 +295,7 @@ const {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        class="h-8 w-8 p-0 text-zinc-400"
+                                        class="h-8 w-8 p-0 text-muted-foreground"
                                         @click="editing = null"
                                     >
                                         <X class="h-4 w-4" />
@@ -305,7 +305,7 @@ const {
                             <template v-else>
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-200/50 bg-amber-50 text-sm font-black text-amber-600 shadow-xs"
+                                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-sm font-black text-accent shadow-xs"
                                     >
                                         {{
                                             c.name.substring(0, 2).toUpperCase()
@@ -313,12 +313,12 @@ const {
                                     </div>
                                     <div>
                                         <h4
-                                            class="text-sm font-black text-[#1c1c22] transition-colors group-hover:text-amber-600"
+                                            class="text-sm font-black text-foreground transition-colors group-hover:text-accent"
                                         >
                                             {{ c.name }}
                                         </h4>
                                         <span
-                                            class="font-mono text-[10px] font-semibold text-zinc-400"
+                                            class="font-mono text-[10px] font-semibold text-muted-foreground"
                                         >
                                             slug:
                                             {{
@@ -335,7 +335,7 @@ const {
                                 >
                                     <button
                                         @click="startEdit('category', c)"
-                                        class="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-amber-50 hover:text-amber-600"
+                                        class="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent/10 hover:text-accent"
                                         title="Edit Kategori"
                                     >
                                         <Pencil class="h-3.5 w-3.5" />
@@ -347,7 +347,7 @@ const {
                                                 item: c,
                                             }
                                         "
-                                        class="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                                        class="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                                         title="Hapus Kategori"
                                     >
                                         <Trash2 class="h-3.5 w-3.5" />
@@ -357,12 +357,12 @@ const {
                         </div>
 
                         <div
-                            class="flex items-center justify-between border-t border-black/5 pt-2 text-[11px] font-medium text-zinc-500"
+                            class="flex items-center justify-between border-t border-border pt-2 text-[11px] font-medium text-muted-foreground"
                         >
                             <span
-                                class="flex items-center gap-1 font-bold text-zinc-600"
+                                class="flex items-center gap-1 font-bold text-muted-foreground"
                             >
-                                <Package class="h-3.5 w-3.5 text-zinc-400" />
+                                <Package class="h-3.5 w-3.5 text-muted-foreground" />
                                 {{ c.product_count ?? 12 }} Produk Terkait
                             </span>
                             <Badge variant="teal" class="px-2 py-0 text-[9px]"
@@ -374,10 +374,10 @@ const {
 
                 <div
                     v-if="!filteredCategories.length"
-                    class="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center"
+                    class="rounded-2xl border border-dashed border-black/10 bg-background p-8 text-center"
                 >
-                    <FolderPlus class="mx-auto mb-2 h-8 w-8 text-zinc-300" />
-                    <p class="text-xs font-bold text-zinc-500">
+                    <FolderPlus class="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                    <p class="text-xs font-bold text-muted-foreground">
                         Belum ada kategori yang ditemukan.
                     </p>
                 </div>
@@ -391,15 +391,15 @@ const {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div
-                            class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 font-bold text-indigo-600"
+                            class="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 font-bold text-primary"
                         >
                             <Award class="h-4 w-4" />
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-[#1c1c22]">
+                            <h3 class="text-base font-black text-foreground">
                                 Brand & Merk Lisensi
                             </h3>
-                            <p class="text-xs text-zinc-500">
+                            <p class="text-xs text-muted-foreground">
                                 Merek resmi produsen barang dagangan
                             </p>
                         </div>
@@ -407,7 +407,7 @@ const {
                 </div>
 
                 <!-- Fast Add Brand Input Card -->
-                <Card class="rounded-2xl border-black/8 bg-white p-4 shadow-xs">
+                <Card class="rounded-2xl border-border bg-background p-4 shadow-xs">
                     <form
                         @submit.prevent="saveBrand"
                         class="flex flex-col items-center gap-3 sm:flex-row"
@@ -421,7 +421,7 @@ const {
                         </div>
                         <Button
                             type="submit"
-                            class="h-10 w-full shrink-0 rounded-xl bg-indigo-600 px-5 text-xs font-bold text-white hover:bg-indigo-700 sm:w-auto"
+                            class="h-10 w-full shrink-0 rounded-xl bg-primary px-5 text-xs font-bold text-primary-foreground hover:bg-primary/90 sm:w-auto"
                         >
                             <Plus class="mr-1 h-4 w-4" /> Tambah Brand
                         </Button>
@@ -435,7 +435,7 @@ const {
                     <div
                         v-for="b in filteredBrands"
                         :key="b.id"
-                        class="group relative flex flex-col justify-between gap-3 overflow-hidden rounded-2xl border border-black/8 bg-white p-4 transition-all duration-200 hover:border-indigo-500/30 hover:shadow-md"
+                        class="group relative flex flex-col justify-between gap-3 overflow-hidden rounded-2xl border border-border bg-background p-4 transition-all duration-200 hover:border-primary/50 hover:shadow-md"
                     >
                         <div class="flex items-start justify-between gap-2">
                             <template v-if="isEditing('brand', b.id)">
@@ -457,7 +457,7 @@ const {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        class="h-8 w-8 p-0 text-zinc-400"
+                                        class="h-8 w-8 p-0 text-muted-foreground"
                                         @click="editing = null"
                                     >
                                         <X class="h-4 w-4" />
@@ -467,18 +467,18 @@ const {
                             <template v-else>
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-200/50 bg-indigo-50 text-sm font-black text-indigo-600 shadow-xs"
+                                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-sm font-black text-primary shadow-xs"
                                     >
                                         <Award class="h-5 w-5" />
                                     </div>
                                     <div>
                                         <h4
-                                            class="text-sm font-black text-[#1c1c22] transition-colors group-hover:text-indigo-600"
+                                            class="text-sm font-black text-foreground transition-colors group-hover:text-primary"
                                         >
                                             {{ b.name }}
                                         </h4>
                                         <span
-                                            class="text-[10px] font-semibold text-zinc-400"
+                                            class="text-[10px] font-semibold text-muted-foreground"
                                             >Official Brand License</span
                                         >
                                     </div>
@@ -489,7 +489,7 @@ const {
                                 >
                                     <button
                                         @click="startEdit('brand', b)"
-                                        class="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600"
+                                        class="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                                         title="Edit Brand"
                                     >
                                         <Pencil class="h-3.5 w-3.5" />
@@ -501,7 +501,7 @@ const {
                                                 item: b,
                                             }
                                         "
-                                        class="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                                        class="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                                         title="Hapus Brand"
                                     >
                                         <Trash2 class="h-3.5 w-3.5" />
@@ -511,7 +511,7 @@ const {
                         </div>
 
                         <div
-                            class="flex items-center justify-between border-t border-black/5 pt-2 text-[11px]"
+                            class="flex items-center justify-between border-t border-border pt-2 text-[11px]"
                         >
                             <Badge
                                 variant="violetSolid"
@@ -519,7 +519,7 @@ const {
                             >
                                 Verified Partner
                             </Badge>
-                            <span class="font-mono text-[10px] text-zinc-400"
+                            <span class="font-mono text-[10px] text-muted-foreground"
                                 >ID: #BRD-0{{ b.id }}</span
                             >
                         </div>
@@ -528,10 +528,10 @@ const {
 
                 <div
                     v-if="!filteredBrands.length"
-                    class="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center"
+                    class="rounded-2xl border border-dashed border-black/10 bg-background p-8 text-center"
                 >
-                    <Award class="mx-auto mb-2 h-8 w-8 text-zinc-300" />
-                    <p class="text-xs font-bold text-zinc-500">
+                    <Award class="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                    <p class="text-xs font-bold text-muted-foreground">
                         Belum ada brand yang terdaftar.
                     </p>
                 </div>
@@ -550,10 +550,10 @@ const {
                             <TagIcon class="h-4 w-4" />
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-[#1c1c22]">
+                            <h3 class="text-base font-black text-foreground">
                                 Label & Tag Promosi
                             </h3>
-                            <p class="text-xs text-zinc-500">
+                            <p class="text-xs text-muted-foreground">
                                 Lencana promo visual pada kartu produk
                                 storefront
                             </p>
@@ -562,7 +562,7 @@ const {
                 </div>
 
                 <!-- Advanced Add Label Input Card with Live Badge Preview & Palette -->
-                <Card class="rounded-2xl border-black/8 bg-white p-5 shadow-xs">
+                <Card class="rounded-2xl border-border bg-background p-5 shadow-xs">
                     <form
                         @submit.prevent="saveLabel"
                         class="flex flex-col gap-4"
@@ -580,9 +580,9 @@ const {
 
                             <!-- Color Palette Selector -->
                             <div
-                                class="flex shrink-0 items-center gap-2 rounded-xl border border-black/10 bg-[#faf9f6] px-3 py-1.5"
+                                class="flex shrink-0 items-center gap-2 rounded-xl border border-black/10 bg-muted px-3 py-1.5"
                             >
-                                <Palette class="h-4 w-4 text-zinc-400" />
+                                <Palette class="h-4 w-4 text-muted-foreground" />
                                 <div class="flex items-center gap-1.5">
                                     <button
                                         v-for="color in colorPresets"
@@ -608,7 +608,7 @@ const {
 
                             <Button
                                 type="submit"
-                                variant="amber"
+                                variant="default"
                                 class="h-10 w-full shrink-0 rounded-xl px-5 text-xs font-bold sm:w-auto"
                             >
                                 <Plus class="mr-1 h-4 w-4" /> Tambah Label Promo
@@ -618,10 +618,10 @@ const {
                         <!-- Live Badge Preview Banner -->
                         <div
                             v-if="newLabel"
-                            class="flex items-center gap-3 rounded-xl bg-zinc-900 p-3 text-xs text-white"
+                            class="flex items-center gap-3 rounded-xl bg-primary p-3 text-xs text-primary-foreground"
                         >
                             <span
-                                class="shrink-0 text-[11px] font-bold text-zinc-400"
+                                class="shrink-0 text-[11px] font-bold text-muted-foreground"
                                 >Live Preview Storefront:</span
                             >
                             <span
@@ -645,7 +645,7 @@ const {
                     <div
                         v-for="l in filteredLabels"
                         :key="l.id"
-                        class="group relative flex flex-col justify-between gap-3 overflow-hidden rounded-2xl border border-black/8 bg-white p-4 transition-all duration-200 hover:shadow-md"
+                        class="group relative flex flex-col justify-between gap-3 overflow-hidden rounded-2xl border border-border bg-background p-4 transition-all duration-200 hover:shadow-md"
                     >
                         <div class="flex items-start justify-between gap-2">
                             <template v-if="isEditing('label', l.id)">
@@ -672,7 +672,7 @@ const {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        class="h-8 w-8 p-0 text-zinc-400"
+                                        class="h-8 w-8 p-0 text-muted-foreground"
                                         @click="editing = null"
                                     >
                                         <X class="h-4 w-4" />
@@ -702,7 +702,7 @@ const {
                                 >
                                     <button
                                         @click="startEdit('label', l)"
-                                        class="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
+                                        class="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-600"
                                         title="Edit Label"
                                     >
                                         <Pencil class="h-3.5 w-3.5" />
@@ -714,7 +714,7 @@ const {
                                                 item: l,
                                             }
                                         "
-                                        class="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                                        class="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                                         title="Hapus Label"
                                     >
                                         <Trash2 class="h-3.5 w-3.5" />
@@ -724,12 +724,12 @@ const {
                         </div>
 
                         <div
-                            class="flex items-center justify-between border-t border-black/5 pt-2 text-[10px] text-zinc-400"
+                            class="flex items-center justify-between border-t border-border pt-2 text-[10px] text-muted-foreground"
                         >
                             <span class="font-mono"
                                 >HEX: {{ l.color || '#e07c28' }}</span
                             >
-                            <span class="font-bold text-zinc-500"
+                            <span class="font-bold text-muted-foreground"
                                 >Siap Dipakai di Produk</span
                             >
                         </div>
@@ -738,10 +738,10 @@ const {
 
                 <div
                     v-if="!filteredLabels.length"
-                    class="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center"
+                    class="rounded-2xl border border-dashed border-black/10 bg-background p-8 text-center"
                 >
-                    <TagIcon class="mx-auto mb-2 h-8 w-8 text-zinc-300" />
-                    <p class="text-xs font-bold text-zinc-500">
+                    <TagIcon class="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                    <p class="text-xs font-bold text-muted-foreground">
                         Belum ada label promo yang dibuat.
                     </p>
                 </div>

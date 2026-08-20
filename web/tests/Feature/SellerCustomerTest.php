@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Store;
 use App\Models\Tenant;
@@ -13,8 +14,16 @@ test('seller dapat mengakses halaman daftar pelanggan dan melihat rekap data pel
         'name' => 'Toko Pelanggan Kami',
     ]);
 
+    $customer = Customer::create([
+        'store_id' => $store->id,
+        'name' => 'Budi Pelanggan',
+        'email' => 'budi@example.com',
+        'phone' => '081234567890',
+    ]);
+
     Order::create([
         'store_id' => $store->id,
+        'customer_id' => $customer->id,
         'order_number' => 'ORD-CUST-001',
         'customer_name' => 'Budi Pelanggan',
         'customer_email' => 'budi@example.com',
@@ -26,6 +35,7 @@ test('seller dapat mengakses halaman daftar pelanggan dan melihat rekap data pel
 
     Order::create([
         'store_id' => $store->id,
+        'customer_id' => $customer->id,
         'order_number' => 'ORD-CUST-002',
         'customer_name' => 'Budi Pelanggan',
         'customer_email' => 'budi@example.com',

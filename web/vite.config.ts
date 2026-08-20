@@ -13,6 +13,11 @@ const canRunWayfinder = fs.existsSync(
 );
 
 export default defineConfig({
+    server: {
+        headers: {
+            'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],

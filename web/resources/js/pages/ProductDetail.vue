@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import {
     Star,
     ShoppingCart,
@@ -15,24 +15,23 @@ import {
     Share2,
     ChevronLeft
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import { useCart } from '@/composables/useCart';
 import { toast } from '@/components/ui/sonner';
 import { useActiveUser } from '@/composables/useActiveUser';
-import { useCart } from '@/composables/useCart';
-import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 
 interface Props {
     store: any;
     theme: any;
     product: any;
+    seo?: SeoMeta | null;
 }
 
 const props = defineProps<Props>();
-
-const activeUser = useActiveUser();
 
 const qty = ref(1);
 const isLiked = ref(false);
@@ -61,11 +60,11 @@ function handleAddToCart() {
         toast.error('Silakan login untuk menambahkan ke keranjang');
         const store = usePage().props.store as any;
         router.visit(store?.slug ? `/${store.slug}/login` : '/login');
-
         return;
     }
 
     const rawPrice =
+        selectedVariant.value?.priceNum ||
         props.product.priceNum ||
         parseInt(props.product.price.replace(/[^\d]/g, ''), 10) ||
         100000;
@@ -73,10 +72,13 @@ function handleAddToCart() {
     addItem(
         {
             id: props.product.id,
-            name: props.product.name,
+            variant_id: selectedVariant.value?.id,
+            name: selectedVariant.value 
+                ? `${props.product.name} - ${selectedVariant.value.name}` 
+                : props.product.name,
             price: rawPrice,
-            formattedPrice: props.product.price,
-            img: props.product.img,
+            formattedPrice: displayPrice.value,
+            img: displayImg.value,
             store: props.store.name,
             qty: qty.value,
         },
@@ -86,13 +88,91 @@ function handleAddToCart() {
     toast.success(`${props.product.name} ditambahkan ke keranjang!`);
 }
 
-const mockReviews: any[] = [];
+const selectedOptions = ref<Record<string, string>>({});
+
+watch(
+    () => props.product,
+    (newProd) => {
+        qty.value = 1;
+        activeTab.value = 'detail';
+        selectedOptions.value = {};
+        
+        if (newProd?.variant_options?.length) {
+            newProd.variant_options.forEach((opt: any) => {
+                if (opt.values?.length) {
+                    selectedOptions.value[opt.name] = opt.values[0];
+                }
+            });
+        }
+    },
+    { immediate: true }
+);
+
+const selectedVariant = computed(() => {
+    if (!props.product.variants?.length || !props.product.variant_options?.length) {
+return null;
+}
+    
+    const expectedName = props.product.variant_options
+        .map((opt: any) => selectedOptions.value[opt.name] || '')
+        .filter(Boolean)
+        .join(' - ');
+        
+    return props.product.variants.find((v: any) => v.name === expectedName) || null;
+});
+
+const displayImg = computed(() => {
+    if (selectedVariant.value && selectedVariant.value.img) {
+        return selectedVariant.value.img;
+    }
+
+    return props.product.img;
+});
+
+const displayPrice = computed(() => {
+    if (selectedVariant.value && selectedVariant.value.price) {
+        return selectedVariant.value.price;
+    }
+
+    return props.product.price;
+});
+
+const reviews = computed(() => props.product.reviews ?? []);
 const ratingBreakdown: any[] = [];
+const reviewRating = ref(5);
+const reviewBody = ref('');
+const reviewPhoto = ref<File | null>(null);
+
+function onReviewPhoto(e: Event) {
+    const input = e.target as HTMLInputElement;
+    reviewPhoto.value = input.files?.[0] ?? null;
+}
+
+function submitReview() {
+    const slug = (usePage().props.store as { slug?: string })?.slug ?? props.store.slug;
+    const data = new FormData();
+    data.append('rating', String(reviewRating.value));
+    data.append('body', reviewBody.value);
+    if (props.product.eligible_order_item_id) {
+        data.append('order_item_id', String(props.product.eligible_order_item_id));
+    }
+    if (reviewPhoto.value) {
+        data.append('photo', reviewPhoto.value);
+    }
+    router.post(`/${slug}/p/${props.product.slug}/reviews`, data, {
+        forceFormData: true,
+        onSuccess: () => toast.success('Ulasan terkirim'),
+        onError: (errors) => {
+            const first = Object.values(errors)[0];
+            toast.error(typeof first === 'string' ? first : 'Gagal kirim ulasan');
+        },
+    });
+}
 
 </script>
 
 <template>
-    <Head :title="`${product.name} - ${store.name}`" />
+    <SeoHead :seo="seo" :fallback-title="`${product.name} - ${store.name}`" />
 
     <StorefrontLayout>
         <main class="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-3 pt-4 pb-28 sm:gap-6 sm:p-6 lg:flex-row lg:items-start">
@@ -108,10 +188,10 @@ const ratingBreakdown: any[] = [];
             <div class="relative flex w-full lg:w-2/5 shrink-0 flex-col bg-muted overflow-hidden rounded-3xl border border-border shadow-sm">
                 <div class="relative flex-1 overflow-hidden aspect-square">
                     <img
-                        v-if="product.img"
-                        :src="product.img"
+                        v-if="displayImg"
+                        :src="displayImg"
                         :alt="product.name"
-                        class="h-full w-full object-cover"
+                        class="h-full w-full object-cover transition-all duration-300"
                     />
                     <!-- Tag badge -->
                     <div
@@ -166,7 +246,7 @@ const ratingBreakdown: any[] = [];
                                 {{ store.badge }} · Respons &lt; 1 jam
                             </p>
                         </div>
-                        <ChevronLeft class="w-5 h-5 rotate-180 text-zinc-300" />
+                        <ChevronLeft class="w-5 h-5 rotate-180 text-muted-foreground" />
                     </div>
                     <!-- Trust badges -->
                     <div class="mt-4 flex flex-col gap-2">
@@ -214,7 +294,7 @@ const ratingBreakdown: any[] = [];
                                     class="h-4 w-4"
                                     :class="
                                         i <= Math.round(product.rating || 0)
-                                            ? 'fill-amber-400 stroke-amber-400'
+                                            ? 'fill-accent stroke-accent'
                                             : 'fill-none stroke-border'
                                     "
                                 />
@@ -225,7 +305,7 @@ const ratingBreakdown: any[] = [];
                         <span>{{ formatSold(product.sold) }} terjual</span>
                         <span class="text-muted-foreground/30">|</span>
                         <button @click="activeTab = 'ulasan'" class="text-brand hover:underline cursor-pointer">
-                            {{ mockReviews.length }} ulasan
+                            {{ reviews.length }} ulasan
                         </button>
                     </div>
 
@@ -236,8 +316,31 @@ const ratingBreakdown: any[] = [];
                         </p>
                         <div class="flex items-baseline gap-3">
                             <span class="font-mono text-4xl font-black text-brand-strong">
-                                {{ product.price }}
+                                {{ displayPrice }}
                             </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Variant Selector -->
+                <div v-if="product.variant_options && product.variant_options.length > 0" class="px-5 sm:px-8 py-4 border-y border-border flex flex-col gap-3">
+                    <div v-for="opt in product.variant_options" :key="opt.name">
+                        <p class="mb-3 text-sm font-extrabold text-foreground">Pilih {{ opt.name }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                v-for="val in opt.values"
+                                :key="val"
+                                type="button"
+                                @click="selectedOptions[opt.name] = val"
+                                class="px-4 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer"
+                                :class="
+                                    selectedOptions[opt.name] === val
+                                        ? 'border-brand-strong bg-brand-soft text-brand-strong ring-1 ring-brand-strong'
+                                        : 'border-border bg-card text-foreground hover:border-brand-strong/50 hover:bg-muted'
+                                "
+                            >
+                                {{ val }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -256,12 +359,12 @@ const ratingBreakdown: any[] = [];
                             <span class="min-w-[32px] text-center font-mono text-sm font-black">{{ qty }}</span>
                             <button
                                 @click="qty++"
-                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-zinc-50 shadow-xs hover:bg-zinc-100 transition"
+                                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-muted shadow-xs hover:bg-muted/80 transition"
                             >
                                 <Plus class="h-4 w-4" />
                             </button>
                         </div>
-                        <span class="text-xs font-medium text-zinc-400">Sisa stok: {{ product.stock }}</span>
+                        <span class="text-xs font-medium text-muted-foreground">Sisa stok: {{ product.stock }}</span>
                     </div>
                     <div class="flex gap-2">
                         <Button
@@ -288,7 +391,7 @@ const ratingBreakdown: any[] = [];
                         "
                     >
                         {{ tab === 'detail' ? 'Deskripsi' : 'Ulasan' }}
-                        <span v-if="tab === 'ulasan'" class="ml-1 text-sm font-bold text-zinc-400">({{ mockReviews.length }})</span>
+                        <span v-if="tab === 'ulasan'" class="ml-1 text-sm font-bold text-muted-foreground">({{ reviews.length }})</span>
                     </button>
                 </div>
 
@@ -296,7 +399,7 @@ const ratingBreakdown: any[] = [];
                 <div class="px-5 sm:px-8 py-6 bg-card rounded-b-3xl">
                     <div v-if="activeTab === 'detail'">
                         <p class="mb-6 text-sm md:text-base leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                            {{ product.description || `Produk ${store.name} original dengan material premium, daya tahan tinggi, dan kenyamanan maksimal untuk aktivitas sehari-hari.` }}
+                            {{ product.description || 'Tidak ada deskripsi.' }}
                         </p>
                         <div class="rounded-2xl border border-border bg-muted p-5 shadow-xs">
                             <p class="mb-4 text-sm font-black text-foreground">
@@ -305,29 +408,48 @@ const ratingBreakdown: any[] = [];
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
                                 <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
                                     <span class="text-muted-foreground shrink-0 font-medium">Merk / Brand</span>
-                                    <span class="font-extrabold text-foreground text-right">{{ product.brand || store.name }}</span>
+                                    <span class="font-extrabold text-foreground text-right">{{ product.brand || '-' }}</span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
                                     <span class="text-muted-foreground shrink-0 font-medium">Kode SKU</span>
-                                    <span class="font-mono font-extrabold text-foreground text-right">{{ product.sku || 'NK-' + product.id }}</span>
+                                    <span class="font-mono font-extrabold text-foreground text-right">{{ product.sku || '-' }}</span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
                                     <span class="text-muted-foreground shrink-0 font-medium">Kategori</span>
-                                    <span class="font-bold text-foreground text-right">{{ product.category }}</span>
+                                    <span class="font-bold text-foreground text-right">{{ product.category || product.cat || '-' }}</span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
                                     <span class="text-muted-foreground shrink-0 font-medium">Kondisi</span>
-                                    <span class="font-bold text-foreground text-right">100% Baru & Original</span>
+                                    <span class="font-bold text-foreground text-right">Baru</span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2 border-b border-border pb-2">
                                     <span class="text-muted-foreground shrink-0 font-medium">Berat Produk</span>
-                                    <span class="font-bold text-foreground text-right">{{ product.weightGram || 500 }} gram</span>
+                                    <span class="font-bold text-foreground text-right">{{ product.weightGram ? product.weightGram + ' gram' : '-' }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div v-else>
-                        <div v-if="!mockReviews.length" class="flex flex-col items-center gap-3 py-12 text-center">
+                    <div v-else class="flex flex-col gap-6">
+                        <form
+                            v-if="product.can_review"
+                            class="flex flex-col gap-3 rounded-2xl border p-4"
+                            @submit.prevent="submitReview"
+                        >
+                            <p class="text-sm font-bold">Tulis ulasan</p>
+                            <select v-model.number="reviewRating" class="h-10 rounded-md border bg-background px-2 text-sm">
+                                <option v-for="n in 5" :key="n" :value="n">{{ n }} bintang</option>
+                            </select>
+                            <textarea v-model="reviewBody" rows="3" class="rounded-md border p-2 text-sm" placeholder="Bagaimana produknya?" />
+                            <input type="file" accept="image/*" class="text-xs" @change="onReviewPhoto" />
+                            <Button type="submit" class="w-fit">Kirim ulasan</Button>
+                        </form>
+                        <div v-for="r in reviews" :key="r.id" class="rounded-2xl border p-4">
+                            <p class="text-sm font-bold">{{ r.author }} · {{ r.rating }}/5</p>
+                            <p class="text-xs text-muted-foreground">{{ r.created_at }}</p>
+                            <p class="mt-2 text-sm">{{ r.body }}</p>
+                            <img v-if="r.photo_url" :src="r.photo_url" alt="" class="mt-2 max-h-40 rounded-xl object-cover" />
+                        </div>
+                        <div v-if="!reviews.length" class="flex flex-col items-center gap-3 py-12 text-center">
                             <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
                                 <Star class="h-8 w-8 stroke-muted-foreground/30" />
                             </div>

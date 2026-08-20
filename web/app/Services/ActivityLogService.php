@@ -3,12 +3,18 @@
 namespace App\Services;
 
 use App\Models\ActivityLog;
-use App\Models\Store;
 use App\Models\User;
+use App\Repositories\ActivityLogRepository;
+use App\Repositories\StoreRepository;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ActivityLogService
 {
-    public function __construct(protected TenantContext $tenants) {}
+    public function __construct(
+        protected TenantContext $tenants,
+        protected ActivityLogRepository $logRepository,
+        protected StoreRepository $storeRepository
+    ) {}
 
     /**
      * Record a new audit log entry.
@@ -25,7 +31,7 @@ class ActivityLogService
     ): ActivityLog {
         $user ??= auth()->user();
 
-        return ActivityLog::create([
+        return $this->logRepository->createLog([
             'tenant_id' => $this->tenantIdFor($user),
             'user_id' => $user?->id,
             'action' => $action,
@@ -34,6 +40,17 @@ class ActivityLogService
             'properties' => $properties,
             'ip' => $ip ?? request()->ip(),
         ]);
+    }
+
+    public function getLogsForUser(int $userId, int $perPage = 20): LengthAwarePaginator
+    {
+        $store = $this->storeRepository->getStoreForUser($userId);
+
+        if (! $store || ! $store->tenant_id) {
+            return new LengthAwarePaginator([], 0, $perPage);
+        }
+
+        return $this->logRepository->getLogsByTenant($store->tenant_id, $perPage);
     }
 
     /**
@@ -53,9 +70,6 @@ class ActivityLogService
             return null;
         }
 
-        return Store::whereHas(
-            'tenant',
-            fn ($q) => $q->where('user_id', $user->id)
-        )->value('tenant_id');
+        return $this->storeRepository->getStoreForUser($user->id)?->tenant_id;
     }
 }

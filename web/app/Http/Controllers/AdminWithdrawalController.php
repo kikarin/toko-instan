@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Withdrawal;
+use App\DTO\Wallet\WithdrawalRejectDTO;
 use App\Services\WithdrawService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,10 +17,7 @@ class AdminWithdrawalController extends Controller
 
     public function index(Request $request): Response
     {
-        $withdrawals = Withdrawal::with(['store', 'wallet.tenant'])
-            ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
-            ->orderByDesc('created_at')
-            ->get()
+        $withdrawals = $this->withdrawService->getAllWithdrawals($request->query('status'))
             ->map(fn ($w) => [
                 'id' => $w->id,
                 'store_name' => $w->store->name ?? '—',
@@ -42,25 +39,23 @@ class AdminWithdrawalController extends Controller
 
     public function approve(Request $request, int $id): RedirectResponse
     {
-        $this->withdrawService->approve(Withdrawal::findOrFail($id));
+        $this->withdrawService->approve($this->withdrawService->getWithdrawal($id));
 
         return back()->with('success', 'Penarikan disetujui.');
     }
 
     public function reject(Request $request, int $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'reason' => 'required|string|max:500',
-        ]);
+        $dto = WithdrawalRejectDTO::fromRequest($request);
 
-        $this->withdrawService->reject(Withdrawal::findOrFail($id), $validated['reason']);
+        $this->withdrawService->reject($this->withdrawService->getWithdrawal($id), $dto->reason);
 
         return back()->with('success', 'Penarikan ditolak, dana dikembalikan.');
     }
 
     public function markTransferred(Request $request, int $id): RedirectResponse
     {
-        $this->withdrawService->markTransferred(Withdrawal::findOrFail($id));
+        $this->withdrawService->markTransferred($this->withdrawService->getWithdrawal($id));
 
         return back()->with('success', 'Penarikan ditandai sudah ditransfer.');
     }

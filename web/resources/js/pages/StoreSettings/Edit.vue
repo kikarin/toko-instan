@@ -67,8 +67,8 @@ useStoreTheme();
                             Pengaturan & Branding Toko
                         </h1>
                         <Badge
-                            variant="amber"
-                            class="bg-black text-[10px] font-extrabold text-amber-400 uppercase"
+                            variant="default"
+                            class="bg-foreground text-[10px] font-extrabold text-accent uppercase"
                             >Shopify Webstore</Badge
                         >
                     </div>
@@ -80,13 +80,13 @@ useStoreTheme();
 
                 <div class="flex items-center gap-2">
                     <Button
-                        variant="amber"
+                        variant="default"
                         size="sm"
-                        class="h-9 gap-1.5 bg-black text-xs font-bold text-amber-400 shadow-md hover:bg-zinc-800"
+                        class="h-9 gap-1.5 bg-foreground text-xs font-bold text-accent shadow-md hover:bg-foreground/90"
                         :disabled="form.processing"
                         @click="submitForm"
                     >
-                        <Save class="h-4 w-4 text-amber-400" />
+                        <Save class="h-4 w-4 text-accent" />
                         {{
                             form.processing
                                 ? 'Menyimpan...'
@@ -135,11 +135,11 @@ useStoreTheme();
                             </h3>
                             <ShieldCheck class="h-5 w-5 text-brand" />
                         </div>
-                        <p class="mt-0.5 text-xs font-semibold text-zinc-500">
+                        <p class="mt-0.5 text-xs font-semibold text-muted-foreground">
                             {{ form.headline }}
                         </p>
                         <p
-                            class="mt-1 flex items-center justify-center gap-1 font-mono text-[11px] text-zinc-400 sm:justify-start"
+                            class="mt-1 flex items-center justify-center gap-1 font-mono text-[11px] text-muted-foreground sm:justify-start"
                         >
                             <Globe class="h-3 w-3" />
                             https://{{ form.slug }}.toko-instan.id
@@ -149,7 +149,7 @@ useStoreTheme();
             </Card>
 
             <!-- ── Navigation Tabs ── -->
-            <div class="flex gap-4 overflow-x-auto border-b border-black/10">
+            <div class="flex gap-4 overflow-x-auto border-b border-border">
                 <button
                     @click="activeTab = 'profil'"
                     class="flex shrink-0 cursor-pointer items-center gap-1.5 border-b-2 pb-3 text-xs font-extrabold transition-all"
@@ -208,7 +208,7 @@ useStoreTheme();
                 <CardContent class="flex flex-col gap-5 p-6">
                     <!-- Status Operasional Buka/Tutup Toko (P1-012) -->
                     <div
-                        class="flex items-center justify-between rounded-xl border border-black/10 bg-[#faf9f6] p-4"
+                        class="flex items-center justify-between rounded-xl border border-border bg-[#faf9f6] p-4"
                     >
                         <div class="flex items-center gap-3">
                             <div
@@ -216,7 +216,7 @@ useStoreTheme();
                                 :class="
                                     form.is_active
                                         ? 'bg-emerald-600'
-                                        : 'bg-rose-600'
+                                        : 'bg-destructive'
                                 "
                             >
                                 <Power class="h-5 w-5" />
@@ -232,7 +232,7 @@ useStoreTheme();
                                         :class="
                                             form.is_active
                                                 ? 'bg-emerald-600 text-white'
-                                                : 'bg-rose-600 text-white'
+                                                : 'bg-destructive text-white'
                                         "
                                         class="text-[10px] font-extrabold"
                                     >
@@ -243,7 +243,7 @@ useStoreTheme();
                                         }}
                                     </Badge>
                                 </div>
-                                <p class="mt-0.5 text-xs text-zinc-500">
+                                <p class="mt-0.5 text-xs text-muted-foreground">
                                     {{
                                         form.is_active
                                             ? 'Storefront publik aktif menerima pesanan dari pembeli.'
@@ -274,7 +274,7 @@ useStoreTheme();
                             />
                             <p
                                 v-if="form.errors.name"
-                                class="text-[10px] font-semibold text-rose-500"
+                                class="text-[10px] font-semibold text-destructive"
                             >
                                 {{ form.errors.name }}
                             </p>
@@ -301,7 +301,7 @@ useStoreTheme();
                             </div>
                             <p
                                 v-if="form.errors.slug"
-                                class="text-[10px] font-semibold text-rose-500"
+                                class="text-[10px] font-semibold text-destructive"
                             >
                                 {{ form.errors.slug }}
                             </p>
@@ -341,7 +341,7 @@ useStoreTheme();
                                     class="h-10 w-28 font-mono text-xs"
                                 />
                                 <div
-                                    class="h-9 w-9 rounded-xl border border-black/10 shadow-inner"
+                                    class="h-9 w-9 rounded-xl border border-border shadow-inner"
                                     :style="{
                                         backgroundColor: `hsl(${form.avatar_hue}, 70%, 50%)`,
                                     }"
@@ -437,7 +437,7 @@ useStoreTheme();
                                 @change="handleBannerFileChange"
                                 class="h-10 cursor-pointer bg-white text-xs"
                             />
-                            <p class="text-[10px] text-zinc-500">
+                            <p class="text-[10px] text-muted-foreground">
                                 Pilih beberapa gambar sekaligus untuk dijadikan Hero Banner Carousel.
                             </p>
                         </div>
@@ -455,7 +455,7 @@ useStoreTheme();
                                     class="h-10 flex-1 font-mono text-xs"
                                     @keyup.enter="addBannerUrl"
                                 />
-                                <Button type="button" @click="addBannerUrl" variant="amber" class="h-10">Tambah</Button>
+                                <Button type="button" @click="addBannerUrl" variant="default" class="h-10">Tambah</Button>
                             </div>
                         </div>
                     </div>
@@ -469,7 +469,7 @@ useStoreTheme();
                             <div
                                 v-for="(url, index) in bannerPreviewUrls"
                                 :key="index"
-                                class="group relative aspect-video w-full overflow-hidden rounded-2xl border border-black/10 bg-zinc-900"
+                                class="group relative aspect-video w-full overflow-hidden rounded-2xl border border-border bg-card"
                             >
                                 <img
                                     :src="url"
@@ -479,7 +479,7 @@ useStoreTheme();
                                     class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 text-white"
                                 >
                                     <p
-                                        class="text-[10px] font-black tracking-widest text-amber-400 uppercase"
+                                        class="text-[10px] font-black tracking-widest text-accent uppercase"
                                     >
                                         {{ form.name }}
                                     </p>
@@ -490,7 +490,7 @@ useStoreTheme();
                                 <button
                                     type="button"
                                     @click="removeBanner(index)"
-                                    class="absolute top-2 right-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                    class="absolute top-2 right-2 rounded-full bg-destructive/100 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
                                     title="Hapus Banner"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -505,7 +505,7 @@ useStoreTheme();
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col gap-1.5">
                             <Label class="text-xs font-bold text-[#1c1c22]">Highlights / Promo Badges (Maks 3)</Label>
-                            <p class="text-[10px] text-zinc-500">
+                            <p class="text-[10px] text-muted-foreground">
                                 Tambahkan maksimal 3 poin keunggulan toko yang akan ditampilkan di bawah Banner (contoh: "Gratis Ongkir", "Garansi Retur 30 Hari").
                             </p>
                             
@@ -520,7 +520,7 @@ useStoreTheme();
                                 <Button 
                                     type="button" 
                                     @click="addHighlight" 
-                                    variant="amber" 
+                                    variant="default" 
                                     class="h-10"
                                     :disabled="form.highlights.length >= 3"
                                 >
@@ -534,13 +534,13 @@ useStoreTheme();
                                 v-for="(hl, idx) in form.highlights" 
                                 :key="idx" 
                                 variant="outline" 
-                                class="flex items-center gap-1.5 border-black/10 bg-zinc-50 px-2.5 py-1 text-xs text-[#1c1c22]"
+                                class="flex items-center gap-1.5 border-border bg-muted px-2.5 py-1 text-xs text-foreground"
                             >
                                 {{ hl }}
                                 <button 
                                     type="button" 
                                     @click="removeHighlight(idx)" 
-                                    class="ml-1 text-zinc-400 hover:text-red-500"
+                                    class="ml-1 text-muted-foreground hover:text-destructive"
                                 >
                                     <X class="h-3 w-3" />
                                 </button>
@@ -566,13 +566,13 @@ useStoreTheme();
                         </div>
 
                         <!-- Widget Settings -->
-                        <div class="flex flex-col gap-3 rounded-xl border border-black/10 bg-zinc-50 p-4">
+                        <div class="flex flex-col gap-3 rounded-xl border border-border bg-muted p-4">
                             <Label class="text-sm font-black text-[#1c1c22]">Widget Garansi (Kanan Atas)</Label>
-                            <p class="text-[10px] text-zinc-500">Sesuaikan teks pada kotak garansi di halaman depan.</p>
+                            <p class="text-[10px] text-muted-foreground">Sesuaikan teks pada kotak garansi di halaman depan.</p>
                             
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="widget_title" class="text-[10px] font-bold text-zinc-600">Judul Widget</Label>
+                                    <Label for="widget_title" class="text-[10px] font-bold text-muted-foreground">Judul Widget</Label>
                                     <Input
                                         id="widget_title"
                                         v-model="form.hero_config.widget_title"
@@ -581,7 +581,7 @@ useStoreTheme();
                                     />
                                 </div>
                                 <div class="flex flex-col gap-1.5">
-                                    <Label for="widget_subtitle" class="text-[10px] font-bold text-zinc-600">Fitur Utama</Label>
+                                    <Label for="widget_subtitle" class="text-[10px] font-bold text-muted-foreground">Fitur Utama</Label>
                                     <Input
                                         id="widget_subtitle"
                                         v-model="form.hero_config.widget_subtitle"
@@ -590,7 +590,7 @@ useStoreTheme();
                                     />
                                 </div>
                                 <div class="flex flex-col gap-1.5 md:col-span-2">
-                                    <Label for="widget_description" class="text-[10px] font-bold text-zinc-600">Deskripsi Singkat</Label>
+                                    <Label for="widget_description" class="text-[10px] font-bold text-muted-foreground">Deskripsi Singkat</Label>
                                     <Input
                                         id="widget_description"
                                         v-model="form.hero_config.widget_description"
@@ -612,7 +612,7 @@ useStoreTheme();
                                 placeholder="Contoh: 54rb+"
                                 class="h-10 text-xs"
                             />
-                            <p class="text-[10px] text-zinc-500">Teks ini akan menggantikan angka pesanan asli di statistik hero.</p>
+                            <p class="text-[10px] text-muted-foreground">Teks ini akan menggantikan angka pesanan asli di statistik hero.</p>
                         </div>
                     </div>
                 </CardContent>
@@ -704,6 +704,28 @@ useStoreTheme();
                             class="text-xs"
                         />
                     </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="flex flex-col gap-1.5">
+                            <Label class="text-xs font-bold text-[#1c1c22]"
+                                >Kota Asal Pengiriman</Label
+                            >
+                            <Input
+                                v-model="form.origin_city"
+                                placeholder="Jakarta Selatan"
+                                class="h-10 text-xs"
+                            />
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <Label class="text-xs font-bold text-[#1c1c22]"
+                                >Kode Pos Asal</Label
+                            >
+                            <Input
+                                v-model="form.origin_postal_code"
+                                placeholder="12190"
+                                class="h-10 text-xs"
+                            />
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -715,11 +737,11 @@ useStoreTheme();
                 <CardContent class="flex flex-col gap-5 p-6">
                     <!-- Status PKP Switch -->
                     <div
-                        class="flex items-center justify-between rounded-xl border border-black/10 bg-[#faf9f6] p-4"
+                        class="flex items-center justify-between rounded-xl border border-border bg-[#faf9f6] p-4"
                     >
                         <div class="flex items-center gap-3">
                             <div
-                                class="flex h-10 w-10 items-center justify-center rounded-xl bg-black font-bold text-amber-400 shadow-xs"
+                                class="flex h-10 w-10 items-center justify-center rounded-xl bg-black font-bold text-accent shadow-xs"
                             >
                                 <Building2 class="h-5 w-5" />
                             </div>
@@ -733,8 +755,8 @@ useStoreTheme();
                                     <Badge
                                         :class="
                                             form.is_pkp
-                                                ? 'bg-black text-amber-400'
-                                                : 'bg-zinc-200 text-zinc-700'
+                                                ? 'bg-black text-accent'
+                                                : 'bg-muted text-foreground'
                                         "
                                         class="text-[10px] font-extrabold"
                                     >
@@ -745,7 +767,7 @@ useStoreTheme();
                                         }}
                                     </Badge>
                                 </div>
-                                <p class="mt-0.5 text-xs text-zinc-500">
+                                <p class="mt-0.5 text-xs text-muted-foreground">
                                     Aktifkan jika badan usaha kamu terdaftar
                                     sebagai Pengusaha Kena Pajak (PKP) resmi.
                                 </p>
@@ -825,13 +847,13 @@ useStoreTheme();
             <!-- Bottom Save Button -->
             <div class="flex justify-end pt-2">
                 <Button
-                    variant="amber"
+                    variant="default"
                     size="lg"
-                    class="h-11 gap-2 bg-black px-8 text-sm font-bold text-amber-400 shadow-md hover:bg-zinc-800"
+                    class="h-11 gap-2 bg-black px-8 text-sm font-bold text-accent shadow-md hover:bg-foreground/90"
                     :disabled="form.processing"
                     @click="submitForm"
                 >
-                    <Save class="h-5 w-5 text-amber-400" />
+                    <Save class="h-5 w-5 text-accent" />
                     {{
                         form.processing
                             ? 'Menyimpan Perubahan...'

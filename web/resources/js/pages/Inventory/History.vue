@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { ArrowLeft, Boxes, TrendingDown, TrendingUp } from 'lucide-vue-next';
+import { ArrowLeft, ArrowRight, Boxes, TrendingDown, TrendingUp } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -73,8 +73,8 @@ function typeLabel(type: string) {
                             class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                             :class="
                                 m.type === 'out'
-                                    ? 'bg-red-50 text-red-500'
-                                    : 'bg-green-50 text-green-600'
+                                    ? 'bg-destructive/10 text-destructive'
+                                    : 'bg-emerald-500/10 text-emerald-600'
                             "
                         >
                             <TrendingUp v-if="m.delta > 0" class="h-4 w-4" />
@@ -94,13 +94,15 @@ function typeLabel(type: string) {
                         <p
                             class="font-mono text-sm font-extrabold"
                             :class="
-                                m.delta > 0 ? 'text-green-600' : 'text-red-500'
+                                m.delta > 0 ? 'text-emerald-600' : 'text-destructive'
                             "
                         >
                             {{ m.delta > 0 ? '+' : '' }}{{ m.delta }}
                         </p>
                         <p class="text-[10px] text-[#9090a0]">
-                            {{ m.stock_before }} → {{ m.stock_after }}
+                            {{ m.stock_before }}
+                            <ArrowRight class="inline h-3 w-3" />
+                            {{ m.stock_after }}
                         </p>
                     </div>
                 </div>
